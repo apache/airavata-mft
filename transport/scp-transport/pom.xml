@@ -43,6 +43,11 @@
             <artifactId>mft-core</artifactId>
             <version>0.18-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
+            <artifactId>mft-s3-transport</artifactId>
+            <version>0.18-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
 </project>

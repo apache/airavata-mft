@@ -44,7 +44,11 @@ public class DoubleByteArrayOutputStream extends OutputStream {
 
     @Override
     public void write(int b) throws IOException {
+        if (processedBytes > maxBytesPerStream) {
+            swapBuffers();
+        }
         this.currentStream.write(b);
+        processedBytes += 1;
     }
 
     @Override
