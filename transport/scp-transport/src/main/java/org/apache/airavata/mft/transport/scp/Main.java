@@ -19,15 +19,18 @@
  */
 package org.apache.airavata.mft.transport.scp;
 
-import com.jcraft.jsch.JSchException;
+import org.apache.airavata.mft.core.streaming.TransportMetadata;
 import org.apache.airavata.mft.core.streaming.TransportStream;
 
 import java.io.IOException;
 
 public class Main {
-    public static void main(final String[] arg) throws IOException, JSchException {
+    public static void main(final String[] arg) throws Exception {
 
-        final TransportStream stream = new TransportStream();
+        TransportMetadata metadata = new TransportMetadata();
+        SCPTransportOperator operator = new SCPTransportOperator();
+        metadata.setLength(operator.getResourceSize("1"));
+        final TransportStream stream = new TransportStream("1", "2", metadata);
 
         Runnable r1 = new Runnable() {
             @Override
@@ -42,7 +45,7 @@ public class Main {
                             //char c = (char)asInt;
                             //System.out.print(c);
                         } else {
-                            if (stream.getStreamCompleted().get()) {
+                            if (stream.isStreamCompleted()) {
                                 break;
                             } else {
                                 try {
@@ -60,23 +63,38 @@ public class Main {
             }
         };
 
-        Runnable r2 = new Runnable() {
+        Runnable receiverRun = new Runnable() {
             @Override
             public void run() {
                 SCPReceiver receiver = new SCPReceiver();
                 try {
-                    receiver.receive("1", stream);
+                    receiver.receive(stream);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         };
 
-        Thread t1 = new Thread(r1);
-        t1.start();
+        Runnable senderRun = new Runnable() {
+            @Override
+            public void run() {
+                SCPSender sender = new SCPSender();
+                try {
+                    sender.send(stream);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
 
-        Thread t2 = new Thread(r2);
-        t2.start();
+        //Thread t1 = new Thread(r1);
+        //t1.start();
+
+        Thread senderThread = new Thread(senderRun);
+        senderThread.start();
+
+        Thread receiverThread = new Thread(receiverRun);
+        receiverThread.start();
         System.out.println("Done");
     }
 }

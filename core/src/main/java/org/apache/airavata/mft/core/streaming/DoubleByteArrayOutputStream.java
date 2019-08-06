@@ -33,6 +33,8 @@ public class DoubleByteArrayOutputStream extends OutputStream {
     private long processedBytes = 0;
     private boolean clearedNonActiveStream = false;
 
+    private boolean isClosed = false;
+
     @Override
     public void write(int b) throws IOException {
         this.currentStream.write(b);
@@ -41,27 +43,31 @@ public class DoubleByteArrayOutputStream extends OutputStream {
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
         if (processedBytes > maxBytesPerStream) {
-            while (!clearedNonActiveStream) {
-                try {
-                    Thread.sleep(100);
-                    System.out.println("Waiting until non active buffer gets emptied");
-                } catch (InterruptedException e) {
-                    // ignore
-                }
-            }
-            if (activeStream == 1) {
-                activeStream = 2;
-                currentStream = stream2;
-            } else {
-                activeStream = 1;
-                currentStream = stream1;
-            }
-            currentStream.reset();
-            processedBytes = 0;
-            clearedNonActiveStream = false;
+            swapBuffers();
         }
         this.currentStream.write(b, off, len);
         processedBytes += len;
+    }
+
+    private void swapBuffers() {
+        while (!clearedNonActiveStream) {
+            try {
+                Thread.sleep(100);
+                System.out.println("Receiver waiting until non active buffer gets emptied");
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+        if (activeStream == 1) {
+            activeStream = 2;
+            currentStream = stream2;
+        } else {
+            activeStream = 1;
+            currentStream = stream1;
+        }
+        currentStream.reset();
+        processedBytes = 0;
+        clearedNonActiveStream = false;
     }
 
     @Override
@@ -76,8 +82,12 @@ public class DoubleByteArrayOutputStream extends OutputStream {
 
     @Override
     public void close() throws IOException {
-        this.stream1.close();
-        this.stream2.close();
+        if (!isClosed) {
+            swapBuffers();
+            //this.stream1.close();
+            //this.stream2.close();
+        }
+        isClosed = true;
     }
 
     public InputStream asInputStream() {

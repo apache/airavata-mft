@@ -24,30 +24,17 @@ import org.apache.airavata.mft.core.api.StreamedReceiver;
 import org.apache.airavata.mft.core.streaming.TransportStream;
 
 import java.io.*;
-import java.util.Properties;
 
 public class SCPReceiver implements StreamedReceiver {
 
     @Override
-    public void receive(String resourceIdentifier, TransportStream stream) throws Exception {
-        SSHResourceIdentifier sshResourceIdentifier = getSSHResourceIdentifier(resourceIdentifier);
-        Session session = createSession(sshResourceIdentifier.getUser(), sshResourceIdentifier.getHost(),
+    public void receive(TransportStream stream) throws Exception {
+        SSHResourceIdentifier sshResourceIdentifier = SCPTransportUtil.getSSHResourceIdentifier(stream.getSourceId());
+        Session session = SCPTransportUtil.createSession(sshResourceIdentifier.getUser(), sshResourceIdentifier.getHost(),
                 sshResourceIdentifier.getPort(),
                 sshResourceIdentifier.getKeyFile(),
                 sshResourceIdentifier.getKeyPassphrase());
         transferRemoteToStream(session, sshResourceIdentifier.getRemotePath(), stream);
-    }
-
-    // TODO replace with an API call to the registry
-    private SSHResourceIdentifier getSSHResourceIdentifier(String resourceId) {
-        SSHResourceIdentifier identifier = new SSHResourceIdentifier();
-        identifier.setHost("pgadev.scigap.org");
-        identifier.setUser("pga");
-        identifier.setPort(22);
-        identifier.setKeyFile("/Users/user/.ssh/id_rsa");
-        identifier.setKeyPassphrase(null);
-        identifier.setRemotePath("/var/www/portals/gateway-user-data/dev-seagrid/eromads6/DefaultProject/Gaussian_C11470169729/file.txt");
-        return identifier;
     }
 
     private void transferRemoteToStream(Session session, String from, TransportStream stream) throws JSchException, IOException {
@@ -99,7 +86,6 @@ public class SCPReceiver implements StreamedReceiver {
             }
 
             System.out.println("file-size=" + filesize + ", file=" + file);
-            stream.setLength(filesize);
             // send '\0'
             buf[0] = 0;
             out.write(buf, 0, 1);
@@ -132,7 +118,7 @@ public class SCPReceiver implements StreamedReceiver {
             out.flush();
         }
 
-        stream.getStreamCompleted().set(true);
+        stream.setStreamCompleted(true);
         channel.disconnect();
         session.disconnect();
     }
@@ -162,31 +148,5 @@ public class SCPReceiver implements StreamedReceiver {
             }
         }
         return b;
-    }
-
-    private static Session createSession(String user, String host, int port, String keyFilePath, String keyPassword) {
-        try {
-            JSch jsch = new JSch();
-
-            if (keyFilePath != null) {
-                if (keyPassword != null) {
-                    jsch.addIdentity(keyFilePath, keyPassword);
-                } else {
-                    jsch.addIdentity(keyFilePath);
-                }
-            }
-
-            Properties config = new java.util.Properties();
-            config.put("StrictHostKeyChecking", "no");
-
-            Session session = jsch.getSession(user, host, port);
-            session.setConfig(config);
-            session.connect();
-
-            return session;
-        } catch (JSchException e) {
-            System.out.println(e);
-            return null;
-        }
     }
 }

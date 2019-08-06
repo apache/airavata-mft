@@ -24,12 +24,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TransportStream {
 
-    private OutputStream outputStream = new DoubleByteArrayOutputStream();
-    private InputStream inputStream = new DoubleByteArrayInputStream((DoubleByteArrayOutputStream) outputStream);
-    private long length = -1;
+    private TransportMetadata metadata;
     private AtomicBoolean streamCompleted = new AtomicBoolean(false);
 
-    public TransportStream() throws IOException {
+    private OutputStream outputStream = new DoubleByteArrayOutputStream();
+    private InputStream inputStream = new DoubleByteArrayInputStream((DoubleByteArrayOutputStream) outputStream);
+
+    private String sourceId;
+    private String destId;
+
+    public TransportStream(String sourceId, String destId, TransportMetadata metadata) throws Exception {
+        this.sourceId = sourceId;
+        this.destId = destId;
+        this.metadata = metadata;
     }
 
     public InputStream getInputStream() {
@@ -48,19 +55,36 @@ public class TransportStream {
         this.outputStream = outputStream;
     }
 
-    public long getLength() {
-        return length;
+    public TransportMetadata getMetadata() {
+        return metadata;
     }
 
-    public void setLength(long length) {
-        this.length = length;
+    public void setMetadata(TransportMetadata metadata) {
+        this.metadata = metadata;
     }
 
-    public AtomicBoolean getStreamCompleted() {
-        return streamCompleted;
+    public Boolean isStreamCompleted() {
+        return streamCompleted.get();
     }
 
-    public void setStreamCompleted(AtomicBoolean streamCompleted) {
-        this.streamCompleted = streamCompleted;
+    public void setStreamCompleted(boolean completed) throws IOException {
+        this.outputStream.close();
+        this.streamCompleted.set(completed);
+    }
+
+    public String getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(String sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public String getDestId() {
+        return destId;
+    }
+
+    public void setDestId(String destId) {
+        this.destId = destId;
     }
 }
