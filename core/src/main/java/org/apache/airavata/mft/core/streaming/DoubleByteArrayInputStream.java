@@ -22,6 +22,10 @@ package org.apache.airavata.mft.core.streaming;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * This accepts {@link DoubleByteArrayOutputStream} and monitors for the availability of readable data. If there is any,
+ * this is exposing them as an {@link InputStream}
+ */
 public class DoubleByteArrayInputStream extends InputStream {
 
     private DoubleByteArrayOutputStream outputStream;
@@ -44,6 +48,10 @@ public class DoubleByteArrayInputStream extends InputStream {
         return this.currentInputStream.available();
     }
 
+    /**
+     * This will check if there is new data in the {@link DoubleByteArrayOutputStream}
+     * @throws IOException
+     */
     private void refresh() throws IOException {
         if (this.currentInputStream.available() == 0) {
             InputStream tempInputStream = this.outputStream.asInputStream();

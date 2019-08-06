@@ -21,6 +21,13 @@ package org.apache.airavata.mft.core.streaming;
 
 import java.io.*;
 
+/**
+ * This class wraps two {@link ByteArrayOutputStream} objects and implements the API of {@link OutputStream}. Main
+ * objective of this implementation is to use one stream for writing data and other stream to read the already written data.
+ * Behaviour of this Class is similar to what {@link PipedOutputStream} is doing but with more relaxed modes in thread
+ * contention and high performance. Limitation is that an instance of this class only be used between two threads. One
+ * thread can write to the output stream and other thread can digest data from asInputStream method.
+ */
 public class DoubleByteArrayOutputStream extends OutputStream {
 
     private ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
@@ -49,6 +56,10 @@ public class DoubleByteArrayOutputStream extends OutputStream {
         processedBytes += len;
     }
 
+    /**
+     * This will swap currently writing {@link BufferedOutputStream} into the non active one. In order to perform
+     * this swap, non active stream should be empty.
+     */
     private void swapBuffers() {
         while (!clearedNonActiveStream) {
             try {
@@ -90,6 +101,11 @@ public class DoubleByteArrayOutputStream extends OutputStream {
         isClosed = true;
     }
 
+    /**
+     * This will read currently non updating output stream and convert its data as an {@link InputStream}. Multiple invoking
+     * this will return null if there is no new data.
+     * @return {@link InputStream} of currently un-read data. null otherwise
+     */
     public InputStream asInputStream() {
         if (clearedNonActiveStream) {
             return null;
