@@ -38,6 +38,13 @@ public class S3TransportUtil {
                 identifier.setRegion("us-east-2");
                 identifier.setRemoteFile("file.txt");
                 return identifier;
+            case "4":
+                identifier.setAccessKey("key");
+                identifier.setSecretKey("secret");
+                identifier.setBucket("airavata-s3");
+                identifier.setRegion("us-east-2");
+                identifier.setRemoteFile("file2.txt");
+                return identifier;
             default:
                 return null;
         }

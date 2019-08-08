@@ -38,7 +38,7 @@ public class SCPReceiver implements StreamedReceiver {
     }
 
     private void transferRemoteToStream(Session session, String from, TransportStream stream) throws JSchException, IOException {
-
+        System.out.println("Starting scp receive");
         // exec 'scp -f rfile' remotely
         String command = "scp -f " + from;
         Channel channel = session.openChannel("exec");
@@ -121,6 +121,9 @@ public class SCPReceiver implements StreamedReceiver {
         stream.setStreamCompleted(true);
         channel.disconnect();
         session.disconnect();
+
+        System.out.println("Completed scp receive");
+
     }
 
     public int checkAck(InputStream in) throws IOException {

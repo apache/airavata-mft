@@ -28,7 +28,7 @@ public class TransportStream {
     private AtomicBoolean streamCompleted = new AtomicBoolean(false);
 
     private OutputStream outputStream = new DoubleByteArrayOutputStream();
-    private InputStream inputStream = new DoubleByteArrayInputStream((DoubleByteArrayOutputStream) outputStream);
+    private DoubleByteArrayInputStream inputStream = new DoubleByteArrayInputStream((DoubleByteArrayOutputStream) outputStream);
 
     private String sourceId;
     private String destId;
@@ -43,16 +43,8 @@ public class TransportStream {
         return inputStream;
     }
 
-    public void setInputStream(InputStream inputStream) {
-        this.inputStream = inputStream;
-    }
-
     public OutputStream getOutputStream() {
         return outputStream;
-    }
-
-    public void setOutputStream(OutputStream outputStream) {
-        this.outputStream = outputStream;
     }
 
     public TransportMetadata getMetadata() {

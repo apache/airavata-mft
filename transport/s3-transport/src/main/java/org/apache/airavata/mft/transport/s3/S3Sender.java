@@ -19,12 +19,22 @@
  */
 package org.apache.airavata.mft.transport.s3;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import org.apache.airavata.mft.core.api.StreamedSender;
 import org.apache.airavata.mft.core.streaming.TransportStream;
 
 public class S3Sender implements StreamedSender {
     @Override
     public void send(TransportStream stream) throws Exception {
+        S3ResourceIdentifier resourceIdentifier = S3TransportUtil.getS3ResourceIdentifier(stream.getDestId());
+        AmazonS3 s3client = S3TransportUtil.getS3Client(resourceIdentifier.getAccessKey(),
+                resourceIdentifier.getSecretKey(), resourceIdentifier.getRegion());
 
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentLength(stream.getMetadata().getLength());
+
+        s3client.putObject(resourceIdentifier.getBucket(), resourceIdentifier.getRemoteFile(),
+                stream.getInputStream(), metadata);
     }
 }

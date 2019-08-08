@@ -30,6 +30,7 @@ public class DoubleByteArrayInputStream extends InputStream {
 
     private DoubleByteArrayOutputStream outputStream;
     private InputStream currentInputStream;
+    private int readCount;
 
     public DoubleByteArrayInputStream(DoubleByteArrayOutputStream outputStream) {
         this.outputStream = outputStream;
@@ -38,8 +39,29 @@ public class DoubleByteArrayInputStream extends InputStream {
 
     @Override
     public int read() throws IOException {
-        refresh();
-        return this.currentInputStream.read();
+        int data =  this.currentInputStream.read();
+        if (data == -1) {
+            refresh();
+            while (data == -1) {
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    // ignore
+                }
+                refresh();
+                if (outputStream.isClosed()) {
+                    // If the stream is closed, do another refresh
+                    refresh();
+                    data = this.currentInputStream.read();
+                    break;
+                }
+                data = this.currentInputStream.read();
+            }
+            return data;
+        } else {
+            readCount ++;
+        }
+        return data;
     }
 
     @Override

@@ -22,6 +22,7 @@ package org.apache.airavata.mft.transport.scp;
 import org.apache.airavata.mft.core.streaming.TransportMetadata;
 import org.apache.airavata.mft.core.streaming.TransportStream;
 import org.apache.airavata.mft.transport.s3.S3Receiver;
+import org.apache.airavata.mft.transport.s3.S3Sender;
 import org.apache.airavata.mft.transport.s3.S3TransportOperator;
 
 import java.io.IOException;
@@ -30,10 +31,10 @@ public class Main {
     public static void main(final String[] arg) throws Exception {
 
         TransportMetadata metadata = new TransportMetadata();
-        //SCPTransportOperator operator = new SCPTransportOperator();
-        S3TransportOperator operator = new S3TransportOperator();
-        metadata.setLength(operator.getResourceSize("3"));
-        final TransportStream stream = new TransportStream("3", "2", metadata);
+        SCPTransportOperator operator = new SCPTransportOperator();
+        //S3TransportOperator operator = new S3TransportOperator();
+        metadata.setLength(operator.getResourceSize("1"));
+        final TransportStream stream = new TransportStream("1", "4", metadata);
 
         Runnable r1 = new Runnable() {
             @Override
@@ -69,8 +70,8 @@ public class Main {
         Runnable receiverRun = new Runnable() {
             @Override
             public void run() {
-                //SCPReceiver receiver = new SCPReceiver();
-                S3Receiver receiver = new S3Receiver();
+                SCPReceiver receiver = new SCPReceiver();
+                //S3Receiver receiver = new S3Receiver();
                 try {
                     receiver.receive(stream);
                 } catch (Exception e) {
@@ -82,7 +83,8 @@ public class Main {
         Runnable senderRun = new Runnable() {
             @Override
             public void run() {
-                SCPSender sender = new SCPSender();
+                //SCPSender sender = new SCPSender();
+                S3Sender sender = new S3Sender();
                 try {
                     sender.send(stream);
                 } catch (Exception e) {

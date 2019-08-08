@@ -38,6 +38,7 @@ public class DoubleByteArrayOutputStream extends OutputStream {
 
     private long maxBytesPerStream = 1 * 1000 * 1000;
     private long processedBytes = 0;
+    private long totalBytes = 0;
     private boolean clearedNonActiveStream = false;
 
     private boolean isClosed = false;
@@ -49,6 +50,7 @@ public class DoubleByteArrayOutputStream extends OutputStream {
         }
         this.currentStream.write(b);
         processedBytes += 1;
+        totalBytes += 1;
     }
 
     @Override
@@ -58,6 +60,7 @@ public class DoubleByteArrayOutputStream extends OutputStream {
         }
         this.currentStream.write(b, off, len);
         processedBytes += len;
+        totalBytes += len;
     }
 
     /**
@@ -68,7 +71,7 @@ public class DoubleByteArrayOutputStream extends OutputStream {
         while (!clearedNonActiveStream) {
             try {
                 Thread.sleep(100);
-                System.out.println("Receiver waiting until non active buffer gets emptied");
+                System.out.println("Receiver waiting until non active buffer gets emptied " + processedBytes);
             } catch (InterruptedException e) {
                 // ignore
             }
@@ -98,10 +101,12 @@ public class DoubleByteArrayOutputStream extends OutputStream {
     @Override
     public void close() throws IOException {
         if (!isClosed) {
+            System.out.println("Swapping buffers...");
             swapBuffers();
             //this.stream1.close();
             //this.stream2.close();
         }
+        System.out.println("Output stream received total bytes " + totalBytes);
         isClosed = true;
     }
 
@@ -117,5 +122,9 @@ public class DoubleByteArrayOutputStream extends OutputStream {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(activeStream == 1 ? stream2.toByteArray(): stream1.toByteArray());
         this.clearedNonActiveStream = true;
         return inputStream;
+    }
+
+    public boolean isClosed() {
+        return isClosed;
     }
 }
