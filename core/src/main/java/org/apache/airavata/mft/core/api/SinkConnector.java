@@ -19,7 +19,6 @@
 
 package org.apache.airavata.mft.core.api;
 
-import java.nio.channels.Channel;
 import java.util.Properties;
 
 /**
@@ -39,5 +38,5 @@ public interface SinkConnector extends Connector{
      * @param channel
      * @return true if succes else false
      */
-    boolean verifyUpload(Channel channel);
+    boolean verifyUpload(ConnectorChannel channel);
 }

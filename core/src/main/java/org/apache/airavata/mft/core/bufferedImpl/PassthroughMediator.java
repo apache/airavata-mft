@@ -51,7 +51,7 @@ public class PassthroughMediator implements Mediator {
             Object obj = dst.getChannelAttribute(Constants.CONNECTOR);
             if (obj != null && obj instanceof SinkConnector) {
                 SinkConnector connector = (SinkConnector) obj;
-                boolean success = connector.verifyUpload(dChannel);
+                boolean success = connector.verifyUpload(dst);
                 if (success) {
                     callback.onComplete("Successfully uploaded", null);
                 } else {
@@ -69,8 +69,8 @@ public class PassthroughMediator implements Mediator {
             Connector sourceConnector = (Connector) src.getChannelAttribute(Constants.CONNECTOR);
             Connector sinkConnector = (Connector) dst.getChannelAttribute(Constants.CONNECTOR);
             try {
-                sourceConnector.closeChannel(rChannel);
-                sinkConnector.closeChannel(dChannel);
+                sourceConnector.closeChannel(src);
+                sinkConnector.closeChannel(dst);
             } catch (Exception ex) {
                 String msg = "Error occurred while closing channels";
                 ConnectorException connectorException = new ConnectorException(msg, ex);

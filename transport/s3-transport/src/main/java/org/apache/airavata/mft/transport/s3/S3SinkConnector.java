@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.channels.Channel;
 import java.util.Properties;
 
 /**
@@ -70,13 +69,12 @@ public class S3SinkConnector extends AbstractConnector implements SinkConnector 
         OutChannel outChannel = new OutChannel(outputStream);
         outChannel.addChannelAttribute(S3Constants.HTTP_CONNECTION, connection);
         outChannel.addChannelAttribute(Constants.CONNECTOR, this);
-        cacheChannel(outChannel.getChannel(), outChannel);
         return outChannel;
     }
 
     @Override
-    public boolean verifyUpload(Channel channel) {
-        OutChannel outChannel = (OutChannel) getConnectorChannel(channel);
+    public boolean verifyUpload(ConnectorChannel channel) {
+        OutChannel outChannel = (OutChannel) channel;
         HttpURLConnection connection = (HttpURLConnection) outChannel.getChannelAttribute(S3Constants.HTTP_CONNECTION);
         try {
             if (connection.getResponseCode() == S3Constants.HTTP_SUCCESS_RESPONSE_CODE) {

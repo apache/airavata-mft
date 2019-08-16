@@ -21,7 +21,6 @@ package org.apache.airavata.mft.core.api;
 
 import org.apache.airavata.mft.core.bufferedImpl.ConnectorConfig;
 
-import java.nio.channels.Channel;
 import java.util.Properties;
 
 /**
@@ -47,5 +46,5 @@ public interface Connector {
      * @param channel
      * @throws Exception
      */
-    void closeChannel(Channel channel) throws  Exception;
+    void closeChannel(ConnectorChannel channel) throws  Exception;
 }

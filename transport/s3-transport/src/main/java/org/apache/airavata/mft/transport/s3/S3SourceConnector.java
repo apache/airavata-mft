@@ -55,7 +55,6 @@ public class S3SourceConnector extends AbstractConnector implements SourceConnec
             inputStream = s3object.getObjectContent();
             InChannel inChannel = new InChannel(inputStream);
             inChannel.addChannelAttribute(Constants.CONNECTOR, this);
-            cacheChannel(inChannel.getChannel(), inChannel);
             return inChannel;
         }
         return null;
