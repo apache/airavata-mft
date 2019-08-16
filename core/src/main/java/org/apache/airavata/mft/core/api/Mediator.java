@@ -22,14 +22,13 @@ package org.apache.airavata.mft.core.api;
 
 /**
  * This represent the interface for all mediators, which mediates
- * data from source connectors and send them to sink connectors.
+ * data from source connector hannel and send them to sink connector channel.
  */
 public interface Mediator {
 
     /**
      * Mediates the content from source connector and writes the mediated content
      * to destination connector
-     * WritableByteChannel
      * @param src
      * @param dst
      * @param callback

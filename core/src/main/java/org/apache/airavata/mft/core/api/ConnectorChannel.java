@@ -23,11 +23,11 @@ import java.io.IOException;
 import java.nio.channels.Channel;
 
 /**
- * An interface represents the underlying channel of a {@Link Connector}
+ * An interface represents a  channel of a {@Link Connector}
  */
 public interface ConnectorChannel {
     /**
-     * get the channel of given connector
+     * get the NIO channel of ChannelConnector
      *
      * @return
      */

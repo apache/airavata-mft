@@ -34,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * This overrides closeChannel method and release all resources allocated to releasing channel
  */
 public abstract class AbstractConnector implements Connector {
-    ConcurrentHashMap<Channel, Object> channelToStreamMap = new ConcurrentHashMap<>();
+    ConcurrentHashMap<Channel, Object> channelMap = new ConcurrentHashMap<>();
 
     @Override
     public void closeChannel(Channel channel) throws ConnectorException {
@@ -42,17 +42,18 @@ public abstract class AbstractConnector implements Connector {
         InChannel inChannel;
 
         try {
-            if (channelToStreamMap.get(channel) instanceof OutputStream) {
-                outChannel = (OutChannel) channelToStreamMap.get(channel);
+            if (channelMap.get(channel) instanceof OutputStream) {
+                outChannel = (OutChannel) channelMap.get(channel);
                 if (outChannel != null) {
                     outChannel.closeChannel();
-                    System.out.println("Closing output stream");
+                    channelMap.remove(channel);
                 }
 
-            } else if (channelToStreamMap.get(channel) instanceof InputStream) {
-                inChannel = (InChannel) channelToStreamMap.get(channel);
+            } else if (channelMap.get(channel) instanceof InputStream) {
+                inChannel = (InChannel) channelMap.get(channel);
                 if (inChannel != null) {
                     inChannel.closeChannel();
+                    channelMap.remove(channel);
                 }
             }
 
@@ -62,13 +63,23 @@ public abstract class AbstractConnector implements Connector {
 
     }
 
+    /**
+     * Cache the operating channel
+     * @param channel
+     * @param obj
+     */
     public void cacheChannel(Channel channel, Object obj) {
-        channelToStreamMap.put(channel, obj);
+        channelMap.put(channel, obj);
     }
 
 
+    /**
+     * get the channel
+     * @param channel
+     * @return
+     */
     public Object getConnectorChannel(Channel channel) {
-       return channelToStreamMap.get(channel);
+       return channelMap.get(channel);
     }
 
 

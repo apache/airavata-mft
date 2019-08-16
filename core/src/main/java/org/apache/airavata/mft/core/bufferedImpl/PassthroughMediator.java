@@ -47,7 +47,6 @@ public class PassthroughMediator implements Mediator {
                 ChannelUtils.copyData(rChannel, dChannel);
             }
 
-          //  dst.closeChannel();
 
             Object obj = dst.getChannelAttribute(Constants.CONNECTOR);
             if (obj != null && obj instanceof SinkConnector) {
