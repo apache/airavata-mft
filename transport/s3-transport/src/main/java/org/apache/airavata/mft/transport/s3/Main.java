@@ -42,16 +42,16 @@ public class Main {
 
     public void execute() {
         Properties connectorConfProp = new Properties();
-        connectorConfProp.put(S3Constants.ACCESS_KEY, "AKIA2SKSIFUH7QDAROSR");
-        connectorConfProp.put(S3Constants.SECRET_KEY, "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");
+        connectorConfProp.put(S3Constants.ACCESS_KEY, "XXXX");
+        connectorConfProp.put(S3Constants.SECRET_KEY, "YYYY");
         connectorConfProp.put(S3Constants.REGION, "us-east-2");
 
         Properties srcProp = new Properties();
-        srcProp.put(S3Constants.BUCKET, "blimpit-test");
+        srcProp.put(S3Constants.BUCKET, "test");
         srcProp.put(S3Constants.REMOTE_FILE, "test.pdf");
 
         Properties dstProp = new Properties();
-        dstProp.put(S3Constants.BUCKET, "blimpit-test");
+        dstProp.put(S3Constants.BUCKET, "test");
         dstProp.put(S3Constants.REMOTE_FILE, "teemure.pdf");
 
         try {
