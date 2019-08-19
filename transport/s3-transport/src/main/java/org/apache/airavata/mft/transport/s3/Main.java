@@ -20,17 +20,13 @@
 package org.apache.airavata.mft.transport.s3;
 
 import org.apache.airavata.mft.core.api.ConnectorChannel;
-import org.apache.airavata.mft.core.bufferedImpl.AbstractConnector;
-import org.apache.airavata.mft.core.bufferedImpl.ConnectorConfig;
-import org.apache.airavata.mft.core.bufferedImpl.PassthroughMediator;
-
-import java.util.Properties;
+import org.apache.airavata.mft.core.bufferedImpl.channel.AbstractConnector;
+import org.apache.airavata.mft.core.bufferedImpl.mediation.PassthroughMediator;
 
 /**
  * For Testing
  */
 public class Main {
-
 
 
     public static void main(String[] args) {
@@ -41,30 +37,31 @@ public class Main {
     }
 
     public void execute() {
-        Properties connectorConfProp = new Properties();
-        connectorConfProp.put(S3Constants.ACCESS_KEY, "XXXX");
-        connectorConfProp.put(S3Constants.SECRET_KEY, "YYYY");
-        connectorConfProp.put(S3Constants.REGION, "us-east-2");
 
-        Properties srcProp = new Properties();
-        srcProp.put(S3Constants.BUCKET, "test");
-        srcProp.put(S3Constants.REMOTE_FILE, "test.pdf");
+        S3ResourceIdentifier src = new S3ResourceIdentifier();
+        S3ResourceIdentifier dst = new S3ResourceIdentifier();
 
-        Properties dstProp = new Properties();
-        dstProp.put(S3Constants.BUCKET, "test");
-        dstProp.put(S3Constants.REMOTE_FILE, "teemure.pdf");
+        src.setAccessKey("XXX");
+        src.setSecretKey("YYY");
+        src.setRegion("us-east-2");
+        src.setBucket("test");
+        src.setRemoteFile("test.pdf");
+
+        dst.setAccessKey("XXX");
+        dst.setSecretKey("YYY");
+        dst.setRegion("us-east-2");
+        dst.setBucket("test");
+        dst.setRemoteFile("testA.pdf");
+
 
         try {
 
-            ConnectorConfig connectorConfig = new ConnectorConfig(connectorConfProp);
 
-            AbstractConnector s3SourceConnector = new S3SourceConnector();
-            s3SourceConnector.initiate(connectorConfig);
-            ConnectorChannel srcChannel = s3SourceConnector.openChannel(srcProp);
+            AbstractConnector s3SourceConnector = new S3SourceConnector(src);
+            ConnectorChannel srcChannel = s3SourceConnector.openChannel();
 
-            AbstractConnector s3SinkConnector = new S3SinkConnector();
-            s3SinkConnector.initiate(connectorConfig);
-            ConnectorChannel dstChannel = s3SinkConnector.openChannel(dstProp);
+            AbstractConnector s3SinkConnector = new S3SinkConnector(dst);
+            ConnectorChannel dstChannel = s3SinkConnector.openChannel();
 
             PassthroughMediator passthroughMediator = new PassthroughMediator();
 
@@ -78,7 +75,6 @@ public class Main {
                 }
             });
             //  };
-
 
 
         } catch (Exception e) {

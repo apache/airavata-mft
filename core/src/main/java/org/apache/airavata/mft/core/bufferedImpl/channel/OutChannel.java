@@ -17,56 +17,53 @@
  *   under the License.
  */
 
-package org.apache.airavata.mft.core.bufferedImpl;
+package org.apache.airavata.mft.core.bufferedImpl.channel;
 
 import org.apache.airavata.mft.core.api.ConnectorChannel;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.channels.Channel;
 import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.util.HashMap;
 
 /**
- * A class which represents the channel of a {@Link SinkConnector}
+ * A class which represents the channel in {@Link SinkConnector}
  */
-public class InChannel implements ConnectorChannel {
+public class OutChannel implements ConnectorChannel {
 
-    private InputStream inputStream;
+    private OutputStream outputStream;
 
-    private ReadableByteChannel readableByteChannel;
+    private WritableByteChannel writableByteChannel;
 
-    private HashMap<String, Object> contextAttributeMap = new HashMap<>();
+    private HashMap<String, Object> contextAttributeMap = new HashMap();
 
-    public InChannel(InputStream inputStream) {
-        this.inputStream = inputStream;
-        readableByteChannel = Channels.newChannel(inputStream);
+    public OutChannel(OutputStream outputStream) {
+        this.outputStream = outputStream;
+        writableByteChannel = Channels.newChannel(outputStream);
 
     }
-
-    public InputStream getInputStream() {
-        return inputStream;
-    }
-
 
     @Override
     public Channel getChannel() {
-        return readableByteChannel;
+        return writableByteChannel;
     }
 
     @Override
     public void closeChannel() throws IOException {
-        inputStream.close();
+        outputStream.close();
     }
 
     @Override
     public void addChannelAttribute(String key, Object value) {
-        contextAttributeMap.put(key,value );
+        contextAttributeMap.put(key, value);
     }
 
     @Override
     public Object getChannelAttribute(String key) {
         return contextAttributeMap.get(key);
     }
+
+
 }

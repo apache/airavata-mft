@@ -17,9 +17,12 @@
  *   under the License.
  */
 
-package org.apache.airavata.mft.core.bufferedImpl;
+package org.apache.airavata.mft.core.bufferedImpl.mediation;
 
 import org.apache.airavata.mft.core.api.*;
+import org.apache.airavata.mft.core.bufferedImpl.ConnectorException;
+import org.apache.airavata.mft.core.bufferedImpl.Constants;
+import org.apache.airavata.mft.core.bufferedImpl.channel.ChannelUtils;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;

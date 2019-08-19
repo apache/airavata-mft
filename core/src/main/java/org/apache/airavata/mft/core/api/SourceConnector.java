@@ -19,19 +19,13 @@
 
 package org.apache.airavata.mft.core.api;
 
-import java.util.Properties;
-
 
 /**
  * This represents the input connector, where to read data
- * from the application
+ * from the application. Use this connector to specify reader related
+ * methods
  */
-public interface SourceConnector extends Connector{
+public interface SourceConnector extends Connector {
 
-    /**
-     * provides the channel to read data from external location
-     * @return ConnectorChannel
-     */
-    ConnectorChannel openChannel(Properties properties);
 
 }

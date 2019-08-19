@@ -17,7 +17,9 @@
  *   under the License.
  */
 
-package org.apache.airavata.mft.core.bufferedImpl;
+package org.apache.airavata.mft.core.bufferedImpl.channel;
+
+import org.apache.airavata.mft.core.bufferedImpl.Constants;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -32,6 +34,7 @@ public class ChannelUtils {
 
     /**
      * Tranfer data from readable byte channel to FileChannel using zero-copy
+     *
      * @param byteChannel
      * @param to
      * @throws IOException
@@ -46,6 +49,7 @@ public class ChannelUtils {
 
     /**
      * Transfer data from FileChannel to writable byte channel using zero-copy
+     *
      * @param to
      * @param from
      * @throws IOException
@@ -60,14 +64,15 @@ public class ChannelUtils {
 
     /**
      * Copy data from readable byte channel to writable byte channel
+     *
      * @param src
      * @param dest
      * @throws IOException
      */
-    public static void copyData(ReadableByteChannel src,  WritableByteChannel dest) throws IOException {
+    public static void copyData(ReadableByteChannel src, WritableByteChannel dest) throws IOException {
         final ByteBuffer buffer = ByteBuffer.allocateDirect(Constants.BUFFER_SIZE);
         int count = 0;
-        while ((count =src.read(buffer)) != -1) {
+        while ((count = src.read(buffer)) != -1) {
             // prepare the buffer to be drained
             buffer.flip();
             // write to the channel, may block

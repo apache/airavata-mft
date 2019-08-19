@@ -22,14 +22,14 @@ package org.apache.airavata.mft.transport.s3;
 /**
  * Includes constants related to S3 SDK
  */
-public interface S3Constants {
+public class S3Constants {
 
-    String ACCESS_KEY="ACCESS_KEY";
-    String SECRET_KEY="SECRET_KEY";
-    String BUCKET="BUCKET";
-    String REGION="REGION";
-    String REMOTE_FILE="REMOTE_FILE";
-    int CONNECTION_EXPIRE_TIME = 1000 * 60 * 60;
-    String HTTP_CONNECTION = "HTTP_CONNECTION";
-    int HTTP_SUCCESS_RESPONSE_CODE = 200;
+    public static String ACCESS_KEY = "ACCESS_KEY";
+    public static String SECRET_KEY = "SECRET_KEY";
+    public static String BUCKET = "BUCKET";
+    public static String REGION = "REGION";
+    public static String REMOTE_FILE = "REMOTE_FILE";
+    public static int CONNECTION_EXPIRE_TIME = 1000 * 60 * 60;
+    public static String HTTP_CONNECTION = "HTTP_CONNECTION";
+    public static int HTTP_SUCCESS_RESPONSE_CODE = 200;
 }

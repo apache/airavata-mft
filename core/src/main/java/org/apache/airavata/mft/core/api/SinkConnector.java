@@ -19,22 +19,17 @@
 
 package org.apache.airavata.mft.core.api;
 
-import java.util.Properties;
 
 /**
  * This represents the output connector, where to write
  * data from the application.
  */
-public interface SinkConnector extends Connector{
+public interface SinkConnector extends Connector {
 
-    /**
-     * provides the channel to write data to external location
-     * @return ConnectorChannel
-     */
-     ConnectorChannel openChannel(Properties properties) throws Exception;
 
     /**
      * Verify content upload of the given channel is completed
+     *
      * @param channel
      * @return true if succes else false
      */

@@ -17,42 +17,43 @@
  *   under the License.
  */
 
-package org.apache.airavata.mft.core.bufferedImpl;
+package org.apache.airavata.mft.core.bufferedImpl.channel;
 
 import org.apache.airavata.mft.core.api.ConnectorChannel;
 
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 import java.nio.channels.Channel;
 import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.util.HashMap;
 
 /**
- * A class which represents the channel in {@Link SinkConnector}
+ * A class which represents the channel of a {@Link SinkConnector}
  */
-public class OutChannel implements ConnectorChannel {
+public class InChannel implements ConnectorChannel {
 
-    private OutputStream outputStream;
+    private InputStream inputStream;
 
-    private WritableByteChannel writableByteChannel;
+    private ReadableByteChannel readableByteChannel;
 
-    private HashMap<String, Object> contextAttributeMap = new HashMap();
+    private HashMap<String, Object> contextAttributeMap = new HashMap<>();
 
-    public OutChannel(OutputStream outputStream) {
-        this.outputStream = outputStream;
-        writableByteChannel = Channels.newChannel(outputStream);
+    public InChannel(InputStream inputStream) {
+        this.inputStream = inputStream;
+        readableByteChannel = Channels.newChannel(inputStream);
 
     }
 
+
     @Override
     public Channel getChannel() {
-        return writableByteChannel;
+        return readableByteChannel;
     }
 
     @Override
     public void closeChannel() throws IOException {
-            outputStream.close();
+        inputStream.close();
     }
 
     @Override
@@ -61,9 +62,7 @@ public class OutChannel implements ConnectorChannel {
     }
 
     @Override
-    public Object getChannelAttribute(String key){
+    public Object getChannelAttribute(String key) {
         return contextAttributeMap.get(key);
     }
-
-
 }

@@ -23,13 +23,11 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
 import org.apache.airavata.mft.core.api.ConnectorChannel;
 import org.apache.airavata.mft.core.api.SourceConnector;
-import org.apache.airavata.mft.core.bufferedImpl.AbstractConnector;
-import org.apache.airavata.mft.core.bufferedImpl.ConnectorConfig;
 import org.apache.airavata.mft.core.bufferedImpl.Constants;
-import org.apache.airavata.mft.core.bufferedImpl.InChannel;
+import org.apache.airavata.mft.core.bufferedImpl.channel.AbstractConnector;
+import org.apache.airavata.mft.core.bufferedImpl.channel.InChannel;
 
 import java.io.InputStream;
-import java.util.Properties;
 
 /**
  * Connector class which connects to a given S3 source and provides
@@ -39,17 +37,18 @@ public class S3SourceConnector extends AbstractConnector implements SourceConnec
 
     private AmazonS3 s3Client;
 
-    @Override
-    public boolean initiate(ConnectorConfig connectorConfig) {
-        s3Client = S3TransportUtil.getS3Client(connectorConfig.getValue(S3Constants.ACCESS_KEY),
-                connectorConfig.getValue(S3Constants.SECRET_KEY), connectorConfig.getValue(S3Constants.REGION));
-        return true;
+    private S3ResourceIdentifier identifier;
+
+    public S3SourceConnector(S3ResourceIdentifier identifier) {
+        this.identifier = identifier;
+        this.s3Client = S3TransportUtil.getS3Client(identifier.getAccessKey(),
+                identifier.getSecretKey(), identifier.getAccessKey());
     }
 
     @Override
-    public ConnectorChannel openChannel(Properties properties) {
-        S3Object s3object = s3Client.getObject(properties.getProperty(S3Constants.BUCKET),
-                properties.getProperty(S3Constants.REMOTE_FILE));
+    public ConnectorChannel openChannel() {
+        S3Object s3object = s3Client.getObject(identifier.getBucket(),
+                identifier.getRemoteFile());
         InputStream inputStream;
         if (s3object != null && s3object.getObjectContent() != null) {
             inputStream = s3object.getObjectContent();

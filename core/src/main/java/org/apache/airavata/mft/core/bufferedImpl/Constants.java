@@ -22,9 +22,9 @@ package org.apache.airavata.mft.core.bufferedImpl;
 /**
  * Contains all the  constants used in core classes.
  */
-public interface Constants {
+public class Constants {
 
-    long TRANSFER_MAX_SIZE = (1024 * 1024);
-    int BUFFER_SIZE = 8 * 1024;
-    String CONNECTOR = "CONNECTOR";
+    public static long TRANSFER_MAX_SIZE = (1024 * 1024);
+    public static int BUFFER_SIZE = 8 * 1024;
+    public static String CONNECTOR = "CONNECTOR";
 }

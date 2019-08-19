@@ -32,6 +32,7 @@ public interface CompletionCallback {
     /**
      * Implementation of this should contain the logic
      * for execution after mediation returns
+     *
      * @param message
      * @param error
      */

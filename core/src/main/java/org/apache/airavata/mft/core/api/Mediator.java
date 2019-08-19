@@ -29,6 +29,7 @@ public interface Mediator {
     /**
      * Mediates the content from source connector and writes the mediated content
      * to destination connector
+     *
      * @param src
      * @param dst
      * @param callback

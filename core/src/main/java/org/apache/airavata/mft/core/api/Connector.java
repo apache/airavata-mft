@@ -19,32 +19,25 @@
 
 package org.apache.airavata.mft.core.api;
 
-import org.apache.airavata.mft.core.bufferedImpl.ConnectorConfig;
-
-import java.util.Properties;
 
 /**
  * This represents a connection between external source or sink
  */
 public interface Connector {
 
-    /**
-     * Initiates the connector object
-     * @param connectorConfig
-     * @return initation state whether success or not
-     */
-    boolean initiate(ConnectorConfig connectorConfig);
 
     /**
      * This returns a {@link ConnectorChannel}
+     *
      * @return Channel
      */
-    ConnectorChannel openChannel(Properties properties) throws Exception;
+    ConnectorChannel openChannel() throws Exception;
 
     /**
      * This is used to close the channel and release resources related to channel
+     *
      * @param channel
      * @throws Exception
      */
-    void closeChannel(ConnectorChannel channel) throws  Exception;
+    void closeChannel(ConnectorChannel channel) throws Exception;
 }

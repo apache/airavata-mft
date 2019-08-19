@@ -17,12 +17,13 @@
  *   under the License.
  */
 
-package org.apache.airavata.mft.core.bufferedImpl;
+package org.apache.airavata.mft.core.bufferedImpl.channel;
 
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.core.api.ConnectorChannel;
 import org.apache.airavata.mft.core.api.SinkConnector;
 import org.apache.airavata.mft.core.api.SourceConnector;
+import org.apache.airavata.mft.core.bufferedImpl.ConnectorException;
 
 import java.io.IOException;
 
