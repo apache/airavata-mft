@@ -55,4 +55,10 @@ public interface ConnectorChannel {
      * @return
      */
     Object getChannelAttribute(String key);
+
+    /**
+     * provides the initiated connector
+     * @return Connector
+     */
+    Connector getSourceConnector();
 }

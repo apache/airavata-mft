@@ -17,33 +17,33 @@
  *   under the License.
  */
 
-package org.apache.airavata.mft.core.bufferedImpl.channel;
+package org.apache.airavata.mft.transport.local;
 
-import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.core.api.ConnectorChannel;
-import org.apache.airavata.mft.core.api.SinkConnector;
 import org.apache.airavata.mft.core.api.SourceConnector;
-import org.apache.airavata.mft.core.bufferedImpl.ConnectorException;
+import org.apache.airavata.mft.core.bufferedImpl.channel.AbstractConnector;
+import org.apache.airavata.mft.core.bufferedImpl.channel.InChannel;
 
-import java.io.IOException;
+import java.io.File;
+import java.io.FileInputStream;
 
 
 /**
- * Common class for {@link SinkConnector} and {@link SourceConnector} implementations
- * This overrides closeChannel method and release all resources allocated to releasing channel
+ * A class responsible for open up the connection to read from file
  */
-public abstract class AbstractConnector implements Connector {
+public class SourceFileConnector extends AbstractConnector implements SourceConnector {
+
+    private ResourceIdentifier resourceIdentifier;
+
+    public SourceFileConnector(ResourceIdentifier resourceIdentifier) {
+        this.resourceIdentifier = resourceIdentifier;
+    }
 
     @Override
-    public void closeChannel(ConnectorChannel channel) throws ConnectorException {
-
-        try {
-            channel.closeChannel();
-
-        } catch (IOException e) {
-            throw new ConnectorException("Error occurred while closing stream", e);
-        }
-
+    public ConnectorChannel openChannel() throws Exception {
+        File file = FileUtils.getFile(resourceIdentifier.getFilePath());
+        FileInputStream inputStream = new FileInputStream(file);
+        return new InChannel(inputStream, this);
     }
 
 

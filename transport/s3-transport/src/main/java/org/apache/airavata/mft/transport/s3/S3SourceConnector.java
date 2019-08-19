@@ -23,7 +23,6 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
 import org.apache.airavata.mft.core.api.ConnectorChannel;
 import org.apache.airavata.mft.core.api.SourceConnector;
-import org.apache.airavata.mft.core.bufferedImpl.Constants;
 import org.apache.airavata.mft.core.bufferedImpl.channel.AbstractConnector;
 import org.apache.airavata.mft.core.bufferedImpl.channel.InChannel;
 
@@ -52,8 +51,7 @@ public class S3SourceConnector extends AbstractConnector implements SourceConnec
         InputStream inputStream;
         if (s3object != null && s3object.getObjectContent() != null) {
             inputStream = s3object.getObjectContent();
-            InChannel inChannel = new InChannel(inputStream);
-            inChannel.addChannelAttribute(Constants.CONNECTOR, this);
+            InChannel inChannel = new InChannel(inputStream,this);
             return inChannel;
         }
         return null;

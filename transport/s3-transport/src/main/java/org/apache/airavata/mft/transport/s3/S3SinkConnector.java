@@ -63,9 +63,8 @@ public class S3SinkConnector extends AbstractConnector implements SinkConnector 
         connection.setDoOutput(true);
         connection.setRequestMethod("PUT");
         OutputStream outputStream = connection.getOutputStream();
-        OutChannel outChannel = new OutChannel(outputStream);
+        OutChannel outChannel = new OutChannel(outputStream,this);
         outChannel.addChannelAttribute(S3Constants.HTTP_CONNECTION, connection);
-        outChannel.addChannelAttribute(Constants.CONNECTOR, this);
         return outChannel;
     }
 

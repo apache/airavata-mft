@@ -17,14 +17,21 @@
  *   under the License.
  */
 
-package org.apache.airavata.mft.transport.s3;
+package org.apache.airavata.mft.transport.local;
 
 /**
- * Includes constants related to S3 SDK
+ * A class used to identify the local file path. Path should be a
+ * same node local path
  */
-public final class S3Constants {
+public class ResourceIdentifier {
+    private String filePath;
 
-    public static final int CONNECTION_EXPIRE_TIME = 1000 * 60 * 60;
-    public static final String HTTP_CONNECTION = "HTTP_CONNECTION";
-    public static final int HTTP_SUCCESS_RESPONSE_CODE = 200;
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
 }

@@ -17,14 +17,36 @@
  *   under the License.
  */
 
-package org.apache.airavata.mft.transport.s3;
+package org.apache.airavata.mft.transport.local;
+
+import org.apache.airavata.mft.core.bufferedImpl.ConnectorException;
+
+import java.io.File;
 
 /**
- * Includes constants related to S3 SDK
+ * A class having utility methods of local file manipulation
  */
-public final class S3Constants {
+public class FileUtils {
 
-    public static final int CONNECTION_EXPIRE_TIME = 1000 * 60 * 60;
-    public static final String HTTP_CONNECTION = "HTTP_CONNECTION";
-    public static final int HTTP_SUCCESS_RESPONSE_CODE = 200;
+    /**
+     * Validates and provides the file
+     * @param src
+     * @return
+     * @throws ConnectorException
+     */
+    public static File getFile(String src) throws ConnectorException {
+        if (src != null) {
+            final File file = new File(src);
+            if (file.isFile()) {
+                return file;
+            } else {
+                throw new ConnectorException("File " + src + " is not a  valid file", null);
+            }
+        } else {
+            throw new ConnectorException("Please specify validate file name", null);
+        }
+
+    }
+
+
 }

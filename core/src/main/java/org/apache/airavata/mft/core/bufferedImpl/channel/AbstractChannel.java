@@ -20,38 +20,35 @@
 package org.apache.airavata.mft.core.bufferedImpl.channel;
 
 import org.apache.airavata.mft.core.api.Connector;
+import org.apache.airavata.mft.core.api.ConnectorChannel;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.channels.Channel;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
+import java.util.HashMap;
 
 /**
- * A class which represents the channel in {@Link SinkConnector}
+ * A class to implement common method of In and Out Channels
  */
-public class OutChannel extends AbstractChannel {
+public abstract class AbstractChannel implements ConnectorChannel {
 
-    private OutputStream outputStream;
+    private HashMap<String, Object> contextAttributeMap = new HashMap<>();
 
-    private WritableByteChannel writableByteChannel;
+    private Connector myConnector;
 
-
-    public OutChannel(OutputStream outputStream, Connector sourceConnector) {
-        super(sourceConnector);
-        this.outputStream = outputStream;
-        writableByteChannel = Channels.newChannel(outputStream);
+    public AbstractChannel(Connector myConnector) {
+        this.myConnector = myConnector;
     }
 
     @Override
-    public Channel getChannel() {
-        return writableByteChannel;
+    public void addChannelAttribute(String key, Object value) {
+        contextAttributeMap.put(key, value);
     }
 
     @Override
-    public void closeChannel() throws IOException {
-        outputStream.close();
+    public Object getChannelAttribute(String key) {
+        return contextAttributeMap.get(key);
     }
 
-
+    @Override
+    public Connector getSourceConnector() {
+        return myConnector;
+    }
 }

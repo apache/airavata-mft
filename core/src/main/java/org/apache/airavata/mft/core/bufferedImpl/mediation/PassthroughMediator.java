@@ -21,7 +21,6 @@ package org.apache.airavata.mft.core.bufferedImpl.mediation;
 
 import org.apache.airavata.mft.core.api.*;
 import org.apache.airavata.mft.core.bufferedImpl.ConnectorException;
-import org.apache.airavata.mft.core.bufferedImpl.Constants;
 import org.apache.airavata.mft.core.bufferedImpl.channel.ChannelUtils;
 
 import java.io.IOException;
@@ -51,7 +50,7 @@ public class PassthroughMediator implements Mediator {
             }
 
 
-            Object obj = dst.getChannelAttribute(Constants.CONNECTOR);
+            Object obj = dst.getSourceConnector();
             if (obj != null && obj instanceof SinkConnector) {
                 SinkConnector connector = (SinkConnector) obj;
                 boolean success = connector.verifyUpload(dst);
@@ -69,8 +68,8 @@ public class PassthroughMediator implements Mediator {
             ConnectorException connectorException = new ConnectorException(msg, e);
             callback.onComplete("Upload failed ", connectorException);
         } finally {
-            Connector sourceConnector = (Connector) src.getChannelAttribute(Constants.CONNECTOR);
-            Connector sinkConnector = (Connector) dst.getChannelAttribute(Constants.CONNECTOR);
+            Connector sourceConnector = src.getSourceConnector();
+            Connector sinkConnector = dst.getSourceConnector();
             try {
                 sourceConnector.closeChannel(src);
                 sinkConnector.closeChannel(dst);

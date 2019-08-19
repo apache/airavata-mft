@@ -19,27 +19,26 @@
 
 package org.apache.airavata.mft.core.bufferedImpl.channel;
 
-import org.apache.airavata.mft.core.api.ConnectorChannel;
+import org.apache.airavata.mft.core.api.Connector;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.Channel;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.util.HashMap;
 
 /**
  * A class which represents the channel of a {@Link SinkConnector}
  */
-public class InChannel implements ConnectorChannel {
+public class InChannel extends AbstractChannel {
 
     private InputStream inputStream;
 
     private ReadableByteChannel readableByteChannel;
 
-    private HashMap<String, Object> contextAttributeMap = new HashMap<>();
 
-    public InChannel(InputStream inputStream) {
+    public InChannel(InputStream inputStream, Connector sourceConnector) {
+        super(sourceConnector);
         this.inputStream = inputStream;
         readableByteChannel = Channels.newChannel(inputStream);
 
@@ -56,13 +55,5 @@ public class InChannel implements ConnectorChannel {
         inputStream.close();
     }
 
-    @Override
-    public void addChannelAttribute(String key, Object value) {
-        contextAttributeMap.put(key, value);
-    }
 
-    @Override
-    public Object getChannelAttribute(String key) {
-        return contextAttributeMap.get(key);
-    }
 }
