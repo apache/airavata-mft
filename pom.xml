@@ -31,7 +31,6 @@
     <modules>
         <module>core</module>
         <module>transport</module>
-        <module>transport/local-transport</module>
     </modules>
 
     <parent>

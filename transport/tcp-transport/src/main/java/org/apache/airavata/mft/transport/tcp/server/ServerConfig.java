@@ -17,13 +17,34 @@
  *   under the License.
  */
 
-package org.apache.airavata.mft.transport.local;
+package org.apache.airavata.mft.transport.tcp.server;
 
 /**
- * A class of represent local file transport constants
+ * A class which represents the server configurations
  */
-public final class FileConstants {
+public class ServerConfig {
 
+    private String host;
+    private int port;
 
-    public static final String OUTPUT_FILE = "OUT_FILE";
+    public ServerConfig(String host, int port) {
+        this.host = host;
+        this.port = port;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
 }

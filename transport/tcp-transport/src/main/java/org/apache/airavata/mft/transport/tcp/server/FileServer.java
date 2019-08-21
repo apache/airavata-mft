@@ -17,13 +17,29 @@
  *   under the License.
  */
 
-package org.apache.airavata.mft.transport.local;
+package org.apache.airavata.mft.transport.tcp.server;
 
 /**
- * A class of represent local file transport constants
+ * A class which is responsible for accepting incoming tcp connections
+ * and delegate accepted channels to worker objects
  */
-public final class FileConstants {
+public class FileServer {
+
+    /**
+     * This starts the server and  accepts incoming connections
+     * @return
+     */
+    public void start() {
+
+    }
+
+    /**
+     * Server is shutdown and stops  accepting incoming connections
+     * @return
+     */
+    public void stop() {
+
+    }
 
 
-    public static final String OUTPUT_FILE = "OUT_FILE";
 }

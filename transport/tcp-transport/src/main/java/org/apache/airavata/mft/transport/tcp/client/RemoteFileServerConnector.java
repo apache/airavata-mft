@@ -17,13 +17,24 @@
  *   under the License.
  */
 
-package org.apache.airavata.mft.transport.local;
+package org.apache.airavata.mft.transport.tcp.client;
+
+import org.apache.airavata.mft.core.api.ConnectorChannel;
+import org.apache.airavata.mft.core.api.SinkConnector;
+import org.apache.airavata.mft.core.bufferedImpl.channel.AbstractConnector;
 
 /**
- * A class of represent local file transport constants
+ * A class which represents the  connections between remote server and local client
  */
-public final class FileConstants {
+public class RemoteFileServerConnector extends AbstractConnector implements SinkConnector {
 
+    @Override
+    public boolean verifyUpload(ConnectorChannel channel) {
+        return false;
+    }
 
-    public static final String OUTPUT_FILE = "OUT_FILE";
+    @Override
+    public ConnectorChannel openChannel() throws Exception {
+        return null;
+    }
 }

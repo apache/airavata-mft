@@ -43,6 +43,12 @@ public class OutChannel extends AbstractChannel {
         writableByteChannel = Channels.newChannel(outputStream);
     }
 
+    public OutChannel(WritableByteChannel byteChannel, Connector sourceConnector) {
+        super(sourceConnector);
+        this.writableByteChannel = byteChannel;
+    }
+
+
     @Override
     public Channel getChannel() {
         return writableByteChannel;
@@ -50,7 +56,11 @@ public class OutChannel extends AbstractChannel {
 
     @Override
     public void closeChannel() throws IOException {
-        outputStream.close();
+        if (outputStream != null) {
+            outputStream.close();
+        } else if (writableByteChannel != null) {
+            writableByteChannel.close();
+        }
     }
 
 

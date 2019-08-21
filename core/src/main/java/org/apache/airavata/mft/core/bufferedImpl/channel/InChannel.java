@@ -44,6 +44,12 @@ public class InChannel extends AbstractChannel {
 
     }
 
+    public InChannel(ReadableByteChannel channel, Connector sourceConnector) {
+        super(sourceConnector);
+        readableByteChannel = channel;
+
+    }
+
 
     @Override
     public Channel getChannel() {
@@ -52,7 +58,11 @@ public class InChannel extends AbstractChannel {
 
     @Override
     public void closeChannel() throws IOException {
-        inputStream.close();
+        if (inputStream != null) {
+            inputStream.close();
+        } else if (readableByteChannel != null) {
+            readableByteChannel.close();
+        }
     }
 
 
