@@ -17,34 +17,13 @@
  *   under the License.
  */
 
-package org.apache.airavata.mft.transport.tcp.server;
+package org.apache.airavata.mft.transport.tcp;
 
 /**
- * A class which represents the server configurations
+ * A class which contains all Constants
  */
-public class ServerConfig {
+public final class Constants {
 
-    private String host;
-    private int port;
-
-    public ServerConfig(String host, int port) {
-        this.host = host;
-        this.port = port;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
+    public static final String UNKNOWN_HOST = "UNKNOWN_HOST";
+    public static int MAX_CACHING_CONNECTIONS = 100;
 }

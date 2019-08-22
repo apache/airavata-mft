@@ -22,13 +22,33 @@ package org.apache.airavata.mft.transport.tcp.server;
 import org.apache.airavata.mft.core.api.ConnectorChannel;
 import org.apache.airavata.mft.core.api.SourceConnector;
 import org.apache.airavata.mft.core.bufferedImpl.channel.AbstractConnector;
+import org.apache.airavata.mft.core.bufferedImpl.channel.InChannel;
+import org.apache.airavata.mft.transport.tcp.Constants;
+
+import java.nio.channels.SocketChannel;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Represents a connection between remote client and  FileServer
  */
 public class FileServerConnector extends AbstractConnector implements SourceConnector {
+
+    private LinkedBlockingQueue<SocketChannel> acceptedChannelCache = new
+            LinkedBlockingQueue<>(Constants.MAX_CACHING_CONNECTIONS);
+
+
     @Override
     public ConnectorChannel openChannel() throws Exception {
-        return null;
+        SocketChannel socketChannel = this.acceptedChannelCache.take();
+        InChannel inChannel = new InChannel(socketChannel, this);
+        return inChannel;
+
     }
+
+
+    public void addChannel(SocketChannel channel) throws InterruptedException {
+        this.acceptedChannelCache.put(channel);
+    }
+
+
 }

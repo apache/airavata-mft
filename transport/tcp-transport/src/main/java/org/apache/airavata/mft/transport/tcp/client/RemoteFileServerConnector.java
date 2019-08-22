@@ -22,19 +22,33 @@ package org.apache.airavata.mft.transport.tcp.client;
 import org.apache.airavata.mft.core.api.ConnectorChannel;
 import org.apache.airavata.mft.core.api.SinkConnector;
 import org.apache.airavata.mft.core.bufferedImpl.channel.AbstractConnector;
+import org.apache.airavata.mft.core.bufferedImpl.channel.OutChannel;
+import org.apache.airavata.mft.transport.tcp.RemoteResourceIdentifier;
+
+import java.nio.channels.SocketChannel;
 
 /**
  * A class which represents the  connections between remote server and local client
  */
 public class RemoteFileServerConnector extends AbstractConnector implements SinkConnector {
 
+    RemoteResourceIdentifier identifier;
+
+    public RemoteFileServerConnector(RemoteResourceIdentifier remoteResourceIdentifier) {
+        this.identifier = remoteResourceIdentifier;
+    }
+
+
     @Override
     public boolean verifyUpload(ConnectorChannel channel) {
-        return false;
+        //TODO Implement this later
+        return true;
     }
 
     @Override
     public ConnectorChannel openChannel() throws Exception {
-        return null;
+        SocketChannel socketChannel = SocketChannel.open(this.identifier.getAddress());
+        OutChannel outChannel = new OutChannel(socketChannel, this);
+        return outChannel;
     }
 }

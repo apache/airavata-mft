@@ -19,13 +19,24 @@
 
 package org.apache.airavata.mft.transport.tcp;
 
+import java.net.InetSocketAddress;
+
 /**
- * A class used to identify remote servers
+ * A class used to identify remote clients and servers
  */
 public class RemoteResourceIdentifier {
 
     private String host;
-    private  int port;
+    private int port;
+
+    private InetSocketAddress inetSocketAddress;
+
+    public RemoteResourceIdentifier(String host, int port) {
+        this.host = host;
+        this.port = port;
+
+        inetSocketAddress = new InetSocketAddress(host, port);
+    }
 
     public String getHost() {
         return host;
@@ -41,5 +52,14 @@ public class RemoteResourceIdentifier {
 
     public void setPort(int port) {
         this.port = port;
+    }
+
+    /**
+     * provides the InetSocketAddress of given host and port
+     *
+     * @return InetSocketAddress
+     */
+    public InetSocketAddress getAddress() {
+        return inetSocketAddress;
     }
 }
