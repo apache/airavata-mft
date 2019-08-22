@@ -49,6 +49,8 @@ public class FileServer {
                 //run while loop without waiting for connections
                 serverSocketChannel.configureBlocking(false);
 
+                serverSocketChannel.bind(new InetSocketAddress(port));
+                
                 SocketChannel channel = serverSocketChannel.accept();
 
                 if (channel != null) {
