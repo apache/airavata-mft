@@ -35,7 +35,6 @@ public class FileServer {
 
     private ConcurrentHashMap<String, FileServerConnector> remoteHostToConnectorMap =
             new ConcurrentHashMap<>(Constants.MAX_NUM_OF_HOSTS);
-
     private volatile boolean runServer = true;
 
     /**
@@ -65,8 +64,6 @@ public class FileServer {
                     }
 
                     fileServerConnector.addChannel(channel);
-
-
                 }
             }
         } catch (Exception ex) {
@@ -76,7 +73,6 @@ public class FileServer {
 
     /**
      * Server is shutdown and stops  accepting incoming connections
-     *
      * @return
      */
     public void stop() {
@@ -86,7 +82,6 @@ public class FileServer {
 
     /**
      * Get connector bound to remote client. If remote host is not known keep it null.
-     *
      * @param host
      * @return
      */

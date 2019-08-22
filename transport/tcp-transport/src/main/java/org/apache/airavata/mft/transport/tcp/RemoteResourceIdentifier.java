@@ -28,13 +28,11 @@ public class RemoteResourceIdentifier {
 
     private String host;
     private int port;
-
     private InetSocketAddress inetSocketAddress;
 
     public RemoteResourceIdentifier(String host, int port) {
         this.host = host;
         this.port = port;
-
         inetSocketAddress = new InetSocketAddress(host, port);
     }
 
@@ -56,7 +54,6 @@ public class RemoteResourceIdentifier {
 
     /**
      * provides the InetSocketAddress of given host and port
-     *
      * @return InetSocketAddress
      */
     public InetSocketAddress getAddress() {
