@@ -35,6 +35,8 @@
     <modules>
         <module>scp-transport</module>
         <module>s3-transport</module>
+        <module>local-transport</module>
+        <module>tcp-transport</module>
     </modules>
 
 
