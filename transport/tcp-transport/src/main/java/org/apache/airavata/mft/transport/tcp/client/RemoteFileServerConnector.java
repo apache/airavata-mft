@@ -32,7 +32,7 @@ import java.nio.channels.SocketChannel;
  */
 public class RemoteFileServerConnector extends AbstractConnector implements SinkConnector {
 
-    RemoteResourceIdentifier identifier;
+   private  RemoteResourceIdentifier identifier;
 
     public RemoteFileServerConnector(RemoteResourceIdentifier remoteResourceIdentifier) {
         this.identifier = remoteResourceIdentifier;

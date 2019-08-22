@@ -26,4 +26,5 @@ public final class Constants {
 
     public static final String UNKNOWN_HOST = "UNKNOWN_HOST";
     public static int MAX_CACHING_CONNECTIONS = 100;
+    public static int MAX_NUM_OF_HOSTS = 100;
 }

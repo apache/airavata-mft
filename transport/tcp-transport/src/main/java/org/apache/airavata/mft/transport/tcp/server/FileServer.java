@@ -33,15 +33,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class FileServer {
 
-
-    //If too many  host address
-    private ConcurrentHashMap<String, FileServerConnector> remoteHostToConnectorMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, FileServerConnector> remoteHostToConnectorMap =
+            new ConcurrentHashMap<>(Constants.MAX_NUM_OF_HOSTS);
 
     private volatile boolean runServer = true;
 
     /**
      * This starts the server and  accepts incoming connections
-     *
      * @return
      */
     public void start(int port) {

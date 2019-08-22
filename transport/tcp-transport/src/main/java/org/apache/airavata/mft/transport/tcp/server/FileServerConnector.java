@@ -36,7 +36,6 @@ public class FileServerConnector extends AbstractConnector implements SourceConn
     private LinkedBlockingQueue<SocketChannel> acceptedChannelCache = new
             LinkedBlockingQueue<>(Constants.MAX_CACHING_CONNECTIONS);
 
-
     @Override
     public ConnectorChannel openChannel() throws Exception {
         SocketChannel socketChannel = this.acceptedChannelCache.take();
@@ -45,10 +44,8 @@ public class FileServerConnector extends AbstractConnector implements SourceConn
 
     }
 
-
     public void addChannel(SocketChannel channel) throws InterruptedException {
         this.acceptedChannelCache.put(channel);
     }
-
 
 }
