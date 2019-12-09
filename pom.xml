@@ -22,28 +22,29 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-    <modelVersion>4.0.0</modelVersion>
-
-    <prerequisites>
-        <maven>3.0</maven>
-    </prerequisites>
-    <modules>
-        <module>core</module>
-        <module>transport</module>
-    </modules>
-
     <parent>
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
         <version>21</version>
     </parent>
 
+    <modelVersion>4.0.0</modelVersion>
+
     <groupId>org.apache.airavata</groupId>
     <artifactId>airavata-mft</artifactId>
     <packaging>pom</packaging>
     <name>Airavata MFT</name>
-    <version>0.18-SNAPSHOT</version>
+    <version>0.01-SNAPSHOT</version>
+
+    <prerequisites>
+        <maven>3.0</maven>
+    </prerequisites>
+
+    <modules>
+        <module>core</module>
+        <module>transport</module>
+        <module>agent</module>
+    </modules>
 
     <url>http://airavata.apache.org/</url>
     <inceptionYear>2011</inceptionYear>
