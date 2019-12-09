@@ -20,6 +20,7 @@
 package org.apache.airavata.mft.transport.scp;
 
 public class SSHResourceIdentifier {
+
     private String id;
     private String remotePath;
     private String host;

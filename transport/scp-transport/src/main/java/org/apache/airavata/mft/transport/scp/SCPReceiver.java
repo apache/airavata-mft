@@ -1,47 +1,43 @@
-/*
- *
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
 package org.apache.airavata.mft.transport.scp;
 
-import com.jcraft.jsch.*;
-import org.apache.airavata.mft.core.api.StreamedReceiver;
-import org.apache.airavata.mft.core.streaming.TransportStream;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.Session;
+import net.ladenthin.streambuffer.StreamBuffer;
+import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.api.Connector;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-public class SCPReceiver implements StreamedReceiver {
+public class SCPReceiver implements Connector {
+    private Session session;
+    private SSHResourceIdentifier sshResourceIdentifier;
 
-    @Override
-    public void receive(TransportStream stream) throws Exception {
-        SSHResourceIdentifier sshResourceIdentifier = SCPTransportUtil.getSSHResourceIdentifier(stream.getSourceId());
-        Session session = SCPTransportUtil.createSession(sshResourceIdentifier.getUser(), sshResourceIdentifier.getHost(),
+    public void init(String resourceId, String credentialToken) {
+        this.sshResourceIdentifier = SCPTransportUtil.getSSHResourceIdentifier(resourceId);
+        this.session = SCPTransportUtil.createSession(sshResourceIdentifier.getUser(), sshResourceIdentifier.getHost(),
                 sshResourceIdentifier.getPort(),
                 sshResourceIdentifier.getKeyFile(),
                 sshResourceIdentifier.getKeyPassphrase());
-        transferRemoteToStream(session, sshResourceIdentifier.getRemotePath(), stream);
     }
 
-    private void transferRemoteToStream(Session session, String from, TransportStream stream) throws JSchException, IOException {
+    public void destroy() {
+        this.session.disconnect();
+    }
+
+    public void startStream(ConnectorContext context) throws Exception {
+        transferRemoteToStream(session, sshResourceIdentifier.getRemotePath(), context.getStreamBuffer());
+    }
+
+    private void transferRemoteToStream(Session session, String from, StreamBuffer streamBuffer) throws Exception {
+
+        OutputStream outputStream = streamBuffer.getOutputStream();
+
         System.out.println("Starting scp receive");
         // exec 'scp -f rfile' remotely
         String command = "scp -f " + from;
-        Channel channel = session.openChannel("exec");
+        com.jcraft.jsch.Channel channel = session.openChannel("exec");
         ((ChannelExec) channel).setCommand(command);
 
         // get I/O streams for remote scp
@@ -101,8 +97,9 @@ public class SCPReceiver implements StreamedReceiver {
                     // error
                     break;
                 }
-                stream.getOutputStream().write(buf, 0, bufSize);
-                stream.getOutputStream().flush();
+                //System.out.println("Read " + bufSize);
+                outputStream.write(buf, 0, bufSize);
+                outputStream.flush();
 
                 filesize -= bufSize;
                 if (filesize == 0L) break;
@@ -118,7 +115,6 @@ public class SCPReceiver implements StreamedReceiver {
             out.flush();
         }
 
-        stream.setStreamCompleted(true);
         channel.disconnect();
         session.disconnect();
 

@@ -39,6 +39,11 @@
             <version>0.1.55</version>
         </dependency>
         <dependency>
+            <groupId>com.hierynomus</groupId>
+            <artifactId>sshj</artifactId>
+            <version>0.23.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.airavata</groupId>
             <artifactId>mft-core</artifactId>
             <version>0.18-SNAPSHOT</version>
