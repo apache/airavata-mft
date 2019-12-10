@@ -14,7 +14,7 @@ public class SCPReceiver implements Connector {
     private Session session;
     private SSHResourceIdentifier sshResourceIdentifier;
 
-    public void init(String resourceId, String credentialToken) {
+    public void init(String resourceId, String credentialToken) throws Exception {
         this.sshResourceIdentifier = SCPTransportUtil.getSSHResourceIdentifier(resourceId);
         this.session = SCPTransportUtil.createSession(sshResourceIdentifier.getUser(), sshResourceIdentifier.getHost(),
                 sshResourceIdentifier.getPort(),
@@ -27,6 +27,11 @@ public class SCPReceiver implements Connector {
     }
 
     public void startStream(ConnectorContext context) throws Exception {
+        if (session == null) {
+            System.out.println("Session can not be null. Make sure that SCP Receiver is properly initialized");
+            throw new Exception("Session can not be null. Make sure that SCP Receiver is properly initialized");
+        }
+
         transferRemoteToStream(session, sshResourceIdentifier.getRemotePath(), context.getStreamBuffer());
     }
 

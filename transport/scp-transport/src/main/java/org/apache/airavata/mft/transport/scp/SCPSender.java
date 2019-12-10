@@ -27,11 +27,15 @@ public class SCPSender implements Connector {
     }
 
     public void startStream(ConnectorContext context) throws Exception {
+        if (session == null) {
+            System.out.println("Session can not be null. Make sure that SCP Sender is properly initialized");
+            throw new Exception("Session can not be null. Make sure that SCP Sender is properly initialized");
+        }
         copyLocalToRemote(this.session, sshResourceIdentifier.getRemotePath(), context.getStreamBuffer(), context.getMetadata().getResourceSize());
     }
 
     private void copyLocalToRemote(Session session, String to, StreamBuffer streamBuffer, long fileSize) throws JSchException, IOException {
-
+        System.out.println("Starting scp send");
         InputStream inputStream = streamBuffer.getInputStream();
 
         boolean ptimestamp = true;
