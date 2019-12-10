@@ -2,8 +2,8 @@ package org.apache.airavata.mft.transport.scp;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
-import net.ladenthin.streambuffer.StreamBuffer;
 import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.StreamBuffer;
 import org.apache.airavata.mft.core.api.Connector;
 
 import java.io.IOException;

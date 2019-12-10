@@ -1,7 +1,5 @@
 package org.apache.airavata.mft.core;
 
-import net.ladenthin.streambuffer.StreamBuffer;
-
 public class ConnectorContext {
 
     private StreamBuffer streamBuffer;
