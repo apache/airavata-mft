@@ -8,14 +8,13 @@
         <version>0.01-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
-    <artifactId>mft-resource-service</artifactId>
     <packaging>pom</packaging>
-
     <modules>
         <module>stub</module>
-        <module>server</module>
         <module>client</module>
+        <module>server</module>
     </modules>
+    <artifactId>mft-secret-service</artifactId>
+
 
 </project>

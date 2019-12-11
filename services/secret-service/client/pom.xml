@@ -3,19 +3,20 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>mft-services</artifactId>
+        <artifactId>mft-secret-service</artifactId>
         <groupId>org.apache.airavata</groupId>
         <version>0.01-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>mft-resource-service</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>mft-secret-service-client</artifactId>
 
-    <modules>
-        <module>stub</module>
-        <module>server</module>
-        <module>client</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
+            <artifactId>mft-secret-service-stub</artifactId>
+            <version>0.01-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
 </project>

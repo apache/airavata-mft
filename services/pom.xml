@@ -11,9 +11,22 @@
     <packaging>pom</packaging>
     <modules>
         <module>resource-service</module>
+        <module>secret-service</module>
     </modules>
 
     <artifactId>mft-services</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>3.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.lognet</groupId>
+            <artifactId>grpc-spring-boot-starter</artifactId>
+            <version>3.5.0</version>
+        </dependency>
+    </dependencies>
 
 </project>
