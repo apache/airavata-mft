@@ -23,7 +23,11 @@ public class SCPReceiver implements Connector {
     }
 
     public void destroy() {
-        this.session.disconnect();
+        try {
+            this.session.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void startStream(ConnectorContext context) throws Exception {

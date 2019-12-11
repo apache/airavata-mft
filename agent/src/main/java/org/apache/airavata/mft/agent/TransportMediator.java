@@ -52,6 +52,7 @@ public class TransportMediator {
                             ft.get();
                         } catch (InterruptedException e) {
                             // Interrupted
+                            e.printStackTrace();
                         } catch (ExecutionException e) {
                             // Snap, something went wrong in the task! Abort! Abort! Abort!
                             System.out.println("One task failed with error: " + e.getMessage());
@@ -76,13 +77,14 @@ public class TransportMediator {
                     System.out.println("Transfer " + transferId + " completed");
                 } catch (Exception e) {
                     e.printStackTrace();
+                } finally {
+                    inConnector.destroy();
+                    outConnector.destroy();
                 }
             }
         });
 
         monitor.submit(monitorThread);
         return transferId;
-        //inConnector.destroy();
-        //outConnector.destroy();
     }
 }
