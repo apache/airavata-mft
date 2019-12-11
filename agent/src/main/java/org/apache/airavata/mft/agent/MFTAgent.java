@@ -30,8 +30,8 @@ public class MFTAgent {
                 MetadataCollector metadataCollector = resolveMetadataCollector(request.getSourceType());
                 ResourceMetadata metadata = metadataCollector.getGetResourceMetadata(request.getSourceId(), request.getSourceToken());
                 System.out.println("File size " + metadata.getResourceSize());
-                mediator.transfer(inConnector, outConnector, metadata);
-
+                String transferId = mediator.transfer(inConnector, outConnector, metadata);
+                System.out.println("Submitted transfer " + transferId);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -42,7 +42,7 @@ public class MFTAgent {
         request.setSourceId("1");
         request.setSourceType("SCP");
         request.setDestinationId("2");
-        request.setDestinationType("LOCAL");
+        request.setDestinationType("SCP");
 
         MFTAgent agent = new MFTAgent();
         agent.requests.add(request);
