@@ -34,6 +34,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>scp-transport</module>
+        <module>local-transport</module>
     </modules>
 
 

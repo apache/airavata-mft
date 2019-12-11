@@ -1,8 +1,8 @@
 package org.apache.airavata.mft.agent;
 
+import org.apache.airavata.mft.core.CircularStreamingBuffer;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.ResourceMetadata;
-import org.apache.airavata.mft.core.StreamBuffer;
 import org.apache.airavata.mft.core.TransferTask;
 import org.apache.airavata.mft.core.api.Connector;
 
@@ -20,7 +20,7 @@ public class TransportMediator {
 
     public void transfer(Connector inConnector, Connector outConnector, ResourceMetadata metadata) throws Exception {
 
-        StreamBuffer streamBuffer = new StreamBuffer();
+        CircularStreamingBuffer streamBuffer = new CircularStreamingBuffer();
         ConnectorContext context = new ConnectorContext();
         context.setMetadata(metadata);
         context.setStreamBuffer(streamBuffer);
@@ -46,6 +46,7 @@ public class TransportMediator {
                 System.out.println("One task failed with error: " + e.getMessage() );
                 e.printStackTrace();
                 for(Future<Integer> f : futureList){
+                    Thread.sleep(1000);
                     f.cancel(true);
                 }
                 futureList.clear();
