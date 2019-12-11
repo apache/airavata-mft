@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+package org.apache.airavata.mft.resource.service;
+
+import "google/api/annotations.proto";
+
+message SCPResource {
+    string resourceId = 1;
+    string host = 2;
+    int32 port = 3;
+}
+
+message SCPResourceRequest {
+    string resourceId = 1;
+}
+
+service  ResourceService {
+    rpc getSCPResource (SCPResourceRequest) returns (SCPResource) {
+        option (google.api.http) = {
+           get: "/v1.0/resource/scp"
+        };
+    }
+}
