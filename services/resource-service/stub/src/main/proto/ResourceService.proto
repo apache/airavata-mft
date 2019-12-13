@@ -4,21 +4,163 @@ option java_multiple_files = true;
 package org.apache.airavata.mft.resource.service;
 
 import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
 
-message SCPResource {
-    string resourceId = 1;
+// SCP Storage
+
+message SCPStorage {
+    string storageId = 1;
     string host = 2;
     int32 port = 3;
 }
 
-message SCPResourceRequest {
+message SCPStorageGetRequest {
+    string storageId = 1;
+}
+
+message SCPStorageCreateRequest {
+    string host = 1;
+    int32 port = 2;
+}
+
+message SCPStorageUpdateRequest {
+    string storageId = 1;
+    string host = 2;
+    int32 port = 3;
+}
+
+message SCPStorageDeleteRequest {
+    string storageId = 1;
+}
+
+// SCP Resource
+
+message SCPResource {
+    string resourceId = 1;
+    SCPStorage scpStorage = 2;
+    string resourcePath = 3;
+}
+
+message SCPResourceGetRequest {
+    string resourceId = 1;
+}
+
+message SCPResourceCreateRequest {
+    string scpStorageId = 1;
+    string resourcePath = 2;
+}
+
+message SCPResourceUpdateRequest {
+    string resourceId = 1;
+    string scpStorageId = 2;
+    string resourcePath = 3;
+}
+
+message SCPResourceDeleteRequest {
+    string resourceId = 1;
+}
+
+// Local Resource
+
+message LocalResource {
+    string resourceId = 1;
+    string resourcePath = 2;
+}
+
+message LocalResourceGetRequest {
+    string resourceId = 1;
+}
+
+message LocalResourceCreateRequest {
+    string resourcePath = 1;
+}
+
+message LocalResourceUpdateRequest {
+    string resourceId = 1;
+    string resourcePath = 2;
+}
+
+message LocalResourceDeleteRequest {
     string resourceId = 1;
 }
 
 service  ResourceService {
-    rpc getSCPResource (SCPResourceRequest) returns (SCPResource) {
+    // SCP Storage
+
+    rpc getSCPStorage (SCPStorageGetRequest) returns (SCPStorage) {
+        option (google.api.http) = {
+           get: "/v1.0/resource/scp/storage"
+        };
+    }
+
+    rpc createSCPStorage (SCPStorageCreateRequest) returns (SCPStorage) {
+        option (google.api.http) = {
+           post: "/v1.0/resource/scp/storage"
+        };
+    }
+
+    rpc updateSCPStorage (SCPStorageUpdateRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+           put: "/v1.0/resource/scp/storage"
+        };
+    }
+
+    rpc deleteSCPStorage (SCPStorageDeleteRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+           delete: "/v1.0/resource/scp/storage"
+        };
+    }
+
+    // SCP Resource
+
+    rpc getSCPResource (SCPResourceGetRequest) returns (SCPResource) {
         option (google.api.http) = {
            get: "/v1.0/resource/scp"
         };
     }
+
+    rpc createSCPResource (SCPResourceCreateRequest) returns (SCPResource) {
+        option (google.api.http) = {
+           post: "/v1.0/resource/scp"
+        };
+    }
+
+    rpc updateSCPResource (SCPResourceUpdateRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+           put: "/v1.0/resource/scp"
+        };
+    }
+
+    rpc deleteSCPResource (SCPResourceDeleteRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+           delete: "/v1.0/resource/scp"
+        };
+    }
+
+    // Local Resource
+
+    rpc getLocalResource (LocalResourceGetRequest) returns (LocalResource) {
+        option (google.api.http) = {
+           get: "/v1.0/resource/local"
+        };
+    }
+
+    rpc createLocalResource (LocalResourceCreateRequest) returns (LocalResource) {
+        option (google.api.http) = {
+           post: "/v1.0/resource/local"
+        };
+    }
+
+    rpc updateLocalResource (LocalResourceUpdateRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+           put: "/v1.0/resource/local"
+        };
+    }
+
+    rpc deleteLocalResource (LocalResourceDeleteRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+           delete: "/v1.0/resource/local"
+        };
+    }
+
 }

@@ -59,7 +59,7 @@ public class MFTAgent {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                }); //prints "bar"
+                });
 
             });
         });
