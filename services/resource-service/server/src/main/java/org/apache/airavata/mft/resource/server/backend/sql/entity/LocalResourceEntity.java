@@ -17,17 +17,22 @@
 
 package org.apache.airavata.mft.resource.server.backend.sql.entity;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
 public class LocalResourceEntity {
 
+
     @Id
     @Column(name = "LOCAL_RESOURCE_ID")
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String resourceId;
-
     @Column(name = "RESOURCE_PATH")
     private String resourcePath;
 

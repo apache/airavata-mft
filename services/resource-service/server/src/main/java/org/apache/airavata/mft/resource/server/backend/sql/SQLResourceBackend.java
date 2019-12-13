@@ -46,13 +46,13 @@ public class SQLResourceBackend implements ResourceBackend {
     @Override
     public Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request) {
         Optional<SCPStorageEntity> storageEty = scpStorageRepository.findByStorageId(request.getStorageId());
-        return storageEty.map(scpStorageEntity -> mapper.map(scpStorageEntity, SCPStorage.class));
+        return storageEty.map(scpStorageEntity -> mapper.map(scpStorageEntity, SCPStorage.newBuilder().getClass()).build());
     }
 
     @Override
     public SCPStorage createSCPStorage(SCPStorageCreateRequest request) {
         SCPStorageEntity savedEntity = scpStorageRepository.save(mapper.map(request, SCPStorageEntity.class));
-        return mapper.map(savedEntity, SCPStorage.class);
+        return mapper.map(savedEntity, SCPStorage.newBuilder().getClass()).build();
     }
 
     @Override
@@ -70,13 +70,13 @@ public class SQLResourceBackend implements ResourceBackend {
     @Override
     public Optional<SCPResource> getSCPResource(SCPResourceGetRequest request) {
         Optional<SCPResourceEntity> resourceEntity = scpResourceRepository.findByResourceId(request.getResourceId());
-        return resourceEntity.map(scpResourceEntity -> mapper.map(scpResourceEntity, SCPResource.class));
+        return resourceEntity.map(scpResourceEntity -> mapper.map(scpResourceEntity, SCPResource.newBuilder().getClass()).build());
     }
 
     @Override
     public SCPResource createSCPResource(SCPResourceCreateRequest request) {
         SCPResourceEntity savedEntity = scpResourceRepository.save(mapper.map(request, SCPResourceEntity.class));
-        return mapper.map(savedEntity, SCPResource.class);
+        return mapper.map(savedEntity, SCPResource.newBuilder().getClass()).build();
     }
 
     @Override
@@ -94,13 +94,13 @@ public class SQLResourceBackend implements ResourceBackend {
     @Override
     public Optional<LocalResource> getLocalResource(LocalResourceGetRequest request) {
         Optional<LocalResourceEntity> resourceEntity = localResourceRepository.findByResourceId(request.getResourceId());
-        return resourceEntity.map(scpResourceEntity -> mapper.map(scpResourceEntity, LocalResource.class));
+        return resourceEntity.map(scpResourceEntity -> mapper.map(scpResourceEntity, LocalResource.newBuilder().getClass()).build());
     }
 
     @Override
     public LocalResource createLocalResource(LocalResourceCreateRequest request) {
         LocalResourceEntity savedEntity = localResourceRepository.save(mapper.map(request, LocalResourceEntity.class));
-        return mapper.map(savedEntity, LocalResource.class);
+        return mapper.map(savedEntity, LocalResource.newBuilder().getClass()).build();
     }
 
     @Override

@@ -16,6 +16,8 @@
  */
 package org.apache.airavata.mft.resource.server.backend.sql.entity;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import javax.persistence.*;
 
 @Entity
@@ -23,6 +25,8 @@ public class SCPResourceEntity {
 
     @Id
     @Column(name = "SCP_RESOURCE_ID")
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String resourceId;
 
     @ManyToOne(fetch = FetchType.EAGER)
