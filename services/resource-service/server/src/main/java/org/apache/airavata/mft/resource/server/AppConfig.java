@@ -17,14 +17,15 @@
 
 package org.apache.airavata.mft.resource.server;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
+import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
+import org.apache.airavata.mft.resource.server.backend.sql.SQLResourceBackend;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@SpringBootApplication
-@ComponentScan(basePackages = {"org.apache.airavata"})
-public class ResourceServiceApplication {
-    public static void main(String args[]) {
-        SpringApplication.run(ResourceServiceApplication.class, args);
+@Configuration
+public class AppConfig {
+    @Bean
+    public ResourceBackend resourceBackend() {
+        return new SQLResourceBackend();
     }
 }

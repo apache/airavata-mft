@@ -15,16 +15,13 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.resource.server;
+package org.apache.airavata.mft.resource.server.backend.sql.repository;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
+import org.apache.airavata.mft.resource.server.backend.sql.entity.SCPResourceEntity;
+import org.springframework.data.repository.CrudRepository;
 
-@SpringBootApplication
-@ComponentScan(basePackages = {"org.apache.airavata"})
-public class ResourceServiceApplication {
-    public static void main(String args[]) {
-        SpringApplication.run(ResourceServiceApplication.class, args);
-    }
+import java.util.Optional;
+
+public interface SCPResourceRepository extends CrudRepository<SCPResourceEntity, String> {
+    Optional<SCPResourceEntity> findByResourceId(String resourceId);
 }

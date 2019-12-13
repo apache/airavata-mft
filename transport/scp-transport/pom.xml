@@ -36,12 +36,12 @@
         <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
-            <version>0.1.55</version>
+            <version>${jsch}</version>
         </dependency>
         <dependency>
             <groupId>com.hierynomus</groupId>
             <artifactId>sshj</artifactId>
-            <version>0.23.0</version>
+            <version>${sshj}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.airavata</groupId>

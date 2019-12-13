@@ -14,17 +14,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.airavata.mft.resource.server.backend.sql.entity;
 
-package org.apache.airavata.mft.resource.server;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
+@Entity
+public class SCPStorageEntity {
 
-@SpringBootApplication
-@ComponentScan(basePackages = {"org.apache.airavata"})
-public class ResourceServiceApplication {
-    public static void main(String args[]) {
-        SpringApplication.run(ResourceServiceApplication.class, args);
+    @Id
+    @Column(name = "SCP_STORAGE_ID")
+    private String storageId;
+
+    @Column(name = "HOST")
+    private String host;
+
+    @Column(name = "PORT")
+    private int port;
+
+    public String getStorageId() {
+        return storageId;
+    }
+
+    public void setStorageId(String storageId) {
+        this.storageId = storageId;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 }

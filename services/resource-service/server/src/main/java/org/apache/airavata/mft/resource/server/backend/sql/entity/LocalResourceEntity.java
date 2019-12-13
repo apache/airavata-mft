@@ -15,16 +15,35 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.resource.server;
+package org.apache.airavata.mft.resource.server.backend.sql.entity;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
-@SpringBootApplication
-@ComponentScan(basePackages = {"org.apache.airavata"})
-public class ResourceServiceApplication {
-    public static void main(String args[]) {
-        SpringApplication.run(ResourceServiceApplication.class, args);
+@Entity
+public class LocalResourceEntity {
+
+    @Id
+    @Column(name = "LOCAL_RESOURCE_ID")
+    private String resourceId;
+
+    @Column(name = "RESOURCE_PATH")
+    private String resourcePath;
+
+    public String getResourceId() {
+        return resourceId;
+    }
+
+    public void setResourceId(String resourceId) {
+        this.resourceId = resourceId;
+    }
+
+    public String getResourcePath() {
+        return resourcePath;
+    }
+
+    public void setResourcePath(String resourcePath) {
+        this.resourcePath = resourcePath;
     }
 }
