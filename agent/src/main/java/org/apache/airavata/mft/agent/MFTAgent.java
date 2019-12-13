@@ -1,5 +1,9 @@
 package org.apache.airavata.mft.agent;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.orbitz.consul.Consul;
+import com.orbitz.consul.KeyValueClient;
+import com.orbitz.consul.cache.KVCache;
 import org.apache.airavata.mft.core.ResourceMetadata;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.core.api.MetadataCollector;
@@ -10,43 +14,63 @@ import org.apache.airavata.mft.transport.scp.SCPMetadataCollector;
 import org.apache.airavata.mft.transport.scp.SCPReceiver;
 import org.apache.airavata.mft.transport.scp.SCPSender;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Semaphore;
 
 public class MFTAgent {
 
-    private List<TransferRequest> requests = new ArrayList<>();
     private TransportMediator mediator = new TransportMediator();
+    private String agentId = "agent0";
+    private Semaphore mainHold = new Semaphore(0);
 
-    public void acceptRequests() {
-        for (TransferRequest request : requests) {
+    private void acceptRequests() {
+        Consul client = Consul.builder().build();
+        KeyValueClient kvClient = client.keyValueClient();
 
-            try {
-                Connector inConnector = resolveConnector(request.getSourceType(), "IN");
-                inConnector.init(request.getSourceId(), request.getSourceToken());
-                Connector outConnector = resolveConnector(request.getDestinationType(), "OUT");
-                outConnector.init(request.getDestinationId(), request.getDestinationToken());
+        KVCache messageCache = KVCache.newCache(kvClient, agentId + "/messages");
+        messageCache.addListener(newValues -> {
+            // Cache notifies all paths with "foo" the root path
+            // If you want to watch only "foo" value, you must filter other paths
 
-                MetadataCollector metadataCollector = resolveMetadataCollector(request.getSourceType());
-                ResourceMetadata metadata = metadataCollector.getGetResourceMetadata(request.getSourceId(), request.getSourceToken());
-                System.out.println("File size " + metadata.getResourceSize());
-                String transferId = mediator.transfer(inConnector, outConnector, metadata);
-                System.out.println("Submitted transfer " + transferId);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+            newValues.values().forEach(value -> {
+
+                // Values are encoded in key/value store, decode it if needed
+                Optional<String> decodedValue = value.getValueAsString();
+                decodedValue.ifPresent(v -> {
+                    System.out.println(String.format("Value is: %s", v));
+                    ObjectMapper mapper = new ObjectMapper();
+                    try {
+                        TransferRequest request = mapper.readValue(v, TransferRequest.class);
+                        System.out.println("Received request " + request.getTransferId());
+
+                        Connector inConnector = resolveConnector(request.getSourceType(), "IN");
+                        inConnector.init(request.getSourceId(), request.getSourceToken());
+                        Connector outConnector = resolveConnector(request.getDestinationType(), "OUT");
+                        outConnector.init(request.getDestinationId(), request.getDestinationToken());
+
+                        MetadataCollector metadataCollector = resolveMetadataCollector(request.getSourceType());
+                        ResourceMetadata metadata = metadataCollector.getGetResourceMetadata(request.getSourceId(), request.getSourceToken());
+                        System.out.println("File size " + metadata.getResourceSize());
+                        String transferId = mediator.transfer(inConnector, outConnector, metadata);
+                        System.out.println("Submitted transfer " + transferId);
+
+                        System.out.println("Deleting key " + value.getKey());
+                        kvClient.deleteKey(value.getKey()); // Due to bug in consul https://github.com/hashicorp/consul/issues/571
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }); //prints "bar"
+
+            });
+        });
+        messageCache.start();
     }
-    public static void main(String args[]) {
-        TransferRequest request = new TransferRequest();
-        request.setSourceId("1");
-        request.setSourceType("SCP");
-        request.setDestinationId("2");
-        request.setDestinationType("SCP");
 
+
+    public static void main(String args[]) throws InterruptedException {
         MFTAgent agent = new MFTAgent();
-        agent.requests.add(request);
         agent.acceptRequests();
+        agent.mainHold.acquire();
     }
 
     // TODO load from reflection to avoid dependencies

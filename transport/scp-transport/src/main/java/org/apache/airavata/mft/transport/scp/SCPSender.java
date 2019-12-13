@@ -57,7 +57,7 @@ public class SCPSender implements Connector {
         channel.connect();
 
         if (checkAck(in) != 0) {
-            System.exit(0);
+            throw new IOException("Error code found in ack " + (checkAck(in)));
         }
 
         if (ptimestamp) {
@@ -68,7 +68,7 @@ public class SCPSender implements Connector {
             out.write(command.getBytes());
             out.flush();
             if (checkAck(in) != 0) {
-                System.exit(0);
+                throw new IOException("Error code found in ack " + (checkAck(in)));
             }
         }
 
@@ -85,7 +85,7 @@ public class SCPSender implements Connector {
         out.flush();
 
         if (checkAck(in) != 0) {
-            System.exit(0);
+            throw new IOException("Error code found in ack " + (checkAck(in)));
         }
 
         // send a content of lfile
@@ -111,7 +111,7 @@ public class SCPSender implements Connector {
         out.flush();
 
         if (checkAck(in) != 0) {
-            System.exit(0);
+            throw new IOException("Error code found in ack " + (checkAck(in)));
         }
         out.close();
 

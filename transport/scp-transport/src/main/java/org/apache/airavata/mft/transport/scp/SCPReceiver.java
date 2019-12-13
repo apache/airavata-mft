@@ -115,7 +115,7 @@ public class SCPReceiver implements Connector {
             }
 
             if (checkAck(in) != 0) {
-                System.exit(0);
+                throw new IOException("Error code found in ack " + (checkAck(in)));
             }
 
             // send '\0'

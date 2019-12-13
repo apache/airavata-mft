@@ -43,5 +43,10 @@
             <artifactId>mft-local-transport</artifactId>
             <version>0.01-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.orbitz.consul</groupId>
+            <artifactId>consul-client</artifactId>
+            <version>${consul.client}</version>
+        </dependency>
     </dependencies>
 </project>
