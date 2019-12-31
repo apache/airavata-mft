@@ -33,6 +33,7 @@ public class LocalResourceEntity {
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String resourceId;
+
     @Column(name = "RESOURCE_PATH")
     private String resourcePath;
 

@@ -28,6 +28,14 @@ import net.schmizz.sshj.userauth.method.ChallengeResponseProvider;
 import net.schmizz.sshj.userauth.password.Resource;
 import org.apache.airavata.mft.core.ResourceMetadata;
 import org.apache.airavata.mft.core.api.MetadataCollector;
+import org.apache.airavata.mft.resource.client.ResourceServiceClient;
+import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
+import org.apache.airavata.mft.resource.service.SCPResource;
+import org.apache.airavata.mft.resource.service.SCPResourceGetRequest;
+import org.apache.airavata.mft.secret.client.SecretServiceClient;
+import org.apache.airavata.mft.secret.service.SCPSecret;
+import org.apache.airavata.mft.secret.service.SCPSecretGetRequest;
+import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,11 +46,16 @@ public class SCPMetadataCollector implements MetadataCollector {
 
     public ResourceMetadata getGetResourceMetadata(String resourceId, String credentialToken) throws IOException {
 
-        SSHResourceIdentifier sshResourceIdentifier = SCPTransportUtil.getSSHResourceIdentifier(resourceId);
+        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient("localhost", 7002);
+        SCPResource scpResource = resourceClient.getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+
+        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient("localhost", 7003);
+        SCPSecret scpSecret = secretClient.getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+
 
         try (SSHClient sshClient = new SSHClient()) {
             sshClient.addHostKeyVerifier((h, p, key) -> true);
-            KeyProvider keyProvider = sshClient.loadKeys(sshResourceIdentifier.getKeyFile(), sshResourceIdentifier.getKeyPassphrase());
+            KeyProvider keyProvider = sshClient.loadKeys(scpSecret.getPrivateKey(), scpSecret.getPassphrase());
             final List<AuthMethod> am = new LinkedList<>();
             am.add(new AuthPublickey(keyProvider));
             am.add(new AuthKeyboardInteractive(new ChallengeResponseProvider() {
@@ -65,11 +78,11 @@ public class SCPMetadataCollector implements MetadataCollector {
                 }
             }));
 
-            sshClient.connect(sshResourceIdentifier.getHost(), sshResourceIdentifier.getPort());
-            sshClient.auth(sshResourceIdentifier.getUser(), am);
+            sshClient.connect(scpResource.getScpStorage().getHost(), scpResource.getScpStorage().getPort());
+            sshClient.auth(scpSecret.getUser(), am);
 
             try (SFTPClient sftpClient = sshClient.newSFTPClient()) {
-                FileAttributes lstat = sftpClient.lstat(sshResourceIdentifier.getRemotePath());
+                FileAttributes lstat = sftpClient.lstat(scpResource.getResourcePath());
                 sftpClient.close();
 
                 ResourceMetadata metadata = new ResourceMetadata();

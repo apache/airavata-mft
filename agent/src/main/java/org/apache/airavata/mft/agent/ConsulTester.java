@@ -29,12 +29,16 @@ public class ConsulTester {
         ObjectMapper mapper = new ObjectMapper();
 
         TransferRequest request = new TransferRequest();
-        request.setSourceId("1");
+        request.setSourceId("40107348-c457-4b0d-b206-b923caa2ab8d");
         request.setSourceType("SCP");
-        request.setDestinationId("2");
+        request.setSourceToken("866d421e-3624-434f-ae71-04a90d39e70c");
+
+        request.setDestinationId("24cf4870-ee50-4076-b97c-aeb481fec324");
         request.setDestinationType("SCP");
+        request.setDestinationToken("866d421e-3624-434f-ae71-04a90d39e70c");
+
         request.setAgentList(Collections.singletonList("agent0"));
-        request.setTransferId("transfer005");
+        request.setTransferId("transfer010");
 
         String asString = mapper.writeValueAsString(request);
 

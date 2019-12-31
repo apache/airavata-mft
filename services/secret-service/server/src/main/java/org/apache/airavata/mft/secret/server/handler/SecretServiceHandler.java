@@ -17,22 +17,48 @@
 
 package org.apache.airavata.mft.secret.server.handler;
 
+import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
-import org.apache.airavata.mft.secret.service.SCPSecret;
-import org.apache.airavata.mft.secret.service.SCPSecretRequest;
-import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
+import org.apache.airavata.mft.secret.server.backend.SecretBackend;
+import org.apache.airavata.mft.secret.service.*;
 import org.lognet.springboot.grpc.GRpcService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @GRpcService
 public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBase {
+
+    @Autowired
+    private SecretBackend backend;
+
     @Override
-    public void getSCPSecret(SCPSecretRequest request, StreamObserver<SCPSecret> responseObserver) {
-        SCPSecret.Builder builder = SCPSecret.newBuilder()
-                .setPrivateKey("private")
-                .setPrivateKey("pubKey")
-                .setPassphrase("pass")
-                .setSecretId("sec1");
-        responseObserver.onNext(builder.build());
+    public void getSCPSecret(SCPSecretGetRequest request, StreamObserver<SCPSecret> responseObserver) {
+        this.backend.getSCPSecret(request).ifPresentOrElse(secret -> {
+            responseObserver.onNext(secret);
+            responseObserver.onCompleted();
+        }, () -> {
+            responseObserver.onError(new Exception("No SCP Secret with id " + request.getSecretId()));
+        });
+    }
+
+    @Override
+    public void createSCPSecret(SCPSecretCreateRequest request, StreamObserver<SCPSecret> responseObserver) {
+        responseObserver.onNext(this.backend.createSCPSecret(request));
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public void updateSCPSecret(SCPSecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
+        this.backend.updateSCPSecret(request);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void deleteSCPSecret(SCPSecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
+        boolean res = this.backend.deleteSCPSecret(request);
+        if (res) {
+            responseObserver.onCompleted();
+        } else {
+            responseObserver.onError(new Exception("Failed to delete SCP Secret with id " + request.getSecretId()));
+        }
     }
 }

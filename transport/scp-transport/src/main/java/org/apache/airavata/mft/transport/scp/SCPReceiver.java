@@ -22,6 +22,12 @@ import com.jcraft.jsch.Session;
 import org.apache.airavata.mft.core.CircularStreamingBuffer;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
+import org.apache.airavata.mft.resource.client.ResourceServiceClient;
+import org.apache.airavata.mft.resource.service.*;
+import org.apache.airavata.mft.secret.client.SecretServiceClient;
+import org.apache.airavata.mft.secret.service.SCPSecret;
+import org.apache.airavata.mft.secret.service.SCPSecretGetRequest;
+import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,14 +35,21 @@ import java.io.OutputStream;
 
 public class SCPReceiver implements Connector {
     private Session session;
-    private SSHResourceIdentifier sshResourceIdentifier;
+    private SCPResource scpResource;
 
     public void init(String resourceId, String credentialToken) throws Exception {
-        this.sshResourceIdentifier = SCPTransportUtil.getSSHResourceIdentifier(resourceId);
-        this.session = SCPTransportUtil.createSession(sshResourceIdentifier.getUser(), sshResourceIdentifier.getHost(),
-                sshResourceIdentifier.getPort(),
-                sshResourceIdentifier.getKeyFile(),
-                sshResourceIdentifier.getKeyPassphrase());
+        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient("localhost", 7002);
+        this.scpResource = resourceClient.getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+
+        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient("localhost", 7003);
+        SCPSecret scpSecret = secretClient.getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+
+        this.session = SCPTransportUtil.createSession(
+                scpSecret.getUser(),
+                scpResource.getScpStorage().getHost(),
+                scpResource.getScpStorage().getPort(),
+                scpSecret.getPrivateKey(),
+                scpSecret.getPassphrase());
     }
 
     public void destroy() {
@@ -53,7 +66,7 @@ public class SCPReceiver implements Connector {
             throw new Exception("Session can not be null. Make sure that SCP Receiver is properly initialized");
         }
 
-        transferRemoteToStream(session, sshResourceIdentifier.getRemotePath(), context.getStreamBuffer());
+        transferRemoteToStream(session, this.scpResource.getResourcePath(), context.getStreamBuffer());
     }
 
     private void transferRemoteToStream(Session session, String from, CircularStreamingBuffer streamBuffer) throws Exception {

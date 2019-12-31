@@ -63,20 +63,23 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public boolean deleteSCPStorage(SCPStorageDeleteRequest request) {
-        scpStorageRepository.delete(request.getStorageId());
+        //scpStorageRepository.delete(request.getStorageId());
         return true;
     }
 
     @Override
     public Optional<SCPResource> getSCPResource(SCPResourceGetRequest request) {
         Optional<SCPResourceEntity> resourceEntity = scpResourceRepository.findByResourceId(request.getResourceId());
-        return resourceEntity.map(scpResourceEntity -> mapper.map(scpResourceEntity, SCPResource.newBuilder().getClass()).build());
+
+        return resourceEntity.map(scpResourceEntity -> mapper.map(scpResourceEntity, SCPResource.newBuilder().getClass())
+                .setScpStorage(mapper.map(scpResourceEntity.getScpStorage(), SCPStorage.newBuilder().getClass())).build());
+        // Here we have to do nested mapping as the dozer -> protobuf conversion is not happening for inner objects
     }
 
     @Override
     public SCPResource createSCPResource(SCPResourceCreateRequest request) {
         SCPResourceEntity savedEntity = scpResourceRepository.save(mapper.map(request, SCPResourceEntity.class));
-        return mapper.map(savedEntity, SCPResource.newBuilder().getClass()).build();
+        return getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(savedEntity.getResourceId()).build()).get();
     }
 
     @Override
@@ -87,7 +90,7 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public boolean deleteSCPResource(SCPResourceDeleteRequest request) {
-        scpResourceRepository.delete(request.getResourceId());
+        scpResourceRepository.deleteById(request.getResourceId());
         return true;
     }
 
@@ -111,7 +114,7 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public boolean deleteLocalResource(LocalResourceDeleteRequest request) {
-        localResourceRepository.delete(request.getResourceId());
+        localResourceRepository.deleteById(request.getResourceId());
         return true;
     }
 }

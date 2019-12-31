@@ -17,14 +17,14 @@
 
 package org.apache.airavata.mft.secret.server;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
+import org.apache.airavata.mft.secret.server.backend.SecretBackend;
+import org.apache.airavata.mft.secret.server.backend.sql.SQLSecretBackend;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@ComponentScan(basePackages = {"org.apache.airavata"})
-@SpringBootApplication
-public class SecretServiceApplication {
-    public static void main(String args[]) {
-        SpringApplication.run(SecretServiceApplication.class, args);
-    }
+@Configuration
+public class AppConfig {
+
+    @Bean
+    SecretBackend secretBackend() {return new SQLSecretBackend();}
 }

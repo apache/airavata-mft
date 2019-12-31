@@ -36,6 +36,18 @@
         <module>scp-transport</module>
         <module>local-transport</module>
     </modules>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
+            <artifactId>mft-resource-service-client</artifactId>
+            <version>0.01-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
+            <artifactId>mft-secret-service-client</artifactId>
+            <version>0.01-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
 
 </project>

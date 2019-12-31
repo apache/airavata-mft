@@ -71,10 +71,11 @@ public class MFTAgent {
                         String transferId = mediator.transfer(inConnector, outConnector, metadata);
                         System.out.println("Submitted transfer " + transferId);
 
-                        System.out.println("Deleting key " + value.getKey());
-                        kvClient.deleteKey(value.getKey()); // Due to bug in consul https://github.com/hashicorp/consul/issues/571
                     } catch (Exception e) {
                         e.printStackTrace();
+                    } finally {
+                        System.out.println("Deleting key " + value.getKey());
+                        kvClient.deleteKey(value.getKey()); // Due to bug in consul https://github.com/hashicorp/consul/issues/571
                     }
                 });
 

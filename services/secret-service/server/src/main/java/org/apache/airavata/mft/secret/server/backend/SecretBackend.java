@@ -15,16 +15,15 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.secret.server;
+package org.apache.airavata.mft.secret.server.backend;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
+import org.apache.airavata.mft.secret.service.*;
 
-@ComponentScan(basePackages = {"org.apache.airavata"})
-@SpringBootApplication
-public class SecretServiceApplication {
-    public static void main(String args[]) {
-        SpringApplication.run(SecretServiceApplication.class, args);
-    }
+import java.util.Optional;
+
+public interface SecretBackend {
+    public Optional<SCPSecret> getSCPSecret(SCPSecretGetRequest request);
+    public SCPSecret createSCPSecret(SCPSecretCreateRequest request);
+    public boolean updateSCPSecret(SCPSecretUpdateRequest request);
+    public boolean deleteSCPSecret(SCPSecretDeleteRequest request);
 }

@@ -29,12 +29,12 @@ public class SCPResourceEntity {
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String resourceId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "SCP_STORAGE_ID", referencedColumnName = "SCP_STORAGE_ID", nullable = false, updatable = false)
-    private SCPStorageEntity scpStorage;
-
-    @Column(name = "SCP_STORAGE_ID", insertable = false, updatable = false)
+    @Column(name = "SCP_STORAGE_ID")
     private String scpStorageId;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "SCP_STORAGE_ID", referencedColumnName = "SCP_STORAGE_ID", nullable = false, insertable = false, updatable = false)
+    private SCPStorageEntity scpStorage;
 
     @Column(name = "RESOURCE_PATH")
     private String resourcePath;
