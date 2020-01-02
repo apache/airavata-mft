@@ -25,6 +25,7 @@ import com.orbitz.consul.KeyValueClient;
 import com.orbitz.consul.model.kv.Value;
 import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferRequest;
+import org.apache.airavata.mft.admin.models.TransferState;
 
 import java.io.IOException;
 import java.util.*;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
  mft/agents/messages/{agent-id} -> message
  mft/agent/info/{agent-id} -> agent infos
  mft/agent/live/{agent-id} -> live agent
+ mft/transfer/state/{transfer-id} -> transfer state
  */
 
 public class MFTAdmin {
@@ -44,7 +46,9 @@ public class MFTAdmin {
 
     public String submitTransfer(String agentId, TransferRequest transferRequest) throws MFTAdminException {
         try {
+
             String transferId = UUID.randomUUID().toString();
+            updateTransferState(transferId, new TransferState().setState("INITIALIZING").setPercentage(0).setUpdateTimeMils(System.currentTimeMillis()));
             transferRequest.setTransferId(transferId);
             String asString = mapper.writeValueAsString(transferRequest);
             kvClient.putValue("mft/agents/messages/"  + agentId + "/" + transferId, asString);
@@ -100,6 +104,36 @@ public class MFTAdmin {
             throw new MFTAdminException("Error in fetching live agents", e);
         } catch (Exception e) {
             throw new MFTAdminException("Error in fetching live agents", e);
+        }
+    }
+
+    public TransferState getTransferState(String transferId) throws MFTAdminException {
+        try {
+            Optional<Value> value = kvClient.getValue("mft/transfer/state/" + transferId);
+            if (value.isPresent()) {
+                if (value.get().getValueAsString().isPresent()) {
+                    String asStr = value.get().getValueAsString().get();
+                    return mapper.readValue(asStr, TransferState.class);
+                }
+            }
+            return new TransferState().setPercentage(0).setUpdateTimeMils(System.currentTimeMillis()).setState("UNKNOWN");
+
+        } catch (ConsulException e) {
+            if (e.getCode() == 404) {
+                return new TransferState().setPercentage(0).setUpdateTimeMils(System.currentTimeMillis()).setState("UNKNOWN");
+            }
+            throw new MFTAdminException("Error in fetching transfer status " + transferId, e);
+        } catch (Exception e) {
+            throw new MFTAdminException("Error in fetching transfer status " + transferId, e);
+        }
+    }
+
+    public void updateTransferState(String transferId, TransferState transferState) throws MFTAdminException {
+        try {
+            String asStr = mapper.writeValueAsString(transferState);
+            kvClient.putValue("mft/transfer/state/" + transferId, asStr);
+        } catch (JsonProcessingException e) {
+            throw new MFTAdminException("Error in serializing transfer status", e);
         }
     }
 

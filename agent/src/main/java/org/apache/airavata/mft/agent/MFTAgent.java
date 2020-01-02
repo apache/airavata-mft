@@ -30,8 +30,8 @@ import org.apache.airavata.mft.admin.MFTAdmin;
 import org.apache.airavata.mft.admin.MFTAdminException;
 import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferRequest;
+import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.core.ResourceMetadata;
-import org.apache.airavata.mft.core.TransportMediator;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.transport.local.LocalMetadataCollector;
@@ -63,13 +63,17 @@ public class MFTAgent {
     private long sessionRenewSeconds = 4;
     private long sessionTTLSeconds = 10;
 
+    private MFTAdmin admin;
+
     public void init() {
         client = Consul.builder().build();
         kvClient = client.keyValueClient();
         messageCache = KVCache.newCache(kvClient, "mft/agents/messages/" + agentId );
+        admin = new MFTAdmin();
     }
 
     private void acceptRequests() {
+
         cacheListener = newValues -> {
             // Cache notifies all paths with "foo" the root path
             // If you want to watch only "foo" value, you must filter other paths
@@ -81,9 +85,12 @@ public class MFTAgent {
                 decodedValue.ifPresent(v -> {
                     System.out.println(String.format("Value is: %s", v));
                     ObjectMapper mapper = new ObjectMapper();
+                    TransferRequest request = null;
                     try {
-                        TransferRequest request = mapper.readValue(v, TransferRequest.class);
+                        request = mapper.readValue(v, TransferRequest.class);
                         System.out.println("Received request " + request.getTransferId());
+                        admin.updateTransferState(request.getTransferId(), new TransferState().setState("STARTING")
+                                .setPercentage(0).setUpdateTimeMils(System.currentTimeMillis()));
 
                         Connector inConnector = MFTAgent.this.resolveConnector(request.getSourceType(), "IN");
                         inConnector.init(request.getSourceId(), request.getSourceToken());
@@ -93,11 +100,30 @@ public class MFTAgent {
                         MetadataCollector metadataCollector = MFTAgent.this.resolveMetadataCollector(request.getSourceType());
                         ResourceMetadata metadata = metadataCollector.getGetResourceMetadata(request.getSourceId(), request.getSourceToken());
                         System.out.println("File size " + metadata.getResourceSize());
-                        String transferId = mediator.transfer(inConnector, outConnector, metadata);
+                        admin.updateTransferState(request.getTransferId(), new TransferState().setState("STARTED")
+                                .setPercentage(0).setUpdateTimeMils(System.currentTimeMillis()));
+
+                        String transferId = mediator.transfer(request.getTransferId(), inConnector, outConnector, metadata, (id, st) -> {
+                            try {
+                                admin.updateTransferState(id, st);
+                            } catch (MFTAdminException e) {
+                                e.printStackTrace();
+                            }
+                        });
+
                         System.out.println("Submitted transfer " + transferId);
 
                     } catch (Exception e) {
                         e.printStackTrace();
+                        if (request != null) {
+                            try {
+                                admin.updateTransferState(request.getTransferId(), new TransferState().setState("FAILED")
+                                        .setPercentage(0).setUpdateTimeMils(System.currentTimeMillis()));
+                            } catch (MFTAdminException ex) {
+                                ex.printStackTrace();
+                                // Ignore
+                            }
+                        }
                     } finally {
                         System.out.println("Deleting key " + value.getKey());
                         kvClient.deleteKey(value.getKey()); // Due to bug in consul https://github.com/hashicorp/consul/issues/571
@@ -136,7 +162,6 @@ public class MFTAgent {
                     }
                 }
             }, sessionRenewSeconds, sessionRenewSeconds, TimeUnit.SECONDS);
-            MFTAdmin admin = new MFTAdmin();
             admin.registerAgent(new AgentInfo()
                     .setId(agentId)
                     .setHost("localhost")

@@ -15,14 +15,21 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.core;
+package org.apache.airavata.mft.agent;
 
+import org.apache.airavata.mft.admin.models.TransferState;
+import org.apache.airavata.mft.core.CircularStreamingBuffer;
+import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.ResourceMetadata;
+import org.apache.airavata.mft.core.TransferTask;
 import org.apache.airavata.mft.core.api.Connector;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class TransportMediator {
 
@@ -33,9 +40,8 @@ public class TransportMediator {
         executor.shutdown();
     }
 
-    public String transfer(Connector inConnector, Connector outConnector, ResourceMetadata metadata) throws Exception {
-
-        String transferId = UUID.randomUUID().toString();
+    public String transfer(String transferId, Connector inConnector, Connector outConnector, ResourceMetadata metadata,
+                           BiConsumer<String, TransferState> onCallback) throws Exception {
 
         CircularStreamingBuffer streamBuffer = new CircularStreamingBuffer();
         ConnectorContext context = new ConnectorContext();
@@ -48,7 +54,7 @@ public class TransportMediator {
 
         ExecutorCompletionService<Integer> completionService = new ExecutorCompletionService<>(executor);
 
-        long startTime = System.currentTimeMillis();
+        long startTime = System.nanoTime();
 
         futureList.add(completionService.submit(recvTask));
         futureList.add(completionService.submit(sendTask));
@@ -70,6 +76,7 @@ public class TransportMediator {
                             // Snap, something went wrong in the task! Abort! Abort! Abort!
                             System.out.println("One task failed with error: " + e.getMessage());
                             e.printStackTrace();
+                            onCallback.accept(transferId, new TransferState().setPercentage(0).setState("FAILED").setUpdateTimeMils(System.currentTimeMillis()));
                             for (Future<Integer> f : futureList) {
                                 try {
                                     Thread.sleep(1000);
@@ -82,10 +89,10 @@ public class TransportMediator {
                         }
                     }
 
-                    long endTime = System.currentTimeMillis();
+                    long endTime = System.nanoTime();
 
-                    long time = (endTime - startTime) / 1000;
-
+                    double time = (endTime - startTime) * 1.0 /1000000000;
+                    onCallback.accept(transferId, new TransferState().setPercentage(100).setState("COMPLETED").setUpdateTimeMils(System.currentTimeMillis()));
                     System.out.println("Transfer Speed " + (metadata.getResourceSize() * 1.0 / time) / (1024 * 1024) + " MB/s");
                     System.out.println("Transfer " + transferId + " completed");
                 } catch (Exception e) {
