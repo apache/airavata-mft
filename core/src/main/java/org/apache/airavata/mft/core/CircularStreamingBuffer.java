@@ -40,8 +40,9 @@ public class CircularStreamingBuffer {
         return inputStream;
     }
 
-    private void updateRead() {
-        if (readSem.availablePermits() == 0) {
+    private void updateRead(boolean forced) {
+        if (forced || readSem.availablePermits() == 0) {
+            //System.out.println("Read sem released");
             readSem.release();
         }
     }
@@ -57,7 +58,7 @@ public class CircularStreamingBuffer {
             for (int i = off; i < len; i ++) {
                 try {
                     buffer.put(b[i]);
-                    updateRead();
+                    updateRead(false);
                 } catch (InterruptedException e) {
                     throw new IOException(e);
                 }
@@ -71,7 +72,7 @@ public class CircularStreamingBuffer {
         @Override
         public void close() throws IOException {
             osClosed = true;
-            updateRead();
+            updateRead(true);
         }
 
         @Override
@@ -79,7 +80,7 @@ public class CircularStreamingBuffer {
             try {
                 buffer.put((byte)b);
                 //System.out.println("Writing");
-                updateRead();
+                updateRead(false);
             } catch (InterruptedException e) {
                 throw new IOException(e);
             }
@@ -95,7 +96,9 @@ public class CircularStreamingBuffer {
                 //System.out.println("Received null in is.read()");
                 if (osClosed) return -1;
                 try {
+                    //System.out.println("Read sem acquired");
                     readSem.acquire();
+                    //System.out.println("Read Released");
                     return read();
                 } catch (InterruptedException e) {
                     throw new IOException(e);
@@ -108,7 +111,9 @@ public class CircularStreamingBuffer {
         @Override
         public int read(byte[] b, int off, int len) throws IOException {
             for (int i = off; i < len; i++) {
+                //System.out.println("Begin read");
                 int res = read();
+                //System.out.println("End read " + res);
                 if (res == -1) {
                     //System.out.println("Received -1 in is.read(byte[], off, len)");
                     if (i == off) {

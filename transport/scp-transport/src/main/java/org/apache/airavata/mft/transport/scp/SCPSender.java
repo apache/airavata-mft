@@ -70,7 +70,12 @@ public class SCPSender implements Connector {
             System.out.println("Session can not be null. Make sure that SCP Sender is properly initialized");
             throw new Exception("Session can not be null. Make sure that SCP Sender is properly initialized");
         }
-        copyLocalToRemote(this.session, this.scpResource.getResourcePath(), context.getStreamBuffer(), context.getMetadata().getResourceSize());
+        try {
+            copyLocalToRemote(this.session, this.scpResource.getResourcePath(), context.getStreamBuffer(), context.getMetadata().getResourceSize());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     private void copyLocalToRemote(Session session, String to, CircularStreamingBuffer streamBuffer, long fileSize) throws JSchException, IOException {
