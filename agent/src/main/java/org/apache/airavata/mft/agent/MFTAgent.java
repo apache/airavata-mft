@@ -40,18 +40,38 @@ import org.apache.airavata.mft.transport.local.LocalSender;
 import org.apache.airavata.mft.transport.scp.SCPMetadataCollector;
 import org.apache.airavata.mft.transport.scp.SCPReceiver;
 import org.apache.airavata.mft.transport.scp.SCPSender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.context.annotation.PropertySource;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-public class MFTAgent {
+@PropertySource("classpath:application.properties")
+@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
+public class MFTAgent implements CommandLineRunner {
+
+    private static final Logger logger = LoggerFactory.getLogger(MFTAgent.class);
 
     private final TransportMediator mediator = new TransportMediator();
-    private String agentId = "agent0";
+
+    @org.springframework.beans.factory.annotation.Value("${agent.id}")
+    private String agentId;
+    @org.springframework.beans.factory.annotation.Value("${agent.host}")
+    private String agentHost;
+    @org.springframework.beans.factory.annotation.Value("${agent.user}")
+    private String agentUser;
+    @org.springframework.beans.factory.annotation.Value("${agent.supported.protocols}")
+    private String supportedProtocols;
+
     private final Semaphore mainHold = new Semaphore(0);
 
     private Consul client;
@@ -75,12 +95,7 @@ public class MFTAgent {
     private void acceptRequests() {
 
         cacheListener = newValues -> {
-            // Cache notifies all paths with "foo" the root path
-            // If you want to watch only "foo" value, you must filter other paths
-
             newValues.values().forEach(value -> {
-
-                // Values are encoded in key/value store, decode it if needed
                 Optional<String> decodedValue = value.getValueAsString();
                 decodedValue.ifPresent(v -> {
                     System.out.println(String.format("Value is: %s", v));
@@ -88,7 +103,7 @@ public class MFTAgent {
                     TransferRequest request = null;
                     try {
                         request = mapper.readValue(v, TransferRequest.class);
-                        System.out.println("Received request " + request.getTransferId());
+                        logger.info("Received request " + request.getTransferId());
                         admin.updateTransferState(request.getTransferId(), new TransferState().setState("STARTING")
                                 .setPercentage(0).setUpdateTimeMils(System.currentTimeMillis()));
 
@@ -99,7 +114,7 @@ public class MFTAgent {
 
                         MetadataCollector metadataCollector = MFTAgent.this.resolveMetadataCollector(request.getSourceType());
                         ResourceMetadata metadata = metadataCollector.getGetResourceMetadata(request.getSourceId(), request.getSourceToken());
-                        System.out.println("File size " + metadata.getResourceSize());
+                        logger.debug("File size " + metadata.getResourceSize());
                         admin.updateTransferState(request.getTransferId(), new TransferState().setState("STARTED")
                                 .setPercentage(0).setUpdateTimeMils(System.currentTimeMillis()));
 
@@ -107,11 +122,11 @@ public class MFTAgent {
                             try {
                                 admin.updateTransferState(id, st);
                             } catch (MFTAdminException e) {
-                                e.printStackTrace();
+                                logger.error("Failed while updating transfer state", e);
                             }
                         });
 
-                        System.out.println("Submitted transfer " + transferId);
+                        logger.info("Submitted transfer " + transferId);
 
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -121,11 +136,12 @@ public class MFTAgent {
                                         .setPercentage(0).setUpdateTimeMils(System.currentTimeMillis()));
                             } catch (MFTAdminException ex) {
                                 ex.printStackTrace();
+                                logger.warn(ex.getMessage());
                                 // Ignore
                             }
                         }
                     } finally {
-                        System.out.println("Deleting key " + value.getKey());
+                        logger.info("Deleting key " + value.getKey());
                         kvClient.deleteKey(value.getKey()); // Due to bug in consul https://github.com/hashicorp/consul/issues/571
                     }
                 });
@@ -137,9 +153,14 @@ public class MFTAgent {
     }
 
     private boolean connectAgent() throws MFTAdminException {
-        ImmutableSession session = ImmutableSession.builder().name(agentId).behavior("delete").ttl(sessionTTLSeconds + "s").build();
-        SessionCreatedResponse sessResp = client.sessionClient().createSession(session);
-        String lockPath = "mft/agent/live/" + agentId;
+        final ImmutableSession session = ImmutableSession.builder()
+                .name(agentId)
+                .behavior("delete")
+                .ttl(sessionTTLSeconds + "s").build();
+
+        final SessionCreatedResponse sessResp = client.sessionClient().createSession(session);
+        final String lockPath = "mft/agent/live/" + agentId;
+
         boolean acquired = kvClient.acquireLock(lockPath, sessResp.getId());
 
         if (acquired) {
@@ -148,28 +169,42 @@ public class MFTAgent {
                     client.sessionClient().renewSession(sessResp.getId());
                 } catch (ConsulException e) {
                     if (e.getCode() == 404) {
+                        logger.error("Can not renew session as it is expired");
                         stop();
                     }
-                    e.printStackTrace();
+                    logger.warn("Errored while renewing the session", e);
+                    try {
+                        boolean status = kvClient.acquireLock(lockPath, sessResp.getId());
+                        if (!status) {
+                            logger.error("Can not renew session as it is expired");
+                            stop();
+                        }
+                    } catch (Exception ex) {
+                        logger.error("Can not renew session as it is expired");
+                        stop();
+                    }
                 } catch (Exception e) {
                     try {
                         boolean status = kvClient.acquireLock(lockPath, sessResp.getId());
                         if (!status) {
+                            logger.error("Can not renew session as it is expired");
                             stop();
                         }
                     } catch (Exception ex) {
+                        logger.error("Can not renew session as it is expired");
                         stop();
                     }
                 }
             }, sessionRenewSeconds, sessionRenewSeconds, TimeUnit.SECONDS);
-            admin.registerAgent(new AgentInfo()
+
+            this.admin.registerAgent(new AgentInfo()
                     .setId(agentId)
-                    .setHost("localhost")
-                    .setUser("dimuthu")
-                    .setSupportedProtocols(Collections.singletonList("SCP")));
+                    .setHost(agentHost)
+                    .setUser(agentUser)
+                    .setSupportedProtocols(Arrays.asList(supportedProtocols.split(","))));
         }
 
-        System.out.println("Lock status " + acquired);
+        logger.info("Acquired lock " + acquired);
         return acquired;
     }
 
@@ -181,26 +216,18 @@ public class MFTAgent {
     }
 
     public void stop() {
-        System.out.println("Stopping Agent " + agentId);
+        logger.info("Stopping Agent " + agentId);
         disconnectAgent();
         mainHold.release();
     }
 
     public void start() throws Exception {
-        System.out.println("Starting Agent");
         init();
         boolean connected = connectAgent();
         if (!connected) {
             throw new Exception("Failed to connect to the cluster");
         }
         acceptRequests();
-    }
-
-    public static void main(String args[]) throws Exception {
-        MFTAgent agent = new MFTAgent();
-        agent.start();
-        agent.mainHold.acquire();
-        System.out.println("Agent exited");
     }
 
     // TODO load from reflection to avoid dependencies
@@ -234,5 +261,17 @@ public class MFTAgent {
                 return new LocalMetadataCollector();
         }
         return null;
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        logger.info("Starting Agent " + agentId);
+        start();
+        mainHold.acquire();
+        logger.info("Agent exited");
+    }
+
+    public static void main(String args[]) throws Exception {
+        SpringApplication.run(MFTAgent.class);
     }
 }

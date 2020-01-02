@@ -58,6 +58,36 @@
             <artifactId>log4j-over-slf4j</artifactId>
             <version>1.7.26</version>
         </dependency>
-
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>${maven.assembly.plugin}</version>
+                <executions>
+                    <execution>
+                        <id>mft-agent-distribution-package</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <tarLongFileMode>posix</tarLongFileMode>
+                            <finalName>${agent.dist.name}</finalName>
+                            <descriptors>
+                                <descriptor>src/main/assembly/agent-bin-assembly.xml</descriptor>
+                            </descriptors>
+                            <attach>false</attach>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    <properties>
+        <agent.dist.name>MFT-Agent-0.01</agent.dist.name>
+        <maven.assembly.plugin>3.1.1</maven.assembly.plugin>
+    </properties>
 </project>
