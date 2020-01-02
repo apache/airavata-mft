@@ -15,12 +15,8 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.agent;
+package org.apache.airavata.mft.core;
 
-import org.apache.airavata.mft.core.CircularStreamingBuffer;
-import org.apache.airavata.mft.core.ConnectorContext;
-import org.apache.airavata.mft.core.ResourceMetadata;
-import org.apache.airavata.mft.core.TransferTask;
 import org.apache.airavata.mft.core.api.Connector;
 
 import java.util.ArrayList;

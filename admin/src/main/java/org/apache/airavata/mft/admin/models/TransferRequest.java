@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.agent;
+package org.apache.airavata.mft.admin.models;
 
 import java.util.List;
 

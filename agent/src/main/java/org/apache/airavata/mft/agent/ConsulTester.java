@@ -20,6 +20,8 @@ package org.apache.airavata.mft.agent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orbitz.consul.Consul;
 import com.orbitz.consul.KeyValueClient;
+import org.apache.airavata.mft.admin.models.TransferRequest;
+
 import java.util.Collections;
 
 public class ConsulTester {

@@ -45,6 +45,7 @@
         <module>transport</module>
         <module>agent</module>
         <module>services</module>
+        <module>admin</module>
     </modules>
 
     <url>http://airavata.apache.org/</url>

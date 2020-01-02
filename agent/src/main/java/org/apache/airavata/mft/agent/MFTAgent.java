@@ -19,9 +19,16 @@ package org.apache.airavata.mft.agent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orbitz.consul.Consul;
+import com.orbitz.consul.ConsulException;
 import com.orbitz.consul.KeyValueClient;
+import com.orbitz.consul.cache.ConsulCache;
 import com.orbitz.consul.cache.KVCache;
+import com.orbitz.consul.model.kv.Value;
+import com.orbitz.consul.model.session.ImmutableSession;
+import com.orbitz.consul.model.session.SessionCreatedResponse;
+import org.apache.airavata.mft.admin.models.TransferRequest;
 import org.apache.airavata.mft.core.ResourceMetadata;
+import org.apache.airavata.mft.core.TransportMediator;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.transport.local.LocalMetadataCollector;
@@ -32,20 +39,34 @@ import org.apache.airavata.mft.transport.scp.SCPReceiver;
 import org.apache.airavata.mft.transport.scp.SCPSender;
 
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 public class MFTAgent {
 
-    private TransportMediator mediator = new TransportMediator();
+    private final TransportMediator mediator = new TransportMediator();
     private String agentId = "agent0";
-    private Semaphore mainHold = new Semaphore(0);
+    private final Semaphore mainHold = new Semaphore(0);
+
+    private Consul client;
+    private KeyValueClient kvClient;
+    private KVCache messageCache;
+    private ConsulCache.Listener<String, Value> cacheListener;
+
+    private final ScheduledExecutorService sessionRenewPool = Executors.newSingleThreadScheduledExecutor();
+    private long sessionRenewSeconds = 4;
+    private long sessionTTLSeconds = 10;
+
+    public void init() {
+        client = Consul.builder().build();
+        kvClient = client.keyValueClient();
+        messageCache = KVCache.newCache(kvClient, "mft/agents/messages/" + agentId );
+    }
 
     private void acceptRequests() {
-        Consul client = Consul.builder().build();
-        KeyValueClient kvClient = client.keyValueClient();
-
-        KVCache messageCache = KVCache.newCache(kvClient, agentId + "/messages");
-        messageCache.addListener(newValues -> {
+        cacheListener = newValues -> {
             // Cache notifies all paths with "foo" the root path
             // If you want to watch only "foo" value, you must filter other paths
 
@@ -60,12 +81,12 @@ public class MFTAgent {
                         TransferRequest request = mapper.readValue(v, TransferRequest.class);
                         System.out.println("Received request " + request.getTransferId());
 
-                        Connector inConnector = resolveConnector(request.getSourceType(), "IN");
+                        Connector inConnector = MFTAgent.this.resolveConnector(request.getSourceType(), "IN");
                         inConnector.init(request.getSourceId(), request.getSourceToken());
-                        Connector outConnector = resolveConnector(request.getDestinationType(), "OUT");
+                        Connector outConnector = MFTAgent.this.resolveConnector(request.getDestinationType(), "OUT");
                         outConnector.init(request.getDestinationId(), request.getDestinationToken());
 
-                        MetadataCollector metadataCollector = resolveMetadataCollector(request.getSourceType());
+                        MetadataCollector metadataCollector = MFTAgent.this.resolveMetadataCollector(request.getSourceType());
                         ResourceMetadata metadata = metadataCollector.getGetResourceMetadata(request.getSourceId(), request.getSourceToken());
                         System.out.println("File size " + metadata.getResourceSize());
                         String transferId = mediator.transfer(inConnector, outConnector, metadata);
@@ -80,15 +101,65 @@ public class MFTAgent {
                 });
 
             });
-        });
+        };
+        messageCache.addListener(cacheListener);
         messageCache.start();
     }
 
+    public void connectAgent() {
+        ImmutableSession session = ImmutableSession.builder().name(agentId).behavior("delete").ttl(sessionTTLSeconds + "s").build();
+        SessionCreatedResponse sessResp = client.sessionClient().createSession(session);
+        String lockPath = "mft/agent/live/" + agentId;
+        boolean acquired = kvClient.acquireLock(lockPath, sessResp.getId());
+
+        if (acquired) {
+            sessionRenewPool.scheduleAtFixedRate(() -> {
+                try {
+                    client.sessionClient().renewSession(sessResp.getId());
+                } catch (ConsulException e) {
+                    if (e.getCode() == 404) {
+                        stop();
+                    }
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    try {
+                        boolean status = kvClient.acquireLock(lockPath, sessResp.getId());
+                        if (!status) {
+                            stop();
+                        }
+                    } catch (Exception ex) {
+                        stop();
+                    }
+                }
+        }, sessionRenewSeconds, sessionRenewSeconds, TimeUnit.SECONDS);
+        }
+
+        System.out.println("Lock status " + acquired);
+    }
+
+    public void disconnectAgent() {
+        sessionRenewPool.shutdown();
+        if (cacheListener != null) {
+            messageCache.removeListener(cacheListener);
+        }
+    }
+
+    public void stop() {
+        disconnectAgent();
+        mainHold.release();
+    }
+
+    public void start() {
+        init();
+        connectAgent();
+        acceptRequests();
+    }
 
     public static void main(String args[]) throws InterruptedException {
         MFTAgent agent = new MFTAgent();
-        agent.acceptRequests();
+        agent.start();
         agent.mainHold.acquire();
+        System.out.println("Shutting down agent");
     }
 
     // TODO load from reflection to avoid dependencies
