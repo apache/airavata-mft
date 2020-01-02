@@ -44,5 +44,29 @@
             <version>${h2}</version>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
+            <artifactId>airavata-credential-store-stubs</artifactId>
+            <version>0.19-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.openjpa</groupId>
+                    <artifactId>openjpa</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId> org.apache.airavata</groupId>
+                    <artifactId>airavata-commons</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.airavata</groupId>
+                    <artifactId>airavata-server-configuration</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
+            <artifactId>airavata-data-models</artifactId>
+            <version>0.19-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>

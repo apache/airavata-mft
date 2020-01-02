@@ -18,6 +18,7 @@
 package org.apache.airavata.mft.secret.server;
 
 import org.apache.airavata.mft.secret.server.backend.SecretBackend;
+import org.apache.airavata.mft.secret.server.backend.airavata.AiravataSecretBackend;
 import org.apache.airavata.mft.secret.server.backend.sql.SQLSecretBackend;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,5 +27,5 @@ import org.springframework.context.annotation.Configuration;
 public class AppConfig {
 
     @Bean
-    SecretBackend secretBackend() {return new SQLSecretBackend();}
+    SecretBackend secretBackend() {return new AiravataSecretBackend();}
 }

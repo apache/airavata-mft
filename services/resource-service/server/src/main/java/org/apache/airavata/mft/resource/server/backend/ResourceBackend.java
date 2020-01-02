@@ -18,16 +18,17 @@
 package org.apache.airavata.mft.resource.server.backend;
 
 import org.apache.airavata.mft.resource.service.*;
+import org.apache.airavata.registry.api.exception.RegistryServiceException;
 
 import java.util.Optional;
 
 public interface ResourceBackend {
-    public Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request);
+    public Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request) throws Exception;
     public SCPStorage createSCPStorage(SCPStorageCreateRequest request);
     public boolean updateSCPStorage(SCPStorageUpdateRequest request);
     public boolean deleteSCPStorage(SCPStorageDeleteRequest request);
 
-    public Optional<SCPResource> getSCPResource(SCPResourceGetRequest request);
+    public Optional<SCPResource> getSCPResource(SCPResourceGetRequest request) throws Exception;
     public SCPResource createSCPResource(SCPResourceCreateRequest request);
     public boolean updateSCPResource(SCPResourceUpdateRequest request);
     public boolean deleteSCPResource(SCPResourceDeleteRequest request);

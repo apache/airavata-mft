@@ -44,5 +44,10 @@
             <version>${h2}</version>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
+            <artifactId>registry-api-stubs</artifactId>
+            <version>0.19-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>

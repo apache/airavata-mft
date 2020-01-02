@@ -27,10 +27,7 @@ import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferRequest;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /*
@@ -45,10 +42,13 @@ public class MFTAdmin {
     private KeyValueClient kvClient = client.keyValueClient();
     private ObjectMapper mapper = new ObjectMapper();
 
-    public void submitTransfer(String agentId, TransferRequest transferRequest) throws MFTAdminException {
+    public String submitTransfer(String agentId, TransferRequest transferRequest) throws MFTAdminException {
         try {
+            String transferId = UUID.randomUUID().toString();
+            transferRequest.setTransferId(transferId);
             String asString = mapper.writeValueAsString(transferRequest);
-            kvClient.putValue("mft/agents/messages/"  + agentId + "/" + transferRequest.getTransferId(), asString);
+            kvClient.putValue("mft/agents/messages/"  + agentId + "/" + transferId, asString);
+            return transferId;
         } catch (JsonProcessingException e) {
             throw new MFTAdminException("Error in serializing transfer request", e);
         }
@@ -69,7 +69,7 @@ public class MFTAdmin {
         if (value.isPresent()) {
             Value absVal = value.get();
             if (absVal.getValue().isPresent()) {
-                String asStr = absVal.getValue().get();
+                String asStr = absVal.getValueAsString().get();
                 try {
                     return Optional.of(mapper.readValue(asStr, AgentInfo.class));
                 } catch (IOException e) {

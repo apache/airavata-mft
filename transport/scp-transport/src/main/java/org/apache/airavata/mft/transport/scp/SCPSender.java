@@ -32,14 +32,12 @@ import org.apache.airavata.mft.secret.service.SCPSecret;
 import org.apache.airavata.mft.secret.service.SCPSecretGetRequest;
 import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
 public class SCPSender implements Connector {
     private Session session;
     private SCPResource scpResource;
-    public void init(String resourceId, String credentialToken) {
+    public void init(String resourceId, String credentialToken) throws IOException {
 
         ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient("localhost", 7002);
         this.scpResource = resourceClient.getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
@@ -47,9 +45,14 @@ public class SCPSender implements Connector {
         SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient("localhost", 7003);
         SCPSecret scpSecret = secretClient.getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
+        File privateKeyFile = File.createTempFile("id_rsa", "");
+        BufferedWriter writer = new BufferedWriter(new FileWriter(privateKeyFile));
+        writer.write(scpSecret.getPrivateKey());
+        writer.close();
+
         this.session = SCPTransportUtil.createSession(scpSecret.getUser(), scpResource.getScpStorage().getHost(),
                 scpResource.getScpStorage().getPort(),
-                scpSecret.getPrivateKey(),
+                privateKeyFile.getPath(),
                 scpSecret.getPassphrase());
     }
 

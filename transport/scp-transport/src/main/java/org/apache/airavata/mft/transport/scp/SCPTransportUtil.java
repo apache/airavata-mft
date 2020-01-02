@@ -100,7 +100,7 @@ public class SCPTransportUtil {
 
             return session;
         } catch (JSchException e) {
-            System.out.println(e);
+            e.printStackTrace();
             return null;
         }
     }

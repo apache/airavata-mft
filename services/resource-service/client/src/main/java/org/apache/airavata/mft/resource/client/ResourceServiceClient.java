@@ -21,9 +21,25 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class ResourceServiceClient {
+
+    private static Map<String, Map<Integer, ResourceServiceGrpc.ResourceServiceBlockingStub>> stubCache = new ConcurrentHashMap<>();
+
     public static ResourceServiceGrpc.ResourceServiceBlockingStub buildClient(String hostName, int port) {
+
+        if (stubCache.containsKey(hostName)) {
+            if (stubCache.get(hostName).containsKey(port)) {
+                return stubCache.get(hostName).get(port);
+            }
+        }
+
         ManagedChannel channel = ManagedChannelBuilder.forAddress(hostName, port).usePlaintext().build();
-        return ResourceServiceGrpc.newBlockingStub(channel);
+        ResourceServiceGrpc.ResourceServiceBlockingStub stub = ResourceServiceGrpc.newBlockingStub(channel);
+        stubCache.put(hostName, Collections.singletonMap(port, stub));
+        return stub;
     }
 }

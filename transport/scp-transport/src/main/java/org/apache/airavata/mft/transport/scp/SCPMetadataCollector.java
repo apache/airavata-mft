@@ -37,6 +37,9 @@ import org.apache.airavata.mft.secret.service.SCPSecret;
 import org.apache.airavata.mft.secret.service.SCPSecretGetRequest;
 import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -55,7 +58,13 @@ public class SCPMetadataCollector implements MetadataCollector {
 
         try (SSHClient sshClient = new SSHClient()) {
             sshClient.addHostKeyVerifier((h, p, key) -> true);
-            KeyProvider keyProvider = sshClient.loadKeys(scpSecret.getPrivateKey(), scpSecret.getPassphrase());
+
+            File privateKeyFile = File.createTempFile("id_rsa", "");
+            BufferedWriter writer = new BufferedWriter(new FileWriter(privateKeyFile));
+            writer.write(scpSecret.getPrivateKey());
+            writer.close();
+
+            KeyProvider keyProvider = sshClient.loadKeys(privateKeyFile.getPath(), scpSecret.getPassphrase());
             final List<AuthMethod> am = new LinkedList<>();
             am.add(new AuthPublickey(keyProvider));
             am.add(new AuthKeyboardInteractive(new ChallengeResponseProvider() {

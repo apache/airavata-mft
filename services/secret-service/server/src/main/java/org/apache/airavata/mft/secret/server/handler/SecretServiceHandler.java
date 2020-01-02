@@ -32,12 +32,17 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
 
     @Override
     public void getSCPSecret(SCPSecretGetRequest request, StreamObserver<SCPSecret> responseObserver) {
-        this.backend.getSCPSecret(request).ifPresentOrElse(secret -> {
-            responseObserver.onNext(secret);
-            responseObserver.onCompleted();
-        }, () -> {
-            responseObserver.onError(new Exception("No SCP Secret with id " + request.getSecretId()));
-        });
+        try {
+            this.backend.getSCPSecret(request).ifPresentOrElse(secret -> {
+                responseObserver.onNext(secret);
+                responseObserver.onCompleted();
+            }, () -> {
+                responseObserver.onError(new Exception("No SCP Secret with id " + request.getSecretId()));
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            responseObserver.onError(new Exception("Error in retrieving Secret with id " + request.getSecretId()));
+        }
     }
 
     @Override

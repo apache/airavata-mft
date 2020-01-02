@@ -28,7 +28,6 @@ public class TransferRequest {
     private String destinationId;
     private String destinationType;
     private String destinationToken;
-    private List<String> agentList;
 
     public String getSourceId() {
         return sourceId;
@@ -76,14 +75,6 @@ public class TransferRequest {
 
     public void setDestinationToken(String destinationToken) {
         this.destinationToken = destinationToken;
-    }
-
-    public List<String> getAgentList() {
-        return agentList;
-    }
-
-    public void setAgentList(List<String> agentList) {
-        this.agentList = agentList;
     }
 
     public String getTransferId() {

@@ -29,9 +29,7 @@ import org.apache.airavata.mft.secret.service.SCPSecret;
 import org.apache.airavata.mft.secret.service.SCPSecretGetRequest;
 import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
 public class SCPReceiver implements Connector {
     private Session session;
@@ -44,11 +42,18 @@ public class SCPReceiver implements Connector {
         SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient("localhost", 7003);
         SCPSecret scpSecret = secretClient.getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
+        File privateKeyFile = File.createTempFile("id_rsa", "");
+        BufferedWriter writer = new BufferedWriter(new FileWriter(privateKeyFile));
+        writer.write(scpSecret.getPrivateKey());
+        writer.close();
+
+        privateKeyFile.deleteOnExit();
+
         this.session = SCPTransportUtil.createSession(
                 scpSecret.getUser(),
                 scpResource.getScpStorage().getHost(),
                 scpResource.getScpStorage().getPort(),
-                scpSecret.getPrivateKey(),
+                privateKeyFile.getPath(),
                 scpSecret.getPassphrase());
     }
 

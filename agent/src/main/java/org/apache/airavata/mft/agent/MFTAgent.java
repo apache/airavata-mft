@@ -26,6 +26,9 @@ import com.orbitz.consul.cache.KVCache;
 import com.orbitz.consul.model.kv.Value;
 import com.orbitz.consul.model.session.ImmutableSession;
 import com.orbitz.consul.model.session.SessionCreatedResponse;
+import org.apache.airavata.mft.admin.MFTAdmin;
+import org.apache.airavata.mft.admin.MFTAdminException;
+import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferRequest;
 import org.apache.airavata.mft.core.ResourceMetadata;
 import org.apache.airavata.mft.core.TransportMediator;
@@ -38,6 +41,7 @@ import org.apache.airavata.mft.transport.scp.SCPMetadataCollector;
 import org.apache.airavata.mft.transport.scp.SCPReceiver;
 import org.apache.airavata.mft.transport.scp.SCPSender;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -106,7 +110,7 @@ public class MFTAgent {
         messageCache.start();
     }
 
-    private boolean connectAgent() {
+    private boolean connectAgent() throws MFTAdminException {
         ImmutableSession session = ImmutableSession.builder().name(agentId).behavior("delete").ttl(sessionTTLSeconds + "s").build();
         SessionCreatedResponse sessResp = client.sessionClient().createSession(session);
         String lockPath = "mft/agent/live/" + agentId;
@@ -131,7 +135,13 @@ public class MFTAgent {
                         stop();
                     }
                 }
-        }, sessionRenewSeconds, sessionRenewSeconds, TimeUnit.SECONDS);
+            }, sessionRenewSeconds, sessionRenewSeconds, TimeUnit.SECONDS);
+            MFTAdmin admin = new MFTAdmin();
+            admin.registerAgent(new AgentInfo()
+                    .setId(agentId)
+                    .setHost("localhost")
+                    .setUser("dimuthu")
+                    .setSupportedProtocols(Collections.singletonList("SCP")));
         }
 
         System.out.println("Lock status " + acquired);

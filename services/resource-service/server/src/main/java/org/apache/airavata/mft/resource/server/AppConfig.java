@@ -18,6 +18,7 @@
 package org.apache.airavata.mft.resource.server;
 
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
+import org.apache.airavata.mft.resource.server.backend.airavata.AiravataResourceBackend;
 import org.apache.airavata.mft.resource.server.backend.sql.SQLResourceBackend;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,6 @@ import org.springframework.context.annotation.Configuration;
 public class AppConfig {
     @Bean
     public ResourceBackend resourceBackend() {
-        return new SQLResourceBackend();
+        return new AiravataResourceBackend();
     }
 }

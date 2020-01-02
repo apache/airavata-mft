@@ -48,12 +48,17 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
 
     @Override
     public void getSCPStorage(SCPStorageGetRequest request, StreamObserver<SCPStorage> responseObserver) {
-        this.backend.getSCPStorage(request).ifPresentOrElse(storage -> {
-            responseObserver.onNext(storage);
-            responseObserver.onCompleted();
-        }, () -> {
-            responseObserver.onError(new Exception("No SCP Storage with id " + request.getStorageId()));
-        });
+        try {
+            this.backend.getSCPStorage(request).ifPresentOrElse(storage -> {
+                responseObserver.onNext(storage);
+                responseObserver.onCompleted();
+            }, () -> {
+                responseObserver.onError(new Exception("No SCP Storage with id " + request.getStorageId()));
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            responseObserver.onError(new Exception("Failed in retrieving storage with id " + request.getStorageId()));
+        }
     }
 
     @Override
@@ -80,12 +85,17 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
 
     @Override
     public void getSCPResource(SCPResourceGetRequest request, StreamObserver<SCPResource> responseObserver) {
-        this.backend.getSCPResource(request).ifPresentOrElse(resource -> {
-            responseObserver.onNext(resource);
-            responseObserver.onCompleted();
-        }, () -> {
-            responseObserver.onError(new Exception("No SCP Resource with id " + request.getResourceId()));
-        });
+        try {
+            this.backend.getSCPResource(request).ifPresentOrElse(resource -> {
+                responseObserver.onNext(resource);
+                responseObserver.onCompleted();
+            }, () -> {
+                responseObserver.onError(new Exception("No SCP Resource with id " + request.getResourceId()));
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            responseObserver.onError(new Exception("Failed in retrieving resource with id " + request.getResourceId()));
+        }
     }
 
     @Override
