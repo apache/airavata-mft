@@ -106,7 +106,7 @@ public class MFTAgent {
         messageCache.start();
     }
 
-    public void connectAgent() {
+    private boolean connectAgent() {
         ImmutableSession session = ImmutableSession.builder().name(agentId).behavior("delete").ttl(sessionTTLSeconds + "s").build();
         SessionCreatedResponse sessResp = client.sessionClient().createSession(session);
         String lockPath = "mft/agent/live/" + agentId;
@@ -135,6 +135,7 @@ public class MFTAgent {
         }
 
         System.out.println("Lock status " + acquired);
+        return acquired;
     }
 
     public void disconnectAgent() {
@@ -145,21 +146,26 @@ public class MFTAgent {
     }
 
     public void stop() {
+        System.out.println("Stopping Agent " + agentId);
         disconnectAgent();
         mainHold.release();
     }
 
-    public void start() {
+    public void start() throws Exception {
+        System.out.println("Starting Agent");
         init();
-        connectAgent();
+        boolean connected = connectAgent();
+        if (!connected) {
+            throw new Exception("Failed to connect to the cluster");
+        }
         acceptRequests();
     }
 
-    public static void main(String args[]) throws InterruptedException {
+    public static void main(String args[]) throws Exception {
         MFTAgent agent = new MFTAgent();
         agent.start();
         agent.mainHold.acquire();
-        System.out.println("Shutting down agent");
+        System.out.println("Agent exited");
     }
 
     // TODO load from reflection to avoid dependencies
