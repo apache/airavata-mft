@@ -17,10 +17,11 @@
 
 package org.apache.airavata.mft.admin.models;
 
-import java.util.Map;
+import java.util.List;
 
-public class TransferRequest {
+public class TransferCommand {
 
+    private String transferId;
     private String sourceId;
     private String sourceType;
     private String sourceToken;
@@ -31,14 +32,21 @@ public class TransferRequest {
     private String destinationToken;
     private String destResourceBackend;
     private String destCredentialBackend;
-    private boolean affinityTransfer;
-    private Map<String, Integer> targetAgents;
+
+    public String getTransferId() {
+        return transferId;
+    }
+
+    public TransferCommand setTransferId(String transferId) {
+        this.transferId = transferId;
+        return this;
+    }
 
     public String getSourceId() {
         return sourceId;
     }
 
-    public TransferRequest setSourceId(String sourceId) {
+    public TransferCommand setSourceId(String sourceId) {
         this.sourceId = sourceId;
         return this;
     }
@@ -47,7 +55,7 @@ public class TransferRequest {
         return sourceType;
     }
 
-    public TransferRequest setSourceType(String sourceType) {
+    public TransferCommand setSourceType(String sourceType) {
         this.sourceType = sourceType;
         return this;
     }
@@ -56,7 +64,7 @@ public class TransferRequest {
         return sourceToken;
     }
 
-    public TransferRequest setSourceToken(String sourceToken) {
+    public TransferCommand setSourceToken(String sourceToken) {
         this.sourceToken = sourceToken;
         return this;
     }
@@ -65,7 +73,7 @@ public class TransferRequest {
         return sourceResourceBackend;
     }
 
-    public TransferRequest setSourceResourceBackend(String sourceResourceBackend) {
+    public TransferCommand setSourceResourceBackend(String sourceResourceBackend) {
         this.sourceResourceBackend = sourceResourceBackend;
         return this;
     }
@@ -74,7 +82,7 @@ public class TransferRequest {
         return sourceCredentialBackend;
     }
 
-    public TransferRequest setSourceCredentialBackend(String sourceCredentialBackend) {
+    public TransferCommand setSourceCredentialBackend(String sourceCredentialBackend) {
         this.sourceCredentialBackend = sourceCredentialBackend;
         return this;
     }
@@ -83,7 +91,7 @@ public class TransferRequest {
         return destinationId;
     }
 
-    public TransferRequest setDestinationId(String destinationId) {
+    public TransferCommand setDestinationId(String destinationId) {
         this.destinationId = destinationId;
         return this;
     }
@@ -92,7 +100,7 @@ public class TransferRequest {
         return destinationType;
     }
 
-    public TransferRequest setDestinationType(String destinationType) {
+    public TransferCommand setDestinationType(String destinationType) {
         this.destinationType = destinationType;
         return this;
     }
@@ -101,7 +109,7 @@ public class TransferRequest {
         return destinationToken;
     }
 
-    public TransferRequest setDestinationToken(String destinationToken) {
+    public TransferCommand setDestinationToken(String destinationToken) {
         this.destinationToken = destinationToken;
         return this;
     }
@@ -110,7 +118,7 @@ public class TransferRequest {
         return destResourceBackend;
     }
 
-    public TransferRequest setDestResourceBackend(String destResourceBackend) {
+    public TransferCommand setDestResourceBackend(String destResourceBackend) {
         this.destResourceBackend = destResourceBackend;
         return this;
     }
@@ -119,26 +127,8 @@ public class TransferRequest {
         return destCredentialBackend;
     }
 
-    public TransferRequest setDestCredentialBackend(String destCredentialBackend) {
+    public TransferCommand setDestCredentialBackend(String destCredentialBackend) {
         this.destCredentialBackend = destCredentialBackend;
-        return this;
-    }
-
-    public boolean isAffinityTransfer() {
-        return affinityTransfer;
-    }
-
-    public TransferRequest setAffinityTransfer(boolean affinityTransfer) {
-        this.affinityTransfer = affinityTransfer;
-        return this;
-    }
-
-    public Map<String, Integer> getTargetAgents() {
-        return targetAgents;
-    }
-
-    public TransferRequest setTargetAgents(Map<String, Integer> targetAgents) {
-        this.targetAgents = targetAgents;
         return this;
     }
 }

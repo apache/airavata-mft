@@ -15,30 +15,73 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.admin.models;
+package org.apache.airavata.mft.controller.db.entities;
 
-import java.util.Map;
+import javax.persistence.*;
+import java.util.Set;
 
-public class TransferRequest {
+@Entity
+public class TransferEntity {
+    @Id
+    @Column(name = "TRANSFER_ID")
+    private String transferId;
 
+    @Column(name = "SOURCE_ID")
     private String sourceId;
+
+    @Column(name = "SOURCE_TYPE")
     private String sourceType;
+
+    @Column(name = "SOURCE_TOKEN")
     private String sourceToken;
+
+    @Column(name = "SOURCE_RESOURCE_BACKEND")
     private String sourceResourceBackend;
+
+    @Column(name = "SOURCE_CREDENTIAL_BACKEND")
     private String sourceCredentialBackend;
+
+    @Column(name = "DESTINATION_ID")
     private String destinationId;
+
+    @Column(name = "DESTINATION_TYPE")
     private String destinationType;
+
+    @Column(name = "DESTINATION_TOKEN")
     private String destinationToken;
+
+    @Column(name = "DEST_RESOURCE_BACKEND")
     private String destResourceBackend;
+
+    @Column(name = "DEST_CREDENTIAL_BACKEND")
     private String destCredentialBackend;
+
+    @Column(name = "AFFINITY_TRANSFER")
     private boolean affinityTransfer;
-    private Map<String, Integer> targetAgents;
+
+    @OneToMany(targetEntity = TargetAgentEntity.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Set<TargetAgentEntity> targetAgents;
+
+    @OneToMany(targetEntity = TransferExecutionEntity.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Set<TransferExecutionEntity> executions;
+
+    @OneToMany(targetEntity = TransferStatusEntity.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Set<TransferStatusEntity> statuses;
+
+    public String getTransferId() {
+        return transferId;
+    }
+
+    public TransferEntity setTransferId(String transferId) {
+        this.transferId = transferId;
+        return this;
+    }
 
     public String getSourceId() {
         return sourceId;
     }
 
-    public TransferRequest setSourceId(String sourceId) {
+    public TransferEntity setSourceId(String sourceId) {
         this.sourceId = sourceId;
         return this;
     }
@@ -47,7 +90,7 @@ public class TransferRequest {
         return sourceType;
     }
 
-    public TransferRequest setSourceType(String sourceType) {
+    public TransferEntity setSourceType(String sourceType) {
         this.sourceType = sourceType;
         return this;
     }
@@ -56,7 +99,7 @@ public class TransferRequest {
         return sourceToken;
     }
 
-    public TransferRequest setSourceToken(String sourceToken) {
+    public TransferEntity setSourceToken(String sourceToken) {
         this.sourceToken = sourceToken;
         return this;
     }
@@ -65,7 +108,7 @@ public class TransferRequest {
         return sourceResourceBackend;
     }
 
-    public TransferRequest setSourceResourceBackend(String sourceResourceBackend) {
+    public TransferEntity setSourceResourceBackend(String sourceResourceBackend) {
         this.sourceResourceBackend = sourceResourceBackend;
         return this;
     }
@@ -74,7 +117,7 @@ public class TransferRequest {
         return sourceCredentialBackend;
     }
 
-    public TransferRequest setSourceCredentialBackend(String sourceCredentialBackend) {
+    public TransferEntity setSourceCredentialBackend(String sourceCredentialBackend) {
         this.sourceCredentialBackend = sourceCredentialBackend;
         return this;
     }
@@ -83,7 +126,7 @@ public class TransferRequest {
         return destinationId;
     }
 
-    public TransferRequest setDestinationId(String destinationId) {
+    public TransferEntity setDestinationId(String destinationId) {
         this.destinationId = destinationId;
         return this;
     }
@@ -92,7 +135,7 @@ public class TransferRequest {
         return destinationType;
     }
 
-    public TransferRequest setDestinationType(String destinationType) {
+    public TransferEntity setDestinationType(String destinationType) {
         this.destinationType = destinationType;
         return this;
     }
@@ -101,7 +144,7 @@ public class TransferRequest {
         return destinationToken;
     }
 
-    public TransferRequest setDestinationToken(String destinationToken) {
+    public TransferEntity setDestinationToken(String destinationToken) {
         this.destinationToken = destinationToken;
         return this;
     }
@@ -110,7 +153,7 @@ public class TransferRequest {
         return destResourceBackend;
     }
 
-    public TransferRequest setDestResourceBackend(String destResourceBackend) {
+    public TransferEntity setDestResourceBackend(String destResourceBackend) {
         this.destResourceBackend = destResourceBackend;
         return this;
     }
@@ -119,7 +162,7 @@ public class TransferRequest {
         return destCredentialBackend;
     }
 
-    public TransferRequest setDestCredentialBackend(String destCredentialBackend) {
+    public TransferEntity setDestCredentialBackend(String destCredentialBackend) {
         this.destCredentialBackend = destCredentialBackend;
         return this;
     }
@@ -128,17 +171,35 @@ public class TransferRequest {
         return affinityTransfer;
     }
 
-    public TransferRequest setAffinityTransfer(boolean affinityTransfer) {
+    public TransferEntity setAffinityTransfer(boolean affinityTransfer) {
         this.affinityTransfer = affinityTransfer;
         return this;
     }
 
-    public Map<String, Integer> getTargetAgents() {
+    public Set<TargetAgentEntity> getTargetAgents() {
         return targetAgents;
     }
 
-    public TransferRequest setTargetAgents(Map<String, Integer> targetAgents) {
+    public TransferEntity setTargetAgents(Set<TargetAgentEntity> targetAgents) {
         this.targetAgents = targetAgents;
+        return this;
+    }
+
+    public Set<TransferExecutionEntity> getExecutions() {
+        return executions;
+    }
+
+    public TransferEntity setExecutions(Set<TransferExecutionEntity> executions) {
+        this.executions = executions;
+        return this;
+    }
+
+    public Set<TransferStatusEntity> getStatuses() {
+        return statuses;
+    }
+
+    public TransferEntity setStatuses(Set<TransferStatusEntity> statuses) {
+        this.statuses = statuses;
         return this;
     }
 }

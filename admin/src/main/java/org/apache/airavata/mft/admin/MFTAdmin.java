@@ -24,6 +24,7 @@ import com.orbitz.consul.ConsulException;
 import com.orbitz.consul.KeyValueClient;
 import com.orbitz.consul.model.kv.Value;
 import org.apache.airavata.mft.admin.models.AgentInfo;
+import org.apache.airavata.mft.admin.models.TransferCommand;
 import org.apache.airavata.mft.admin.models.TransferRequest;
 import org.apache.airavata.mft.admin.models.TransferState;
 
@@ -44,15 +45,22 @@ public class MFTAdmin {
     private KeyValueClient kvClient = client.keyValueClient();
     private ObjectMapper mapper = new ObjectMapper();
 
-    public String submitTransfer(String agentId, TransferRequest transferRequest) throws MFTAdminException {
+    public String submitTransfer(TransferRequest transferRequest) throws MFTAdminException{
         try {
-
+            String asStr = mapper.writeValueAsString(transferRequest);
             String transferId = UUID.randomUUID().toString();
-            updateTransferState(transferId, new TransferState().setState("INITIALIZING").setPercentage(0).setUpdateTimeMils(System.currentTimeMillis()));
-            transferRequest.setTransferId(transferId);
-            String asString = mapper.writeValueAsString(transferRequest);
-            kvClient.putValue("mft/agents/messages/"  + agentId + "/" + transferId, asString);
+            kvClient.putValue("mft/controller/messages/" + transferId, asStr);
             return transferId;
+        } catch (JsonProcessingException e) {
+            throw new MFTAdminException("Error in serializing transfer request", e);
+        }
+    }
+
+    public void commandTransferToAgent(String agentId, TransferCommand transferCommand) throws MFTAdminException {
+        try {
+            updateTransferState(transferCommand.getTransferId(), new TransferState().setState("INITIALIZING").setPercentage(0).setUpdateTimeMils(System.currentTimeMillis()));
+            String asString = mapper.writeValueAsString(transferCommand);
+            kvClient.putValue("mft/agents/messages/"  + agentId + "/" + transferCommand.getTransferId(), asString);
         } catch (JsonProcessingException e) {
             throw new MFTAdminException("Error in serializing transfer request", e);
         }

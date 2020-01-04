@@ -29,7 +29,7 @@ import com.orbitz.consul.model.session.SessionCreatedResponse;
 import org.apache.airavata.mft.admin.MFTAdmin;
 import org.apache.airavata.mft.admin.MFTAdminException;
 import org.apache.airavata.mft.admin.models.AgentInfo;
-import org.apache.airavata.mft.admin.models.TransferRequest;
+import org.apache.airavata.mft.admin.models.TransferCommand;
 import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.core.ResourceMetadata;
 import org.apache.airavata.mft.core.api.Connector;
@@ -83,6 +83,8 @@ public class MFTAgent implements CommandLineRunner {
     private long sessionRenewSeconds = 4;
     private long sessionTTLSeconds = 10;
 
+    private ObjectMapper mapper = new ObjectMapper();
+
     private MFTAdmin admin;
 
     public void init() {
@@ -99,10 +101,9 @@ public class MFTAgent implements CommandLineRunner {
                 Optional<String> decodedValue = value.getValueAsString();
                 decodedValue.ifPresent(v -> {
                     System.out.println(String.format("Value is: %s", v));
-                    ObjectMapper mapper = new ObjectMapper();
-                    TransferRequest request = null;
+                    TransferCommand request = null;
                     try {
-                        request = mapper.readValue(v, TransferRequest.class);
+                        request = mapper.readValue(v, TransferCommand.class);
                         logger.info("Received request " + request.getTransferId());
                         admin.updateTransferState(request.getTransferId(), new TransferState().setState("STARTING")
                                 .setPercentage(0).setUpdateTimeMils(System.currentTimeMillis()));

@@ -46,6 +46,7 @@
         <module>agent</module>
         <module>services</module>
         <module>admin</module>
+        <module>controller</module>
     </modules>
 
     <url>http://airavata.apache.org/</url>
@@ -113,6 +114,7 @@
         <protobuf.java>3.9.1</protobuf.java>
         <grpc.spring.boot>3.5.1</grpc.spring.boot>
         <spring.boot.data.jpa>2.2.1.RELEASE</spring.boot.data.jpa>
+        <log4j.over.slf4j>1.7.26</log4j.over.slf4j>
         <dozer>5.5.1</dozer>
         <jsch>0.1.55</jsch>
         <sshj>0.23.0</sshj>
