@@ -30,41 +30,57 @@ public class TransferStatusEntity {
     @JoinColumn(name = "TRANSFER_ID", referencedColumnName = "TRANSFER_ID")
     private TransferEntity transfer;
 
-    @Column(name = "STATUS")
+    @Column(name = "STATE")
     private String status;
 
-    @Column(name = "TIME_OF_CHANGE")
-    private long timeOfChange;
+    @Column(name = "UPDATE_TIME")
+    private long updateTimeMils;
+
+    @Column(name = "PERCENTAGE")
+    private double percentage;
 
     public int getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public TransferStatusEntity setId(int id) {
         this.id = id;
+        return this;
     }
 
     public TransferEntity getTransfer() {
         return transfer;
     }
 
-    public void setTransfer(TransferEntity transfer) {
+    public TransferStatusEntity setTransfer(TransferEntity transfer) {
         this.transfer = transfer;
+        return this;
     }
 
     public String getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public TransferStatusEntity setStatus(String status) {
         this.status = status;
+        return this;
     }
 
-    public long getTimeOfChange() {
-        return timeOfChange;
+    public long getUpdateTimeMils() {
+        return updateTimeMils;
     }
 
-    public void setTimeOfChange(long timeOfChange) {
-        this.timeOfChange = timeOfChange;
+    public TransferStatusEntity setUpdateTimeMils(long updateTimeMils) {
+        this.updateTimeMils = updateTimeMils;
+        return this;
+    }
+
+    public double getPercentage() {
+        return percentage;
+    }
+
+    public TransferStatusEntity setPercentage(double percentage) {
+        this.percentage = percentage;
+        return this;
     }
 }

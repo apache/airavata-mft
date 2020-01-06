@@ -24,11 +24,13 @@ import com.orbitz.consul.cache.ConsulCache;
 import com.orbitz.consul.cache.KVCache;
 import com.orbitz.consul.model.kv.Value;
 import org.apache.airavata.mft.admin.MFTAdmin;
-import org.apache.airavata.mft.admin.MFTAdminException;
 import org.apache.airavata.mft.admin.models.TransferCommand;
+import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.controller.db.entities.TransferEntity;
+import org.apache.airavata.mft.controller.db.entities.TransferStatusEntity;
 import org.apache.airavata.mft.controller.db.repositories.TransferRepository;
 import org.apache.airavata.mft.admin.models.TransferRequest;
+import org.apache.airavata.mft.controller.db.repositories.TransferStatusRepository;
 import org.dozer.DozerBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.PropertySource;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Semaphore;
@@ -53,7 +56,9 @@ public class MFTController implements CommandLineRunner {
     private Consul client;
     private KeyValueClient kvClient;
     private KVCache messageCache;
-    private ConsulCache.Listener<String, Value> cacheListener;
+    private KVCache stateCache;
+    private ConsulCache.Listener<String, Value> messageCacheListener;
+    private ConsulCache.Listener<String, Value> stateCacheListener;
 
     private MFTAdmin admin;
 
@@ -63,15 +68,19 @@ public class MFTController implements CommandLineRunner {
     @Autowired
     private TransferRepository transferRepository;
 
+    @Autowired
+    private TransferStatusRepository statusRepository;
+
     public void init() {
         client = Consul.builder().build();
         kvClient = client.keyValueClient();
         messageCache = KVCache.newCache(kvClient, "mft/controller/messages");
+        stateCache = KVCache.newCache(kvClient, "mft/transfer/state");
         admin = new MFTAdmin();
     }
 
     private void acceptRequests() {
-        cacheListener = newValues -> {
+        messageCacheListener = newValues -> {
             newValues.forEach((key, value) -> {
                 String transferId = key.substring(key.lastIndexOf("/") + 1);
                 Optional<String> decodedValue = value.getValueAsString();
@@ -140,15 +149,47 @@ public class MFTController implements CommandLineRunner {
                 });
             });
         };
-        messageCache.addListener(cacheListener);
+        messageCache.addListener(messageCacheListener);
         messageCache.start();
     }
 
+    private void acceptStates() {
+        stateCacheListener = newValues -> {
+            newValues.forEach((key, value) -> {
+                try {
+                    if (value.getValueAsString().isPresent()) {
+                        String asStr = value.getValueAsString().get();
+                        logger.info("Received state {}", asStr);
+                        TransferState transferState = jsonMapper.readValue(asStr, TransferState.class);
+                        String transferId = key.substring(key.lastIndexOf("/") + 1);
+                        Optional<TransferEntity> transferEntity = transferRepository.findById(transferId);
+                        if (transferEntity.isPresent()) {
+                            TransferStatusEntity ety = new TransferStatusEntity()
+                                    .setPercentage(transferState.getPercentage())
+                                    .setStatus(transferState.getState())
+                                    .setUpdateTimeMils(transferState.getUpdateTimeMils())
+                                    .setTransfer(transferEntity.get());
+                            statusRepository.save(ety);
+                            logger.info("Saved state for transfer {}", transferId);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    logger.info("Deleting key " + value.getKey());
+                    kvClient.deleteKey(value.getKey()); // Due to bug in consul https://github.com/hashicorp/consul/issues/571
+                }
+            });
+        };
+        stateCache.addListener(stateCacheListener);
+        stateCache.start();
+    }
 
     @Override
     public void run(String... args) throws Exception {
         init();
         acceptRequests();
+        acceptStates();
         mainHold.acquire();
     }
 
