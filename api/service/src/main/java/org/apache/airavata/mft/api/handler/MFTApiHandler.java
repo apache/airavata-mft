@@ -20,6 +20,7 @@ package org.apache.airavata.mft.api.handler;
 import io.grpc.stub.StreamObserver;
 import org.apache.airavata.mft.admin.MFTAdmin;
 import org.apache.airavata.mft.admin.models.TransferRequest;
+import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.api.service.*;
 import org.apache.airavata.mft.api.db.entities.TransferStatusEntity;
 import org.apache.airavata.mft.api.db.repositories.TransferStatusRepository;
@@ -54,6 +55,11 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
 
             String transferId = mftAdmin.submitTransfer(transferRequest);
             logger.info("Submitted the transfer request {}", transferId);
+
+            mftAdmin.updateTransferState(transferId, new TransferState()
+                    .setUpdateTimeMils(System.currentTimeMillis())
+                    .setState("RECEIVED").setPercentage(0));
+
             responseObserver.onNext(TransferApiResponse.newBuilder().setTransferId(transferId).build());
             responseObserver.onCompleted();
         } catch (Exception e) {
