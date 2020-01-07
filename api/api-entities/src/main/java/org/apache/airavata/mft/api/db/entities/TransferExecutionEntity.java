@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.controller.db.entities;
+package org.apache.airavata.mft.api.db.entities;
 
 import javax.persistence.*;
 

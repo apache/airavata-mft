@@ -15,10 +15,12 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.controller.db.repositories;
+package org.apache.airavata.mft.api.db.repositories;
 
-import org.apache.airavata.mft.controller.db.entities.TransferStatusEntity;
+import org.apache.airavata.mft.api.db.entities.TargetAgentEntity;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
-public interface TransferStatusRepository extends CrudRepository<TransferStatusEntity, Integer> {
+@Repository
+public interface TargetAgentRepository extends CrudRepository<TargetAgentEntity, String> {
 }

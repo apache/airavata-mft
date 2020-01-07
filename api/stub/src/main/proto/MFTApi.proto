@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+package org.apache.airavata.mft.api.service;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+message TransferApiRequest {
+    string sourceId = 1;
+    string sourceType = 2;
+    string sourceToken = 3;
+    string sourceResourceBackend = 4;
+    string sourceCredentialBackend = 5;
+    string destinationId = 6;
+    string destinationType = 7;
+    string destinationToken = 8;
+    string destResourceBackend = 9;
+    string destCredentialBackend = 10;
+    bool affinityTransfer = 11;
+    map<string, int32> targetAgents = 12;
+}
+
+message TransferApiResponse {
+    string transferId = 1;
+}
+
+message TransferStateApiRequest {
+    string transferId = 1;
+}
+
+message TransferStateApiResponse {
+    string state = 1;
+    int64 updateTimeMils = 2;
+    double percentage = 3;
+}
+
+service  MFTApiService {
+
+    rpc submitTransfer(TransferApiRequest) returns (TransferApiResponse) {
+        option (google.api.http) = {
+           post: "/v1.0/api/transfer"
+        };
+    }
+
+    rpc getTransferStates(TransferStateApiRequest) returns (stream TransferStateApiResponse) {
+        option (google.api.http) = {
+           get: "/v1.0/api/transfer/states"
+        };
+    }
+
+    rpc getTransferState(TransferStateApiRequest) returns (TransferStateApiResponse) {
+        option (google.api.http) = {
+           get: "/v1.0/api/transfer/state"
+        };
+    }
+}

@@ -15,10 +15,16 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.controller.db.repositories;
+package org.apache.airavata.mft.api;
 
-import org.apache.airavata.mft.controller.db.entities.TransferEntity;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
-public interface TransferRepository extends CrudRepository<TransferEntity, String> {
+@SpringBootApplication
+@ComponentScan(basePackages = {"org.apache.airavata.mft"})
+public class ApiServiceApplication {
+    public static void main(String args[]) {
+        SpringApplication.run(ApiServiceApplication.class, args);
+    }
 }

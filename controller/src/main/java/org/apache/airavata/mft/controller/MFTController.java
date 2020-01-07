@@ -26,11 +26,11 @@ import com.orbitz.consul.model.kv.Value;
 import org.apache.airavata.mft.admin.MFTAdmin;
 import org.apache.airavata.mft.admin.models.TransferCommand;
 import org.apache.airavata.mft.admin.models.TransferState;
-import org.apache.airavata.mft.controller.db.entities.TransferEntity;
-import org.apache.airavata.mft.controller.db.entities.TransferStatusEntity;
-import org.apache.airavata.mft.controller.db.repositories.TransferRepository;
+import org.apache.airavata.mft.api.db.entities.TransferEntity;
+import org.apache.airavata.mft.api.db.entities.TransferStatusEntity;
+import org.apache.airavata.mft.api.db.repositories.TransferRepository;
 import org.apache.airavata.mft.admin.models.TransferRequest;
-import org.apache.airavata.mft.controller.db.repositories.TransferStatusRepository;
+import org.apache.airavata.mft.api.db.repositories.TransferStatusRepository;
 import org.dozer.DozerBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,15 +38,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Semaphore;
 
 @PropertySource("classpath:application.properties")
 @SpringBootApplication()
+@ComponentScan(basePackages = {"org.apache.airavata.mft"})
+@EnableJpaRepositories("org.apache.airavata.mft.api.db.repositories")
+@EntityScan("org.apache.airavata.mft.api.db.entities")
 public class MFTController implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(MFTController.class);
@@ -166,7 +171,7 @@ public class MFTController implements CommandLineRunner {
                         if (transferEntity.isPresent()) {
                             TransferStatusEntity ety = new TransferStatusEntity()
                                     .setPercentage(transferState.getPercentage())
-                                    .setStatus(transferState.getState())
+                                    .setState(transferState.getState())
                                     .setUpdateTimeMils(transferState.getUpdateTimeMils())
                                     .setTransfer(transferEntity.get());
                             statusRepository.save(ety);

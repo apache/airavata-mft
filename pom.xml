@@ -47,6 +47,7 @@
         <module>services</module>
         <module>admin</module>
         <module>controller</module>
+        <module>api</module>
     </modules>
 
     <url>http://airavata.apache.org/</url>

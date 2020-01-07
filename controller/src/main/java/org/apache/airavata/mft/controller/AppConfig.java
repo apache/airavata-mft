@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.controller.db.repositories;
+package org.apache.airavata.mft.controller;
 
-import org.apache.airavata.mft.controller.db.entities.TargetAgentEntity;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.context.annotation.Configuration;
 
-public interface TargetAgentRepository extends CrudRepository<TargetAgentEntity, String> {
+@Configuration
+public class AppConfig {
 }

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.controller.db.entities;
+package org.apache.airavata.mft.api.db.entities;
 
 import javax.persistence.*;
 
@@ -31,7 +31,7 @@ public class TransferStatusEntity {
     private TransferEntity transfer;
 
     @Column(name = "STATE")
-    private String status;
+    private String state;
 
     @Column(name = "UPDATE_TIME")
     private long updateTimeMils;
@@ -57,12 +57,12 @@ public class TransferStatusEntity {
         return this;
     }
 
-    public String getStatus() {
-        return status;
+    public String getState() {
+        return state;
     }
 
-    public TransferStatusEntity setStatus(String status) {
-        this.status = status;
+    public TransferStatusEntity setState(String state) {
+        this.state = state;
         return this;
     }
 
