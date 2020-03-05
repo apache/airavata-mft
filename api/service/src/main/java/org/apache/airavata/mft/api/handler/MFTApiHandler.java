@@ -87,10 +87,15 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
     public void getTransferState(TransferStateApiRequest request, StreamObserver<TransferStateApiResponse> responseObserver) {
         try {
             List<TransferStatusEntity> states = statusRepository.getByTransferId(request.getTransferId());
-            states.stream().findFirst().ifPresent(st -> {
-                TransferStateApiResponse s = dozerBeanMapper.map(st, TransferStateApiResponse.newBuilder().getClass()).build();
+
+            Optional<TransferStatusEntity> firstElement = states.stream().findFirst();
+            if (firstElement.isPresent()) {
+                TransferStateApiResponse s = dozerBeanMapper.map(firstElement.get(),
+                    TransferStateApiResponse.newBuilder().getClass()).build();
                 responseObserver.onNext(s);
-            });
+            } else {
+                responseObserver.onNext(TransferStateApiResponse.getDefaultInstance());
+            }
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error in fetching transfer state", e);

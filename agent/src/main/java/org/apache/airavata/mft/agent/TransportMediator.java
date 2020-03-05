@@ -23,6 +23,9 @@ import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.ResourceMetadata;
 import org.apache.airavata.mft.core.TransferTask;
 import org.apache.airavata.mft.core.api.Connector;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +35,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class TransportMediator {
+
+    private static final Logger logger = LoggerFactory.getLogger(TransportMediator.class);
 
     private ExecutorService executor = Executors.newFixedThreadPool(10);
     private ExecutorService monitor = Executors.newFixedThreadPool(10);
@@ -71,17 +76,21 @@ public class TransportMediator {
                             ft.get();
                         } catch (InterruptedException e) {
                             // Interrupted
-                            e.printStackTrace();
+                            logger.error("Transfer task interrupted", e);
                         } catch (ExecutionException e) {
                             // Snap, something went wrong in the task! Abort! Abort! Abort!
-                            System.out.println("One task failed with error: " + e.getMessage());
-                            e.printStackTrace();
-                            onCallback.accept(transferId, new TransferState().setPercentage(0).setState("FAILED").setUpdateTimeMils(System.currentTimeMillis()));
+                            logger.error("One task failed with error", e);
+
+                            onCallback.accept(transferId, new TransferState()
+                                .setPercentage(0)
+                                .setState("FAILED")
+                                .setUpdateTimeMils(System.currentTimeMillis())
+                                .setDescription("Transfer failed due to " + ExceptionUtils.getStackTrace(e)));
                             for (Future<Integer> f : futureList) {
                                 try {
                                     Thread.sleep(1000);
                                 } catch (InterruptedException ex) {
-                                    ex.printStackTrace();
+                                    logger.error("Sleep failed", e);
                                 }
                                 f.cancel(true);
                             }
@@ -92,9 +101,13 @@ public class TransportMediator {
                     long endTime = System.nanoTime();
 
                     double time = (endTime - startTime) * 1.0 /1000000000;
-                    onCallback.accept(transferId, new TransferState().setPercentage(100).setState("COMPLETED").setUpdateTimeMils(System.currentTimeMillis()));
-                    System.out.println("Transfer Speed " + (metadata.getResourceSize() * 1.0 / time) / (1024 * 1024) + " MB/s");
-                    System.out.println("Transfer " + transferId + " completed");
+                    onCallback.accept(transferId, new TransferState()
+                        .setPercentage(100)
+                        .setState("COMPLETED")
+                        .setUpdateTimeMils(System.currentTimeMillis())
+                        .setDescription("Transfer successfully completed"));
+                    logger.info("Transfer Speed " + (metadata.getResourceSize() * 1.0 / time) / (1024 * 1024) + " MB/s");
+                    logger.info("Transfer " + transferId + " completed");
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {

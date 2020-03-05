@@ -21,6 +21,7 @@ public class TransferState {
     private String state;
     private long updateTimeMils;
     private double percentage;
+    private String description;
 
     public String getState() {
         return state;
@@ -46,6 +47,15 @@ public class TransferState {
 
     public TransferState setPercentage(double percentage) {
         this.percentage = percentage;
+        return this;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public TransferState setDescription(String description) {
+        this.description = description;
         return this;
     }
 }

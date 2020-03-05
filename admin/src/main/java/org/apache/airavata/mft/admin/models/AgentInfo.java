@@ -25,6 +25,7 @@ public class AgentInfo {
     private String user;
     private boolean sudo;
     private List<String> supportedProtocols;
+    private List<String> localStorages;
 
     public String getId() {
         return id;
@@ -68,6 +69,15 @@ public class AgentInfo {
 
     public AgentInfo setSupportedProtocols(List<String> supportedProtocols) {
         this.supportedProtocols = supportedProtocols;
+        return this;
+    }
+
+    public List<String> getLocalStorages() {
+        return localStorages;
+    }
+
+    public AgentInfo setLocalStorages(List<String> localStorages) {
+        this.localStorages = localStorages;
         return this;
     }
 }

@@ -33,6 +33,7 @@ message TransferStateApiResponse {
     string state = 1;
     int64 updateTimeMils = 2;
     double percentage = 3;
+    string description = 4;
 }
 
 service  MFTApiService {

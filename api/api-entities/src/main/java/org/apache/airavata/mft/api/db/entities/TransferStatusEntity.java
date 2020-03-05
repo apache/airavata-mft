@@ -39,6 +39,9 @@ public class TransferStatusEntity {
     @Column(name = "PERCENTAGE")
     private double percentage;
 
+    @Column(name = "DESCRIPTION", columnDefinition = "varchar(2048) default ''")
+    private String description;
+
     public int getId() {
         return id;
     }
@@ -81,6 +84,15 @@ public class TransferStatusEntity {
 
     public TransferStatusEntity setPercentage(double percentage) {
         this.percentage = percentage;
+        return this;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public TransferStatusEntity setDescription(String description) {
+        this.description = description;
         return this;
     }
 }

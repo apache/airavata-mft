@@ -26,11 +26,17 @@ import org.apache.airavata.model.data.movement.DataMovementProtocol;
 import org.apache.airavata.model.data.movement.SCPDataMovement;
 import org.apache.airavata.registry.api.RegistryService;
 import org.apache.airavata.registry.api.client.RegistryServiceClientFactory;
-import org.apache.airavata.registry.api.exception.RegistryServiceException;
 
 import java.util.Optional;
 
 public class AiravataResourceBackend implements ResourceBackend {
+
+    @org.springframework.beans.factory.annotation.Value("${registry.server.host}")
+    private String registryServerHost;
+
+    @org.springframework.beans.factory.annotation.Value("${registry.server.port}")
+    private int registryServerPort;
+
     @Override
     public Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request) throws Exception {
 
@@ -41,7 +47,7 @@ public class AiravataResourceBackend implements ResourceBackend {
         String gateway = parts[2];
         String storageOrComputeId = parts[3];
 
-        RegistryService.Client registryClient = RegistryServiceClientFactory.createRegistryClient("localhost", 8970);
+        RegistryService.Client registryClient = RegistryServiceClientFactory.createRegistryClient(registryServerHost, registryServerPort);
         SCPStorage.Builder builder = SCPStorage.newBuilder().setStorageId(resourceId);
         if ("STORAGE".equals(type)) {
 

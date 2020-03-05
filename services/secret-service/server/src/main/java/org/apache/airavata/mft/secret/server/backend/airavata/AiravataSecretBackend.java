@@ -26,9 +26,16 @@ import org.apache.airavata.model.credential.store.SSHCredential;
 import java.util.Optional;
 
 public class AiravataSecretBackend implements SecretBackend {
+
+    @org.springframework.beans.factory.annotation.Value("${credential.server.host}")
+    private String credentialServerHost;
+
+    @org.springframework.beans.factory.annotation.Value("${credential.server.port}")
+    private int credentialServerPort;
+
     @Override
     public Optional<SCPSecret> getSCPSecret(SCPSecretGetRequest request) throws Exception {
-        CredentialStoreService.Client csClient = CredentialStoreClientFactory.createAiravataCSClient("localhost", 8960);
+        CredentialStoreService.Client csClient = CredentialStoreClientFactory.createAiravataCSClient(credentialServerHost, credentialServerPort);
         String secretId = request.getSecretId();
         String[] parts = secretId.split(":");
         String csToken = parts[0];

@@ -40,6 +40,7 @@ import org.apache.airavata.mft.transport.local.LocalSender;
 import org.apache.airavata.mft.transport.scp.SCPMetadataCollector;
 import org.apache.airavata.mft.transport.scp.SCPReceiver;
 import org.apache.airavata.mft.transport.scp.SCPSender;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -48,7 +49,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.PropertySource;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -100,13 +103,16 @@ public class MFTAgent implements CommandLineRunner {
             newValues.values().forEach(value -> {
                 Optional<String> decodedValue = value.getValueAsString();
                 decodedValue.ifPresent(v -> {
-                    System.out.println(String.format("Value is: %s", v));
+                    logger.info("Received raw message: {}", v);
                     TransferCommand request = null;
                     try {
                         request = mapper.readValue(v, TransferCommand.class);
                         logger.info("Received request " + request.getTransferId());
-                        admin.updateTransferState(request.getTransferId(), new TransferState().setState("STARTING")
-                                .setPercentage(0).setUpdateTimeMils(System.currentTimeMillis()));
+                        admin.updateTransferState(request.getTransferId(), new TransferState()
+                            .setState("STARTING")
+                            .setPercentage(0)
+                            .setUpdateTimeMils(System.currentTimeMillis())
+                            .setDescription("Starting the transfer"));
 
                         Connector inConnector = MFTAgent.this.resolveConnector(request.getSourceType(), "IN");
                         inConnector.init(request.getSourceId(), request.getSourceToken());
@@ -116,8 +122,11 @@ public class MFTAgent implements CommandLineRunner {
                         MetadataCollector metadataCollector = MFTAgent.this.resolveMetadataCollector(request.getSourceType());
                         ResourceMetadata metadata = metadataCollector.getGetResourceMetadata(request.getSourceId(), request.getSourceToken());
                         logger.debug("File size " + metadata.getResourceSize());
-                        admin.updateTransferState(request.getTransferId(), new TransferState().setState("STARTED")
-                                .setPercentage(0).setUpdateTimeMils(System.currentTimeMillis()));
+                        admin.updateTransferState(request.getTransferId(), new TransferState()
+                            .setState("STARTED")
+                            .setPercentage(0)
+                            .setUpdateTimeMils(System.currentTimeMillis())
+                            .setDescription("Started the transfer"));
 
                         String transferId = mediator.transfer(request.getTransferId(), inConnector, outConnector, metadata, (id, st) -> {
                             try {
@@ -130,16 +139,21 @@ public class MFTAgent implements CommandLineRunner {
                         logger.info("Submitted transfer " + transferId);
 
                     } catch (Exception e) {
-                        e.printStackTrace();
                         if (request != null) {
                             try {
-                                admin.updateTransferState(request.getTransferId(), new TransferState().setState("FAILED")
-                                        .setPercentage(0).setUpdateTimeMils(System.currentTimeMillis()));
+                                logger.error("Error in submitting transfer {}", request.getTransferId(), e);
+
+                                admin.updateTransferState(request.getTransferId(), new TransferState()
+                                        .setState("FAILED")
+                                        .setPercentage(0)
+                                        .setUpdateTimeMils(System.currentTimeMillis())
+                                        .setDescription(ExceptionUtils.getStackTrace(e)));
                             } catch (MFTAdminException ex) {
-                                ex.printStackTrace();
                                 logger.warn(ex.getMessage());
                                 // Ignore
                             }
+                        } else {
+                            logger.error("Unknown error in processing message {}", v, e);
                         }
                     } finally {
                         logger.info("Deleting key " + value.getKey());
@@ -202,7 +216,8 @@ public class MFTAgent implements CommandLineRunner {
                     .setId(agentId)
                     .setHost(agentHost)
                     .setUser(agentUser)
-                    .setSupportedProtocols(Arrays.asList(supportedProtocols.split(","))));
+                    .setSupportedProtocols(Arrays.asList(supportedProtocols.split(",")))
+                    .setLocalStorages(new ArrayList<>()));
         }
 
         logger.info("Acquired lock " + acquired);
@@ -224,9 +239,20 @@ public class MFTAgent implements CommandLineRunner {
 
     public void start() throws Exception {
         init();
-        boolean connected = connectAgent();
-        if (!connected) {
-            throw new Exception("Failed to connect to the cluster");
+        boolean connected = false;
+        int connectionRetries = 0;
+        while (!connected) {
+            connected = connectAgent();
+            if (connected) {
+                logger.info("Successfully connected to consul");
+            } else {
+                logger.info("Retrying to connect to consul");
+                Thread.sleep(5000);
+                connectionRetries++;
+                if (connectionRetries > 10) {
+                    throw new Exception("Failed to connect to the cluster");
+                }
+            }
         }
         acceptRequests();
     }

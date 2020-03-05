@@ -24,6 +24,7 @@ import com.orbitz.consul.cache.ConsulCache;
 import com.orbitz.consul.cache.KVCache;
 import com.orbitz.consul.model.kv.Value;
 import org.apache.airavata.mft.admin.MFTAdmin;
+import org.apache.airavata.mft.admin.MFTAdminException;
 import org.apache.airavata.mft.admin.models.TransferCommand;
 import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.api.db.entities.TransferEntity;
@@ -93,57 +94,8 @@ public class MFTController implements CommandLineRunner {
                     logger.info("Value is: {}", v);
                     try {
                         TransferRequest transferRequest = jsonMapper.readValue(v, TransferRequest.class);
-                        TransferEntity transferEntity = new TransferEntity();
-                        transferEntity.setTransferId(transferId);
-                        transferEntity.setSourceId(transferRequest.getSourceId())
-                                .setSourceToken(transferRequest.getSourceToken())
-                                .setSourceType(transferRequest.getSourceType())
-                                .setSourceResourceBackend(transferRequest.getSourceResourceBackend())
-                                .setSourceCredentialBackend(transferRequest.getSourceCredentialBackend())
-                                .setDestinationId(transferRequest.getDestinationId())
-                                .setDestinationToken(transferRequest.getDestinationToken())
-                                .setDestinationType(transferRequest.getDestinationType())
-                                .setDestResourceBackend(transferRequest.getDestResourceBackend())
-                                .setDestCredentialBackend(transferRequest.getDestCredentialBackend())
-                                .setAffinityTransfer(transferRequest.isAffinityTransfer());
-
-                        TransferEntity savedEntity = transferRepository.save(transferEntity);
-
-                        List<String> liveAgentIds = admin.getLiveAgentIds();
-                        if (liveAgentIds.isEmpty()) {
-                            logger.error("Live agents are not available. Skipping for now");
-                            throw new ControllerException("Live agents are not available. Skipping for now");
-                        }
-
-                        String selectedAgent = null;
-                        if (transferRequest.getTargetAgents() != null && !transferRequest.getTargetAgents().isEmpty()) {
-                            Optional<String> possibleAgent = transferRequest.getTargetAgents().keySet()
-                                    .stream().filter(req -> liveAgentIds.stream().anyMatch(agent -> agent.equals(req))).findFirst();
-                            if (possibleAgent.isPresent()) {
-                                selectedAgent = possibleAgent.get();
-                            }
-                        } else if (!transferRequest.isAffinityTransfer()){
-                            selectedAgent = liveAgentIds.get(0);
-                        }
-
-                        if (selectedAgent == null) {
-                            logger.error("Couldn't find an Agent that meet transfer requirements");
-                            throw new ControllerException("Couldn't find an Agent that meet transfer requirements");
-                        }
-
-                        TransferCommand transferCommand = new TransferCommand();
-                        transferCommand.setSourceId(transferRequest.getSourceId())
-                                .setSourceToken(transferRequest.getSourceToken())
-                                .setSourceType(transferRequest.getSourceType())
-                                .setSourceResourceBackend(transferRequest.getSourceResourceBackend())
-                                .setSourceCredentialBackend(transferRequest.getSourceCredentialBackend())
-                                .setDestinationId(transferRequest.getDestinationId())
-                                .setDestinationToken(transferRequest.getDestinationToken())
-                                .setDestinationType(transferRequest.getDestinationType())
-                                .setDestResourceBackend(transferRequest.getDestResourceBackend())
-                                .setDestCredentialBackend(transferRequest.getDestCredentialBackend())
-                                .setTransferId(savedEntity.getTransferId());
-
+                        TransferCommand transferCommand = saveAndCreateTransferCommand(transferId, transferRequest);
+                        String selectedAgent = selectAgent(transferRequest);
                         admin.commandTransferToAgent(selectedAgent, transferCommand);
                     } catch (Exception e) {
                         logger.error("Failed to process the request", e);
@@ -173,13 +125,14 @@ public class MFTController implements CommandLineRunner {
                                     .setPercentage(transferState.getPercentage())
                                     .setState(transferState.getState())
                                     .setUpdateTimeMils(transferState.getUpdateTimeMils())
+                                    .setDescription(Optional.ofNullable(transferState.getDescription()).orElse(transferState.getState()))
                                     .setTransfer(transferEntity.get());
                             statusRepository.save(ety);
                             logger.info("Saved state for transfer {}", transferId);
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.error("Error while processing the state message", e);
                 } finally {
                     logger.info("Deleting key " + value.getKey());
                     kvClient.deleteKey(value.getKey()); // Due to bug in consul https://github.com/hashicorp/consul/issues/571
@@ -188,6 +141,67 @@ public class MFTController implements CommandLineRunner {
         };
         stateCache.addListener(stateCacheListener);
         stateCache.start();
+    }
+
+    private TransferCommand saveAndCreateTransferCommand(String transferId, TransferRequest transferRequest) {
+        TransferEntity transferEntity = new TransferEntity();
+        transferEntity.setTransferId(transferId);
+        transferEntity.setSourceId(transferRequest.getSourceId())
+                .setSourceToken(transferRequest.getSourceToken())
+                .setSourceType(transferRequest.getSourceType())
+                .setSourceResourceBackend(transferRequest.getSourceResourceBackend())
+                .setSourceCredentialBackend(transferRequest.getSourceCredentialBackend())
+                .setDestinationId(transferRequest.getDestinationId())
+                .setDestinationToken(transferRequest.getDestinationToken())
+                .setDestinationType(transferRequest.getDestinationType())
+                .setDestResourceBackend(transferRequest.getDestResourceBackend())
+                .setDestCredentialBackend(transferRequest.getDestCredentialBackend())
+                .setAffinityTransfer(transferRequest.isAffinityTransfer());
+
+        TransferEntity savedEntity = transferRepository.save(transferEntity);
+
+
+        TransferCommand transferCommand = new TransferCommand();
+        transferCommand.setSourceId(savedEntity.getSourceId())
+                .setSourceToken(savedEntity.getSourceToken())
+                .setSourceType(savedEntity.getSourceType())
+                .setSourceResourceBackend(savedEntity.getSourceResourceBackend())
+                .setSourceCredentialBackend(savedEntity.getSourceCredentialBackend())
+                .setDestinationId(savedEntity.getDestinationId())
+                .setDestinationToken(savedEntity.getDestinationToken())
+                .setDestinationType(savedEntity.getDestinationType())
+                .setDestResourceBackend(savedEntity.getDestResourceBackend())
+                .setDestCredentialBackend(savedEntity.getDestCredentialBackend())
+                .setTransferId(savedEntity.getTransferId());
+
+        return transferCommand;
+    }
+
+    private String selectAgent(TransferRequest transferRequest) throws ControllerException, MFTAdminException {
+
+        List<String> liveAgentIds = admin.getLiveAgentIds();
+        if (liveAgentIds.isEmpty()) {
+            logger.error("Live agents are not available. Skipping for now");
+            throw new ControllerException("Live agents are not available. Skipping for now");
+        }
+
+        String selectedAgent = null;
+        if (transferRequest.getTargetAgents() != null && !transferRequest.getTargetAgents().isEmpty()) {
+            Optional<String> possibleAgent = transferRequest.getTargetAgents().keySet()
+                    .stream().filter(req -> liveAgentIds.stream().anyMatch(agent -> agent.equals(req))).findFirst();
+            if (possibleAgent.isPresent()) {
+                selectedAgent = possibleAgent.get();
+            }
+        } else if (!transferRequest.isAffinityTransfer()){
+            selectedAgent = liveAgentIds.get(0);
+        }
+
+        if (selectedAgent == null) {
+            logger.error("Couldn't find an Agent that meet transfer requirements");
+            throw new ControllerException("Couldn't find an Agent that meet transfer requirements");
+        }
+
+        return selectedAgent;
     }
 
     @Override

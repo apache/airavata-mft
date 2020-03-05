@@ -36,6 +36,8 @@ import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.service.SCPSecret;
 import org.apache.airavata.mft.secret.service.SCPSecretGetRequest;
 import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -46,6 +48,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class SCPMetadataCollector implements MetadataCollector {
+
+    private static final Logger logger = LoggerFactory.getLogger(SCPMetadataCollector.class);
 
     public ResourceMetadata getGetResourceMetadata(String resourceId, String credentialToken) throws IOException {
 
@@ -89,6 +93,8 @@ public class SCPMetadataCollector implements MetadataCollector {
 
             sshClient.connect(scpResource.getScpStorage().getHost(), scpResource.getScpStorage().getPort());
             sshClient.auth(scpSecret.getUser(), am);
+
+            logger.info("Fetching metadata for resource {} in {}", scpResource.getResourcePath(), scpResource.getScpStorage().getHost());
 
             try (SFTPClient sftpClient = sshClient.newSFTPClient()) {
                 FileAttributes lstat = sftpClient.lstat(scpResource.getResourcePath());

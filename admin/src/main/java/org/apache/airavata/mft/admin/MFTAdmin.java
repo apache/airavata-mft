@@ -58,7 +58,11 @@ public class MFTAdmin {
 
     public void commandTransferToAgent(String agentId, TransferCommand transferCommand) throws MFTAdminException {
         try {
-            updateTransferState(transferCommand.getTransferId(), new TransferState().setState("INITIALIZING").setPercentage(0).setUpdateTimeMils(System.currentTimeMillis()));
+            updateTransferState(transferCommand.getTransferId(), new TransferState()
+            .setState("INITIALIZING")
+            .setPercentage(0)
+            .setUpdateTimeMils(System.currentTimeMillis())
+            .setDescription("Initializing the transfer"));
             String asString = mapper.writeValueAsString(transferCommand);
             kvClient.putValue("mft/agents/messages/"  + agentId + "/" + transferCommand.getTransferId(), asString);
         } catch (JsonProcessingException e) {
