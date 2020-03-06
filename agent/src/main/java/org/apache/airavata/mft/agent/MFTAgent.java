@@ -31,6 +31,8 @@ import org.apache.airavata.mft.admin.MFTAdminException;
 import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferCommand;
 import org.apache.airavata.mft.admin.models.TransferState;
+import org.apache.airavata.mft.core.ConnectorResolver;
+import org.apache.airavata.mft.core.MetadataCollectorResolver;
 import org.apache.airavata.mft.core.ResourceMetadata;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.core.api.MetadataCollector;
@@ -114,12 +116,15 @@ public class MFTAgent implements CommandLineRunner {
                             .setUpdateTimeMils(System.currentTimeMillis())
                             .setDescription("Starting the transfer"));
 
-                        Connector inConnector = MFTAgent.this.resolveConnector(request.getSourceType(), "IN");
+                        Optional<Connector> inConnectorOpt = ConnectorResolver.resolveConnector(request.getSourceType(), "IN");
+                        Connector inConnector = inConnectorOpt.orElseThrow(() -> new Exception("Could not find an in connector for given input"));
                         inConnector.init(request.getSourceId(), request.getSourceToken());
-                        Connector outConnector = MFTAgent.this.resolveConnector(request.getDestinationType(), "OUT");
+                        Optional<Connector> outConnectorOpt = ConnectorResolver.resolveConnector(request.getDestinationType(), "OUT");
+                        Connector outConnector = outConnectorOpt.orElseThrow(() -> new Exception("Could not find an out connector for given input"));
                         outConnector.init(request.getDestinationId(), request.getDestinationToken());
 
-                        MetadataCollector metadataCollector = MFTAgent.this.resolveMetadataCollector(request.getSourceType());
+                        Optional<MetadataCollector> metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(request.getSourceType());
+                        MetadataCollector metadataCollector = metadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for input"));
                         ResourceMetadata metadata = metadataCollector.getGetResourceMetadata(request.getSourceId(), request.getSourceToken());
                         logger.debug("File size " + metadata.getResourceSize());
                         admin.updateTransferState(request.getTransferId(), new TransferState()
@@ -255,39 +260,6 @@ public class MFTAgent implements CommandLineRunner {
             }
         }
         acceptRequests();
-    }
-
-    // TODO load from reflection to avoid dependencies
-    private Connector resolveConnector(String type, String direction) {
-        switch (type) {
-            case "SCP":
-                switch (direction) {
-                    case "IN":
-                        return new SCPReceiver();
-                    case "OUT":
-                        return new SCPSender();
-                }
-                break;
-            case "LOCAL":
-                switch (direction) {
-                    case "IN":
-                        return new LocalReceiver();
-                    case "OUT":
-                        return new LocalSender();
-                }
-        }
-        return null;
-    }
-
-    // TODO load from reflection to avoid dependencies
-    private MetadataCollector resolveMetadataCollector(String type) {
-        switch (type) {
-            case "SCP":
-                return new SCPMetadataCollector();
-            case "LOCAL":
-                return new LocalMetadataCollector();
-        }
-        return null;
     }
 
     @Override

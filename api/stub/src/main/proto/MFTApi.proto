@@ -36,6 +36,18 @@ message TransferStateApiResponse {
     string description = 4;
 }
 
+message ResourceAvailabilityRequest {
+    string resourceId = 1;
+    string resourceType = 2;
+    string resourceToken = 3;
+    string resourceBackend = 4;
+    string resourceCredentialBackend = 5;
+}
+
+message ResourceAvailabilityResponse {
+    bool available = 1;
+}
+
 service  MFTApiService {
 
     rpc submitTransfer(TransferApiRequest) returns (TransferApiResponse) {
@@ -55,4 +67,6 @@ service  MFTApiService {
            get: "/v1.0/api/transfer/state"
         };
     }
+
+    rpc getResourceAvailability(ResourceAvailabilityRequest) returns (ResourceAvailabilityResponse) {}
 }

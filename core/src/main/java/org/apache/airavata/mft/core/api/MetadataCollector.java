@@ -21,4 +21,5 @@ import org.apache.airavata.mft.core.ResourceMetadata;
 
 public interface MetadataCollector {
     public ResourceMetadata getGetResourceMetadata(String resourceId, String credentialToken) throws Exception;
+    public Boolean isAvailable(String resourceId, String credentialToken) throws Exception;
 }

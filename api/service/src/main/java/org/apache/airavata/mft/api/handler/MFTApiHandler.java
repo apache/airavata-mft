@@ -24,6 +24,8 @@ import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.api.service.*;
 import org.apache.airavata.mft.api.db.entities.TransferStatusEntity;
 import org.apache.airavata.mft.api.db.repositories.TransferStatusRepository;
+import org.apache.airavata.mft.core.MetadataCollectorResolver;
+import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.dozer.DozerBeanMapper;
 import org.lognet.springboot.grpc.GRpcService;
 import org.slf4j.Logger;
@@ -100,6 +102,23 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
         } catch (Exception e) {
             logger.error("Error in fetching transfer state", e);
             responseObserver.onError(new Exception("Failed to retrieve transfer state", e));
+        }
+    }
+
+    @Override
+    public void getResourceAvailability(ResourceAvailabilityRequest request, StreamObserver<ResourceAvailabilityResponse> responseObserver) {
+        try {
+            Optional<MetadataCollector> metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(request.getResourceType());
+            MetadataCollector metadataCollector = metadataCollectorOp.orElseThrow(
+                    () -> new Exception("Could not find a metadata collector for resource " + request.getResourceId()));
+
+            Boolean available = metadataCollector.isAvailable(request.getResourceId(), request.getResourceToken());
+            responseObserver.onNext(ResourceAvailabilityResponse.newBuilder().setAvailable(available).build());
+            responseObserver.onCompleted();
+
+        } catch (Exception e) {
+            logger.error("Error while checking availability of resource " + request.getResourceId(), e);
+            responseObserver.onError(new Exception("Failed to check the availability", e));
         }
     }
 }

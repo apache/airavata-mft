@@ -34,4 +34,9 @@ public class LocalMetadataCollector implements MetadataCollector {
         metadata.setUpdateTime(file.lastModified());
         return metadata;
     }
+
+    @Override
+    public Boolean isAvailable(String resourceId, String credentialToken) throws Exception {
+        return false;
+    }
 }

@@ -51,48 +51,21 @@ public class SCPMetadataCollector implements MetadataCollector {
 
     private static final Logger logger = LoggerFactory.getLogger(SCPMetadataCollector.class);
 
+    private String resourceServiceHost = "localhost";
+    private int resourceServicePort = 7002;
+
+    private String secretServiceHost = "localhost";
+    private int secretServicePort = 7003;
+
     public ResourceMetadata getGetResourceMetadata(String resourceId, String credentialToken) throws IOException {
 
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient("localhost", 7002);
+        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
         SCPResource scpResource = resourceClient.getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient("localhost", 7003);
+        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
         SCPSecret scpSecret = secretClient.getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
-
-        try (SSHClient sshClient = new SSHClient()) {
-            sshClient.addHostKeyVerifier((h, p, key) -> true);
-
-            File privateKeyFile = File.createTempFile("id_rsa", "");
-            BufferedWriter writer = new BufferedWriter(new FileWriter(privateKeyFile));
-            writer.write(scpSecret.getPrivateKey());
-            writer.close();
-
-            KeyProvider keyProvider = sshClient.loadKeys(privateKeyFile.getPath(), scpSecret.getPassphrase());
-            final List<AuthMethod> am = new LinkedList<>();
-            am.add(new AuthPublickey(keyProvider));
-            am.add(new AuthKeyboardInteractive(new ChallengeResponseProvider() {
-                @Override
-                public List<String> getSubmethods() {
-                    return new ArrayList<>();
-                }
-
-                @Override
-                public void init(Resource resource, String name, String instruction) {}
-
-                @Override
-                public char[] getResponse(String prompt, boolean echo) {
-                    return new char[0];
-                }
-
-                @Override
-                public boolean shouldRetry() {
-                    return false;
-                }
-            }));
-
-            sshClient.connect(scpResource.getScpStorage().getHost(), scpResource.getScpStorage().getPort());
-            sshClient.auth(scpSecret.getUser(), am);
+        try (SSHClient sshClient = getSSHClient(scpResource, scpSecret)) {
 
             logger.info("Fetching metadata for resource {} in {}", scpResource.getResourcePath(), scpResource.getScpStorage().getHost());
 
@@ -107,5 +80,62 @@ public class SCPMetadataCollector implements MetadataCollector {
                 return metadata;
             }
         }
+    }
+
+    @Override
+    public Boolean isAvailable(String resourceId, String credentialToken) throws Exception {
+
+        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
+        SCPResource scpResource = resourceClient.getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+
+        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
+        SCPSecret scpSecret = secretClient.getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+
+        try (SSHClient sshClient = getSSHClient(scpResource, scpSecret)) {
+            logger.info("Checking the availability of file {}", scpResource.getResourcePath());
+            try (SFTPClient sftpClient = sshClient.newSFTPClient()) {
+                return sftpClient.statExistence(scpResource.getResourcePath()) != null;
+            }
+        }
+    }
+
+    private SSHClient getSSHClient(SCPResource scpResource, SCPSecret scpSecret) throws IOException {
+
+        SSHClient sshClient = new SSHClient();
+
+        sshClient.addHostKeyVerifier((h, p, key) -> true);
+
+        File privateKeyFile = File.createTempFile("id_rsa", "");
+        BufferedWriter writer = new BufferedWriter(new FileWriter(privateKeyFile));
+        writer.write(scpSecret.getPrivateKey());
+        writer.close();
+
+        KeyProvider keyProvider = sshClient.loadKeys(privateKeyFile.getPath(), scpSecret.getPassphrase());
+        final List<AuthMethod> am = new LinkedList<>();
+        am.add(new AuthPublickey(keyProvider));
+        am.add(new AuthKeyboardInteractive(new ChallengeResponseProvider() {
+            @Override
+            public List<String> getSubmethods() {
+                return new ArrayList<>();
+            }
+
+            @Override
+            public void init(Resource resource, String name, String instruction) {}
+
+            @Override
+            public char[] getResponse(String prompt, boolean echo) {
+                return new char[0];
+            }
+
+            @Override
+            public boolean shouldRetry() {
+                return false;
+            }
+        }));
+
+        sshClient.connect(scpResource.getScpStorage().getHost(), scpResource.getScpStorage().getPort());
+        sshClient.auth(scpSecret.getUser(), am);
+
+        return sshClient;
     }
 }
