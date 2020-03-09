@@ -40,15 +40,27 @@ public class SCPSender implements Connector {
 
     private static final Logger logger = LoggerFactory.getLogger(SCPSender.class);
 
+    @org.springframework.beans.factory.annotation.Value("${resource.service.host}")
+    private String resourceServiceHost;
+
+    @org.springframework.beans.factory.annotation.Value("${resource.service.port}")
+    private int resourceServicePort;
+
+    @org.springframework.beans.factory.annotation.Value("${secret.service.host}")
+    private String secretServiceHost;
+
+    @org.springframework.beans.factory.annotation.Value("${secret.service.port}")
+    private int secretServicePort;
+
     private Session session;
     private SCPResource scpResource;
 
     public void init(String resourceId, String credentialToken) throws Exception {
 
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient("localhost", 7002);
+        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
         this.scpResource = resourceClient.getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient("localhost", 7003);
+        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
         SCPSecret scpSecret = secretClient.getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         File privateKeyFile = File.createTempFile("id_rsa", "");

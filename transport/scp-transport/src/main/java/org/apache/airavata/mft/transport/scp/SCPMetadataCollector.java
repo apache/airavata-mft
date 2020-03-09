@@ -51,11 +51,17 @@ public class SCPMetadataCollector implements MetadataCollector {
 
     private static final Logger logger = LoggerFactory.getLogger(SCPMetadataCollector.class);
 
-    private String resourceServiceHost = "localhost";
-    private int resourceServicePort = 7002;
+    @org.springframework.beans.factory.annotation.Value("${resource.service.host}")
+    private String resourceServiceHost;
 
-    private String secretServiceHost = "localhost";
-    private int secretServicePort = 7003;
+    @org.springframework.beans.factory.annotation.Value("${resource.service.port}")
+    private int resourceServicePort;
+
+    @org.springframework.beans.factory.annotation.Value("${secret.service.host}")
+    private String secretServiceHost;
+
+    @org.springframework.beans.factory.annotation.Value("${secret.service.port}")
+    private int secretServicePort;
 
     public ResourceMetadata getGetResourceMetadata(String resourceId, String credentialToken) throws IOException {
 
