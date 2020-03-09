@@ -26,12 +26,15 @@ import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.service.SCPSecret;
 import org.apache.airavata.mft.secret.service.SCPSecretCreateRequest;
 import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
 public class SCPTransportUtil {
     // TODO replace with an API call to the registry
 
+    private static final Logger logger = LoggerFactory.getLogger(SCPTransportUtil.class);
 
     public static void main(String args[]) {
         ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient("localhost", 7002);
@@ -79,7 +82,7 @@ public class SCPTransportUtil {
         return null;
     }
 
-    public static Session createSession(String user, String host, int port, String keyFilePath, String keyPassword) {
+    public static Session createSession(String user, String host, int port, String keyFilePath, String keyPassword) throws Exception {
         try {
             JSch jsch = new JSch();
 
@@ -100,8 +103,7 @@ public class SCPTransportUtil {
 
             return session;
         } catch (JSchException e) {
-            e.printStackTrace();
-            return null;
+            throw new Exception("Failed to create a ssh session for " + user + "@" + host + ":" + port, e);
         }
     }
 }

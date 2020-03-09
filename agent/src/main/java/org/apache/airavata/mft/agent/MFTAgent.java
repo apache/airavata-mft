@@ -26,7 +26,7 @@ import com.orbitz.consul.cache.KVCache;
 import com.orbitz.consul.model.kv.Value;
 import com.orbitz.consul.model.session.ImmutableSession;
 import com.orbitz.consul.model.session.SessionCreatedResponse;
-import org.apache.airavata.mft.admin.MFTAdmin;
+import org.apache.airavata.mft.admin.MFTConsulClient;
 import org.apache.airavata.mft.admin.MFTAdminException;
 import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferCommand;
@@ -36,12 +36,6 @@ import org.apache.airavata.mft.core.MetadataCollectorResolver;
 import org.apache.airavata.mft.core.ResourceMetadata;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.core.api.MetadataCollector;
-import org.apache.airavata.mft.transport.local.LocalMetadataCollector;
-import org.apache.airavata.mft.transport.local.LocalReceiver;
-import org.apache.airavata.mft.transport.local.LocalSender;
-import org.apache.airavata.mft.transport.scp.SCPMetadataCollector;
-import org.apache.airavata.mft.transport.scp.SCPReceiver;
-import org.apache.airavata.mft.transport.scp.SCPSender;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +47,6 @@ import org.springframework.context.annotation.PropertySource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -90,13 +83,13 @@ public class MFTAgent implements CommandLineRunner {
 
     private ObjectMapper mapper = new ObjectMapper();
 
-    private MFTAdmin admin;
+    private MFTConsulClient mftConsulClient;
 
     public void init() {
         client = Consul.builder().build();
         kvClient = client.keyValueClient();
         messageCache = KVCache.newCache(kvClient, "mft/agents/messages/" + agentId );
-        admin = new MFTAdmin();
+        mftConsulClient = new MFTConsulClient();
     }
 
     private void acceptRequests() {
@@ -110,7 +103,7 @@ public class MFTAgent implements CommandLineRunner {
                     try {
                         request = mapper.readValue(v, TransferCommand.class);
                         logger.info("Received request " + request.getTransferId());
-                        admin.updateTransferState(request.getTransferId(), new TransferState()
+                        mftConsulClient.submitTransferState(request.getTransferId(), new TransferState()
                             .setState("STARTING")
                             .setPercentage(0)
                             .setUpdateTimeMils(System.currentTimeMillis())
@@ -127,7 +120,7 @@ public class MFTAgent implements CommandLineRunner {
                         MetadataCollector metadataCollector = metadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for input"));
                         ResourceMetadata metadata = metadataCollector.getGetResourceMetadata(request.getSourceId(), request.getSourceToken());
                         logger.debug("File size " + metadata.getResourceSize());
-                        admin.updateTransferState(request.getTransferId(), new TransferState()
+                        mftConsulClient.submitTransferState(request.getTransferId(), new TransferState()
                             .setState("STARTED")
                             .setPercentage(0)
                             .setUpdateTimeMils(System.currentTimeMillis())
@@ -135,7 +128,7 @@ public class MFTAgent implements CommandLineRunner {
 
                         String transferId = mediator.transfer(request.getTransferId(), inConnector, outConnector, metadata, (id, st) -> {
                             try {
-                                admin.updateTransferState(id, st);
+                                mftConsulClient.submitTransferState(id, st);
                             } catch (MFTAdminException e) {
                                 logger.error("Failed while updating transfer state", e);
                             }
@@ -148,7 +141,7 @@ public class MFTAgent implements CommandLineRunner {
                             try {
                                 logger.error("Error in submitting transfer {}", request.getTransferId(), e);
 
-                                admin.updateTransferState(request.getTransferId(), new TransferState()
+                                mftConsulClient.submitTransferState(request.getTransferId(), new TransferState()
                                         .setState("FAILED")
                                         .setPercentage(0)
                                         .setUpdateTimeMils(System.currentTimeMillis())
@@ -217,7 +210,7 @@ public class MFTAgent implements CommandLineRunner {
                 }
             }, sessionRenewSeconds, sessionRenewSeconds, TimeUnit.SECONDS);
 
-            this.admin.registerAgent(new AgentInfo()
+            this.mftConsulClient.registerAgent(new AgentInfo()
                     .setId(agentId)
                     .setHost(agentHost)
                     .setUser(agentUser)

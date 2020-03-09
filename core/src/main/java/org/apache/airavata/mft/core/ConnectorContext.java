@@ -21,6 +21,7 @@ public class ConnectorContext {
 
     private CircularStreamingBuffer streamBuffer;
     private ResourceMetadata metadata;
+    private String transferId;
 
     public CircularStreamingBuffer getStreamBuffer() {
         return streamBuffer;
@@ -36,5 +37,14 @@ public class ConnectorContext {
 
     public void setMetadata(ResourceMetadata metadata) {
         this.metadata = metadata;
+    }
+
+    public String getTransferId() {
+        return transferId;
+    }
+
+    public ConnectorContext setTransferId(String transferId) {
+        this.transferId = transferId;
+        return this;
     }
 }

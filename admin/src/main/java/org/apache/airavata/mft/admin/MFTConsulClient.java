@@ -18,6 +18,7 @@
 package org.apache.airavata.mft.admin;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orbitz.consul.Consul;
 import com.orbitz.consul.ConsulException;
@@ -27,10 +28,13 @@ import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferCommand;
 import org.apache.airavata.mft.admin.models.TransferRequest;
 import org.apache.airavata.mft.admin.models.TransferState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /*
  mft/agents/messages/{agent-id} -> message
@@ -39,7 +43,9 @@ import java.util.stream.Collectors;
  mft/transfer/state/{transfer-id} -> transfer state
  */
 
-public class MFTAdmin {
+public class MFTConsulClient {
+
+    private static final Logger logger = LoggerFactory.getLogger(MFTConsulClient.class);
 
     private Consul client = Consul.builder().build();
     private KeyValueClient kvClient = client.keyValueClient();
@@ -58,7 +64,7 @@ public class MFTAdmin {
 
     public void commandTransferToAgent(String agentId, TransferCommand transferCommand) throws MFTAdminException {
         try {
-            updateTransferState(transferCommand.getTransferId(), new TransferState()
+            submitTransferState(transferCommand.getTransferId(), new TransferState()
             .setState("INITIALIZING")
             .setPercentage(0)
             .setUpdateTimeMils(System.currentTimeMillis())
@@ -119,34 +125,53 @@ public class MFTAdmin {
         }
     }
 
-    public TransferState getTransferState(String transferId) throws MFTAdminException {
+    public Optional<TransferState> getTransferState(String transferId) throws MFTAdminException {
+
         try {
-            Optional<Value> value = kvClient.getValue("mft/transfer/state/" + transferId);
-            if (value.isPresent()) {
-                if (value.get().getValueAsString().isPresent()) {
-                    String asStr = value.get().getValueAsString().get();
-                    return mapper.readValue(asStr, TransferState.class);
+            List<TransferState> states = getTransferStates(transferId);
+
+            Optional<TransferState> lastStatusOp = states.stream().min((o1, o2) -> {
+                if (o1.getUpdateTimeMils() == o2.getUpdateTimeMils()) {
+                    return 0;
+                } else {
+                    return o1.getUpdateTimeMils() - o2.getUpdateTimeMils() < 0 ? 1 : -1;
                 }
-            }
-            return new TransferState().setPercentage(0).setUpdateTimeMils(System.currentTimeMillis()).setState("UNKNOWN");
+            });
+
+            return lastStatusOp;
 
         } catch (ConsulException e) {
-            if (e.getCode() == 404) {
-                return new TransferState().setPercentage(0).setUpdateTimeMils(System.currentTimeMillis()).setState("UNKNOWN");
-            }
             throw new MFTAdminException("Error in fetching transfer status " + transferId, e);
         } catch (Exception e) {
             throw new MFTAdminException("Error in fetching transfer status " + transferId, e);
         }
     }
 
-    public void updateTransferState(String transferId, TransferState transferState) throws MFTAdminException {
+    public void submitTransferState(String transferId, TransferState transferState) throws MFTAdminException {
         try {
-            String asStr = mapper.writeValueAsString(transferState);
+            List<TransferState> allStates = getTransferStates(transferId);
+            System.out.println(allStates);
+            allStates.add(transferState);
+            String asStr = mapper.writeValueAsString(allStates);
             kvClient.putValue("mft/transfer/state/" + transferId, asStr);
-        } catch (JsonProcessingException e) {
+
+            logger.info("Saved transfer status " + asStr);
+
+        } catch (Exception e) {
             throw new MFTAdminException("Error in serializing transfer status", e);
         }
+    }
+
+    public List<TransferState> getTransferStates(String transferId) throws IOException {
+        Optional<Value> valueOp = kvClient.getValue("mft/transfer/state/" + transferId);
+        List<TransferState> allStates;
+        if (valueOp.isPresent()) {
+            String prevStates = valueOp.get().getValueAsString().get();
+            allStates = new ArrayList<>(Arrays.asList(mapper.readValue(prevStates, TransferState[].class)));
+        } else {
+            allStates = new ArrayList<>();
+        }
+        return allStates;
     }
 
     public List<AgentInfo> getLiveAgentInfos() throws MFTAdminException {

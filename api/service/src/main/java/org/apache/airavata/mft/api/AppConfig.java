@@ -17,7 +17,7 @@
 
 package org.apache.airavata.mft.api;
 
-import org.apache.airavata.mft.admin.MFTAdmin;
+import org.apache.airavata.mft.admin.MFTConsulClient;
 import org.apache.airavata.mft.admin.models.TransferRequest;
 import org.apache.airavata.mft.api.service.TransferApiRequest;
 import org.dozer.DozerBeanMapper;
@@ -28,8 +28,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AppConfig {
     @Bean
-    public MFTAdmin mftAdmin() {
-        return new MFTAdmin();
+    public MFTConsulClient mftConsulClient() {
+        return new MFTConsulClient();
     }
 
     @Bean

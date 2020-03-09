@@ -31,13 +31,19 @@ import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.service.SCPSecret;
 import org.apache.airavata.mft.secret.service.SCPSecretGetRequest;
 import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 
 public class SCPSender implements Connector {
+
+    private static final Logger logger = LoggerFactory.getLogger(SCPSender.class);
+
     private Session session;
     private SCPResource scpResource;
-    public void init(String resourceId, String credentialToken) throws IOException {
+
+    public void init(String resourceId, String credentialToken) throws Exception {
 
         ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient("localhost", 7002);
         this.scpResource = resourceClient.getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
@@ -50,6 +56,12 @@ public class SCPSender implements Connector {
         writer.write(scpSecret.getPrivateKey());
         writer.close();
 
+        logger.info("Creating a ssh session for {}@{}:{} with key {} and passphrase {}",
+                scpSecret.getUser(), scpResource.getScpStorage().getHost(),
+                scpResource.getScpStorage().getPort(),
+                privateKeyFile.getPath(),
+                scpSecret.getPassphrase());
+
         this.session = SCPTransportUtil.createSession(scpSecret.getUser(), scpResource.getScpStorage().getHost(),
                 scpResource.getScpStorage().getPort(),
                 privateKeyFile.getPath(),
@@ -58,11 +70,11 @@ public class SCPSender implements Connector {
 
     public void destroy() {
 
-        try {
-            this.session.disconnect();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        //try {
+        //    this.session.disconnect();
+        //} catch (Exception e) {
+        //    logger.error("Errored while disconnecting session", e);
+        //}
     }
 
     public void startStream(ConnectorContext context) throws Exception {
@@ -72,91 +84,99 @@ public class SCPSender implements Connector {
         }
         try {
             copyLocalToRemote(this.session, this.scpResource.getResourcePath(), context.getStreamBuffer(), context.getMetadata().getResourceSize());
+            logger.info("SCP send to transfer {} completed", context.getTransferId());
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Errored while streaming to remote scp server. Transfer {}", context.getTransferId() , e);
             throw e;
         }
     }
 
     private void copyLocalToRemote(Session session, String to, CircularStreamingBuffer streamBuffer, long fileSize) throws JSchException, IOException {
-        System.out.println("Starting scp send");
-        InputStream inputStream = streamBuffer.getInputStream();
+        try {
+            logger.info("Starting scp send for remote server");
+            InputStream inputStream = streamBuffer.getInputStream();
 
-        boolean ptimestamp = true;
+            boolean ptimestamp = true;
 
-        // exec 'scp -t rfile' remotely
-        String command = "scp " + (ptimestamp ? "-p" : "") + " -t " + to;
-        com.jcraft.jsch.Channel channel = session.openChannel("exec");
-        ((ChannelExec) channel).setCommand(command);
+            // exec 'scp -t rfile' remotely
+            String command = "scp " + (ptimestamp ? "-p" : "") + " -t " + to;
+            com.jcraft.jsch.Channel channel = session.openChannel("exec");
+            ((ChannelExec) channel).setCommand(command);
 
-        // get I/O streams for remote scp
-        OutputStream out = channel.getOutputStream();
-        InputStream in = channel.getInputStream();
+            // get I/O streams for remote scp
+            OutputStream out = channel.getOutputStream();
+            InputStream in = channel.getInputStream();
 
-        channel.connect();
+            channel.connect();
 
-        if (checkAck(in) != 0) {
-            throw new IOException("Error code found in ack " + (checkAck(in)));
-        }
-
-        if (ptimestamp) {
-            command = "T" + (System.currentTimeMillis() / 1000) + " 0";
-            // The access time should be sent here,
-            // but it is not accessible with JavaAPI ;-<
-            command += (" " + (System.currentTimeMillis() / 1000) + " 0\n");
-            out.write(command.getBytes());
-            out.flush();
             if (checkAck(in) != 0) {
                 throw new IOException("Error code found in ack " + (checkAck(in)));
             }
-        }
 
-        // send "C0644 filesize filename", where filename should not include '/'
-        command = "C0644 " + fileSize + " ";
-        if (to.lastIndexOf('/') > 0) {
-            command += to.substring(to.lastIndexOf('/') + 1);
-        } else {
-            command += to;
-        }
-
-        command += "\n";
-        out.write(command.getBytes());
-        out.flush();
-
-        if (checkAck(in) != 0) {
-            throw new IOException("Error code found in ack " + (checkAck(in)));
-        }
-
-        // send a content of lfile
-        byte[] buf = new byte[1024];
-        long totalWritten = 0;
-        while (true) {
-            int len = inputStream.read(buf, 0, buf.length);
-            if (len == -1) {
-                break;
-            } else {
-                out.write(buf, 0, len); //out.flush();
-                totalWritten += len;
-                //System.out.println("Write " + totalWritten);
-                if (totalWritten == fileSize) {
-                    break;
+            if (ptimestamp) {
+                command = "T" + (System.currentTimeMillis() / 1000) + " 0";
+                // The access time should be sent here,
+                // but it is not accessible with JavaAPI ;-<
+                command += (" " + (System.currentTimeMillis() / 1000) + " 0\n");
+                out.write(command.getBytes());
+                out.flush();
+                if (checkAck(in) != 0) {
+                    throw new IOException("Error code found in ack " + (checkAck(in)));
                 }
             }
+
+            // send "C0644 filesize filename", where filename should not include '/'
+            command = "C0644 " + fileSize + " ";
+            if (to.lastIndexOf('/') > 0) {
+                command += to.substring(to.lastIndexOf('/') + 1);
+            } else {
+                command += to;
+            }
+
+            command += "\n";
+            out.write(command.getBytes());
+            out.flush();
+
+            if (checkAck(in) != 0) {
+                throw new IOException("Error code found in ack " + (checkAck(in)));
+            }
+
+            // send a content of lfile
+            byte[] buf = new byte[1024];
+            long totalWritten = 0;
+            while (true) {
+                int len = inputStream.read(buf, 0, buf.length);
+                if (len == -1) {
+                    break;
+                } else {
+                    out.write(buf, 0, len); //out.flush();
+                    totalWritten += len;
+                    //System.out.println("Write " + totalWritten);
+                    if (totalWritten == fileSize) {
+                        break;
+                    }
+                }
+            }
+
+            // send '\0'
+            buf[0] = 0;
+            out.write(buf, 0, 1);
+            out.flush();
+
+            if (checkAck(in) != 0) {
+                throw new IOException("Error code found in ack " + (checkAck(in)));
+            }
+            out.close();
+            logger.info("Completed scp send for remote server");
+            channel.disconnect();
+
+        } finally {
+            try {
+                session.disconnect();
+            } catch (Exception e) {
+                logger.warn("Session disconnection failed", e);
+            }
         }
-
-        // send '\0'
-        buf[0] = 0;
-        out.write(buf, 0, 1);
-        out.flush();
-
-        if (checkAck(in) != 0) {
-            throw new IOException("Error code found in ack " + (checkAck(in)));
-        }
-        out.close();
-
-        channel.disconnect();
-        session.disconnect();
-        System.out.println("Done sending");
     }
 
     public int checkAck(InputStream in) throws IOException {

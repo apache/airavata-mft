@@ -18,12 +18,10 @@
 package org.apache.airavata.mft.api.handler;
 
 import io.grpc.stub.StreamObserver;
-import org.apache.airavata.mft.admin.MFTAdmin;
+import org.apache.airavata.mft.admin.MFTConsulClient;
 import org.apache.airavata.mft.admin.models.TransferRequest;
 import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.api.service.*;
-import org.apache.airavata.mft.api.db.entities.TransferStatusEntity;
-import org.apache.airavata.mft.api.db.repositories.TransferStatusRepository;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.dozer.DozerBeanMapper;
@@ -41,10 +39,7 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
     private static final Logger logger = LoggerFactory.getLogger(MFTApiHandler.class);
 
     @Autowired
-    private TransferStatusRepository statusRepository;
-
-    @Autowired
-    private MFTAdmin mftAdmin;
+    private MFTConsulClient mftConsulClient;
 
     @Autowired
     private DozerBeanMapper dozerBeanMapper;
@@ -55,12 +50,13 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
             TransferRequest transferRequest = dozerBeanMapper.map(request, TransferRequest.class);
             Optional.ofNullable(request.getTargetAgentsMap()).ifPresent(transferRequest::setTargetAgents); // Custom mapping
 
-            String transferId = mftAdmin.submitTransfer(transferRequest);
+            String transferId = mftConsulClient.submitTransfer(transferRequest);
             logger.info("Submitted the transfer request {}", transferId);
 
-            mftAdmin.updateTransferState(transferId, new TransferState()
+            mftConsulClient.submitTransferState(transferId, new TransferState()
                     .setUpdateTimeMils(System.currentTimeMillis())
-                    .setState("RECEIVED").setPercentage(0));
+                    .setState("RECEIVED").setPercentage(0)
+                    .setDescription("Received transfer job " + transferId));
 
             responseObserver.onNext(TransferApiResponse.newBuilder().setTransferId(transferId).build());
             responseObserver.onCompleted();
@@ -73,7 +69,7 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
     @Override
     public void getTransferStates(TransferStateApiRequest request, StreamObserver<TransferStateApiResponse> responseObserver) {
         try {
-            List<TransferStatusEntity> states = statusRepository.getByTransferId(request.getTransferId());
+            List<TransferState> states = mftConsulClient.getTransferStates(request.getTransferId());
             states.forEach(st -> {
                 TransferStateApiResponse s = dozerBeanMapper.map(st, TransferStateApiResponse.newBuilder().getClass()).build();
                 responseObserver.onNext(s);
@@ -88,11 +84,10 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
     @Override
     public void getTransferState(TransferStateApiRequest request, StreamObserver<TransferStateApiResponse> responseObserver) {
         try {
-            List<TransferStatusEntity> states = statusRepository.getByTransferId(request.getTransferId());
+            Optional<TransferState> stateOp = mftConsulClient.getTransferState(request.getTransferId());
 
-            Optional<TransferStatusEntity> firstElement = states.stream().findFirst();
-            if (firstElement.isPresent()) {
-                TransferStateApiResponse s = dozerBeanMapper.map(firstElement.get(),
+            if (stateOp.isPresent()) {
+                TransferStateApiResponse s = dozerBeanMapper.map(stateOp.get(),
                     TransferStateApiResponse.newBuilder().getClass()).build();
                 responseObserver.onNext(s);
             } else {

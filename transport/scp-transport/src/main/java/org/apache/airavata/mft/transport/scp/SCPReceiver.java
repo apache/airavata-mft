@@ -28,10 +28,15 @@ import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.service.SCPSecret;
 import org.apache.airavata.mft.secret.service.SCPSecretGetRequest;
 import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 
 public class SCPReceiver implements Connector {
+
+    private static final Logger logger = LoggerFactory.getLogger(SCPReceiver.class);
+
     private Session session;
     private SCPResource scpResource;
 
@@ -58,11 +63,7 @@ public class SCPReceiver implements Connector {
     }
 
     public void destroy() {
-        try {
-            this.session.disconnect();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
     }
 
     public void startStream(ConnectorContext context) throws Exception {
@@ -72,98 +73,107 @@ public class SCPReceiver implements Connector {
         }
 
         transferRemoteToStream(session, this.scpResource.getResourcePath(), context.getStreamBuffer());
+        logger.info("SCP Receive completed. Transfer {}", context.getTransferId());
     }
 
     private void transferRemoteToStream(Session session, String from, CircularStreamingBuffer streamBuffer) throws Exception {
 
-        OutputStream outputStream = streamBuffer.getOutputStream();
+        try {
+            OutputStream outputStream = streamBuffer.getOutputStream();
 
-        System.out.println("Starting scp receive");
-        // exec 'scp -f rfile' remotely
-        String command = "scp -f " + from;
-        com.jcraft.jsch.Channel channel = session.openChannel("exec");
-        ((ChannelExec) channel).setCommand(command);
+            logger.info("Starting scp receive");
+            // exec 'scp -f rfile' remotely
+            String command = "scp -f " + from;
+            com.jcraft.jsch.Channel channel = session.openChannel("exec");
+            ((ChannelExec) channel).setCommand(command);
 
-        // get I/O streams for remote scp
-        OutputStream out = channel.getOutputStream();
-        InputStream in = channel.getInputStream();
+            // get I/O streams for remote scp
+            OutputStream out = channel.getOutputStream();
+            InputStream in = channel.getInputStream();
 
-        channel.connect();
+            channel.connect();
 
-        byte[] buf = new byte[1024];
-
-        // send '\0'
-        buf[0] = 0;
-        out.write(buf, 0, 1);
-        out.flush();
-
-        while (true) {
-            int c = checkAck(in);
-            if (c != 'C') {
-                break;
-            }
-
-            // read '0644 '
-            in.read(buf, 0, 5);
-
-            long filesize = 0L;
-            while (true) {
-                if (in.read(buf, 0, 1) < 0) {
-                    // error
-                    break;
-                }
-                if (buf[0] == ' ') break;
-                filesize = filesize * 10L + (long) (buf[0] - '0');
-            }
-
-            String file = null;
-            for (int i = 0; ; i++) {
-                in.read(buf, i, 1);
-                if (buf[i] == (byte) 0x0a) {
-                    file = new String(buf, 0, i);
-                    break;
-                }
-            }
-
-            System.out.println("file-size=" + filesize + ", file=" + file);
-            // send '\0'
-            buf[0] = 0;
-            out.write(buf, 0, 1);
-            out.flush();
-
-            // read a content of lfile
-            int bufSize;
-            while (true) {
-                if (buf.length < filesize) bufSize = buf.length;
-                else bufSize = (int) filesize;
-                bufSize = in.read(buf, 0, bufSize);
-                if (bufSize < 0) {
-                    // error
-                    break;
-                }
-                //System.out.println("Read " + bufSize);
-                outputStream.write(buf, 0, bufSize);
-                outputStream.flush();
-
-                filesize -= bufSize;
-                if (filesize == 0L) break;
-            }
-
-            if (checkAck(in) != 0) {
-                throw new IOException("Error code found in ack " + (checkAck(in)));
-            }
+            byte[] buf = new byte[1024];
 
             // send '\0'
             buf[0] = 0;
             out.write(buf, 0, 1);
             out.flush();
-            outputStream.close();
+
+            while (true) {
+                int c = checkAck(in);
+                if (c != 'C') {
+                    break;
+                }
+
+                // read '0644 '
+                in.read(buf, 0, 5);
+
+                long filesize = 0L;
+                while (true) {
+                    if (in.read(buf, 0, 1) < 0) {
+                        // error
+                        break;
+                    }
+                    if (buf[0] == ' ') break;
+                    filesize = filesize * 10L + (long) (buf[0] - '0');
+                }
+
+                String file = null;
+                for (int i = 0; ; i++) {
+                    in.read(buf, i, 1);
+                    if (buf[i] == (byte) 0x0a) {
+                        file = new String(buf, 0, i);
+                        break;
+                    }
+                }
+
+                logger.info("file-size=" + filesize + ", file=" + file);
+                // send '\0'
+                buf[0] = 0;
+                out.write(buf, 0, 1);
+                out.flush();
+
+                // read a content of lfile
+                int bufSize;
+                while (true) {
+                    if (buf.length < filesize) bufSize = buf.length;
+                    else bufSize = (int) filesize;
+                    bufSize = in.read(buf, 0, bufSize);
+                    if (bufSize < 0) {
+                        // error
+                        break;
+                    }
+                    //System.out.println("Read " + bufSize);
+                    outputStream.write(buf, 0, bufSize);
+                    outputStream.flush();
+
+                    filesize -= bufSize;
+                    if (filesize == 0L) break;
+                }
+
+                if (checkAck(in) != 0) {
+                    throw new IOException("Error code found in ack " + (checkAck(in)));
+                }
+
+                // send '\0'
+                buf[0] = 0;
+                out.write(buf, 0, 1);
+                out.flush();
+                outputStream.close();
+            }
+
+            channel.disconnect();
+            session.disconnect();
+
+            logger.info("Completed scp receive");
+        } finally {
+            try {
+                session.disconnect();
+            } catch (Exception e) {
+                logger.warn("Session disconnection failed", e);
+            }
         }
-
-        channel.disconnect();
-        session.disconnect();
-
-        System.out.println("Completed scp receive");
 
     }
 

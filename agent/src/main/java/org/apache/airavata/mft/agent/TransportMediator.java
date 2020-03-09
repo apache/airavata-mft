@@ -52,6 +52,7 @@ public class TransportMediator {
         ConnectorContext context = new ConnectorContext();
         context.setMetadata(metadata);
         context.setStreamBuffer(streamBuffer);
+        context.setTransferId(transferId);
 
         TransferTask recvTask = new TransferTask(inConnector, context);
         TransferTask sendTask = new TransferTask(outConnector, context);
@@ -109,7 +110,7 @@ public class TransportMediator {
                     logger.info("Transfer Speed " + (metadata.getResourceSize() * 1.0 / time) / (1024 * 1024) + " MB/s");
                     logger.info("Transfer " + transferId + " completed");
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.error("Transfer {} failed", transferId, e);
                 } finally {
                     inConnector.destroy();
                     outConnector.destroy();
