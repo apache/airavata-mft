@@ -27,7 +27,8 @@ public class LocalSender implements Connector {
 
     private LocalResourceIdentifier resource;
     @Override
-    public void init(String resourceId, String credentialToken) throws Exception {
+    public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort,
+                     String secretServiceHost, int secretServicePort) throws Exception {
         this.resource = LocalTransportUtil.getLocalResourceIdentifier(resourceId);
     }
 

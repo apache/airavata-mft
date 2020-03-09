@@ -37,22 +37,16 @@ public class SCPReceiver implements Connector {
 
     private static final Logger logger = LoggerFactory.getLogger(SCPReceiver.class);
 
-    @org.springframework.beans.factory.annotation.Value("${resource.service.host}")
-    private String resourceServiceHost;
-
-    @org.springframework.beans.factory.annotation.Value("${resource.service.port}")
-    private int resourceServicePort;
-
-    @org.springframework.beans.factory.annotation.Value("${secret.service.host}")
-    private String secretServiceHost;
-
-    @org.springframework.beans.factory.annotation.Value("${secret.service.port}")
-    private int secretServicePort;
+    boolean initialized = false;
 
     private Session session;
     private SCPResource scpResource;
 
-    public void init(String resourceId, String credentialToken) throws Exception {
+    public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort,
+                     String secretServiceHost, int secretServicePort) throws Exception {
+
+        this.initialized = true;
+
         ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
         this.scpResource = resourceClient.getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
@@ -78,7 +72,14 @@ public class SCPReceiver implements Connector {
 
     }
 
+    private void checkInitialized() {
+        if (!initialized) {
+            throw new IllegalStateException("SCP Receiver is not initialized");
+        }
+    }
+
     public void startStream(ConnectorContext context) throws Exception {
+        checkInitialized();
         if (session == null) {
             System.out.println("Session can not be null. Make sure that SCP Receiver is properly initialized");
             throw new Exception("Session can not be null. Make sure that SCP Receiver is properly initialized");

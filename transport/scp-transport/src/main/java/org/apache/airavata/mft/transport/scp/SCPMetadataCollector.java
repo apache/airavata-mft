@@ -51,20 +51,30 @@ public class SCPMetadataCollector implements MetadataCollector {
 
     private static final Logger logger = LoggerFactory.getLogger(SCPMetadataCollector.class);
 
-    @org.springframework.beans.factory.annotation.Value("${resource.service.host}")
     private String resourceServiceHost;
-
-    @org.springframework.beans.factory.annotation.Value("${resource.service.port}")
     private int resourceServicePort;
-
-    @org.springframework.beans.factory.annotation.Value("${secret.service.host}")
     private String secretServiceHost;
-
-    @org.springframework.beans.factory.annotation.Value("${secret.service.port}")
     private int secretServicePort;
+    boolean initialized = false;
+
+    @Override
+    public void init(String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) {
+        this.resourceServiceHost = resourceServiceHost;
+        this.resourceServicePort = resourceServicePort;
+        this.secretServiceHost = secretServiceHost;
+        this.secretServicePort = secretServicePort;
+        this.initialized = true;
+    }
+
+    private void checkInitialized() {
+        if (!initialized) {
+            throw new IllegalStateException("SCP Metadata Collector is not initialized");
+        }
+    }
 
     public ResourceMetadata getGetResourceMetadata(String resourceId, String credentialToken) throws IOException {
 
+        checkInitialized();
         ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
         SCPResource scpResource = resourceClient.getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
@@ -91,6 +101,7 @@ public class SCPMetadataCollector implements MetadataCollector {
     @Override
     public Boolean isAvailable(String resourceId, String credentialToken) throws Exception {
 
+        checkInitialized();
         ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
         SCPResource scpResource = resourceClient.getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 

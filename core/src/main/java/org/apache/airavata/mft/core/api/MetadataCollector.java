@@ -20,6 +20,7 @@ package org.apache.airavata.mft.core.api;
 import org.apache.airavata.mft.core.ResourceMetadata;
 
 public interface MetadataCollector {
+    public void init(String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort);
     public ResourceMetadata getGetResourceMetadata(String resourceId, String credentialToken) throws Exception;
     public Boolean isAvailable(String resourceId, String credentialToken) throws Exception;
 }

@@ -23,6 +23,28 @@ import org.apache.airavata.mft.core.api.MetadataCollector;
 import java.io.File;
 
 public class LocalMetadataCollector implements MetadataCollector {
+
+    private String resourceServiceHost;
+    private int resourceServicePort;
+    private String secretServiceHost;
+    private int secretServicePort;
+    boolean initialized = false;
+
+    @Override
+    public void init(String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) {
+        this.resourceServiceHost = resourceServiceHost;
+        this.resourceServicePort = resourceServicePort;
+        this.secretServiceHost = secretServiceHost;
+        this.secretServicePort = secretServicePort;
+        this.initialized = true;
+    }
+
+    private void checkInitialized() {
+        if (!initialized) {
+            throw new IllegalStateException("SCP Metadata Collector is not initialized");
+        }
+    }
+
     @Override
     public ResourceMetadata getGetResourceMetadata(String resourceId, String credentialToken) throws Exception {
 

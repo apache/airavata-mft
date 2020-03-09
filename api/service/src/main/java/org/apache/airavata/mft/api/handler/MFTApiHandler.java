@@ -44,6 +44,18 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
     @Autowired
     private DozerBeanMapper dozerBeanMapper;
 
+    @org.springframework.beans.factory.annotation.Value("${resource.service.host}")
+    private String resourceServiceHost;
+
+    @org.springframework.beans.factory.annotation.Value("${resource.service.port}")
+    private int resourceServicePort;
+
+    @org.springframework.beans.factory.annotation.Value("${secret.service.host}")
+    private String secretServiceHost;
+
+    @org.springframework.beans.factory.annotation.Value("${secret.service.port}")
+    private int secretServicePort;
+
     @Override
     public void submitTransfer(TransferApiRequest request, StreamObserver<TransferApiResponse> responseObserver) {
         try {
@@ -106,6 +118,8 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
             Optional<MetadataCollector> metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(request.getResourceType());
             MetadataCollector metadataCollector = metadataCollectorOp.orElseThrow(
                     () -> new Exception("Could not find a metadata collector for resource " + request.getResourceId()));
+
+            metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
 
             Boolean available = metadataCollector.isAvailable(request.getResourceId(), request.getResourceToken());
             responseObserver.onNext(ResourceAvailabilityResponse.newBuilder().setAvailable(available).build());
