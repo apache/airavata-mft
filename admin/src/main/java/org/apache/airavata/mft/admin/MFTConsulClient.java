@@ -20,9 +20,11 @@ package org.apache.airavata.mft.admin;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.net.HostAndPort;
 import com.orbitz.consul.Consul;
 import com.orbitz.consul.ConsulException;
 import com.orbitz.consul.KeyValueClient;
+import com.orbitz.consul.SessionClient;
 import com.orbitz.consul.model.kv.Value;
 import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferCommand;
@@ -36,6 +38,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.google.common.net.HostAndPort.*;
+
 /*
  mft/agents/messages/{agent-id} -> message
  mft/agent/info/{agent-id} -> agent infos
@@ -47,9 +51,25 @@ public class MFTConsulClient {
 
     private static final Logger logger = LoggerFactory.getLogger(MFTConsulClient.class);
 
-    private Consul client = Consul.builder().build();
-    private KeyValueClient kvClient = client.keyValueClient();
+    private Consul client;
+    private KeyValueClient kvClient;
+    private SessionClient sessionClient;
     private ObjectMapper mapper = new ObjectMapper();
+
+    public MFTConsulClient(Map<String, Integer> consulHostPorts) {
+        List<HostAndPort> hostAndPorts = consulHostPorts.entrySet().stream()
+                .map(entry -> fromParts(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+        this.client = Consul.builder().withMultipleHostAndPort(hostAndPorts, 100000).build();
+        this.kvClient = client.keyValueClient();
+        this.sessionClient = client.sessionClient();
+    }
+
+    public MFTConsulClient(String host, int port) {
+        this.client = Consul.builder().withHostAndPort(HostAndPort.fromParts(host, port)).build();
+        this.kvClient = client.keyValueClient();
+        this.sessionClient = client.sessionClient();
+    }
 
     public String submitTransfer(TransferRequest transferRequest) throws MFTAdminException{
         try {
@@ -177,5 +197,13 @@ public class MFTConsulClient {
     public List<AgentInfo> getLiveAgentInfos() throws MFTAdminException {
         List<String> liveAgentIds = getLiveAgentIds();
         return liveAgentIds.stream().map(id -> getAgentInfo(id).get()).collect(Collectors.toList());
+    }
+
+    public KeyValueClient getKvClient() {
+        return kvClient;
+    }
+
+    public SessionClient getSessionClient() {
+        return sessionClient;
     }
 }

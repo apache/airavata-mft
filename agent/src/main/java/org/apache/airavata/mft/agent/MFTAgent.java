@@ -18,9 +18,7 @@
 package org.apache.airavata.mft.agent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.orbitz.consul.Consul;
 import com.orbitz.consul.ConsulException;
-import com.orbitz.consul.KeyValueClient;
 import com.orbitz.consul.cache.ConsulCache;
 import com.orbitz.consul.cache.KVCache;
 import com.orbitz.consul.model.kv.Value;
@@ -39,6 +37,7 @@ import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -72,8 +71,6 @@ public class MFTAgent implements CommandLineRunner {
 
     private final Semaphore mainHold = new Semaphore(0);
 
-    private Consul client;
-    private KeyValueClient kvClient;
     private KVCache messageCache;
     private ConsulCache.Listener<String, Value> cacheListener;
 
@@ -83,13 +80,11 @@ public class MFTAgent implements CommandLineRunner {
 
     private ObjectMapper mapper = new ObjectMapper();
 
+    @Autowired
     private MFTConsulClient mftConsulClient;
 
     public void init() {
-        client = Consul.builder().build();
-        kvClient = client.keyValueClient();
-        messageCache = KVCache.newCache(kvClient, "mft/agents/messages/" + agentId );
-        mftConsulClient = new MFTConsulClient();
+        messageCache = KVCache.newCache(mftConsulClient.getKvClient(), "mft/agents/messages/" + agentId );
     }
 
     private void acceptRequests() {
@@ -155,7 +150,7 @@ public class MFTAgent implements CommandLineRunner {
                         }
                     } finally {
                         logger.info("Deleting key " + value.getKey());
-                        kvClient.deleteKey(value.getKey()); // Due to bug in consul https://github.com/hashicorp/consul/issues/571
+                        mftConsulClient.getKvClient().deleteKey(value.getKey()); // Due to bug in consul https://github.com/hashicorp/consul/issues/571
                     }
                 });
 
@@ -171,15 +166,15 @@ public class MFTAgent implements CommandLineRunner {
                 .behavior("delete")
                 .ttl(sessionTTLSeconds + "s").build();
 
-        final SessionCreatedResponse sessResp = client.sessionClient().createSession(session);
+        final SessionCreatedResponse sessResp = mftConsulClient.getSessionClient().createSession(session);
         final String lockPath = "mft/agent/live/" + agentId;
 
-        boolean acquired = kvClient.acquireLock(lockPath, sessResp.getId());
+        boolean acquired = mftConsulClient.getKvClient().acquireLock(lockPath, sessResp.getId());
 
         if (acquired) {
             sessionRenewPool.scheduleAtFixedRate(() -> {
                 try {
-                    client.sessionClient().renewSession(sessResp.getId());
+                    mftConsulClient.getSessionClient().renewSession(sessResp.getId());
                 } catch (ConsulException e) {
                     if (e.getCode() == 404) {
                         logger.error("Can not renew session as it is expired");
@@ -187,7 +182,7 @@ public class MFTAgent implements CommandLineRunner {
                     }
                     logger.warn("Errored while renewing the session", e);
                     try {
-                        boolean status = kvClient.acquireLock(lockPath, sessResp.getId());
+                        boolean status = mftConsulClient.getKvClient().acquireLock(lockPath, sessResp.getId());
                         if (!status) {
                             logger.error("Can not renew session as it is expired");
                             stop();
@@ -198,7 +193,7 @@ public class MFTAgent implements CommandLineRunner {
                     }
                 } catch (Exception e) {
                     try {
-                        boolean status = kvClient.acquireLock(lockPath, sessResp.getId());
+                        boolean status = mftConsulClient.getKvClient().acquireLock(lockPath, sessResp.getId());
                         if (!status) {
                             logger.error("Can not renew session as it is expired");
                             stop();

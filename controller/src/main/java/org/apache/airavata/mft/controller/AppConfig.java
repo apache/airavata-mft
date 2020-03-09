@@ -17,8 +17,21 @@
 
 package org.apache.airavata.mft.controller;
 
+import org.apache.airavata.mft.admin.MFTConsulClient;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class AppConfig {
+
+    @org.springframework.beans.factory.annotation.Value("${consul.host}")
+    String consulHost;
+
+    @org.springframework.beans.factory.annotation.Value("${consul.port}")
+    Integer consulPort;
+
+    @Bean
+    public MFTConsulClient mftConsulClient() {
+        return new MFTConsulClient(consulHost, consulPort);
+    }
 }

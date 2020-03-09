@@ -31,13 +31,13 @@ import org.apache.airavata.mft.admin.models.TransferRequest;
 import org.dozer.DozerBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.util.List;
 import java.util.Optional;
@@ -46,7 +46,6 @@ import java.util.concurrent.Semaphore;
 @PropertySource("classpath:application.properties")
 @SpringBootApplication()
 @ComponentScan(basePackages = {"org.apache.airavata.mft"})
-@EnableJpaRepositories("org.apache.airavata.mft.api.db.repositories")
 @EntityScan("org.apache.airavata.mft.api.db.entities")
 public class MFTController implements CommandLineRunner {
 
@@ -54,13 +53,12 @@ public class MFTController implements CommandLineRunner {
 
     private final Semaphore mainHold = new Semaphore(0);
 
-    private Consul client;
-    private KeyValueClient kvClient;
     private KVCache messageCache;
     private KVCache stateCache;
     private ConsulCache.Listener<String, Value> messageCacheListener;
     private ConsulCache.Listener<String, Value> stateCacheListener;
 
+    @Autowired
     private MFTConsulClient mftConsulClient;
 
     private ObjectMapper jsonMapper = new ObjectMapper();
@@ -68,11 +66,8 @@ public class MFTController implements CommandLineRunner {
 
 
     public void init() {
-        client = Consul.builder().build();
-        kvClient = client.keyValueClient();
-        messageCache = KVCache.newCache(kvClient, "mft/controller/messages");
-        stateCache = KVCache.newCache(kvClient, "mft/transfer/state");
-        mftConsulClient = new MFTConsulClient();
+        messageCache = KVCache.newCache(mftConsulClient.getKvClient(), "mft/controller/messages");
+        stateCache = KVCache.newCache(mftConsulClient.getKvClient(), "mft/transfer/state");
     }
 
     private void acceptRequests() {
@@ -91,7 +86,7 @@ public class MFTController implements CommandLineRunner {
                         logger.error("Failed to process the request", e);
                     } finally {
                         logger.info("Deleting key " + value.getKey());
-                        kvClient.deleteKey(value.getKey()); // Due to bug in consul https://github.com/hashicorp/consul/issues/571
+                        mftConsulClient.getKvClient().deleteKey(value.getKey()); // Due to bug in consul https://github.com/hashicorp/consul/issues/571
                     }
                 });
             });
@@ -123,7 +118,7 @@ public class MFTController implements CommandLineRunner {
 
     private TransferCommand saveAndCreateTransferCommand(String transferId, TransferRequest transferRequest) throws JsonProcessingException {
 
-        kvClient.putValue("mft/transfer/processed/" +transferId, jsonMapper.writeValueAsString(transferRequest));
+        mftConsulClient.getKvClient().putValue("mft/transfer/processed/" +transferId, jsonMapper.writeValueAsString(transferRequest));
 
         TransferCommand transferCommand = new TransferCommand();
         transferCommand.setSourceId(transferRequest.getSourceId())

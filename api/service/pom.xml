@@ -52,11 +52,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.airavata</groupId>
-            <artifactId>mft-api-entities</artifactId>
-            <version>0.01-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.airavata</groupId>
             <artifactId>mft-admin</artifactId>
             <version>0.01-SNAPSHOT</version>
         </dependency>

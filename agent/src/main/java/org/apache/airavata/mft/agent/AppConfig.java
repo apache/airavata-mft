@@ -15,12 +15,23 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.api.db.repositories;
+package org.apache.airavata.mft.agent;
 
-import org.apache.airavata.mft.api.db.entities.TargetAgentEntity;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
+import org.apache.airavata.mft.admin.MFTConsulClient;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@Repository
-public interface TargetAgentRepository extends CrudRepository<TargetAgentEntity, String> {
+@Configuration
+public class AppConfig {
+
+    @org.springframework.beans.factory.annotation.Value("${consul.host}")
+    String consulHost;
+
+    @org.springframework.beans.factory.annotation.Value("${consul.port}")
+    Integer consulPort;
+
+    @Bean
+    public MFTConsulClient mftConsulClient() {
+        return new MFTConsulClient(consulHost, consulPort);
+    }
 }
