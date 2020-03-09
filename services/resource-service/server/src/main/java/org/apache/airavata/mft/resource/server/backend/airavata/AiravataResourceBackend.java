@@ -26,10 +26,14 @@ import org.apache.airavata.model.data.movement.DataMovementProtocol;
 import org.apache.airavata.model.data.movement.SCPDataMovement;
 import org.apache.airavata.registry.api.RegistryService;
 import org.apache.airavata.registry.api.client.RegistryServiceClientFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
 public class AiravataResourceBackend implements ResourceBackend {
+
+    private static final Logger logger = LoggerFactory.getLogger(AiravataResourceBackend.class);
 
     @org.springframework.beans.factory.annotation.Value("${registry.server.host}")
     private String registryServerHost;
@@ -46,6 +50,8 @@ public class AiravataResourceBackend implements ResourceBackend {
         String path = parts[1];
         String gateway = parts[2];
         String storageOrComputeId = parts[3];
+
+        logger.info("Connecting to registry service {}:{}", registryServerHost, registryServerPort);
 
         RegistryService.Client registryClient = RegistryServiceClientFactory.createRegistryClient(registryServerHost, registryServerPort);
         SCPStorage.Builder builder = SCPStorage.newBuilder().setStorageId(resourceId);
