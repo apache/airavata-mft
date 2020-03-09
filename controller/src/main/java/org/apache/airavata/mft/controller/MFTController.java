@@ -19,8 +19,6 @@ package org.apache.airavata.mft.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.orbitz.consul.Consul;
-import com.orbitz.consul.KeyValueClient;
 import com.orbitz.consul.cache.ConsulCache;
 import com.orbitz.consul.cache.KVCache;
 import com.orbitz.consul.model.kv.Value;
@@ -43,7 +41,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Semaphore;
 
-@PropertySource("classpath:application.properties")
+@PropertySource(value = {
+        "classpath:application.properties",
+        "file:${app.conf.dir}/application.properties"
+}, ignoreResourceNotFound = true)
 @SpringBootApplication()
 @ComponentScan(basePackages = {"org.apache.airavata.mft"})
 @EntityScan("org.apache.airavata.mft.api.db.entities")

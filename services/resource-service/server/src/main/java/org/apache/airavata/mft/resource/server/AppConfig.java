@@ -22,8 +22,13 @@ import org.apache.airavata.mft.resource.server.backend.airavata.AiravataResource
 import org.apache.airavata.mft.resource.server.backend.sql.SQLResourceBackend;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
 @Configuration
+@PropertySource(value = {
+        "classpath:application.properties",
+        "file:${app.conf.dir}/application.properties"
+}, ignoreResourceNotFound = true)
 public class AppConfig {
     @Bean
     public ResourceBackend resourceBackend() {

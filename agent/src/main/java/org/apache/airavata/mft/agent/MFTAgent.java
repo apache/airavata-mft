@@ -52,7 +52,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-@PropertySource("classpath:application.properties")
+@PropertySource(value = {
+        "classpath:application.properties",
+        "file:${app.conf.dir}/application.properties"
+}, ignoreResourceNotFound = true)
 @SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
 public class MFTAgent implements CommandLineRunner {
 

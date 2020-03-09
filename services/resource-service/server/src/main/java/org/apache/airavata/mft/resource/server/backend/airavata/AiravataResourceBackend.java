@@ -28,9 +28,14 @@ import org.apache.airavata.registry.api.RegistryService;
 import org.apache.airavata.registry.api.client.RegistryServiceClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.PropertySource;
 
 import java.util.Optional;
 
+@PropertySource(value = {
+        "classpath:application.properties",
+        "file:${app.conf.dir}/application.properties"
+}, ignoreResourceNotFound = true)
 public class AiravataResourceBackend implements ResourceBackend {
 
     private static final Logger logger = LoggerFactory.getLogger(AiravataResourceBackend.class);

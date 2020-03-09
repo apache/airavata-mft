@@ -27,9 +27,14 @@ import org.apache.airavata.mft.resource.server.backend.sql.repository.SCPStorage
 import org.apache.airavata.mft.resource.service.*;
 import org.dozer.DozerBeanMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.PropertySource;
 
 import java.util.Optional;
 
+@PropertySource(value = {
+        "classpath:application.properties",
+        "file:${app.conf.dir}/application.properties"
+}, ignoreResourceNotFound = true)
 public class SQLResourceBackend implements ResourceBackend {
 
     @Autowired

@@ -22,17 +22,24 @@ import org.apache.airavata.mft.admin.models.TransferRequest;
 import org.apache.airavata.mft.api.service.TransferApiRequest;
 import org.dozer.DozerBeanMapper;
 import org.dozer.loader.api.BeanMappingBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 
 @Configuration
+@PropertySource(value = {
+        "classpath:application.properties",
+        "file:${app.conf.dir}/application.properties"
+}, ignoreResourceNotFound = true)
 public class AppConfig {
 
     @org.springframework.beans.factory.annotation.Value("${consul.host}")
-    String consulHost;
+    public String consulHost;
 
     @org.springframework.beans.factory.annotation.Value("${consul.port}")
-    Integer consulPort;
+    public Integer consulPort;
 
     @Bean
     public MFTConsulClient mftConsulClient() {
