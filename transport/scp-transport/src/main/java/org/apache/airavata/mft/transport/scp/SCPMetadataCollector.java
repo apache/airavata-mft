@@ -116,13 +116,6 @@ public class SCPMetadataCollector implements MetadataCollector {
         }
     }
 
-
-    public static void main(String args[]) {
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient("149.165.156.124", 7002);
-        SCPResource scpResource = resourceClient.getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId("STORAGE:/var/www/portals/gateway-user-data/django-seagrid/dimuthu/Default_Project/Clone_of_Clone_of_Clone_of_Clone_of_Clone_of_Clone_of_Clone_of_Clone_of_Clone_of_Gaussian16_on_Mar_6_2020_148_AM/Gaussian.com:seagrid:pgadev.scigap.org_7ddf28fd-d503-4ff8-bbc5-3279a7c3b99e").build());
-        System.out.println(scpResource);
-    }
-
     private SSHClient getSSHClient(SCPResource scpResource, SCPSecret scpSecret) throws IOException {
 
         SSHClient sshClient = new SSHClient();

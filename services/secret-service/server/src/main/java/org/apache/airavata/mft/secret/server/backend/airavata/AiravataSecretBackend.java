@@ -22,14 +22,9 @@ import org.apache.airavata.credential.store.cpi.CredentialStoreService;
 import org.apache.airavata.mft.secret.server.backend.SecretBackend;
 import org.apache.airavata.mft.secret.service.*;
 import org.apache.airavata.model.credential.store.SSHCredential;
-import org.springframework.context.annotation.PropertySource;
 
 import java.util.Optional;
 
-@PropertySource(value = {
-        "classpath:application.properties",
-        "file:${app.conf.dir}/application.properties"
-}, ignoreResourceNotFound = true)
 public class AiravataSecretBackend implements SecretBackend {
 
     @org.springframework.beans.factory.annotation.Value("${credential.server.host}")

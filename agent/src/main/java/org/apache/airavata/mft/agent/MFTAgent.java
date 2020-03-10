@@ -42,7 +42,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.context.annotation.PropertySource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,10 +51,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-@PropertySource(value = {
-        "classpath:application.properties",
-        "file:${app.conf.dir}/application.properties"
-}, ignoreResourceNotFound = true)
 @SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
 public class MFTAgent implements CommandLineRunner {
 

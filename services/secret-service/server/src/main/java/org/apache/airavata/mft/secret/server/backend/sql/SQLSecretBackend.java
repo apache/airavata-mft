@@ -23,14 +23,9 @@ import org.apache.airavata.mft.secret.server.backend.sql.repository.SecretReposi
 import org.apache.airavata.mft.secret.service.*;
 import org.dozer.DozerBeanMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
 
 import java.util.Optional;
 
-@PropertySource(value = {
-        "classpath:application.properties",
-        "file:${app.conf.dir}/application.properties"
-}, ignoreResourceNotFound = true)
 public class SQLSecretBackend implements SecretBackend {
 
     @Autowired

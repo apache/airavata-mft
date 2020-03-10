@@ -35,16 +35,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.PropertySource;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Semaphore;
 
-@PropertySource(value = {
-        "classpath:application.properties",
-        "file:${app.conf.dir}/application.properties"
-}, ignoreResourceNotFound = true)
 @SpringBootApplication()
 @ComponentScan(basePackages = {"org.apache.airavata.mft"})
 @EntityScan("org.apache.airavata.mft.api.db.entities")
