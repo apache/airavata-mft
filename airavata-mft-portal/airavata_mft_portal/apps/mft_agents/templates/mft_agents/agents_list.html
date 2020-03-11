@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Browse Agents{% endblock title %}
+
+{% block content %}
+<div class="list-group col-md-9 ml-sm-auto col-lg-10 px-4">
+    {% for agent in agents.agents%}
+    <a href="/agent/{{agent.id}}" class="list-group-item list-group-item-action">
+      <div class="d-flex w-100 justify-content-between">
+        <h5 class="mb-1">{{agent.name}}</h5>
+      </div>
+      <p class="mb-1">{{agent.description}}</p>
+    </a>
+    {% endfor%}
+  </div>
+{% endblock content %}
