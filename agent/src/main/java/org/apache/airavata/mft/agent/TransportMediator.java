@@ -70,7 +70,8 @@ public class TransportMediator {
             public void run() {
 
                 try {
-                    for (int i = 0; i < futureList.size(); i++) {
+                    int futureCnt = futureList.size();
+                    for (int i = 0; i < futureCnt; i++) {
                         Future<Integer> ft = completionService.take();
                         futureList.remove(ft);
                         try {

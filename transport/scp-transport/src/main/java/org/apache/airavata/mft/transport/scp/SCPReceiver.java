@@ -179,7 +179,6 @@ public class SCPReceiver implements Connector {
             channel.disconnect();
             session.disconnect();
 
-            logger.info("Completed scp receive");
         } finally {
             try {
                 session.disconnect();

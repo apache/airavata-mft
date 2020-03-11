@@ -124,8 +124,8 @@ public class MFTController implements CommandLineRunner {
                 }
             });
         };
-        stateCache.addListener(stateCacheListener);
-        stateCache.start();
+        //stateCache.addListener(stateCacheListener);
+        //stateCache.start();
     }
 
     private void markAsProcessed(String transferId, TransferRequest transferRequest) throws JsonProcessingException {

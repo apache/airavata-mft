@@ -180,7 +180,6 @@ public class SCPSender implements Connector {
                 throw new IOException("Error code found in ack " + (checkAck(in)));
             }
             out.close();
-            logger.info("Completed scp send for remote server");
             channel.disconnect();
 
         } finally {
