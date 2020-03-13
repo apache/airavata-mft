@@ -74,6 +74,7 @@ public class AiravataResourceBackend implements ResourceBackend {
 
             builder.setHost(selectedHostName);
             builder.setPort(selectedPort);
+            builder.setUser(user);
 
         } else if ("CLUSTER".equals(type)) {
             ComputeResourceDescription computeResource = registryClient.getComputeResource(storageOrComputeId);
