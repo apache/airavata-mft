@@ -80,6 +80,7 @@ public class AiravataResourceBackend implements ResourceBackend {
             ComputeResourceDescription computeResource = registryClient.getComputeResource(storageOrComputeId);
             builder.setHost(computeResource.getHostName());
             builder.setPort(22);
+            builder.setUser(user);
         }
         return Optional.of(builder.build());
     }
