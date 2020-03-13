@@ -58,6 +58,8 @@
             <includes>
                 <include>application.properties</include>
                 <include>logback.xml</include>
+                <include>applicationContext.xml</include>
+                <include>resources.json</include>
             </includes>
         </fileSet>
         <fileSet>

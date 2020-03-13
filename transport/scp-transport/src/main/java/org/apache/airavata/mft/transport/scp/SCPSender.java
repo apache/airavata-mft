@@ -62,12 +62,12 @@ public class SCPSender implements Connector {
         writer.close();
 
         logger.info("Creating a ssh session for {}@{}:{} with key {} and passphrase {}",
-                scpSecret.getUser(), scpResource.getScpStorage().getHost(),
+                scpResource.getScpStorage().getUser(), scpResource.getScpStorage().getHost(),
                 scpResource.getScpStorage().getPort(),
                 privateKeyFile.getPath(),
                 scpSecret.getPassphrase());
 
-        this.session = SCPTransportUtil.createSession(scpSecret.getUser(), scpResource.getScpStorage().getHost(),
+        this.session = SCPTransportUtil.createSession(scpResource.getScpStorage().getUser(), scpResource.getScpStorage().getHost(),
                 scpResource.getScpStorage().getPort(),
                 privateKeyFile.getPath(),
                 scpSecret.getPassphrase());

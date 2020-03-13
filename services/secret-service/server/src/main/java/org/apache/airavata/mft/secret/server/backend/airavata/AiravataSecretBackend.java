@@ -39,15 +39,13 @@ public class AiravataSecretBackend implements SecretBackend {
         String secretId = request.getSecretId();
         String[] parts = secretId.split(":");
         String csToken = parts[0];
-        String user = parts[1];
-        String gateway = parts[2];
+        String gateway = parts[1];
         SSHCredential sshCredential = csClient.getSSHCredential(csToken, gateway);
 
         SCPSecret scpSecret = SCPSecret.newBuilder()
                 .setPrivateKey(sshCredential.getPrivateKey())
                 .setPublicKey(sshCredential.getPublicKey())
-                .setPassphrase(sshCredential.getPassphrase())
-                .setUser(user).build();
+                .setPassphrase(sshCredential.getPassphrase()).build();
 
         return Optional.of(scpSecret);
     }

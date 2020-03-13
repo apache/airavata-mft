@@ -61,7 +61,7 @@ public class SCPReceiver implements Connector {
         privateKeyFile.deleteOnExit();
 
         this.session = SCPTransportUtil.createSession(
-                scpSecret.getUser(),
+                scpResource.getScpStorage().getUser(),
                 scpResource.getScpStorage().getHost(),
                 scpResource.getScpStorage().getPort(),
                 privateKeyFile.getPath(),

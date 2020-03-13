@@ -47,9 +47,8 @@ public class AiravataResourceBackend implements ResourceBackend {
         String resourceId = request.getStorageId();
         String[] parts = resourceId.split(":");
         String type = parts[0];
-        String path = parts[1];
-        String gateway = parts[2];
         String storageOrComputeId = parts[3];
+        String user = parts[4];
 
         logger.info("Connecting to registry service {}:{}", registryServerHost, registryServerPort);
 
@@ -103,10 +102,7 @@ public class AiravataResourceBackend implements ResourceBackend {
     public Optional<SCPResource> getSCPResource(SCPResourceGetRequest request) throws Exception {
         String resourceId = request.getResourceId();
         String[] parts = resourceId.split(":");
-        String type = parts[0];
         String path = parts[1];
-        String gateway = parts[2];
-        String storageOrComputeId = parts[3];
 
         SCPResource scpResource = SCPResource.newBuilder()
                 .setResourceId(resourceId)

@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.resource.server;
+ package org.apache.airavata.mft.secret.server;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 
 @Configuration
-public class AppConfig {
-
+@ImportResource({"classpath*:applicationContext.xml"})
+public class XmlConfiguration {
 }

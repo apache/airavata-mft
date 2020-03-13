@@ -24,17 +24,17 @@ import java.util.Optional;
 
 public interface ResourceBackend {
     public Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request) throws Exception;
-    public SCPStorage createSCPStorage(SCPStorageCreateRequest request);
-    public boolean updateSCPStorage(SCPStorageUpdateRequest request);
-    public boolean deleteSCPStorage(SCPStorageDeleteRequest request);
+    public SCPStorage createSCPStorage(SCPStorageCreateRequest request) throws Exception;
+    public boolean updateSCPStorage(SCPStorageUpdateRequest request) throws Exception;
+    public boolean deleteSCPStorage(SCPStorageDeleteRequest request) throws Exception;
 
     public Optional<SCPResource> getSCPResource(SCPResourceGetRequest request) throws Exception;
-    public SCPResource createSCPResource(SCPResourceCreateRequest request);
-    public boolean updateSCPResource(SCPResourceUpdateRequest request);
-    public boolean deleteSCPResource(SCPResourceDeleteRequest request);
+    public SCPResource createSCPResource(SCPResourceCreateRequest request) throws Exception;
+    public boolean updateSCPResource(SCPResourceUpdateRequest request) throws Exception;
+    public boolean deleteSCPResource(SCPResourceDeleteRequest request) throws Exception;
 
-    public Optional<LocalResource> getLocalResource(LocalResourceGetRequest request);
-    public LocalResource createLocalResource(LocalResourceCreateRequest request);
-    public boolean updateLocalResource(LocalResourceUpdateRequest request);
-    public boolean deleteLocalResource(LocalResourceDeleteRequest request);
+    public Optional<LocalResource> getLocalResource(LocalResourceGetRequest request) throws Exception;
+    public LocalResource createLocalResource(LocalResourceCreateRequest request) throws Exception;
+    public boolean updateLocalResource(LocalResourceUpdateRequest request) throws Exception;
+    public boolean deleteLocalResource(LocalResourceDeleteRequest request) throws Exception;
 }

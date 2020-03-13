@@ -12,6 +12,7 @@ message SCPStorage {
     string storageId = 1;
     string host = 2;
     int32 port = 3;
+    string user = 4;
 }
 
 message SCPStorageGetRequest {
@@ -21,12 +22,14 @@ message SCPStorageGetRequest {
 message SCPStorageCreateRequest {
     string host = 1;
     int32 port = 2;
+    string user = 3;
 }
 
 message SCPStorageUpdateRequest {
     string storageId = 1;
     string host = 2;
     int32 port = 3;
+    string user = 4;
 }
 
 message SCPStorageDeleteRequest {

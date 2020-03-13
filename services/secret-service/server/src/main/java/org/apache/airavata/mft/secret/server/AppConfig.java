@@ -27,6 +27,4 @@ import org.springframework.context.annotation.PropertySource;
 @Configuration
 public class AppConfig {
 
-    @Bean
-    SecretBackend secretBackend() {return new AiravataSecretBackend();}
 }

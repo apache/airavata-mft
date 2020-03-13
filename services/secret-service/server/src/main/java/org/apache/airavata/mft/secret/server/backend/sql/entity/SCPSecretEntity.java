@@ -42,9 +42,6 @@ public class SCPSecretEntity {
     @Column(name = "PASSPHRASE")
     private String passphrase;
 
-    @Column(name = "USER_NAME")
-    private String user;
-
     public String getSecretId() {
         return secretId;
     }
@@ -75,13 +72,5 @@ public class SCPSecretEntity {
 
     public void setPassphrase(String passphrase) {
         this.passphrase = passphrase;
-    }
-
-    public String getUser() {
-        return user;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
     }
 }

@@ -151,7 +151,7 @@ public class SCPMetadataCollector implements MetadataCollector {
         }));
 
         sshClient.connect(scpResource.getScpStorage().getHost(), scpResource.getScpStorage().getPort());
-        sshClient.auth(scpSecret.getUser(), am);
+        sshClient.auth(scpResource.getScpStorage().getUser(), am);
 
         return sshClient;
     }

@@ -38,10 +38,14 @@ import io.grpc.stub.StreamObserver;
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
 import org.apache.airavata.mft.resource.service.*;
 import org.lognet.springboot.grpc.GRpcService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @GRpcService
 public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceImplBase {
+
+    private static final Logger logger = LoggerFactory.getLogger(ResourceServiceHandler.class);
 
     @Autowired
     private ResourceBackend backend;
@@ -56,30 +60,48 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
                 responseObserver.onError(new Exception("No SCP Storage with id " + request.getStorageId()));
             });
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Failed in retrieving storage with id " + request.getStorageId(), e);
             responseObserver.onError(new Exception("Failed in retrieving storage with id " + request.getStorageId()));
         }
     }
 
     @Override
     public void createSCPStorage(SCPStorageCreateRequest request, StreamObserver<SCPStorage> responseObserver) {
-        responseObserver.onNext(this.backend.createSCPStorage(request));
-        responseObserver.onCompleted();
+        try {
+            responseObserver.onNext(this.backend.createSCPStorage(request));
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in creating the scp storage", e);
+            responseObserver.onError(new Exception("Failed in creating the scp storage", e));
+        }
     }
 
     @Override
     public void updateSCPStorage(SCPStorageUpdateRequest request, StreamObserver<Empty> responseObserver) {
-        this.backend.updateSCPStorage(request);
-        responseObserver.onCompleted();
+        try {
+            this.backend.updateSCPStorage(request);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in updating the scp storage {}", request.getStorageId(), e);
+            responseObserver.onError(new Exception("Failed in updating the scp storage", e));
+        }
+
     }
 
     @Override
     public void deleteSCPStorage(SCPStorageDeleteRequest request, StreamObserver<Empty> responseObserver) {
-        boolean res = this.backend.deleteSCPStorage(request);
-        if (res) {
-            responseObserver.onCompleted();
-        } else {
-            responseObserver.onError(new Exception("Failed to delete SCP Storage with id " + request.getStorageId()));
+
+        try {
+            boolean res = this.backend.deleteSCPStorage(request);
+            if (res) {
+                responseObserver.onCompleted();
+            } else {
+                logger.error("Failed to delete SCP Storage with id " + request.getStorageId());
+                responseObserver.onError(new Exception("Failed to delete SCP Storage with id " + request.getStorageId()));
+            }
+        } catch (Exception e) {
+            logger.error("Failed in deleting the scp storage {}", request.getStorageId(), e);
+            responseObserver.onError(new Exception("Failed in deleting the scp storage", e));
         }
     }
 
@@ -93,61 +115,98 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
                 responseObserver.onError(new Exception("No SCP Resource with id " + request.getResourceId()));
             });
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Failed in retrieving resource with id {}", request.getResourceId(), e);
             responseObserver.onError(new Exception("Failed in retrieving resource with id " + request.getResourceId()));
         }
     }
 
     @Override
     public void createSCPResource(SCPResourceCreateRequest request, StreamObserver<SCPResource> responseObserver) {
-        responseObserver.onNext(this.backend.createSCPResource(request));
-        responseObserver.onCompleted();
+        try {
+            responseObserver.onNext(this.backend.createSCPResource(request));
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in creating the scp resource", e);
+            responseObserver.onError(new Exception("Failed in creating the scp resource", e));
+        }
     }
 
     @Override
     public void updateSCPResource(SCPResourceUpdateRequest request, StreamObserver<Empty> responseObserver) {
-        this.backend.updateSCPResource(request);
-        responseObserver.onCompleted();
+        try {
+            this.backend.updateSCPResource(request);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in updating the scp resource {}", request.getResourceId(), e);
+            responseObserver.onError(new Exception("Failed in updating the scp resource", e));
+        }
     }
 
     @Override
     public void deleteSCPResource(SCPResourceDeleteRequest request, StreamObserver<Empty> responseObserver) {
-        boolean res = this.backend.deleteSCPResource(request);
-        if (res) {
-            responseObserver.onCompleted();
-        } else {
-            responseObserver.onError(new Exception("Failed to delete SCP Resource with id " + request.getResourceId()));
+        try {
+            boolean res = this.backend.deleteSCPResource(request);
+            if (res) {
+                responseObserver.onCompleted();
+            } else {
+                responseObserver.onError(new Exception("Failed to delete SCP Resource with id " + request.getResourceId()));
+            }
+        } catch (Exception e) {
+            logger.error("Failed in deleting the scp resource {}", request.getResourceId(), e);
+            responseObserver.onError(new Exception("Failed in deleting the scp resource", e));
         }
     }
 
     @Override
     public void getLocalResource(LocalResourceGetRequest request, StreamObserver<LocalResource> responseObserver) {
-        this.backend.getLocalResource(request).ifPresentOrElse(resource -> {
-            responseObserver.onNext(resource);
-            responseObserver.onCompleted();
-        }, () -> {
-            responseObserver.onError(new Exception("No Local Resource with id " + request.getResourceId()));
-        });
+
+        try {
+            this.backend.getLocalResource(request).ifPresentOrElse(resource -> {
+                responseObserver.onNext(resource);
+                responseObserver.onCompleted();
+            }, () -> {
+                responseObserver.onError(new Exception("No Local Resource with id " + request.getResourceId()));
+            });
+        } catch (Exception e) {
+            logger.error("Failed in retrieving resource with id {}", request.getResourceId(), e);
+            responseObserver.onError(new Exception("Failed in retrieving resource with id " + request.getResourceId()));
+        }
     }
 
     @Override
     public void createLocalResource(LocalResourceCreateRequest request, StreamObserver<LocalResource> responseObserver) {
-        responseObserver.onNext(this.backend.createLocalResource(request));
-        responseObserver.onCompleted();
+        try {
+            responseObserver.onNext(this.backend.createLocalResource(request));
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in creating the local resource", e);
+            responseObserver.onError(new Exception("Failed in creating the local resource", e));
+        }
     }
 
     @Override
     public void updateLocalResource(LocalResourceUpdateRequest request, StreamObserver<Empty> responseObserver) {
-        this.backend.updateLocalResource(request);
-        responseObserver.onCompleted();
+        try {
+            this.backend.updateLocalResource(request);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in updating the local resource {}", request.getResourceId(), e);
+            responseObserver.onError(new Exception("Failed in updating the local resource", e));
+        }
     }
 
     @Override
     public void deleteLocalResource(LocalResourceDeleteRequest request, StreamObserver<Empty> responseObserver) {
-        boolean res = this.backend.deleteLocalResource(request);
-        if (res) {
-            responseObserver.onCompleted();
-        } else {
-            responseObserver.onError(new Exception("Failed to delete Local Resource with id " + request.getResourceId()));
-        }    }
+        try {
+            boolean res = this.backend.deleteLocalResource(request);
+            if (res) {
+                responseObserver.onCompleted();
+            } else {
+                responseObserver.onError(new Exception("Failed to delete Local Resource with id " + request.getResourceId()));
+            }
+        } catch (Exception e) {
+            logger.error("Failed in deleting the local resource {}", request.getResourceId(), e);
+            responseObserver.onError(new Exception("Failed in deleting the local resource", e));
+        }
+    }
 }

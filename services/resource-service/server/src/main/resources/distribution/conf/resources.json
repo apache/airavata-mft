@@ -1,0 +1,28 @@
+[
+  {
+    "type": "SCP",
+    "resourceId":  "remote-ssh-resource",
+    "resourcePath": "/tmp/1mb.txt",
+    "scpStorage" : {
+      "storageId": "remote-ssh-storage",
+      "host": "149.165.156.124",
+      "port": 22
+    }
+  },
+  {
+    "type": "SCP",
+    "resourceId":  "remote-ssh-resource2",
+    "resourcePath": "/tmp/10mb.txt",
+    "scpStorage" : {
+      "storageId": "remote-ssh-storage",
+      "host": "149.165.156.124",
+      "port": 22,
+      "user": "root"
+    }
+  },
+  {
+    "type": "LOCAL",
+    "resourceId":  "10mb-file",
+    "resourcePath": "/tmp/1mb.txt"
+  }
+]
