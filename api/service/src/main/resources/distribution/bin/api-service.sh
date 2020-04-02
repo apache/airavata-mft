@@ -51,10 +51,10 @@ do
             fi
         ;;
         -h)
-            echo "Usage: agent.sh"
+            echo "Usage: api-service.sh"
 
             echo "command options:"
-            echo "  -xdebug             Start MFT Agent under JPDA debugger"
+            echo "  -xdebug             Start MFT API Service under JPDA debugger"
             echo "  -h                  Display this help and exit"
             shift
             exit 0

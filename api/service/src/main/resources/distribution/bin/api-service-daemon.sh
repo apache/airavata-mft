@@ -33,7 +33,7 @@ SUBSET=""
 DEFAULT_LOG_FILE="${AIRAVATA_HOME}/logs/airavata-daemon.out"
 LOG_FILE=$DEFAULT_LOG_FILE
 
-SERVICE_NAME="MFT Agent"
+SERVICE_NAME="MFT API Service"
 PID_PATH_NAME="${AIRAVATA_HOME}/bin/service-pid"
 
 case $1 in

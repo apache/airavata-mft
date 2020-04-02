@@ -59,6 +59,11 @@
             <artifactId>json-simple</artifactId>
             <version>1.1.1</version>
         </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-services</artifactId>
+            <version>1.25.0</version>
+        </dependency>
     </dependencies>
 
     <build>
