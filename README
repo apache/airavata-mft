@@ -1,9 +1,0 @@
-Airavata Managed File Transfer Service and Clients
-
-Initialization steps
-
-Start consul server - ./consul agent -dev
-Start ResourceServiceApplication
-Start SecretServiceApplication
-Start MftController
-Start ApiServiceApplication
