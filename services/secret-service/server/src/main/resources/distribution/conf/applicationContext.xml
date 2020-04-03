@@ -6,8 +6,7 @@
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <!-- <context:component-scan base-package="com.in28minutes.spring.basics"/> -->
-
-    <bean id="resourceBackend" class="org.apache.airavata.mft.secret.server.backend.airavata.AiravataSecretBackend"></bean>
+    <bean id="resourceBackend" class="org.apache.airavata.mft.secret.server.backend.file.FileBasedSecretBackend"
+          init-method="init" destroy-method="destroy"></bean>
 
 </beans>

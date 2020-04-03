@@ -22,16 +22,30 @@ import org.apache.airavata.mft.secret.server.backend.sql.entity.SCPSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.SecretRepository;
 import org.apache.airavata.mft.secret.service.*;
 import org.dozer.DozerBeanMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
 public class SQLSecretBackend implements SecretBackend {
 
+    private static final Logger logger = LoggerFactory.getLogger(SQLSecretBackend.class);
+
     @Autowired
     private SecretRepository secretRepository;
 
     private DozerBeanMapper mapper = new DozerBeanMapper();
+
+    @Override
+    public void init() {
+        logger.info("Initializing database secret backend");
+    }
+
+    @Override
+    public void destroy() {
+        logger.info("Destroying database secret backend");
+    }
 
     @Override
     public Optional<SCPSecret> getSCPSecret(SCPSecretGetRequest request) {

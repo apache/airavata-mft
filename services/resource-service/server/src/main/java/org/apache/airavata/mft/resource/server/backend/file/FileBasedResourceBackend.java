@@ -22,6 +22,8 @@ import org.apache.airavata.mft.resource.service.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,6 +33,20 @@ import java.util.stream.Collectors;
 
 public class FileBasedResourceBackend implements ResourceBackend {
 
+    private static final Logger logger = LoggerFactory.getLogger(FileBasedResourceBackend.class);
+
+    @org.springframework.beans.factory.annotation.Value("${file.backend.resource.file}")
+    private String resourceFile;
+
+    @Override
+    public void init() {
+        logger.info("Initializing file based resource backend");
+    }
+
+    @Override
+    public void destroy() {
+        logger.info("Destroying file based resource backend");
+    }
 
     @Override
     public Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request) throws Exception {
@@ -107,7 +123,7 @@ public class FileBasedResourceBackend implements ResourceBackend {
     @Override
     public Optional<LocalResource> getLocalResource(LocalResourceGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
-        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream("resources.json");
+        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);

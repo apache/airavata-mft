@@ -6,7 +6,8 @@
     "scpStorage" : {
       "storageId": "remote-ssh-storage",
       "host": "149.165.156.124",
-      "port": 22
+      "port": 22,
+      "user": "root"
     }
   },
   {

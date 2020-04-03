@@ -22,16 +22,30 @@ import org.apache.airavata.credential.store.cpi.CredentialStoreService;
 import org.apache.airavata.mft.secret.server.backend.SecretBackend;
 import org.apache.airavata.mft.secret.service.*;
 import org.apache.airavata.model.credential.store.SSHCredential;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
 public class AiravataSecretBackend implements SecretBackend {
 
-    @org.springframework.beans.factory.annotation.Value("${credential.server.host}")
+    private static final Logger logger = LoggerFactory.getLogger(AiravataSecretBackend.class);
+
+    @org.springframework.beans.factory.annotation.Value("${airavata.backend.credential.server.host}")
     private String credentialServerHost;
 
-    @org.springframework.beans.factory.annotation.Value("${credential.server.port}")
+    @org.springframework.beans.factory.annotation.Value("${airavata.backend.credential.server.port}")
     private int credentialServerPort;
+
+    @Override
+    public void init() {
+        logger.info("Initializing Airavata secret backend");
+    }
+
+    @Override
+    public void destroy() {
+        logger.info("Destroying Airavata secret backend");
+    }
 
     @Override
     public Optional<SCPSecret> getSCPSecret(SCPSecretGetRequest request) throws Exception {

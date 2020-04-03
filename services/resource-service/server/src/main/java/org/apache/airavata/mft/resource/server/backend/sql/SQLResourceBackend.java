@@ -26,11 +26,15 @@ import org.apache.airavata.mft.resource.server.backend.sql.repository.SCPResourc
 import org.apache.airavata.mft.resource.server.backend.sql.repository.SCPStorageRepository;
 import org.apache.airavata.mft.resource.service.*;
 import org.dozer.DozerBeanMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
 public class SQLResourceBackend implements ResourceBackend {
+
+    private static final Logger logger = LoggerFactory.getLogger(SQLResourceBackend.class);
 
     @Autowired
     private SCPStorageRepository scpStorageRepository;
@@ -42,6 +46,16 @@ public class SQLResourceBackend implements ResourceBackend {
     private LocalResourceRepository localResourceRepository;
 
     private DozerBeanMapper mapper = new DozerBeanMapper();
+
+    @Override
+    public void init() {
+        logger.info("Initializing database resource backend");
+    }
+
+    @Override
+    public void destroy() {
+        logger.info("Destroying database resource backend");
+    }
 
     @Override
     public Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request) {

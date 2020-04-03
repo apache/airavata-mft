@@ -22,6 +22,9 @@ import org.apache.airavata.mft.secret.service.*;
 import java.util.Optional;
 
 public interface SecretBackend {
+
+    public void init();
+    public void destroy();
     public Optional<SCPSecret> getSCPSecret(SCPSecretGetRequest request) throws Exception;
     public SCPSecret createSCPSecret(SCPSecretCreateRequest request);
     public boolean updateSCPSecret(SCPSecretUpdateRequest request);

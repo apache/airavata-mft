@@ -22,6 +22,8 @@ import org.apache.airavata.mft.secret.service.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,10 +33,25 @@ import java.util.stream.Collectors;
 
 public class FileBasedSecretBackend implements SecretBackend {
 
+    private static final Logger logger = LoggerFactory.getLogger(FileBasedSecretBackend.class);
+
+    @org.springframework.beans.factory.annotation.Value("${file.backend.secret.file}")
+    private String secretFile;
+
+    @Override
+    public void init() {
+        logger.info("Initializing file based secret backend");
+    }
+
+    @Override
+    public void destroy() {
+        logger.info("Destroying file based secret backend");
+    }
+
     @Override
     public Optional<SCPSecret> getSCPSecret(SCPSecretGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
-        InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream("secrets.json");
+        InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(secretFile);
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);

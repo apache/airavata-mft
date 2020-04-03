@@ -23,6 +23,10 @@ import org.apache.airavata.registry.api.exception.RegistryServiceException;
 import java.util.Optional;
 
 public interface ResourceBackend {
+
+    public void init();
+    public void destroy();
+
     public Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request) throws Exception;
     public SCPStorage createSCPStorage(SCPStorageCreateRequest request) throws Exception;
     public boolean updateSCPStorage(SCPStorageUpdateRequest request) throws Exception;

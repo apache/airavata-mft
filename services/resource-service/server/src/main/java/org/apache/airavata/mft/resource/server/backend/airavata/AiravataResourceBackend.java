@@ -42,6 +42,16 @@ public class AiravataResourceBackend implements ResourceBackend {
     private int registryServerPort;
 
     @Override
+    public void init() {
+        logger.info("Initializing Airavata resource backend");
+    }
+
+    @Override
+    public void destroy() {
+        logger.info("Destroying Airavata resource backend");
+    }
+
+    @Override
     public Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request) throws Exception {
 
         String resourceId = request.getStorageId();
