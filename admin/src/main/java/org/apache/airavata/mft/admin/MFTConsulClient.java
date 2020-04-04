@@ -56,6 +56,14 @@ public class MFTConsulClient {
     private SessionClient sessionClient;
     private ObjectMapper mapper = new ObjectMapper();
 
+    public static final String TRANSFER_STATE_PATH = "mft/transfer/state/";
+    public static final String CONTROLLER_MESSAGE_TRANSFER_PATH = "mft/controller/messages/transfers/";
+    public static final String AGENTS_MESSAGE_PATH = "mft/agents/messages/";
+    public static final String AGENTS_INFO_PATH = "mft/agents/info/";
+    public static final String LIVE_AGENTS_PATH = "mft/agent/live/";
+    public static final String TRANSFER_PROCESSED_PATH = "mft/transfer/processed/";
+    public static final String TRANSFER_PENDING_PATH = "mft/transfer/pending/";
+
     public MFTConsulClient(Map<String, Integer> consulHostPorts) {
         List<HostAndPort> hostAndPorts = consulHostPorts.entrySet().stream()
                 .map(entry -> fromParts(entry.getKey(), entry.getValue()))
@@ -75,7 +83,7 @@ public class MFTConsulClient {
         try {
             String asStr = mapper.writeValueAsString(transferRequest);
             String transferId = UUID.randomUUID().toString();
-            kvClient.putValue("mft/controller/messages/" + transferId, asStr);
+            kvClient.putValue(CONTROLLER_MESSAGE_TRANSFER_PATH + transferId, asStr);
             return transferId;
         } catch (JsonProcessingException e) {
             throw new MFTAdminException("Error in serializing transfer request", e);
@@ -90,7 +98,7 @@ public class MFTConsulClient {
             .setUpdateTimeMils(System.currentTimeMillis())
             .setDescription("Initializing the transfer"));
             String asString = mapper.writeValueAsString(transferCommand);
-            kvClient.putValue("mft/agents/messages/"  + agentId + "/" + transferCommand.getTransferId(), asString);
+            kvClient.putValue(AGENTS_MESSAGE_PATH  + agentId + "/" + transferCommand.getTransferId(), asString);
         } catch (JsonProcessingException e) {
             throw new MFTAdminException("Error in serializing transfer request", e);
         }
@@ -98,7 +106,7 @@ public class MFTConsulClient {
 
     public List<AgentInfo> listAgents() {
         List<AgentInfo> agents = new ArrayList<>();
-        List<String> keys = kvClient.getKeys("mft/agents/info");
+        List<String> keys = kvClient.getKeys(AGENTS_INFO_PATH);
         for (String key : keys) {
             Optional<AgentInfo> agentInfo = getAgentInfo(key.substring(key.lastIndexOf("/") + 1));
             agentInfo.ifPresent(agents::add);
@@ -107,7 +115,7 @@ public class MFTConsulClient {
     }
 
     public Optional<AgentInfo> getAgentInfo(String agentId) {
-        Optional<Value> value = kvClient.getValue("mft/agents/info/" + agentId);
+        Optional<Value> value = kvClient.getValue(AGENTS_INFO_PATH + agentId);
         if (value.isPresent()) {
             Value absVal = value.get();
             if (absVal.getValue().isPresent()) {
@@ -115,7 +123,7 @@ public class MFTConsulClient {
                 try {
                     return Optional.of(mapper.readValue(asStr, AgentInfo.class));
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.error("Errored while fetching agent {} info", agentId, e);
                 }
             }
         }
@@ -125,7 +133,7 @@ public class MFTConsulClient {
     public void registerAgent(AgentInfo agentInfo) throws MFTAdminException {
         try {
             String asString = mapper.writeValueAsString(agentInfo);
-            kvClient.putValue("mft/agents/info/" + agentInfo.getId(), asString);
+            kvClient.putValue(AGENTS_INFO_PATH + agentInfo.getId(), asString);
         } catch (JsonProcessingException e) {
             throw new MFTAdminException("Error in serializing agent information", e);
         }
@@ -133,7 +141,7 @@ public class MFTConsulClient {
 
     public List<String> getLiveAgentIds() throws MFTAdminException {
         try {
-            List<String> keys = kvClient.getKeys("mft/agent/live/");
+            List<String> keys = kvClient.getKeys(LIVE_AGENTS_PATH);
             return keys.stream().map(key -> key.substring(key.lastIndexOf("/") + 1)).collect(Collectors.toList());
         } catch (ConsulException e) {
             if (e.getCode() == 404) {
@@ -167,13 +175,15 @@ public class MFTConsulClient {
         }
     }
 
+    public void submitTransferStateToProcess(String transferId, String agentId, TransferState transferState) throws MFTAdminException {
+
+    }
     public void submitTransferState(String transferId, TransferState transferState) throws MFTAdminException {
         try {
             List<TransferState> allStates = getTransferStates(transferId);
-            System.out.println(allStates);
             allStates.add(transferState);
             String asStr = mapper.writeValueAsString(allStates);
-            kvClient.putValue("mft/transfer/state/" + transferId, asStr);
+            kvClient.putValue(TRANSFER_STATE_PATH + transferId, asStr);
 
             logger.info("Saved transfer status " + asStr);
 
@@ -183,7 +193,7 @@ public class MFTConsulClient {
     }
 
     public List<TransferState> getTransferStates(String transferId) throws IOException {
-        Optional<Value> valueOp = kvClient.getValue("mft/transfer/state/" + transferId);
+        Optional<Value> valueOp = kvClient.getValue(TRANSFER_STATE_PATH + transferId);
         List<TransferState> allStates;
         if (valueOp.isPresent()) {
             String prevStates = valueOp.get().getValueAsString().get();
