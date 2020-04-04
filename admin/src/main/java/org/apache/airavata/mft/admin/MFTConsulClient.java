@@ -18,7 +18,6 @@
 package org.apache.airavata.mft.admin;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HostAndPort;
 import com.orbitz.consul.Consul;
@@ -36,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.google.common.net.HostAndPort.*;
 
@@ -57,7 +55,8 @@ public class MFTConsulClient {
     private ObjectMapper mapper = new ObjectMapper();
 
     public static final String TRANSFER_STATE_PATH = "mft/transfer/state/";
-    public static final String CONTROLLER_MESSAGE_TRANSFER_PATH = "mft/controller/messages/transfers/";
+    public static final String CONTROLLER_TRANSFER_MESSAGE_PATH = "mft/controller/messages/transfers/";
+    public static final String CONTROLLER_STATE_MESSAGE_PATH = "mft/controller/messages/states/";
     public static final String AGENTS_MESSAGE_PATH = "mft/agents/messages/";
     public static final String AGENTS_INFO_PATH = "mft/agents/info/";
     public static final String LIVE_AGENTS_PATH = "mft/agent/live/";
@@ -79,31 +78,45 @@ public class MFTConsulClient {
         this.sessionClient = client.sessionClient();
     }
 
-    public String submitTransfer(TransferRequest transferRequest) throws MFTAdminException{
+    public String submitTransfer(TransferRequest transferRequest) throws MFTConsulClientException {
         try {
             String asStr = mapper.writeValueAsString(transferRequest);
             String transferId = UUID.randomUUID().toString();
-            kvClient.putValue(CONTROLLER_MESSAGE_TRANSFER_PATH + transferId, asStr);
+            kvClient.putValue(CONTROLLER_TRANSFER_MESSAGE_PATH + transferId, asStr);
             return transferId;
         } catch (JsonProcessingException e) {
-            throw new MFTAdminException("Error in serializing transfer request", e);
+            throw new MFTConsulClientException("Error in serializing transfer request", e);
         }
     }
 
-    public void commandTransferToAgent(String agentId, TransferCommand transferCommand) throws MFTAdminException {
+    /**
+     * Submits a {@link TransferCommand} to a target agent
+     *
+     * @param agentId Agent Id
+     * @param transferCommand Target transfer command
+     * @throws MFTConsulClientException If {@link TransferCommand} can not be delivered to consul store
+     */
+    public void commandTransferToAgent(String agentId, TransferCommand transferCommand) throws MFTConsulClientException {
         try {
-            submitTransferState(transferCommand.getTransferId(), new TransferState()
+            submitTransferStateToProcess(transferCommand.getTransferId(), "controller", new TransferState()
             .setState("INITIALIZING")
             .setPercentage(0)
             .setUpdateTimeMils(System.currentTimeMillis())
+            .setPublisher("controller")
             .setDescription("Initializing the transfer"));
             String asString = mapper.writeValueAsString(transferCommand);
             kvClient.putValue(AGENTS_MESSAGE_PATH  + agentId + "/" + transferCommand.getTransferId(), asString);
+
         } catch (JsonProcessingException e) {
-            throw new MFTAdminException("Error in serializing transfer request", e);
+            throw new MFTConsulClientException("Error in serializing transfer request", e);
         }
     }
 
+    /**
+     * List all currently registered agents.
+     *
+     * @return A list of {@link AgentInfo}
+     */
     public List<AgentInfo> listAgents() {
         List<AgentInfo> agents = new ArrayList<>();
         List<String> keys = kvClient.getKeys(AGENTS_INFO_PATH);
@@ -114,6 +127,11 @@ public class MFTConsulClient {
         return agents;
     }
 
+    /**
+     * Get the {@link AgentInfo} for a given agent id
+     * @param agentId Agent Id
+     * @return AgentInfo if such agent is available
+     */
     public Optional<AgentInfo> getAgentInfo(String agentId) {
         Optional<Value> value = kvClient.getValue(AGENTS_INFO_PATH + agentId);
         if (value.isPresent()) {
@@ -130,16 +148,28 @@ public class MFTConsulClient {
         return Optional.empty();
     }
 
-    public void registerAgent(AgentInfo agentInfo) throws MFTAdminException {
+    /**
+     * Agents are supposed to register themselves in MFT using this method
+     *
+     * @param agentInfo {@link AgentInfo} of the source Agents
+     * @throws MFTConsulClientException If {@link AgentInfo} can not be saved in consul store
+     */
+    public void registerAgent(AgentInfo agentInfo) throws MFTConsulClientException {
         try {
             String asString = mapper.writeValueAsString(agentInfo);
             kvClient.putValue(AGENTS_INFO_PATH + agentInfo.getId(), asString);
         } catch (JsonProcessingException e) {
-            throw new MFTAdminException("Error in serializing agent information", e);
+            throw new MFTConsulClientException("Error in serializing agent information", e);
         }
     }
 
-    public List<String> getLiveAgentIds() throws MFTAdminException {
+    /**
+     * List all currently live agents
+     *
+     * @return A list of live agent ids
+     * @throws MFTConsulClientException If live agents can not be fetched from consul store
+     */
+    public List<String> getLiveAgentIds() throws MFTConsulClientException {
         try {
             List<String> keys = kvClient.getKeys(LIVE_AGENTS_PATH);
             return keys.stream().map(key -> key.substring(key.lastIndexOf("/") + 1)).collect(Collectors.toList());
@@ -147,13 +177,63 @@ public class MFTConsulClient {
             if (e.getCode() == 404) {
                 return Collections.emptyList();
             }
-            throw new MFTAdminException("Error in fetching live agents", e);
+            throw new MFTConsulClientException("Error in fetching live agents", e);
         } catch (Exception e) {
-            throw new MFTAdminException("Error in fetching live agents", e);
+            throw new MFTConsulClientException("Error in fetching live agents", e);
         }
     }
 
-    public Optional<TransferState> getTransferState(String transferId) throws MFTAdminException {
+    /**
+     * Agents should call this method to submit {@link TransferState}. These status are received by the controller and reorder
+     * status messages and put in the final status array.
+     *
+     * @param transferId
+     * @param agentId
+     * @param transferState
+     * @throws MFTConsulClientException
+     */
+    public void submitTransferStateToProcess(String transferId, String agentId, TransferState transferState) throws MFTConsulClientException {
+        try {
+            kvClient.putValue(CONTROLLER_STATE_MESSAGE_PATH + transferId + "/" + agentId + "/" + transferState.getUpdateTimeMils(),
+                        mapper.writeValueAsString(transferState));
+        } catch (Exception e) {
+            logger.error("Error in submitting transfer status to process for transfer {} and agent {}", transferId, agentId, e);
+            throw new MFTConsulClientException("Error in submitting transfer status", e);
+        }
+    }
+
+    /**
+     * Add the {@link TransferState} to the aggregated state array. This method should only be called by the
+     * Controller and API server once the transfer is accepted. Agents should NEVER call this method as it would corrupt
+     * state array when multiple clients are writing at the same time
+     *
+     * @param transferId
+     * @param transferState
+     * @throws MFTConsulClientException
+     */
+    public void saveTransferState(String transferId, TransferState transferState) throws MFTConsulClientException {
+        try {
+            List<TransferState> allStates = getTransferStates(transferId);
+            // TODO implement sequence consistency
+            allStates.add(transferState);
+            String asStr = mapper.writeValueAsString(allStates);
+            kvClient.putValue(TRANSFER_STATE_PATH + transferId, asStr);
+
+            logger.info("Saved transfer status " + asStr);
+
+        } catch (Exception e) {
+            throw new MFTConsulClientException("Error in serializing transfer status", e);
+        }
+    }
+
+    /**
+     * Get the latest {@link TransferState} for given transfer id
+     *
+     * @param transferId Transfer Id
+     * @return Optional {@link TransferState } is there is any
+     * @throws MFTConsulClientException
+     */
+    public Optional<TransferState> getTransferState(String transferId) throws MFTConsulClientException {
 
         try {
             List<TransferState> states = getTransferStates(transferId);
@@ -169,29 +249,19 @@ public class MFTConsulClient {
             return lastStatusOp;
 
         } catch (ConsulException e) {
-            throw new MFTAdminException("Error in fetching transfer status " + transferId, e);
+            throw new MFTConsulClientException("Error in fetching transfer status " + transferId, e);
         } catch (Exception e) {
-            throw new MFTAdminException("Error in fetching transfer status " + transferId, e);
+            throw new MFTConsulClientException("Error in fetching transfer status " + transferId, e);
         }
     }
 
-    public void submitTransferStateToProcess(String transferId, String agentId, TransferState transferState) throws MFTAdminException {
-
-    }
-    public void submitTransferState(String transferId, TransferState transferState) throws MFTAdminException {
-        try {
-            List<TransferState> allStates = getTransferStates(transferId);
-            allStates.add(transferState);
-            String asStr = mapper.writeValueAsString(allStates);
-            kvClient.putValue(TRANSFER_STATE_PATH + transferId, asStr);
-
-            logger.info("Saved transfer status " + asStr);
-
-        } catch (Exception e) {
-            throw new MFTAdminException("Error in serializing transfer status", e);
-        }
-    }
-
+    /**
+     * Provide all {@link TransferState} for given transfer id
+     *
+     * @param transferId Transfer Id
+     * @return The list of all {@link TransferState}
+     * @throws IOException
+     */
     public List<TransferState> getTransferStates(String transferId) throws IOException {
         Optional<Value> valueOp = kvClient.getValue(TRANSFER_STATE_PATH + transferId);
         List<TransferState> allStates;
@@ -204,7 +274,7 @@ public class MFTConsulClient {
         return allStates;
     }
 
-    public List<AgentInfo> getLiveAgentInfos() throws MFTAdminException {
+    public List<AgentInfo> getLiveAgentInfos() throws MFTConsulClientException {
         List<String> liveAgentIds = getLiveAgentIds();
         return liveAgentIds.stream().map(id -> getAgentInfo(id).get()).collect(Collectors.toList());
     }

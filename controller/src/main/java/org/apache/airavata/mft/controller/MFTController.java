@@ -23,9 +23,10 @@ import com.orbitz.consul.cache.ConsulCache;
 import com.orbitz.consul.cache.KVCache;
 import com.orbitz.consul.model.kv.Value;
 import org.apache.airavata.mft.admin.MFTConsulClient;
-import org.apache.airavata.mft.admin.MFTAdminException;
+import org.apache.airavata.mft.admin.MFTConsulClientException;
 import org.apache.airavata.mft.admin.models.TransferCommand;
 import org.apache.airavata.mft.admin.models.TransferRequest;
+import org.apache.airavata.mft.admin.models.TransferState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,7 @@ public class MFTController implements CommandLineRunner {
     private static final Logger logger = LoggerFactory.getLogger(MFTController.class);
 
     private final Semaphore mainHold = new Semaphore(0);
+    private ObjectMapper mapper = new ObjectMapper();
 
     private KVCache messageCache;
     private KVCache stateCache;
@@ -64,8 +66,8 @@ public class MFTController implements CommandLineRunner {
 
     public void init() {
         logger.info("Initializing the Controller");
-        messageCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.CONTROLLER_MESSAGE_TRANSFER_PATH);
-        stateCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.TRANSFER_STATE_PATH);
+        messageCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.CONTROLLER_TRANSFER_MESSAGE_PATH);
+        stateCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.CONTROLLER_STATE_MESSAGE_PATH);
         pendingMonitor = Executors.newSingleThreadScheduledExecutor();
 
         pendingMonitor.scheduleWithFixedDelay(this::processPending, 2000, 4000, TimeUnit.MILLISECONDS);
@@ -122,25 +124,34 @@ public class MFTController implements CommandLineRunner {
     }
 
     private void acceptStates() {
-        //logger.info("Received state Key {} val {}", key, asStr);
-        //logger.info("Deleting key " + value.getKey());
-        //kvClient.deleteKey(value.getKey()); // Due to bug in consul https://github.com/hashicorp/consul/issues/571
         ConsulCache.Listener<String, Value> stateCacheListener = newValues -> newValues.forEach((key, value) -> {
             try {
                 if (value.getValueAsString().isPresent()) {
-                    String asStr = value.getValueAsString().get();
+                    String valAsStr = value.getValueAsString().get();
+                    logger.info("Received state Key {} val {}", key, valAsStr);
 
-                    //logger.info("Received state Key {} val {}", key, asStr);
+                    String parts[] = key.split("/");
+                    if (parts.length != 3) {
+                        logger.error("Invalid status key {}", key);
+                    }
+
+                    String transferId = parts[0];
+                    String agentId = parts[1];
+                    String time = parts[2];
+
+                    TransferState transferState = mapper.readValue(valAsStr, TransferState.class);
+                    mftConsulClient.saveTransferState(transferId, transferState);
+
                 }
             } catch (Exception e) {
                 logger.error("Error while processing the state message", e);
             } finally {
-                //logger.info("Deleting key " + value.getKey());
-                //kvClient.deleteKey(value.getKey()); // Due to bug in consul https://github.com/hashicorp/consul/issues/571
+                logger.info("Deleting key " + value.getKey());
+                mftConsulClient.getKvClient().deleteKey(value.getKey()); // Due to bug in consul https://github.com/hashicorp/consul/issues/571
             }
         });
-        //stateCache.addListener(stateCacheListener);
-        //stateCache.start();
+        stateCache.addListener(stateCacheListener);
+        stateCache.start();
     }
 
     private void markAsProcessed(String transferId, TransferRequest transferRequest) throws JsonProcessingException {
@@ -167,7 +178,7 @@ public class MFTController implements CommandLineRunner {
         return transferCommand;
     }
 
-    private Optional<String> selectAgent(String transferId, TransferRequest transferRequest) throws MFTAdminException {
+    private Optional<String> selectAgent(String transferId, TransferRequest transferRequest) throws MFTConsulClientException {
 
         List<String> liveAgentIds = mftConsulClient.getLiveAgentIds();
         if (liveAgentIds.isEmpty()) {

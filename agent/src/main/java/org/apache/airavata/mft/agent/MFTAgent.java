@@ -25,7 +25,7 @@ import com.orbitz.consul.model.kv.Value;
 import com.orbitz.consul.model.session.ImmutableSession;
 import com.orbitz.consul.model.session.SessionCreatedResponse;
 import org.apache.airavata.mft.admin.MFTConsulClient;
-import org.apache.airavata.mft.admin.MFTAdminException;
+import org.apache.airavata.mft.admin.MFTConsulClientException;
 import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferCommand;
 import org.apache.airavata.mft.admin.models.TransferState;
@@ -108,10 +108,11 @@ public class MFTAgent implements CommandLineRunner {
                     try {
                         request = mapper.readValue(v, TransferCommand.class);
                         logger.info("Received request " + request.getTransferId());
-                        mftConsulClient.submitTransferState(request.getTransferId(), new TransferState()
+                        mftConsulClient.submitTransferStateToProcess(request.getTransferId(), agentId, new TransferState()
                             .setState("STARTING")
                             .setPercentage(0)
                             .setUpdateTimeMils(System.currentTimeMillis())
+                            .setPublisher(agentId)
                             .setDescription("Starting the transfer"));
 
                         Optional<Connector> inConnectorOpt = ConnectorResolver.resolveConnector(request.getSourceType(), "IN");
@@ -128,16 +129,17 @@ public class MFTAgent implements CommandLineRunner {
 
                         ResourceMetadata metadata = metadataCollector.getGetResourceMetadata(request.getSourceId(), request.getSourceToken());
                         logger.debug("File size " + metadata.getResourceSize());
-                        mftConsulClient.submitTransferState(request.getTransferId(), new TransferState()
+                        mftConsulClient.submitTransferStateToProcess(request.getTransferId(), agentId, new TransferState()
                             .setState("STARTED")
                             .setPercentage(0)
                             .setUpdateTimeMils(System.currentTimeMillis())
+                            .setPublisher(agentId)
                             .setDescription("Started the transfer"));
 
                         String transferId = mediator.transfer(request.getTransferId(), inConnector, outConnector, metadata, (id, st) -> {
                             try {
-                                mftConsulClient.submitTransferState(id, st);
-                            } catch (MFTAdminException e) {
+                                mftConsulClient.submitTransferStateToProcess(id, agentId, st.setPublisher(agentId));
+                            } catch (MFTConsulClientException e) {
                                 logger.error("Failed while updating transfer state", e);
                             }
                         });
@@ -149,12 +151,13 @@ public class MFTAgent implements CommandLineRunner {
                             try {
                                 logger.error("Error in submitting transfer {}", request.getTransferId(), e);
 
-                                mftConsulClient.submitTransferState(request.getTransferId(), new TransferState()
+                                mftConsulClient.submitTransferStateToProcess(request.getTransferId(), agentId, new TransferState()
                                         .setState("FAILED")
                                         .setPercentage(0)
                                         .setUpdateTimeMils(System.currentTimeMillis())
+                                        .setPublisher(agentId)
                                         .setDescription(ExceptionUtils.getStackTrace(e)));
-                            } catch (MFTAdminException ex) {
+                            } catch (MFTConsulClientException ex) {
                                 logger.warn(ex.getMessage());
                                 // Ignore
                             }
@@ -173,7 +176,7 @@ public class MFTAgent implements CommandLineRunner {
         messageCache.start();
     }
 
-    private boolean connectAgent() throws MFTAdminException {
+    private boolean connectAgent() throws MFTConsulClientException {
         final ImmutableSession session = ImmutableSession.builder()
                 .name(agentId)
                 .behavior("delete")
