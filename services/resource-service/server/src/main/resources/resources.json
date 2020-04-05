@@ -5,7 +5,7 @@
     "resourcePath": "/tmp/1mb.txt",
     "scpStorage" : {
       "storageId": "remote-ssh-storage",
-      "host": "149.165.156.124",
+      "host": "149.165.171.139",
       "port": 22,
       "user": "root"
     }
@@ -16,7 +16,7 @@
     "resourcePath": "/tmp/10mb.txt",
     "scpStorage" : {
       "storageId": "remote-ssh-storage",
-      "host": "149.165.156.124",
+      "host": "149.165.171.139",
       "port": 22,
       "user": "root"
     }
