@@ -66,16 +66,37 @@ public class AiravataSecretBackend implements SecretBackend {
 
     @Override
     public SCPSecret createSCPSecret(SCPSecretCreateRequest request) {
-        return null;
+        throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
     public boolean updateSCPSecret(SCPSecretUpdateRequest request) {
-        return false;
+        throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
     public boolean deleteSCPSecret(SCPSecretDeleteRequest request) {
-        return false;
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+
+    @Override
+    public Optional<S3Secret> getS3Secret(S3SecretGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public S3Secret createS3Secret(S3SecretCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateS3Secret(S3SecretUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteS3Secret(S3SecretDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 }

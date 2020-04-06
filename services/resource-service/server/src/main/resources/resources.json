@@ -25,5 +25,12 @@
     "type": "LOCAL",
     "resourceId":  "10mb-file",
     "resourcePath": "/tmp/1mb.txt"
+  },
+  {
+    "type": "S3",
+    "resourceId": "s3-file",
+    "resourcePath": "new-file.txt",
+    "region": "us-east-2",
+    "bucketName": "s3-bucket"
   }
 ]

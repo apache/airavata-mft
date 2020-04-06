@@ -50,22 +50,25 @@ public class FileBasedResourceBackend implements ResourceBackend {
 
     @Override
     public Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request) throws Exception {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
     public SCPStorage createSCPStorage(SCPStorageCreateRequest request) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
     }
 
     @Override
     public boolean updateSCPStorage(SCPStorageUpdateRequest request) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
     }
 
     @Override
     public boolean deleteSCPStorage(SCPStorageDeleteRequest request) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
     }
 
     @Override
@@ -107,17 +110,20 @@ public class FileBasedResourceBackend implements ResourceBackend {
 
     @Override
     public SCPResource createSCPResource(SCPResourceCreateRequest request) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
     }
 
     @Override
     public boolean updateSCPResource(SCPResourceUpdateRequest request) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
     }
 
     @Override
     public boolean deleteSCPResource(SCPResourceDeleteRequest request) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
     }
 
     @Override
@@ -148,16 +154,67 @@ public class FileBasedResourceBackend implements ResourceBackend {
 
     @Override
     public LocalResource createLocalResource(LocalResourceCreateRequest request) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
     }
 
     @Override
     public boolean updateLocalResource(LocalResourceUpdateRequest request) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
     }
 
     @Override
     public boolean deleteLocalResource(LocalResourceDeleteRequest request) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
+    }
+
+    @Override
+    public Optional<S3Resource> getS3Resource(S3ResourceGetRequest request) throws Exception {
+        JSONParser jsonParser = new JSONParser();
+        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
+
+        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            Object obj = jsonParser.parse(reader);
+
+            JSONArray resourceList = (JSONArray) obj;
+
+            System.out.println("All resources ");
+            List<S3Resource> s3Resources = (List<S3Resource>) resourceList.stream()
+                    .filter(resource -> "S3".equals(((JSONObject) resource).get("type").toString()))
+                    .map(resource -> {
+                        JSONObject r = (JSONObject) resource;
+
+                        S3Resource s3Resource = S3Resource.newBuilder()
+                                .setResourcePath(r.get("resourcePath").toString())
+                                .setResourceId(r.get("resourceId").toString())
+                                .setBucketName(r.get("bucketName").toString())
+                                .setRegion(r.get("region").toString())
+                                .build();
+
+                        return s3Resource;
+                    }).collect(Collectors.toList());
+            return s3Resources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
+        }
+
+    }
+
+    @Override
+    public S3Resource createS3Resource(S3ResourceCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
+    }
+
+    @Override
+    public boolean updateS3Resource(S3ResourceUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
+    }
+
+    @Override
+    public boolean deleteS3Resource(S3ResourceDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
     }
 }
