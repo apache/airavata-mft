@@ -76,7 +76,6 @@ public class S3Receiver implements Connector {
         S3ObjectInputStream inputStream = s3object.getObjectContent();
 
         OutputStream os = context.getStreamBuffer().getOutputStream();
-        //OutputStream os = new FileOutputStream("/tmp/out.txt");
         int read;
         long bytes = 0;
         while ((read = inputStream.read()) != -1) {
