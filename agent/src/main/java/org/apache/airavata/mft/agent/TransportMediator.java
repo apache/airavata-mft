@@ -18,10 +18,7 @@
 package org.apache.airavata.mft.agent;
 
 import org.apache.airavata.mft.admin.models.TransferState;
-import org.apache.airavata.mft.core.CircularStreamingBuffer;
-import org.apache.airavata.mft.core.ConnectorContext;
-import org.apache.airavata.mft.core.ResourceMetadata;
-import org.apache.airavata.mft.core.TransferTask;
+import org.apache.airavata.mft.core.*;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -48,7 +45,7 @@ public class TransportMediator {
     public String transfer(String transferId, Connector inConnector, Connector outConnector, ResourceMetadata metadata,
                            BiConsumer<String, TransferState> onCallback) throws Exception {
 
-        CircularStreamingBuffer streamBuffer = new CircularStreamingBuffer();
+        DoubleStreamingBuffer streamBuffer = new DoubleStreamingBuffer();
         ConnectorContext context = new ConnectorContext();
         context.setMetadata(metadata);
         context.setStreamBuffer(streamBuffer);

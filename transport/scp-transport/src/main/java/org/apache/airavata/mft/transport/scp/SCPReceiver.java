@@ -19,8 +19,8 @@ package org.apache.airavata.mft.transport.scp;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
-import org.apache.airavata.mft.core.CircularStreamingBuffer;
 import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.DoubleStreamingBuffer;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.service.*;
@@ -83,7 +83,7 @@ public class SCPReceiver implements Connector {
         logger.info("SCP Receive completed. Transfer {}", context.getTransferId());
     }
 
-    private void transferRemoteToStream(Session session, String from, CircularStreamingBuffer streamBuffer) throws Exception {
+    private void transferRemoteToStream(Session session, String from, DoubleStreamingBuffer streamBuffer) throws Exception {
 
         try {
             OutputStream outputStream = streamBuffer.getOutputStream();

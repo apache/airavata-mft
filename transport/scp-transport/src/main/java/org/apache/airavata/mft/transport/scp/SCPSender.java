@@ -20,8 +20,8 @@ package org.apache.airavata.mft.transport.scp;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import org.apache.airavata.mft.core.CircularStreamingBuffer;
 import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.DoubleStreamingBuffer;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
@@ -100,7 +100,7 @@ public class SCPSender implements Connector {
         }
     }
 
-    private void copyLocalToRemote(Session session, String to, CircularStreamingBuffer streamBuffer, long fileSize) throws JSchException, IOException {
+    private void copyLocalToRemote(Session session, String to, DoubleStreamingBuffer streamBuffer, long fileSize) throws JSchException, IOException {
         try {
             logger.info("Starting scp send for remote server");
             InputStream inputStream = streamBuffer.getInputStream();

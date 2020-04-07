@@ -48,22 +48,6 @@ public class CircularStreamingBuffer {
     }
 
     public class CSBOutputStream extends OutputStream {
-        @Override
-        public void write(byte[] b) throws IOException {
-            write(b, 0, b.length);
-        }
-
-        @Override
-        public void write(byte[] b, int off, int len) throws IOException {
-            for (int i = off; i < len; i ++) {
-                try {
-                    buffer.put(b[i]);
-                    updateRead(false);
-                } catch (InterruptedException e) {
-                    throw new IOException(e);
-                }
-            }
-        }
 
         @Override
         public void flush() throws IOException {

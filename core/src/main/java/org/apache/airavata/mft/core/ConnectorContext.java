@@ -19,15 +19,15 @@ package org.apache.airavata.mft.core;
 
 public class ConnectorContext {
 
-    private CircularStreamingBuffer streamBuffer;
+    private DoubleStreamingBuffer streamBuffer;
     private ResourceMetadata metadata;
     private String transferId;
 
-    public CircularStreamingBuffer getStreamBuffer() {
+    public DoubleStreamingBuffer getStreamBuffer() {
         return streamBuffer;
     }
 
-    public void setStreamBuffer(CircularStreamingBuffer streamBuffer) {
+    public void setStreamBuffer(DoubleStreamingBuffer streamBuffer) {
         this.streamBuffer = streamBuffer;
     }
 
