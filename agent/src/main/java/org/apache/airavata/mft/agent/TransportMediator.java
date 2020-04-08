@@ -17,9 +17,11 @@
 
 package org.apache.airavata.mft.agent;
 
+import org.apache.airavata.mft.admin.models.TransferCommand;
 import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.core.*;
 import org.apache.airavata.mft.core.api.Connector;
+import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,14 +44,18 @@ public class TransportMediator {
         executor.shutdown();
     }
 
-    public String transfer(String transferId, Connector inConnector, Connector outConnector, ResourceMetadata metadata,
-                           BiConsumer<String, TransferState> onCallback) throws Exception {
+    public String transfer(TransferCommand command, Connector inConnector, Connector outConnector, MetadataCollector srcMetadataCollector,
+                           MetadataCollector destMetadataCollector, BiConsumer<String, TransferState> onCallback) throws Exception {
+
+        ResourceMetadata srcMetadata = srcMetadataCollector.getGetResourceMetadata(command.getSourceId(), command.getSourceToken());
+
+        logger.debug("Source file size " + srcMetadata.getResourceSize() + ". MD5 " + srcMetadata.getMd5sum());
 
         DoubleStreamingBuffer streamBuffer = new DoubleStreamingBuffer();
         ConnectorContext context = new ConnectorContext();
-        context.setMetadata(metadata);
+        context.setMetadata(srcMetadata);
         context.setStreamBuffer(streamBuffer);
-        context.setTransferId(transferId);
+        context.setTransferId(command.getTransferId());
 
         TransferTask recvTask = new TransferTask(inConnector, context);
         TransferTask sendTask = new TransferTask(outConnector, context);
@@ -74,17 +80,18 @@ public class TransportMediator {
                         try {
                             ft.get();
                         } catch (InterruptedException e) {
-                            // Interrupted
+
                             logger.error("Transfer task interrupted", e);
                         } catch (ExecutionException e) {
-                            // Snap, something went wrong in the task! Abort! Abort! Abort!
+
                             logger.error("One task failed with error", e);
 
-                            onCallback.accept(transferId, new TransferState()
+                            onCallback.accept(command.getTransferId(), new TransferState()
                                 .setPercentage(0)
                                 .setState("FAILED")
                                 .setUpdateTimeMils(System.currentTimeMillis())
                                 .setDescription("Transfer failed due to " + ExceptionUtils.getStackTrace(e)));
+
                             for (Future<Integer> f : futureList) {
                                 try {
                                     Thread.sleep(1000);
@@ -97,18 +104,46 @@ public class TransportMediator {
                         }
                     }
 
+                    Boolean transferred = destMetadataCollector.isAvailable(command.getDestinationId(), command.getDestinationToken());
+
+                    if (!transferred) {
+                        logger.error("Transfer completed but resource is not available in destination");
+                        throw new Exception("Transfer completed but resource is not available in destination");
+                    }
+
+                    ResourceMetadata destMetadata = destMetadataCollector.getGetResourceMetadata(command.getDestinationId(),
+                                                    command.getDestinationToken());
+
+                    if (destMetadata.getMd5sum().equals(srcMetadata.getMd5sum())) {
+                        logger.error("Resource integrity violated. MD5 sums are not matching. Source md5 {} destination md5 {}",
+                                                            srcMetadata.getMd5sum(), destMetadata.getMd5sum());
+                        throw new Exception("Resource integrity violated. MD5 sums are not matching. Source md5 " + srcMetadata.getMd5sum()
+                                                        + " destination md5 " + destMetadata.getMd5sum());
+                    }
+
+                    // Check
+
                     long endTime = System.nanoTime();
 
                     double time = (endTime - startTime) * 1.0 /1000000000;
-                    onCallback.accept(transferId, new TransferState()
+                    onCallback.accept(command.getTransferId(), new TransferState()
                         .setPercentage(100)
                         .setState("COMPLETED")
                         .setUpdateTimeMils(System.currentTimeMillis())
                         .setDescription("Transfer successfully completed"));
-                    logger.info("Transfer Speed " + (metadata.getResourceSize() * 1.0 / time) / (1024 * 1024) + " MB/s");
-                    logger.info("Transfer " + transferId + " completed");
+
+                    logger.info("Transfer {} completed.  Speed {} MB/s", command.getTransferId(),
+                                                    (srcMetadata.getResourceSize() * 1.0 / time) / (1024 * 1024));
+
                 } catch (Exception e) {
-                    logger.error("Transfer {} failed", transferId, e);
+
+                    onCallback.accept(command.getTransferId(), new TransferState()
+                            .setPercentage(0)
+                            .setState("FAILED")
+                            .setUpdateTimeMils(System.currentTimeMillis())
+                            .setDescription("Transfer failed due to " + ExceptionUtils.getStackTrace(e)));
+
+                    logger.error("Transfer {} failed", command.getTransferId(), e);
                 } finally {
                     inConnector.destroy();
                     outConnector.destroy();
@@ -117,6 +152,6 @@ public class TransportMediator {
         });
 
         monitor.submit(monitorThread);
-        return transferId;
+        return command.getTransferId();
     }
 }

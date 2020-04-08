@@ -76,7 +76,7 @@ public class S3MetadataCollector implements MetadataCollector {
         ResourceMetadata metadata = new ResourceMetadata();
         ObjectMetadata s3Metadata = s3Client.getObjectMetadata(s3Resource.getBucketName(), s3Resource.getResourcePath());
         metadata.setResourceSize(s3Metadata.getContentLength());
-        metadata.setMd5sum(s3Metadata.getContentMD5());
+        metadata.setMd5sum(s3Metadata.getETag());
         metadata.setUpdateTime(s3Metadata.getLastModified().getTime());
         metadata.setCreatedTime(s3Metadata.getLastModified().getTime());
         return metadata;
