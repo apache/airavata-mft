@@ -87,6 +87,7 @@ public class MFTAgent implements CommandLineRunner {
     private final ScheduledExecutorService sessionRenewPool = Executors.newSingleThreadScheduledExecutor();
     private long sessionRenewSeconds = 4;
     private long sessionTTLSeconds = 10;
+    private String session;
 
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -94,7 +95,7 @@ public class MFTAgent implements CommandLineRunner {
     private MFTConsulClient mftConsulClient;
 
     public void init() {
-        messageCache = KVCache.newCache(mftConsulClient.getKvClient(), "mft/agents/messages/" + agentId );
+        messageCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.AGENTS_MESSAGE_PATH + agentId );
     }
 
     private void acceptRequests() {
@@ -138,16 +139,29 @@ public class MFTAgent implements CommandLineRunner {
                             .setPublisher(agentId)
                             .setDescription("Started the transfer"));
 
-                        String transferId = mediator.transfer(request, inConnector, outConnector, srcMetadataCollector, dstMetadataCollector, (id, st) -> {
-                            try {
-                                mftConsulClient.submitTransferStateToProcess(id, agentId, st.setPublisher(agentId));
-                            } catch (MFTConsulClientException e) {
-                                logger.error("Failed while updating transfer state", e);
+
+                        String transferId = mediator.transfer(request, inConnector, outConnector, srcMetadataCollector, dstMetadataCollector,
+                            (id, st) -> {
+                                try {
+                                    mftConsulClient.submitTransferStateToProcess(id, agentId, st.setPublisher(agentId));
+                                } catch (MFTConsulClientException e) {
+                                    logger.error("Failed while updating transfer state", e);
+                                }
+                            },
+                            (id, transferSuccess) -> {
+                                try {
+                                    // Delete scheduled key as the transfer completed / failed if it was placed in current session
+                                    mftConsulClient.getKvClient().deleteKey(MFTConsulClient.AGENTS_SCHEDULED_PATH + agentId + "/" + session + "/" + id);
+                                } catch (Exception e) {
+                                    logger.error("Failed while deleting scheduled path for transfer {}", id);
+                                }
                             }
-                        });
+                        );
 
-                        logger.info("Submitted transfer " + transferId);
+                        logger.info("Started the transfer " + transferId);
 
+                        // Save transfer metadata in scheduled path to recover in case of an Agent failures. Recovery is done from controller
+                        mftConsulClient.getKvClient().putValue(MFTConsulClient.AGENTS_SCHEDULED_PATH + agentId + "/" + session + "/" + transferId, v);
                     } catch (Exception e) {
                         if (request != null) {
                             try {
@@ -185,11 +199,12 @@ public class MFTAgent implements CommandLineRunner {
                 .ttl(sessionTTLSeconds + "s").build();
 
         final SessionCreatedResponse sessResp = mftConsulClient.getSessionClient().createSession(session);
-        final String lockPath = "mft/agent/live/" + agentId;
+        final String lockPath = MFTConsulClient.LIVE_AGENTS_PATH + agentId;
 
         boolean acquired = mftConsulClient.getKvClient().acquireLock(lockPath, sessResp.getId());
 
         if (acquired) {
+            this.session = sessResp.getId();
             sessionRenewPool.scheduleAtFixedRate(() -> {
                 try {
                     mftConsulClient.getSessionClient().renewSession(sessResp.getId());
@@ -255,7 +270,7 @@ public class MFTAgent implements CommandLineRunner {
         while (!connected) {
             connected = connectAgent();
             if (connected) {
-                logger.info("Successfully connected to consul");
+                logger.info("Successfully connected to consul with session id {}", session);
             } else {
                 logger.info("Retrying to connect to consul");
                 Thread.sleep(5000);
@@ -265,6 +280,7 @@ public class MFTAgent implements CommandLineRunner {
                 }
             }
         }
+
         acceptRequests();
     }
 

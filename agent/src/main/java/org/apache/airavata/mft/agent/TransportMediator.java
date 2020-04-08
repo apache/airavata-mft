@@ -49,7 +49,8 @@ public class TransportMediator {
     }
 
     public String transfer(TransferCommand command, Connector inConnector, Connector outConnector, MetadataCollector srcMetadataCollector,
-                           MetadataCollector destMetadataCollector, BiConsumer<String, TransferState> onStatusCallback) throws Exception {
+                           MetadataCollector destMetadataCollector, BiConsumer<String, TransferState> onStatusCallback,
+                           BiConsumer<String, Boolean> exitingCallback) throws Exception {
 
         ResourceMetadata srcMetadata = srcMetadataCollector.getGetResourceMetadata(command.getSourceId(), command.getSourceToken());
 
@@ -76,6 +77,8 @@ public class TransportMediator {
         futureList.add(completionService.submit(sendTask));
 
         final AtomicBoolean transferInProgress = new AtomicBoolean(true);
+        final AtomicBoolean transferSuccess = new AtomicBoolean(true);
+
 
         // Monitoring the completeness of the transfer
         Thread monitorThread = new Thread(new Runnable() {
@@ -100,6 +103,7 @@ public class TransportMediator {
                                 .setUpdateTimeMils(System.currentTimeMillis())
                                 .setDescription("Transfer failed due to " + ExceptionUtils.getStackTrace(e)));
                             transferInProgress.set(false);
+                            transferSuccess.set(false);
                             statusLock.unlock();
 
                             for (Future<Integer> f : futureList) {
@@ -144,6 +148,7 @@ public class TransportMediator {
                         .setUpdateTimeMils(System.currentTimeMillis())
                         .setDescription("Transfer successfully completed"));
                     transferInProgress.set(false);
+                    transferSuccess.set(true);
                     statusLock.unlock();
 
                     logger.info("Transfer {} completed.  Speed {} MB/s", command.getTransferId(),
@@ -158,6 +163,7 @@ public class TransportMediator {
                             .setUpdateTimeMils(System.currentTimeMillis())
                             .setDescription("Transfer failed due to " + ExceptionUtils.getStackTrace(e)));
                     transferInProgress.set(false);
+                    transferSuccess.set(false);
                     statusLock.unlock();
 
                     logger.error("Transfer {} failed", command.getTransferId(), e);
@@ -165,6 +171,7 @@ public class TransportMediator {
                     inConnector.destroy();
                     outConnector.destroy();
                     transferInProgress.set(false);
+                    exitingCallback.accept(command.getTransferId(),transferSuccess.get());
                 }
             }
         });

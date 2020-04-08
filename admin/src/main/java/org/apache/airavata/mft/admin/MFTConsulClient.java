@@ -58,6 +58,7 @@ public class MFTConsulClient {
     public static final String CONTROLLER_TRANSFER_MESSAGE_PATH = "mft/controller/messages/transfers/";
     public static final String CONTROLLER_STATE_MESSAGE_PATH = "mft/controller/messages/states/";
     public static final String AGENTS_MESSAGE_PATH = "mft/agents/messages/";
+    public static final String AGENTS_SCHEDULED_PATH = "mft/agents/scheduled/";
     public static final String AGENTS_INFO_PATH = "mft/agents/info/";
     public static final String LIVE_AGENTS_PATH = "mft/agent/live/";
     public static final String TRANSFER_PROCESSED_PATH = "mft/transfer/processed/";
