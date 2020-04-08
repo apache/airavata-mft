@@ -48,6 +48,8 @@ public class DoubleStreamingBuffer {
 
     boolean barrierPassed = false;
 
+    private long processedBytes = 0L;
+
     public class DSBOutputStream extends OutputStream {
 
         @Override
@@ -150,6 +152,7 @@ public class DoubleStreamingBuffer {
                 if (buf1Remain > 0) {
                     buf1Remain --;
                     //System.out.println("Readval " + (buffer1[readPoint] & 0xff));
+                    processedBytes++;
                     return buffer1[readPoint++] & 0xff;
                 } else {
 
@@ -170,13 +173,14 @@ public class DoubleStreamingBuffer {
                     }
                     //return read();
                     buf2Remain --;
+                    processedBytes++;
                     return buffer2[readPoint++] & 0xff;
                 }
             } else {
                 if (buf2Remain > 0) {
                     buf2Remain --;
                     //System.out.println("Readval " + (buffer2[readPoint] & 0xff));
-
+                    processedBytes++;
                     return buffer2[readPoint++] & 0xff;
                 } else {
 
@@ -196,6 +200,7 @@ public class DoubleStreamingBuffer {
                     }
                     //return read();
                     buf1Remain --;
+                    processedBytes++;
                     return buffer1[readPoint++] & 0xff;
                 }
             }
@@ -210,5 +215,9 @@ public class DoubleStreamingBuffer {
 
     public InputStream getInputStream() {
         return inputStream;
+    }
+
+    public long getProcessedBytes() {
+        return processedBytes;
     }
 }
