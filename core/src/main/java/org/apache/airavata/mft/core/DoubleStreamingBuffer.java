@@ -3,26 +3,44 @@ package org.apache.airavata.mft.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * A Thread safe byte buffer bridging bytes from a output stream to a input stream.
+ * This is an alternative for {@link CircularStreamingBuffer} to avoid synchronization overhead among the read thread
+ * and the write thread. This has a separate input and output stream that should be utilized by two different threads.
+ * Bytes are copied through two internal byte arrays. Always one array is dedicated to writes and another for reads. Once
+ * the write buffer is full and read buffer is empty, read and write threads swap the buffers. This is the only placed where
+ * synchronization is enforced.
+ */
 public class DoubleStreamingBuffer {
-    int bufferSize = 2048;
+
+    /*
+    Size of the internal arrays
+     */
+    private int bufferSize = 2048;
+
+    /*
+    Internal buffers
+     */
+    private final byte[] buffer1 = new byte[bufferSize];
+    private final byte[] buffer2 = new byte[bufferSize];
 
     private OutputStream outputStream = new DoubleStreamingBuffer.DSBOutputStream();
     private InputStream inputStream = new DoubleStreamingBuffer.DSBInputStream();
 
-    CyclicBarrier barrier = new CyclicBarrier(2);
+    private CyclicBarrier barrier = new CyclicBarrier(2);
 
-    final byte[] buffer1 = new byte[bufferSize];
-    final byte[] buffer2 = new byte[bufferSize];
+    /*
+    Remaining bytes in each buffer available for read. Read thread subtracts the count once read and write threads
+    increases the count for writes
+     */
+    private int buf1Remain = 0;
+    private int buf2Remain = 0;
 
-    int buf1Remain = 0;
-    int buf2Remain = 0;
-
-    ReentrantLock buffer1Lock = new ReentrantLock();
-    ReentrantLock buffer2Lock = new ReentrantLock();
+    private ReentrantLock buffer1Lock = new ReentrantLock();
+    private ReentrantLock buffer2Lock = new ReentrantLock();
 
     boolean readBuffer1 = true;
     boolean doneWrite = false;
@@ -35,7 +53,6 @@ public class DoubleStreamingBuffer {
         @Override
         public void close() throws IOException {
             doneWrite = true;
-            System.out.println("Closing");
             if (readBuffer1) {
                 buffer2Lock.unlock();
             } else {
@@ -59,6 +76,7 @@ public class DoubleStreamingBuffer {
                         buffer1Lock.lock();
                     }
 
+                    // wait for reader to enter into read block for the first time
                     barrier.await();
 
                     barrierPassed = true;
@@ -77,6 +95,7 @@ public class DoubleStreamingBuffer {
                     buffer2Lock.unlock();
                     buffer1Lock.lock();
                     try {
+                        // Wait for reader to move into next buffer
                         barrier.await();
                     } catch (Exception e) {
                         throw new IOException();
@@ -92,6 +111,7 @@ public class DoubleStreamingBuffer {
                     buffer1Lock.unlock();
                     buffer2Lock.lock();
                     try {
+                        // Wait for reader to move into next buffer
                         barrier.await();
                     } catch (Exception e) {
                         throw new IOException();
@@ -115,6 +135,7 @@ public class DoubleStreamingBuffer {
                         buffer2Lock.lock();
                     }
 
+                    // wait for writer to enter into read block for the first time
                     barrier.await();
 
                     barrierPassed = true;
@@ -142,6 +163,7 @@ public class DoubleStreamingBuffer {
 
                     readPoint = 0;
                     try {
+                        // Wait for writer to move into next buffer
                         barrier.await();
                     } catch (Exception e) {
                         throw new IOException();
@@ -167,6 +189,7 @@ public class DoubleStreamingBuffer {
                     buffer2Lock.unlock();
                     readPoint = 0;
                     try {
+                        // Wait for writer to move into next buffer
                         barrier.await();
                     } catch (Exception e) {
                         throw new IOException();
@@ -181,64 +204,11 @@ public class DoubleStreamingBuffer {
     }
 
 
-    public static void main(String args[]) throws InterruptedException {
-        DoubleStreamingBuffer dsb = new DoubleStreamingBuffer();
-        CyclicBarrier barrier = new CyclicBarrier(2);
-
-        Thread thread1 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("Thread 1");
-                try {
-                    barrier.await();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (BrokenBarrierException e) {
-                    e.printStackTrace();
-                }
-                System.out.println("Done Thread 1");
-            }
-        });
-
-        Thread thread2 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("Thread 2");
-                try {
-                    Thread.sleep(5000);
-                    barrier.await();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (BrokenBarrierException e) {
-                    e.printStackTrace();
-                }
-                System.out.println("Done Thread 2");
-            }
-        });
-
-
-        thread1.start();
-        thread2.start();
-
-        thread1.join();
-        thread2.join();
-
-    }
-
-
     public OutputStream getOutputStream() {
         return outputStream;
     }
 
-    public void setOutputStream(OutputStream outputStream) {
-        this.outputStream = outputStream;
-    }
-
     public InputStream getInputStream() {
         return inputStream;
-    }
-
-    public void setInputStream(InputStream inputStream) {
-        this.inputStream = inputStream;
     }
 }
