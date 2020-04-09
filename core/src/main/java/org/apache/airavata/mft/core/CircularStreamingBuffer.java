@@ -23,7 +23,7 @@ import java.util.concurrent.Semaphore;
 
 public class CircularStreamingBuffer {
 
-    private int bufferSize = 1024;
+    private int bufferSize = 18192;
     private ArrayBlockingQueue<Byte> buffer = new ArrayBlockingQueue<>(bufferSize);
 
     private boolean osClosed = false;
@@ -48,22 +48,6 @@ public class CircularStreamingBuffer {
     }
 
     public class CSBOutputStream extends OutputStream {
-        @Override
-        public void write(byte[] b) throws IOException {
-            write(b, 0, b.length);
-        }
-
-        @Override
-        public void write(byte[] b, int off, int len) throws IOException {
-            for (int i = off; i < len; i ++) {
-                try {
-                    buffer.put(b[i]);
-                    updateRead(false);
-                } catch (InterruptedException e) {
-                    throw new IOException(e);
-                }
-            }
-        }
 
         @Override
         public void flush() throws IOException {
@@ -91,7 +75,9 @@ public class CircularStreamingBuffer {
 
         @Override
         public int read() throws IOException {
+            //System.out.println("Read int");
             Byte res = buffer.poll();
+            //System.out.println("Done read int");
             if (res == null) {
                 //System.out.println("Received null in is.read()");
                 if (osClosed) return -1;
@@ -106,33 +92,6 @@ public class CircularStreamingBuffer {
             } else {
                 return res & 0xff;
             }
-        }
-
-        @Override
-        public int read(byte[] b, int off, int len) throws IOException {
-            for (int i = off; i < len; i++) {
-                //System.out.println("Begin read");
-                int res = read();
-                //System.out.println("End read " + res);
-                if (res == -1) {
-                    //System.out.println("Received -1 in is.read(byte[], off, len)");
-                    if (i == off) {
-                        //System.out.println("Return -1");
-                        return -1;
-                    } else {
-                        //System.out.println("Return " + (i - off));
-                        return i - off;
-                    }
-                } else {
-                    b[i] = (byte)res;
-                }
-            }
-            return len - off;
-        }
-
-        @Override
-        public int read(byte[] b) throws IOException {
-            return read(b, 0, b.length);
         }
     }
 }

@@ -20,8 +20,8 @@ package org.apache.airavata.mft.transport.scp;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import org.apache.airavata.mft.core.CircularStreamingBuffer;
 import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.DoubleStreamingBuffer;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
@@ -56,21 +56,17 @@ public class SCPSender implements Connector {
         SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
         SCPSecret scpSecret = secretClient.getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
-        File privateKeyFile = File.createTempFile("id_rsa", "");
-        BufferedWriter writer = new BufferedWriter(new FileWriter(privateKeyFile));
-        writer.write(scpSecret.getPrivateKey());
-        writer.close();
-
-        logger.info("Creating a ssh session for {}@{}:{} with key {} and passphrase {}",
+        logger.info("Creating a ssh session for {}@{}:{}",
                 scpResource.getScpStorage().getUser(), scpResource.getScpStorage().getHost(),
-                scpResource.getScpStorage().getPort(),
-                privateKeyFile.getPath(),
-                scpSecret.getPassphrase());
+                scpResource.getScpStorage().getPort());
 
-        this.session = SCPTransportUtil.createSession(scpResource.getScpStorage().getUser(), scpResource.getScpStorage().getHost(),
+        this.session = SCPTransportUtil.createSession(
+                scpResource.getScpStorage().getUser(),
+                scpResource.getScpStorage().getHost(),
                 scpResource.getScpStorage().getPort(),
-                privateKeyFile.getPath(),
-                scpSecret.getPassphrase());
+                scpSecret.getPrivateKey().getBytes(),
+                scpSecret.getPublicKey().getBytes(),
+                scpSecret.getPassphrase().equals("")? null : scpSecret.getPassphrase().getBytes());
     }
 
     public void destroy() {
@@ -104,7 +100,7 @@ public class SCPSender implements Connector {
         }
     }
 
-    private void copyLocalToRemote(Session session, String to, CircularStreamingBuffer streamBuffer, long fileSize) throws JSchException, IOException {
+    private void copyLocalToRemote(Session session, String to, DoubleStreamingBuffer streamBuffer, long fileSize) throws JSchException, IOException {
         try {
             logger.info("Starting scp send for remote server");
             InputStream inputStream = streamBuffer.getInputStream();

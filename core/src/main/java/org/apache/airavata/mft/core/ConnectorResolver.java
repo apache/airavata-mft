@@ -47,6 +47,16 @@ public final class ConnectorResolver {
                         break;
                 }
                 break;
+            case "S3":
+                switch (direction) {
+                    case "IN":
+                        className = "org.apache.airavata.mft.transport.s3.S3Receiver";
+                        break;
+                    case "OUT":
+                        className = "org.apache.airavata.mft.transport.s3.S3Sender";
+                        break;
+                }
+                break;
         }
 
         if (className != null) {

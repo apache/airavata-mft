@@ -18,14 +18,21 @@
 package org.apache.airavata.mft.secret.server.handler;
 
 import com.google.protobuf.Empty;
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.apache.airavata.mft.secret.server.backend.SecretBackend;
 import org.apache.airavata.mft.secret.service.*;
 import org.lognet.springboot.grpc.GRpcService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Optional;
 
 @GRpcService
 public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBase {
+
+    private static final Logger logger = LoggerFactory.getLogger(SecretServiceHandler.class);
 
     @Autowired
     private SecretBackend backend;
@@ -37,11 +44,16 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
                 responseObserver.onNext(secret);
                 responseObserver.onCompleted();
             }, () -> {
-                responseObserver.onError(new Exception("No SCP Secret with id " + request.getSecretId()));
+                responseObserver.onError(Status.INTERNAL
+                        .withDescription("No SCP Secret with id " + request.getSecretId())
+                        .asRuntimeException());
             });
         } catch (Exception e) {
-            e.printStackTrace();
-            responseObserver.onError(new Exception("Error in retrieving Secret with id " + request.getSecretId()));
+
+            logger.error("Error in retrieving SCP Secret with id " + request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in retrieving SCP Secret with id " + request.getSecretId())
+                    .asRuntimeException());
         }
     }
 
@@ -63,7 +75,66 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
         if (res) {
             responseObserver.onCompleted();
         } else {
-            responseObserver.onError(new Exception("Failed to delete SCP Secret with id " + request.getSecretId()));
+            responseObserver.onError(Status.INTERNAL
+                    .withDescription("Failed to delete SCP Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void getS3Secret(S3SecretGetRequest request, StreamObserver<S3Secret> responseObserver) {
+        try {
+            this.backend.getS3Secret(request).ifPresentOrElse(secret -> {
+                responseObserver.onNext(secret);
+                responseObserver.onCompleted();
+            }, () -> {
+                responseObserver.onError(Status.INTERNAL
+                        .withDescription("No S3 Secret with id " + request.getSecretId())
+                        .asRuntimeException());
+            });
+
+        } catch (Exception e) {
+            logger.error("Error in retrieving S3 Secret with id " + request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in retrieving S3 Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+        super.getS3Secret(request, responseObserver);
+    }
+
+    @Override
+    public void createS3Secret(S3SecretCreateRequest request, StreamObserver<S3Secret> responseObserver) {
+        try {
+            this.backend.createS3Secret(request);
+        } catch (Exception e) {
+            logger.error("Error in creating S3 Secret", e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in creating S3 Secret")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void updateS3Secret(S3SecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.updateS3Secret(request);
+        } catch (Exception e) {
+            logger.error("Error in updating S3 Secret with id {}", request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in updating S3 Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void deleteS3Secret(S3SecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.deleteS3Secret(request);
+        } catch (Exception e) {
+            logger.error("Error in deleting S3 Secret with id {}", request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in deleting S3 Secret with id " + request.getSecretId())
+                    .asRuntimeException());
         }
     }
 }

@@ -25,8 +25,14 @@ public interface SecretBackend {
 
     public void init();
     public void destroy();
+
     public Optional<SCPSecret> getSCPSecret(SCPSecretGetRequest request) throws Exception;
     public SCPSecret createSCPSecret(SCPSecretCreateRequest request);
     public boolean updateSCPSecret(SCPSecretUpdateRequest request);
     public boolean deleteSCPSecret(SCPSecretDeleteRequest request);
+
+    public Optional<S3Secret> getS3Secret(S3SecretGetRequest request) throws Exception;
+    public S3Secret createS3Secret(S3SecretCreateRequest request) throws Exception;
+    public boolean updateS3Secret(S3SecretUpdateRequest request) throws Exception;
+    public boolean deleteS3Secret(S3SecretDeleteRequest request) throws Exception;
 }

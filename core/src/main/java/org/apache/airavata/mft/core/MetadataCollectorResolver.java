@@ -33,6 +33,9 @@ public final class MetadataCollectorResolver {
             case "LOCAL":
                 className = "org.apache.airavata.mft.transport.local.LocalMetadataCollector";
                 break;
+            case "S3":
+                className = "org.apache.airavata.mft.transport.s3.S3MetadataCollector";
+                break;
         }
 
         if (className != null) {

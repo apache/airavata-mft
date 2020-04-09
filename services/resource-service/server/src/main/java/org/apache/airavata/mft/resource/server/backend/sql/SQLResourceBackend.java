@@ -131,4 +131,28 @@ public class SQLResourceBackend implements ResourceBackend {
         localResourceRepository.deleteById(request.getResourceId());
         return true;
     }
+
+    @Override
+    public Optional<S3Resource> getS3Resource(S3ResourceGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
+    }
+
+    @Override
+    public S3Resource createS3Resource(S3ResourceCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
+    }
+
+    @Override
+    public boolean updateS3Resource(S3ResourceUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
+    }
+
+    @Override
+    public boolean deleteS3Resource(S3ResourceDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
+    }
 }

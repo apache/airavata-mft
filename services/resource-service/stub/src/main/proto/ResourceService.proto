@@ -87,6 +87,36 @@ message LocalResourceDeleteRequest {
     string resourceId = 1;
 }
 
+// S3 Resource
+
+message S3Resource {
+    string resourceId = 1;
+    string bucketName = 2;
+    string region = 3;
+    string resourcePath = 4;
+}
+
+message S3ResourceGetRequest {
+    string resourceId = 1;
+}
+
+message S3ResourceCreateRequest {
+    string bucketName = 1;
+    string region = 2;
+    string resourcePath = 3;
+}
+
+message S3ResourceUpdateRequest {
+    string resourceId = 1;
+    string bucketName = 2;
+    string region = 3;
+    string resourcePath = 4;
+}
+
+message S3ResourceDeleteRequest {
+    string resourceId = 1;
+}
+
 service  ResourceService {
     // SCP Storage
 
@@ -166,4 +196,29 @@ service  ResourceService {
         };
     }
 
+    // S3 Resource
+
+    rpc getS3Resource (S3ResourceGetRequest) returns (S3Resource) {
+        option (google.api.http) = {
+           get: "/v1.0/resource/s3"
+        };
+    }
+
+    rpc createS3Resource (S3ResourceCreateRequest) returns (S3Resource) {
+        option (google.api.http) = {
+           post: "/v1.0/resource/s3"
+        };
+    }
+
+    rpc updateS3Resource (S3ResourceUpdateRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+           put: "/v1.0/resource/s3"
+        };
+    }
+
+    rpc deleteS3Resource (S3ResourceDeleteRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+           delete: "/v1.0/resource/s3"
+        };
+    }
 }

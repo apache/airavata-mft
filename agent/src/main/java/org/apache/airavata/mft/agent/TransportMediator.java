@@ -17,42 +17,53 @@
 
 package org.apache.airavata.mft.agent;
 
+import org.apache.airavata.mft.admin.models.TransferCommand;
 import org.apache.airavata.mft.admin.models.TransferState;
-import org.apache.airavata.mft.core.CircularStreamingBuffer;
-import org.apache.airavata.mft.core.ConnectorContext;
-import org.apache.airavata.mft.core.ResourceMetadata;
-import org.apache.airavata.mft.core.TransferTask;
+import org.apache.airavata.mft.core.*;
 import org.apache.airavata.mft.core.api.Connector;
+import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public class TransportMediator {
 
     private static final Logger logger = LoggerFactory.getLogger(TransportMediator.class);
 
-    private ExecutorService executor = Executors.newFixedThreadPool(10);
-    private ExecutorService monitor = Executors.newFixedThreadPool(10);
+    /*
+    Number of maximum transfers handled at atime
+     */
+    private int concurrentTransfers = 10;
+    private ExecutorService executor = Executors.newFixedThreadPool(concurrentTransfers * 2); // 2 connections per transfer
+    private ExecutorService monitorPool = Executors.newFixedThreadPool(concurrentTransfers * 2); // 2 monitors per transfer
 
     public void destroy() {
         executor.shutdown();
     }
 
-    public String transfer(String transferId, Connector inConnector, Connector outConnector, ResourceMetadata metadata,
-                           BiConsumer<String, TransferState> onCallback) throws Exception {
+    public String transfer(TransferCommand command, Connector inConnector, Connector outConnector, MetadataCollector srcMetadataCollector,
+                           MetadataCollector destMetadataCollector, BiConsumer<String, TransferState> onStatusCallback,
+                           BiConsumer<String, Boolean> exitingCallback) throws Exception {
 
-        CircularStreamingBuffer streamBuffer = new CircularStreamingBuffer();
+        ResourceMetadata srcMetadata = srcMetadataCollector.getGetResourceMetadata(command.getSourceId(), command.getSourceToken());
+
+        final long resourceSize = srcMetadata.getResourceSize();
+        logger.debug("Source file size {}. MD5 {}", resourceSize, srcMetadata.getMd5sum());
+
+        final DoubleStreamingBuffer streamBuffer = new DoubleStreamingBuffer();
+        final ReentrantLock statusLock = new ReentrantLock();
+
         ConnectorContext context = new ConnectorContext();
-        context.setMetadata(metadata);
+        context.setMetadata(srcMetadata);
         context.setStreamBuffer(streamBuffer);
-        context.setTransferId(transferId);
+        context.setTransferId(command.getTransferId());
 
         TransferTask recvTask = new TransferTask(inConnector, context);
         TransferTask sendTask = new TransferTask(outConnector, context);
@@ -65,6 +76,11 @@ public class TransportMediator {
         futureList.add(completionService.submit(recvTask));
         futureList.add(completionService.submit(sendTask));
 
+        final AtomicBoolean transferInProgress = new AtomicBoolean(true);
+        final AtomicBoolean transferSuccess = new AtomicBoolean(true);
+
+
+        // Monitoring the completeness of the transfer
         Thread monitorThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -76,18 +92,20 @@ public class TransportMediator {
                         futureList.remove(ft);
                         try {
                             ft.get();
-                        } catch (InterruptedException e) {
-                            // Interrupted
-                            logger.error("Transfer task interrupted", e);
-                        } catch (ExecutionException e) {
-                            // Snap, something went wrong in the task! Abort! Abort! Abort!
+                        } catch (Exception e) {
+
                             logger.error("One task failed with error", e);
 
-                            onCallback.accept(transferId, new TransferState()
+                            statusLock.lock();
+                            onStatusCallback.accept(command.getTransferId(), new TransferState()
                                 .setPercentage(0)
                                 .setState("FAILED")
                                 .setUpdateTimeMils(System.currentTimeMillis())
                                 .setDescription("Transfer failed due to " + ExceptionUtils.getStackTrace(e)));
+                            transferInProgress.set(false);
+                            transferSuccess.set(false);
+                            statusLock.unlock();
+
                             for (Future<Integer> f : futureList) {
                                 try {
                                     Thread.sleep(1000);
@@ -100,26 +118,96 @@ public class TransportMediator {
                         }
                     }
 
+                    Boolean transferred = destMetadataCollector.isAvailable(command.getDestinationId(), command.getDestinationToken());
+
+                    if (!transferred) {
+                        logger.error("Transfer completed but resource is not available in destination");
+                        throw new Exception("Transfer completed but resource is not available in destination");
+                    }
+
+                    ResourceMetadata destMetadata = destMetadataCollector.getGetResourceMetadata(command.getDestinationId(),
+                                                    command.getDestinationToken());
+
+                    if (destMetadata.getMd5sum().equals(srcMetadata.getMd5sum())) {
+                        logger.error("Resource integrity violated. MD5 sums are not matching. Source md5 {} destination md5 {}",
+                                                            srcMetadata.getMd5sum(), destMetadata.getMd5sum());
+                        throw new Exception("Resource integrity violated. MD5 sums are not matching. Source md5 " + srcMetadata.getMd5sum()
+                                                        + " destination md5 " + destMetadata.getMd5sum());
+                    }
+
+                    // Check
+
                     long endTime = System.nanoTime();
 
                     double time = (endTime - startTime) * 1.0 /1000000000;
-                    onCallback.accept(transferId, new TransferState()
+
+                    statusLock.lock();
+                    onStatusCallback.accept(command.getTransferId(), new TransferState()
                         .setPercentage(100)
                         .setState("COMPLETED")
                         .setUpdateTimeMils(System.currentTimeMillis())
                         .setDescription("Transfer successfully completed"));
-                    logger.info("Transfer Speed " + (metadata.getResourceSize() * 1.0 / time) / (1024 * 1024) + " MB/s");
-                    logger.info("Transfer " + transferId + " completed");
+                    transferInProgress.set(false);
+                    transferSuccess.set(true);
+                    statusLock.unlock();
+
+                    logger.info("Transfer {} completed.  Speed {} MB/s", command.getTransferId(),
+                                                    (srcMetadata.getResourceSize() * 1.0 / time) / (1024 * 1024));
+
                 } catch (Exception e) {
-                    logger.error("Transfer {} failed", transferId, e);
+
+                    statusLock.lock();
+                    onStatusCallback.accept(command.getTransferId(), new TransferState()
+                            .setPercentage(0)
+                            .setState("FAILED")
+                            .setUpdateTimeMils(System.currentTimeMillis())
+                            .setDescription("Transfer failed due to " + ExceptionUtils.getStackTrace(e)));
+                    transferInProgress.set(false);
+                    transferSuccess.set(false);
+                    statusLock.unlock();
+
+                    logger.error("Transfer {} failed", command.getTransferId(), e);
                 } finally {
                     inConnector.destroy();
                     outConnector.destroy();
+                    transferInProgress.set(false);
+                    exitingCallback.accept(command.getTransferId(),transferSuccess.get());
                 }
             }
         });
 
-        monitor.submit(monitorThread);
-        return transferId;
+        // Monitoring the status of the transfer
+        Thread progressThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        // Ignore
+                    }
+                    statusLock.lock();
+                    if (!transferInProgress.get()){
+                        statusLock.unlock();
+                        logger.info("Status monitor is exiting for transfer {}", command.getTransferId());
+                        break;
+                    }
+                    double transferPercentage = streamBuffer.getProcessedBytes() * 100.0/ resourceSize;
+                    logger.info("Transfer percentage for transfer {} {}", command.getTransferId(), transferPercentage);
+                    onStatusCallback.accept(command.getTransferId(), new TransferState()
+                            .setPercentage(transferPercentage)
+                            .setState("RUNNING")
+                            .setUpdateTimeMils(System.currentTimeMillis())
+                            .setDescription("Transfer Progress Updated"));
+                    statusLock.unlock();
+                }
+            }
+        });
+
+        monitorPool.submit(monitorThread);
+        monitorPool.submit(progressThread);
+
+        return command.getTransferId();
     }
 }

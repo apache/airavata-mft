@@ -25,7 +25,7 @@ import com.orbitz.consul.model.kv.Value;
 import com.orbitz.consul.model.session.ImmutableSession;
 import com.orbitz.consul.model.session.SessionCreatedResponse;
 import org.apache.airavata.mft.admin.MFTConsulClient;
-import org.apache.airavata.mft.admin.MFTAdminException;
+import org.apache.airavata.mft.admin.MFTConsulClientException;
 import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferCommand;
 import org.apache.airavata.mft.admin.models.TransferState;
@@ -87,6 +87,7 @@ public class MFTAgent implements CommandLineRunner {
     private final ScheduledExecutorService sessionRenewPool = Executors.newSingleThreadScheduledExecutor();
     private long sessionRenewSeconds = 4;
     private long sessionTTLSeconds = 10;
+    private String session;
 
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -94,7 +95,7 @@ public class MFTAgent implements CommandLineRunner {
     private MFTConsulClient mftConsulClient;
 
     public void init() {
-        messageCache = KVCache.newCache(mftConsulClient.getKvClient(), "mft/agents/messages/" + agentId );
+        messageCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.AGENTS_MESSAGE_PATH + agentId );
     }
 
     private void acceptRequests() {
@@ -108,10 +109,11 @@ public class MFTAgent implements CommandLineRunner {
                     try {
                         request = mapper.readValue(v, TransferCommand.class);
                         logger.info("Received request " + request.getTransferId());
-                        mftConsulClient.submitTransferState(request.getTransferId(), new TransferState()
+                        mftConsulClient.submitTransferStateToProcess(request.getTransferId(), agentId, new TransferState()
                             .setState("STARTING")
                             .setPercentage(0)
                             .setUpdateTimeMils(System.currentTimeMillis())
+                            .setPublisher(agentId)
                             .setDescription("Starting the transfer"));
 
                         Optional<Connector> inConnectorOpt = ConnectorResolver.resolveConnector(request.getSourceType(), "IN");
@@ -122,39 +124,56 @@ public class MFTAgent implements CommandLineRunner {
                         Connector outConnector = outConnectorOpt.orElseThrow(() -> new Exception("Could not find an out connector for given input"));
                         outConnector.init(request.getDestinationId(), request.getDestinationToken(), resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
 
-                        Optional<MetadataCollector> metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(request.getSourceType());
-                        MetadataCollector metadataCollector = metadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for input"));
-                        metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
+                        Optional<MetadataCollector> srcMetadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(request.getSourceType());
+                        MetadataCollector srcMetadataCollector = srcMetadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for source"));
+                        srcMetadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
 
-                        ResourceMetadata metadata = metadataCollector.getGetResourceMetadata(request.getSourceId(), request.getSourceToken());
-                        logger.debug("File size " + metadata.getResourceSize());
-                        mftConsulClient.submitTransferState(request.getTransferId(), new TransferState()
+                        Optional<MetadataCollector> dstMetadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(request.getDestinationType());
+                        MetadataCollector dstMetadataCollector = dstMetadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for destination"));
+                        dstMetadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
+
+                        mftConsulClient.submitTransferStateToProcess(request.getTransferId(), agentId, new TransferState()
                             .setState("STARTED")
                             .setPercentage(0)
                             .setUpdateTimeMils(System.currentTimeMillis())
+                            .setPublisher(agentId)
                             .setDescription("Started the transfer"));
 
-                        String transferId = mediator.transfer(request.getTransferId(), inConnector, outConnector, metadata, (id, st) -> {
-                            try {
-                                mftConsulClient.submitTransferState(id, st);
-                            } catch (MFTAdminException e) {
-                                logger.error("Failed while updating transfer state", e);
+
+                        String transferId = mediator.transfer(request, inConnector, outConnector, srcMetadataCollector, dstMetadataCollector,
+                            (id, st) -> {
+                                try {
+                                    mftConsulClient.submitTransferStateToProcess(id, agentId, st.setPublisher(agentId));
+                                } catch (MFTConsulClientException e) {
+                                    logger.error("Failed while updating transfer state", e);
+                                }
+                            },
+                            (id, transferSuccess) -> {
+                                try {
+                                    // Delete scheduled key as the transfer completed / failed if it was placed in current session
+                                    mftConsulClient.getKvClient().deleteKey(MFTConsulClient.AGENTS_SCHEDULED_PATH + agentId + "/" + session + "/" + id);
+                                } catch (Exception e) {
+                                    logger.error("Failed while deleting scheduled path for transfer {}", id);
+                                }
                             }
-                        });
+                        );
 
-                        logger.info("Submitted transfer " + transferId);
+                        logger.info("Started the transfer " + transferId);
 
+                        // Save transfer metadata in scheduled path to recover in case of an Agent failures. Recovery is done from controller
+                        mftConsulClient.getKvClient().putValue(MFTConsulClient.AGENTS_SCHEDULED_PATH + agentId + "/" + session + "/" + transferId, v);
                     } catch (Exception e) {
                         if (request != null) {
                             try {
                                 logger.error("Error in submitting transfer {}", request.getTransferId(), e);
 
-                                mftConsulClient.submitTransferState(request.getTransferId(), new TransferState()
+                                mftConsulClient.submitTransferStateToProcess(request.getTransferId(), agentId, new TransferState()
                                         .setState("FAILED")
                                         .setPercentage(0)
                                         .setUpdateTimeMils(System.currentTimeMillis())
+                                        .setPublisher(agentId)
                                         .setDescription(ExceptionUtils.getStackTrace(e)));
-                            } catch (MFTAdminException ex) {
+                            } catch (MFTConsulClientException ex) {
                                 logger.warn(ex.getMessage());
                                 // Ignore
                             }
@@ -173,18 +192,19 @@ public class MFTAgent implements CommandLineRunner {
         messageCache.start();
     }
 
-    private boolean connectAgent() throws MFTAdminException {
+    private boolean connectAgent() throws MFTConsulClientException {
         final ImmutableSession session = ImmutableSession.builder()
                 .name(agentId)
                 .behavior("delete")
                 .ttl(sessionTTLSeconds + "s").build();
 
         final SessionCreatedResponse sessResp = mftConsulClient.getSessionClient().createSession(session);
-        final String lockPath = "mft/agent/live/" + agentId;
+        final String lockPath = MFTConsulClient.LIVE_AGENTS_PATH + agentId;
 
         boolean acquired = mftConsulClient.getKvClient().acquireLock(lockPath, sessResp.getId());
 
         if (acquired) {
+            this.session = sessResp.getId();
             sessionRenewPool.scheduleAtFixedRate(() -> {
                 try {
                     mftConsulClient.getSessionClient().renewSession(sessResp.getId());
@@ -250,7 +270,7 @@ public class MFTAgent implements CommandLineRunner {
         while (!connected) {
             connected = connectAgent();
             if (connected) {
-                logger.info("Successfully connected to consul");
+                logger.info("Successfully connected to consul with session id {}", session);
             } else {
                 logger.info("Retrying to connect to consul");
                 Thread.sleep(5000);
@@ -260,6 +280,7 @@ public class MFTAgent implements CommandLineRunner {
                 }
             }
         }
+
         acceptRequests();
     }
 

@@ -41,4 +41,9 @@ public interface ResourceBackend {
     public LocalResource createLocalResource(LocalResourceCreateRequest request) throws Exception;
     public boolean updateLocalResource(LocalResourceUpdateRequest request) throws Exception;
     public boolean deleteLocalResource(LocalResourceDeleteRequest request) throws Exception;
+
+    public Optional<S3Resource> getS3Resource(S3ResourceGetRequest request) throws Exception;
+    public S3Resource createS3Resource(S3ResourceCreateRequest request) throws Exception;
+    public boolean updateS3Resource(S3ResourceUpdateRequest request) throws Exception;
+    public boolean deleteS3Resource(S3ResourceDeleteRequest request) throws Exception;
 }

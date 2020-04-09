@@ -17,24 +17,24 @@
 
 package org.apache.airavata.mft.admin;
 
-public class MFTAdminException extends Exception {
-    public MFTAdminException() {
+public class MFTConsulClientException extends Exception {
+    public MFTConsulClientException() {
         super();
     }
 
-    public MFTAdminException(String message) {
+    public MFTConsulClientException(String message) {
         super(message);
     }
 
-    public MFTAdminException(String message, Throwable cause) {
+    public MFTConsulClientException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public MFTAdminException(Throwable cause) {
+    public MFTConsulClientException(Throwable cause) {
         super(cause);
     }
 
-    protected MFTAdminException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    protected MFTConsulClientException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

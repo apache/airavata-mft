@@ -97,17 +97,19 @@ public class AiravataResourceBackend implements ResourceBackend {
 
     @Override
     public SCPStorage createSCPStorage(SCPStorageCreateRequest request) {
-        return null;
+        throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
     public boolean updateSCPStorage(SCPStorageUpdateRequest request) {
-        return false;
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
     }
 
     @Override
     public boolean deleteSCPStorage(SCPStorageDeleteRequest request) {
-        return false;
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
     }
 
     @Override
@@ -126,36 +128,67 @@ public class AiravataResourceBackend implements ResourceBackend {
 
     @Override
     public SCPResource createSCPResource(SCPResourceCreateRequest request) {
-        return null;
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
     }
 
     @Override
     public boolean updateSCPResource(SCPResourceUpdateRequest request) {
-        return false;
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
     }
 
     @Override
     public boolean deleteSCPResource(SCPResourceDeleteRequest request) {
-        return false;
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
     }
 
     @Override
     public Optional<LocalResource> getLocalResource(LocalResourceGetRequest request) {
-        return Optional.empty();
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
     }
 
     @Override
     public LocalResource createLocalResource(LocalResourceCreateRequest request) {
-        return null;
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
     }
 
     @Override
     public boolean updateLocalResource(LocalResourceUpdateRequest request) {
-        return false;
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
     }
 
     @Override
     public boolean deleteLocalResource(LocalResourceDeleteRequest request) {
-        return false;
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
+    }
+
+    @Override
+    public Optional<S3Resource> getS3Resource(S3ResourceGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
+    }
+
+    @Override
+    public S3Resource createS3Resource(S3ResourceCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
+    }
+
+    @Override
+    public boolean updateS3Resource(S3ResourceUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
+    }
+
+    @Override
+    public boolean deleteS3Resource(S3ResourceDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+
     }
 }
