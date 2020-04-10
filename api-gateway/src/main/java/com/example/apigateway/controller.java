@@ -16,15 +16,15 @@ public class controller {
 
         MFTApiServiceGrpc.MFTApiServiceBlockingStub client = MFTApiClient.buildClient("localhost", 7004);
 
-        String sourceId = "remote-ssh-resource";
-        String sourceToken = "local-ssh-cred";
+        String sourceId = "s3-file";
+        String sourceToken = "s3-cred";
         String destId = "remote-ssh-resource2";
         String destToken = "local-ssh-cred";
 
         TransferApiRequest request = TransferApiRequest.newBuilder()
                 .setSourceId(sourceId)
                 .setSourceToken(sourceToken)
-                .setSourceType("SCP")
+                .setSourceType("S3")
                 .setDestinationId(destId)
                 .setDestinationToken(destToken)
                 .setDestinationType("SCP")

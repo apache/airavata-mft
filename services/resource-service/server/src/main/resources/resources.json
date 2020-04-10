@@ -13,7 +13,7 @@
   {
     "type": "SCP",
     "resourceId":  "remote-ssh-resource2",
-    "resourcePath": "/tmp/10mb.txt",
+    "resourcePath": "/tmp/KAMA20200408_003653_V06",
     "scpStorage" : {
       "storageId": "remote-ssh-storage",
       "host": "149.165.171.139",
@@ -29,8 +29,8 @@
   {
     "type": "S3",
     "resourceId": "s3-file",
-    "resourcePath": "new-file.txt",
-    "region": "us-east-2",
-    "bucketName": "s3-bucket"
+    "resourcePath": "test.txt",
+    "region": "us-east-1",
+    "bucketName": "elasticbeanstalk-us-east-1-065325321358"
   }
 ]
