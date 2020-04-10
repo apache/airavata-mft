@@ -18,6 +18,7 @@
 package org.apache.airavata.mft.transport.scp;
 
 import net.schmizz.sshj.SSHClient;
+import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.sftp.FileAttributes;
 import net.schmizz.sshj.sftp.SFTPClient;
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider;
@@ -36,13 +37,11 @@ import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.service.SCPSecret;
 import org.apache.airavata.mft.secret.service.SCPSecretGetRequest;
 import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -93,6 +92,27 @@ public class SCPMetadataCollector implements MetadataCollector {
                 metadata.setResourceSize(lstat.getSize());
                 metadata.setCreatedTime(lstat.getAtime());
                 metadata.setUpdateTime(lstat.getMtime());
+
+                try {
+                    // TODO calculate md5 using the binary based on the OS platform. Eg: MacOS has md5. Linux has md5sum
+                    // This only works for linux SCP resources. Improve to work in mac and windows resources
+                    Session.Command md5Command = sshClient.startSession().exec("md5sum " + scpResource.getResourcePath());
+                    StringWriter outWriter = new StringWriter();
+                    StringWriter errorWriter = new StringWriter();
+
+                    IOUtils.copy(md5Command.getInputStream(), outWriter, "UTF-8");
+                    Integer exitStatus = md5Command.getExitStatus(); // get exit status ofter reading std out
+
+                    if (exitStatus != null && exitStatus == 0) {
+                        metadata.setMd5sum(outWriter.toString().split(" ")[0]);
+                    } else {
+                        IOUtils.copy(md5Command.getErrorStream(), errorWriter, "UTF-8");
+                        logger.warn("MD5 fetch error out {}", errorWriter.toString());
+                    }
+                } catch (Exception e) {
+                    logger.warn("Failed to fetch md5 for SCP resource {}", resourceId, e);
+                }
+
                 return metadata;
             }
         }

@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
@@ -128,7 +129,17 @@ public class TransportMediator {
                     ResourceMetadata destMetadata = destMetadataCollector.getGetResourceMetadata(command.getDestinationId(),
                                                     command.getDestinationToken());
 
-                    if (destMetadata.getMd5sum().equals(srcMetadata.getMd5sum())) {
+                    boolean doIntegrityVerify = true;
+
+                    if (srcMetadata.getMd5sum() == null) {
+                        logger.warn("MD5 sum is not available for source resource. So this disables integrity verification");
+                        doIntegrityVerify = false;
+                    } else if (destMetadata.getMd5sum() == null) {
+                        logger.warn("MD5 sum is not available for destination resource. So this disables integrity verification");
+                        doIntegrityVerify = false;
+                    }
+
+                    if (doIntegrityVerify && !destMetadata.getMd5sum().equals(srcMetadata.getMd5sum())) {
                         logger.error("Resource integrity violated. MD5 sums are not matching. Source md5 {} destination md5 {}",
                                                             srcMetadata.getMd5sum(), destMetadata.getMd5sum());
                         throw new Exception("Resource integrity violated. MD5 sums are not matching. Source md5 " + srcMetadata.getMd5sum()
