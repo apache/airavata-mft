@@ -19,17 +19,29 @@ package org.apache.airavata.mft.transport.local;
 
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
+import org.apache.airavata.mft.resource.client.ResourceServiceClient;
+import org.apache.airavata.mft.resource.service.LocalResource;
+import org.apache.airavata.mft.resource.service.LocalResourceGetRequest;
+import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 
 public class LocalSender implements Connector {
 
-    private LocalResourceIdentifier resource;
+    private static final Logger logger = LoggerFactory.getLogger(LocalSender.class);
+
+    private LocalResource resource;
+    private boolean initialized;
     @Override
     public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort,
                      String secretServiceHost, int secretServicePort) throws Exception {
-        this.resource = LocalTransportUtil.getLocalResourceIdentifier(resourceId);
+
+        this.initialized = true;
+
+        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
+        this.resource = resourceClient.getLocalResource(LocalResourceGetRequest.newBuilder().setResourceId(resourceId).build());
     }
 
     @Override
@@ -37,15 +49,23 @@ public class LocalSender implements Connector {
 
     }
 
+    private void checkInitialized() {
+        if (!initialized) {
+            throw new IllegalStateException("Local Sender is not initialized");
+        }
+    }
+
     @Override
     public void startStream(ConnectorContext context) throws Exception {
-        System.out.println("Starting local send");
-        FileOutputStream fos = new FileOutputStream(this.resource.getPath());
+
+        logger.info("Starting local sender stream for transfer {}", context.getTransferId());
+
+        checkInitialized();
+        InputStream in = context.getStreamBuffer().getInputStream();
         long fileSize = context.getMetadata().getResourceSize();
+        OutputStream fos = new FileOutputStream(resource.getResourcePath());
 
-        InputStream inputStream = context.getStreamBuffer().getInputStream();
-
-        byte[] buf = new byte[1];
+        byte[] buf = new byte[1024];
         while (true) {
             int bufSize = 0;
 
@@ -54,7 +74,7 @@ public class LocalSender implements Connector {
             } else {
                 bufSize = (int) fileSize;
             }
-            bufSize = inputStream.read(buf, 0, bufSize);
+            bufSize = in.read(buf, 0, bufSize);
 
             if (bufSize < 0) {
                 break;
@@ -67,6 +87,11 @@ public class LocalSender implements Connector {
             if (fileSize == 0L)
                 break;
         }
-        System.out.println("Completed local send");
+
+        in.close();
+        fos.close();
+
+        logger.info("Completed local sender stream for transfer {}", context.getTransferId());
+
     }
 }
