@@ -88,6 +88,8 @@ public class TransportMediator {
 
                 try {
                     int futureCnt = futureList.size();
+                    boolean transferErrored = false;
+
                     for (int i = 0; i < futureCnt; i++) {
                         Future<Integer> ft = completionService.take();
                         futureList.remove(ft);
@@ -96,7 +98,7 @@ public class TransportMediator {
                         } catch (Exception e) {
 
                             logger.error("One task failed with error", e);
-
+                            transferErrored = true;
                             statusLock.lock();
                             onStatusCallback.accept(command.getTransferId(), new TransferState()
                                 .setPercentage(0)
@@ -119,52 +121,53 @@ public class TransportMediator {
                         }
                     }
 
-                    Boolean transferred = destMetadataCollector.isAvailable(command.getDestinationId(), command.getDestinationToken());
+                    if (!transferErrored) {
+                        Boolean transferred = destMetadataCollector.isAvailable(command.getDestinationId(), command.getDestinationToken());
 
-                    if (!transferred) {
-                        logger.error("Transfer completed but resource is not available in destination");
-                        throw new Exception("Transfer completed but resource is not available in destination");
+                        if (!transferred) {
+                            logger.error("Transfer completed but resource is not available in destination");
+                            throw new Exception("Transfer completed but resource is not available in destination");
+                        }
+
+                        ResourceMetadata destMetadata = destMetadataCollector.getGetResourceMetadata(command.getDestinationId(),
+                                command.getDestinationToken());
+
+                        boolean doIntegrityVerify = true;
+
+                        if (srcMetadata.getMd5sum() == null) {
+                            logger.warn("MD5 sum is not available for source resource. So this disables integrity verification");
+                            doIntegrityVerify = false;
+                        } else if (destMetadata.getMd5sum() == null) {
+                            logger.warn("MD5 sum is not available for destination resource. So this disables integrity verification");
+                            doIntegrityVerify = false;
+                        }
+
+                        if (doIntegrityVerify && !destMetadata.getMd5sum().equals(srcMetadata.getMd5sum())) {
+                            logger.error("Resource integrity violated. MD5 sums are not matching. Source md5 {} destination md5 {}",
+                                    srcMetadata.getMd5sum(), destMetadata.getMd5sum());
+                            throw new Exception("Resource integrity violated. MD5 sums are not matching. Source md5 " + srcMetadata.getMd5sum()
+                                    + " destination md5 " + destMetadata.getMd5sum());
+                        }
+
+                        // Check
+
+                        long endTime = System.nanoTime();
+
+                        double time = (endTime - startTime) * 1.0 / 1000000000;
+
+                        statusLock.lock();
+                        onStatusCallback.accept(command.getTransferId(), new TransferState()
+                                .setPercentage(100)
+                                .setState("COMPLETED")
+                                .setUpdateTimeMils(System.currentTimeMillis())
+                                .setDescription("Transfer successfully completed"));
+                        transferInProgress.set(false);
+                        transferSuccess.set(true);
+                        statusLock.unlock();
+
+                        logger.info("Transfer {} completed.  Speed {} MB/s", command.getTransferId(),
+                                (srcMetadata.getResourceSize() * 1.0 / time) / (1024 * 1024));
                     }
-
-                    ResourceMetadata destMetadata = destMetadataCollector.getGetResourceMetadata(command.getDestinationId(),
-                                                    command.getDestinationToken());
-
-                    boolean doIntegrityVerify = true;
-
-                    if (srcMetadata.getMd5sum() == null) {
-                        logger.warn("MD5 sum is not available for source resource. So this disables integrity verification");
-                        doIntegrityVerify = false;
-                    } else if (destMetadata.getMd5sum() == null) {
-                        logger.warn("MD5 sum is not available for destination resource. So this disables integrity verification");
-                        doIntegrityVerify = false;
-                    }
-
-                    if (doIntegrityVerify && !destMetadata.getMd5sum().equals(srcMetadata.getMd5sum())) {
-                        logger.error("Resource integrity violated. MD5 sums are not matching. Source md5 {} destination md5 {}",
-                                                            srcMetadata.getMd5sum(), destMetadata.getMd5sum());
-                        throw new Exception("Resource integrity violated. MD5 sums are not matching. Source md5 " + srcMetadata.getMd5sum()
-                                                        + " destination md5 " + destMetadata.getMd5sum());
-                    }
-
-                    // Check
-
-                    long endTime = System.nanoTime();
-
-                    double time = (endTime - startTime) * 1.0 /1000000000;
-
-                    statusLock.lock();
-                    onStatusCallback.accept(command.getTransferId(), new TransferState()
-                        .setPercentage(100)
-                        .setState("COMPLETED")
-                        .setUpdateTimeMils(System.currentTimeMillis())
-                        .setDescription("Transfer successfully completed"));
-                    transferInProgress.set(false);
-                    transferSuccess.set(true);
-                    statusLock.unlock();
-
-                    logger.info("Transfer {} completed.  Speed {} MB/s", command.getTransferId(),
-                                                    (srcMetadata.getResourceSize() * 1.0 / time) / (1024 * 1024));
-
                 } catch (Exception e) {
 
                     statusLock.lock();
