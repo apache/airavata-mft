@@ -191,4 +191,24 @@ public class AiravataResourceBackend implements ResourceBackend {
         throw new UnsupportedOperationException("Operation is not supported in backend");
 
     }
+
+    @Override
+    public Optional<AzureResource> getAzureResource(AzureResourceGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public AzureResource createAzureResource(AzureResourceCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateAzureResource(AzureResourceUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteAzureResource(AzureResourceDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
 }

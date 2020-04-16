@@ -36,6 +36,9 @@ public final class MetadataCollectorResolver {
             case "S3":
                 className = "org.apache.airavata.mft.transport.s3.S3MetadataCollector";
                 break;
+            case "AZURE":
+                className = "org.apache.airavata.mft.transport.azure.AzureMetadataCollector";
+                break;
         }
 
         if (className != null) {

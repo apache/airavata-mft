@@ -32,5 +32,11 @@
     "resourcePath": "test.txt",
     "region": "us-east-1",
     "bucketName": "elasticbeanstalk-us-east-1-065325321358"
+  },
+  {
+    "type": "AZURE",
+    "resourceId": "azure-blob",
+    "container": "sample-container",
+    "blobName": "sample.blob"
   }
 ]
