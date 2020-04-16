@@ -137,4 +137,61 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
                     .asRuntimeException());
         }
     }
+
+    @Override
+    public void getAzureSecret(AzureSecretGetRequest request, StreamObserver<AzureSecret> responseObserver) {
+        try {
+            this.backend.getAzureSecret(request).ifPresentOrElse(secret -> {
+                responseObserver.onNext(secret);
+                responseObserver.onCompleted();
+            }, () -> {
+                responseObserver.onError(Status.INTERNAL
+                        .withDescription("No Azure Secret with id " + request.getSecretId())
+                        .asRuntimeException());
+            });
+
+        } catch (Exception e) {
+            logger.error("Error in retrieving Azure Secret with id " + request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in retrieving Azure Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+        super.getAzureSecret(request, responseObserver);
+    }
+
+    @Override
+    public void createAzureSecret(AzureSecretCreateRequest request, StreamObserver<AzureSecret> responseObserver) {
+        try {
+            this.backend.createAzureSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in creating Azure Secret", e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in creating Azure Secret")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void updateAzureSecret(AzureSecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.updateAzureSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in updating Azure Secret with id {}", request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in updating Azure Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void deleteAzureSecret(AzureSecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.deleteAzureSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in deleting Azure Secret with id {}", request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in deleting Azure Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+    }
 }

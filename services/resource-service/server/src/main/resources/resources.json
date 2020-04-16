@@ -32,5 +32,11 @@
     "resourcePath": "new-file.txt",
     "region": "us-east-2",
     "bucketName": "s3-bucket"
+  },
+  {
+    "type": "AZURE",
+    "resourceId": "azure-blob",
+    "container": "sample-container",
+    "blobName": "sample.blob"
   }
 ]
