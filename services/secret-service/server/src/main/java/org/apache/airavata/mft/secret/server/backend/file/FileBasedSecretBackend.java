@@ -171,4 +171,44 @@ public class FileBasedSecretBackend implements SecretBackend {
     public boolean deleteBoxSecret(BoxSecretDeleteRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
+
+    @Override
+    public Optional<AzureSecret> getAzureSecret(AzureSecretGetRequest request) throws Exception {
+        JSONParser jsonParser = new JSONParser();
+        InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(secretFile);
+
+        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            Object obj = jsonParser.parse(reader);
+
+            JSONArray resourceList = (JSONArray) obj;
+
+            List<AzureSecret> azureSecrets = (List<AzureSecret>) resourceList.stream()
+                    .filter(resource -> "AZURE".equals(((JSONObject) resource).get("type").toString()))
+                    .map(resource -> {
+                        JSONObject r = (JSONObject) resource;
+
+                        AzureSecret azureSecret = AzureSecret.newBuilder()
+                                .setSecretId(r.get("secretId").toString())
+                                .setConnectionString(r.get("connectionString").toString()).build();
+
+                        return azureSecret;
+                    }).collect(Collectors.toList());
+            return azureSecrets.stream().filter(r -> request.getSecretId().equals(r.getSecretId())).findFirst();
+        }
+    }
+
+    @Override
+    public AzureSecret createAzureSecret(AzureSecretCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateAzureSecret(AzureSecretUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteAzureSecret(AzureSecretDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
 }

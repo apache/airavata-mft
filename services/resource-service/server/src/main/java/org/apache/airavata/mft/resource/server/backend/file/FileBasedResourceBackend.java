@@ -136,7 +136,6 @@ public class FileBasedResourceBackend implements ResourceBackend {
 
             JSONArray resourceList = (JSONArray) obj;
 
-            System.out.println("All resources ");
             List<LocalResource> localResources = (List<LocalResource>) resourceList.stream()
                     .filter(resource -> "LOCAL".equals(((JSONObject) resource).get("type").toString()))
                     .map(resource -> {
@@ -180,7 +179,6 @@ public class FileBasedResourceBackend implements ResourceBackend {
 
             JSONArray resourceList = (JSONArray) obj;
 
-            System.out.println("All resources ");
             List<S3Resource> s3Resources = (List<S3Resource>) resourceList.stream()
                     .filter(resource -> "S3".equals(((JSONObject) resource).get("type").toString()))
                     .map(resource -> {
@@ -258,6 +256,48 @@ public class FileBasedResourceBackend implements ResourceBackend {
 
     @Override
     public boolean deleteBoxResource(BoxResourceDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public Optional<AzureResource> getAzureResource(AzureResourceGetRequest request) throws Exception {
+        JSONParser jsonParser = new JSONParser();
+        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
+
+        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            Object obj = jsonParser.parse(reader);
+
+            JSONArray resourceList = (JSONArray) obj;
+
+            List<AzureResource> azureResources = (List<AzureResource>) resourceList.stream()
+                    .filter(resource -> "AZURE".equals(((JSONObject) resource).get("type").toString()))
+                    .map(resource -> {
+                        JSONObject r = (JSONObject) resource;
+
+                        AzureResource azureResource = AzureResource.newBuilder()
+                                .setBlobName(r.get("blobName").toString())
+                                .setContainer(r.get("container").toString())
+                                .setResourceId(r.get("resourceId").toString())
+                                .build();
+
+                        return azureResource;
+                    }).collect(Collectors.toList());
+            return azureResources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
+        }
+    }
+
+    @Override
+    public AzureResource createAzureResource(AzureResourceCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateAzureResource(AzureResourceUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteAzureResource(AzureResourceDeleteRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 }

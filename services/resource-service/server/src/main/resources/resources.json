@@ -42,5 +42,11 @@
     "type": "BOX",
     "resourceId": "box-file-efgh",
     "boxFileId": "655450661536"
+  },
+  {
+    "type": "AZURE",
+    "resourceId": "azure-blob",
+    "container": "sample-container",
+    "blobName": "sample.blob"
   }
 ]

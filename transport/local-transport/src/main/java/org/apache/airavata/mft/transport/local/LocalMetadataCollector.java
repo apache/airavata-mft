@@ -19,8 +19,17 @@ package org.apache.airavata.mft.transport.local;
 
 import org.apache.airavata.mft.core.ResourceMetadata;
 import org.apache.airavata.mft.core.api.MetadataCollector;
+import org.apache.airavata.mft.resource.client.ResourceServiceClient;
+import org.apache.airavata.mft.resource.service.LocalResource;
+import org.apache.airavata.mft.resource.service.LocalResourceGetRequest;
+import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.security.MessageDigest;
 
 public class LocalMetadataCollector implements MetadataCollector {
 
@@ -41,24 +50,50 @@ public class LocalMetadataCollector implements MetadataCollector {
 
     private void checkInitialized() {
         if (!initialized) {
-            throw new IllegalStateException("SCP Metadata Collector is not initialized");
+            throw new IllegalStateException("Local Metadata Collector is not initialized");
         }
     }
 
     @Override
     public ResourceMetadata getGetResourceMetadata(String resourceId, String credentialToken) throws Exception {
 
-        LocalResourceIdentifier resource = LocalTransportUtil.getLocalResourceIdentifier(resourceId);
-        File file = new File(resource.getPath());
+        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
+        LocalResource localResource = resourceClient.getLocalResource(LocalResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        File resourceFile = new File(localResource.getResourcePath());
+        if (resourceFile.exists()) {
 
-        ResourceMetadata metadata = new ResourceMetadata();
-        metadata.setResourceSize(file.length());
-        metadata.setUpdateTime(file.lastModified());
-        return metadata;
+            BasicFileAttributes basicFileAttributes = Files.readAttributes(Path.of(localResource.getResourcePath()), BasicFileAttributes.class);
+            ResourceMetadata metadata = new ResourceMetadata();
+            metadata.setCreatedTime(basicFileAttributes.creationTime().toMillis());
+            metadata.setUpdateTime(basicFileAttributes.lastModifiedTime().toMillis());
+            metadata.setResourceSize(basicFileAttributes.size());
+
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            FileInputStream fis = new FileInputStream(localResource.getResourcePath());
+            byte[] byteArray = new byte[1024];
+            int bytesCount = 0;
+            while ((bytesCount = fis.read(byteArray)) != -1) {
+                digest.update(byteArray, 0, bytesCount);
+            };
+            fis.close();
+            byte[] bytes = digest.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte aByte : bytes) {
+                sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
+            }
+            metadata.setMd5sum(sb.toString());
+
+            return metadata;
+        } else {
+            throw new Exception("Resource with id " + resourceId + " in path " + localResource.getResourcePath() + " does not exist");
+        }
     }
 
     @Override
     public Boolean isAvailable(String resourceId, String credentialToken) throws Exception {
-        return false;
+        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
+        LocalResource localResource = resourceClient.getLocalResource(LocalResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        File resourceFile = new File(localResource.getResourcePath());
+        return resourceFile.exists();
     }
 }

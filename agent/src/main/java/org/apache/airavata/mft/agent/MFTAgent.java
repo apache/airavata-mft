@@ -162,7 +162,7 @@ public class MFTAgent implements CommandLineRunner {
 
                         // Save transfer metadata in scheduled path to recover in case of an Agent failures. Recovery is done from controller
                         mftConsulClient.getKvClient().putValue(MFTConsulClient.AGENTS_SCHEDULED_PATH + agentId + "/" + session + "/" + transferId, v);
-                    } catch (Exception e) {
+                    } catch (Throwable e) {
                         if (request != null) {
                             try {
                                 logger.error("Error in submitting transfer {}", request.getTransferId(), e);

@@ -39,6 +39,9 @@ public final class MetadataCollectorResolver {
             case "BOX":
                 className = "org.apache.airavata.mft.transport.box.BoxMetadataCollector";
                 break;
+            case "AZURE":
+                className = "org.apache.airavata.mft.transport.azure.AzureMetadataCollector";
+                break;
         }
 
         if (className != null) {
