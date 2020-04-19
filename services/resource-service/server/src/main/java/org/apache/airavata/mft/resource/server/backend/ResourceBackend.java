@@ -51,4 +51,9 @@ public interface ResourceBackend {
     public AzureResource createAzureResource(AzureResourceCreateRequest request) throws Exception;
     public boolean updateAzureResource(AzureResourceUpdateRequest request) throws Exception;
     public boolean deleteAzureResource(AzureResourceDeleteRequest request) throws Exception;
+
+    public Optional<GCSResource> getGCSResource(GCSResourceGetRequest request) throws Exception;
+    public GCSResource createGCSResource(GCSResourceCreateRequest request) throws Exception;
+    public boolean updateGCSResource(GCSResourceUpdateRequest request) throws Exception;
+    public boolean deleteGCSResource(GCSResourceDeleteRequest request) throws Exception;
 }
