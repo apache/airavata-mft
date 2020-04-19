@@ -76,10 +76,8 @@ public class BoxMetadataCollector implements MetadataCollector {
 
         // TODO
         metadata.setMd5sum(boxFileInfo.getSha1());
-
-        // TODO
-        metadata.setUpdateTime(boxFileInfo.getCreatedAt().getTime());
-
+        
+        metadata.setUpdateTime(boxFileInfo.getModifiedAt().getTime());
         metadata.setCreatedTime(boxFileInfo.getCreatedAt().getTime());
 
         return metadata;
