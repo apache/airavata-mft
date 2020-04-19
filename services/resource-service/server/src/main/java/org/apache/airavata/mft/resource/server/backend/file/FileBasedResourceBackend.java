@@ -229,19 +229,19 @@ public class FileBasedResourceBackend implements ResourceBackend {
             JSONArray resourceList = (JSONArray) obj;
 
             System.out.println("All resources ");
-            List<BoxResource> s3Resources = (List<BoxResource>) resourceList.stream()
+            List<BoxResource> boxResources = (List<BoxResource>) resourceList.stream()
                     .filter(resource -> "BOX".equals(((JSONObject) resource).get("type").toString()))
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
 
-                        BoxResource s3Resource = BoxResource.newBuilder()
+                        BoxResource boxResource = BoxResource.newBuilder()
                                 .setResourceId(r.get("resourceId").toString())
                                 .setBoxFileId(r.get("boxFileId").toString())
                                 .build();
 
-                        return s3Resource;
+                        return boxResource;
                     }).collect(Collectors.toList());
-            return s3Resources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
+            return boxResources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
         }
 
     }

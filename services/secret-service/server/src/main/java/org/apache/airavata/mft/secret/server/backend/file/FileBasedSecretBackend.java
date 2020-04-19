@@ -100,7 +100,7 @@ public class FileBasedSecretBackend implements SecretBackend {
 
             JSONArray resourceList = (JSONArray) obj;
 
-            List<S3Secret> scpSecrets = (List<S3Secret>) resourceList.stream()
+            List<S3Secret> s3Secrets = (List<S3Secret>) resourceList.stream()
                     .filter(resource -> "S3".equals(((JSONObject) resource).get("type").toString()))
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
@@ -112,7 +112,7 @@ public class FileBasedSecretBackend implements SecretBackend {
 
                         return s3Secret;
                     }).collect(Collectors.toList());
-            return scpSecrets.stream().filter(r -> request.getSecretId().equals(r.getSecretId())).findFirst();
+            return s3Secrets.stream().filter(r -> request.getSecretId().equals(r.getSecretId())).findFirst();
         }
     }
 
@@ -141,7 +141,7 @@ public class FileBasedSecretBackend implements SecretBackend {
 
             JSONArray resourceList = (JSONArray) obj;
 
-            List<BoxSecret> scpSecrets = (List<BoxSecret>) resourceList.stream()
+            List<BoxSecret> boxSecrets = (List<BoxSecret>) resourceList.stream()
                     .filter(resource -> "BOX".equals(((JSONObject) resource).get("type").toString()))
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
@@ -153,7 +153,7 @@ public class FileBasedSecretBackend implements SecretBackend {
 
                         return boxSecret;
                     }).collect(Collectors.toList());
-            return scpSecrets.stream().filter(r -> request.getSecretId().equals(r.getSecretId())).findFirst();
+            return boxSecrets.stream().filter(r -> request.getSecretId().equals(r.getSecretId())).findFirst();
         }
     }
 
