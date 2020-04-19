@@ -61,12 +61,12 @@ public class BoxSender implements Connector {
     @Override
     public void startStream(ConnectorContext context) throws Exception {
 
-        logger.info("Starting S3 Sender stream for transfer {}", context.getTransferId());
+        logger.info("Starting Box Sender stream for transfer {}", context.getTransferId());
         logger.info("Content length for transfer {} {}", context.getTransferId(), context.getMetadata().getResourceSize());
 
         BoxFile file = new BoxFile(this.boxClient, this.boxResource.getBoxFileId());
         BoxFile.Info fileInfo = file.uploadLargeFile(context.getStreamBuffer().getInputStream(), context.getMetadata().getResourceSize());
 
-        logger.info("Completed S3 Sender stream for transfer {}", context.getTransferId());
+        logger.info("Completed Box Sender stream for transfer {}", context.getTransferId());
     }
 }

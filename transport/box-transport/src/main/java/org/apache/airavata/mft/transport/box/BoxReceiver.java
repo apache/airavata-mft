@@ -65,7 +65,7 @@ public class BoxReceiver implements Connector {
     @Override
     public void startStream(ConnectorContext context) throws Exception {
 
-        logger.info("Starting S3 Receiver stream for transfer {}", context.getTransferId());
+        logger.info("Starting Box Receiver stream for transfer {}", context.getTransferId());
 
         BoxFile file = new BoxFile(this.boxClient, this.boxResource.getBoxFileId());
 
@@ -74,6 +74,6 @@ public class BoxReceiver implements Connector {
         os.flush();
         os.close();
 
-        logger.info("Completed S3 Receiver stream for transfer {}", context.getTransferId());
+        logger.info("Completed Box Receiver stream for transfer {}", context.getTransferId());
     }
 }
