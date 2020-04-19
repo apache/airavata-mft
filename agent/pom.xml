@@ -55,6 +55,11 @@
         </dependency>
         <dependency>
             <groupId>org.apache.airavata</groupId>
+            <artifactId>mft-gcp-transport</artifactId>
+            <version>0.01-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
             <artifactId>mft-admin</artifactId>
             <version>0.01-SNAPSHOT</version>
         </dependency>

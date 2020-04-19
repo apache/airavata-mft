@@ -18,8 +18,8 @@ public class controller {
 
         String sourceId = "s3-file";
         String sourceToken = "s3-cred";
-        String destId = "remote-ssh-resource2";
-        String destToken = "local-ssh-cred";
+        String destId = "gcs-bucket";
+        String destToken = "gcs-cred";
 
         TransferApiRequest request = TransferApiRequest.newBuilder()
                 .setSourceId(sourceId)
@@ -27,7 +27,7 @@ public class controller {
                 .setSourceType("S3")
                 .setDestinationId(destId)
                 .setDestinationToken(destToken)
-                .setDestinationType("SCP")
+                .setDestinationType("GCS")
                 .setAffinityTransfer(false).build();
 
         // Submitting the transfer to MFT

@@ -37,6 +37,7 @@
         <module>local-transport</module>
         <module>s3-transport</module>
         <module>azure-transport</module>
+        <module>gcp-transport</module>
     </modules>
     <dependencies>
         <dependency>
