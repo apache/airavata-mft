@@ -65,7 +65,14 @@ public class BoxSender implements Connector {
         logger.info("Content length for transfer {} {}", context.getTransferId(), context.getMetadata().getResourceSize());
 
         BoxFile file = new BoxFile(this.boxClient, this.boxResource.getBoxFileId());
-        BoxFile.Info fileInfo = file.uploadLargeFile(context.getStreamBuffer().getInputStream(), context.getMetadata().getResourceSize());
+
+        // Upload chunks only if the file size is > 20mb
+        // Ref: https://developer.box.com/guides/uploads/chunked/
+        if (context.getMetadata().getResourceSize() > 20971520) {
+            file.uploadLargeFile(context.getStreamBuffer().getInputStream(), context.getMetadata().getResourceSize());
+        } else {
+            file.uploadNewVersion(context.getStreamBuffer().getInputStream());
+        }
 
         logger.info("Completed Box Sender stream for transfer {}", context.getTransferId());
     }
