@@ -18,6 +18,8 @@ import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.service.*;
 
 import java.io.FileInputStream;
+import java.math.BigInteger;
+import java.util.Base64;
 import java.util.Collection;
 
 public class GCSMetadataCollector implements MetadataCollector{
@@ -69,7 +71,8 @@ public class GCSMetadataCollector implements MetadataCollector{
         ResourceMetadata metadata = new ResourceMetadata();
         StorageObject gcsMetadata = storage.objects().get(gcsResource.getBucketName(),"PikaTest.txt").execute();
         metadata.setResourceSize(gcsMetadata.getSize().longValue());
-        metadata.setMd5sum(gcsMetadata.getEtag());
+        String md5Sum=String.format("%032x", new BigInteger(1, Base64.getDecoder().decode(gcsMetadata.getMd5Hash())));
+        metadata.setMd5sum(md5Sum);
         metadata.setUpdateTime(gcsMetadata.getTimeStorageClassUpdated().getValue());
         metadata.setCreatedTime(gcsMetadata.getTimeCreated().getValue());
         return metadata;

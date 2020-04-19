@@ -16,18 +16,18 @@ public class controller {
 
         MFTApiServiceGrpc.MFTApiServiceBlockingStub client = MFTApiClient.buildClient("localhost", 7004);
 
-        String sourceId = "gcs-bucket";
-        String sourceToken ="gcs-cred" ;
-        String destId = "s3-file";
-        String destToken ="s3-cred";
+        String sourceId ="s3-file";
+        String sourceToken ="s3-cred";
+        String destId = "gcs-bucket";
+        String destToken ="gcs-cred" ;
 
         TransferApiRequest request = TransferApiRequest.newBuilder()
                 .setSourceId(sourceId)
                 .setSourceToken(sourceToken)
-                .setSourceType("GCS")
+                .setSourceType("S3")
                 .setDestinationId(destId)
                 .setDestinationToken(destToken)
-                .setDestinationType("S3")
+                .setDestinationType("GCS")
                 .setAffinityTransfer(false).build();
 
         // Submitting the transfer to MFT
