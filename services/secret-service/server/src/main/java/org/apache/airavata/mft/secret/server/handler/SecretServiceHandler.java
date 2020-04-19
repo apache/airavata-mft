@@ -137,4 +137,61 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
                     .asRuntimeException());
         }
     }
+
+    @Override
+    public void getBoxSecret(BoxSecretGetRequest request, StreamObserver<BoxSecret> responseObserver) {
+        try {
+            this.backend.getBoxSecret(request).ifPresentOrElse(secret -> {
+                responseObserver.onNext(secret);
+                responseObserver.onCompleted();
+            }, () -> {
+                responseObserver.onError(Status.INTERNAL
+                        .withDescription("No Box Secret with id " + request.getSecretId())
+                        .asRuntimeException());
+            });
+
+        } catch (Exception e) {
+            logger.error("Error in retrieving Box Secret with id " + request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in retrieving Box Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+        super.getBoxSecret(request, responseObserver);
+    }
+
+    @Override
+    public void createBoxSecret(BoxSecretCreateRequest request, StreamObserver<BoxSecret> responseObserver) {
+        try {
+            this.backend.createBoxSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in creating Box Secret", e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in creating Box Secret")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void updateBoxSecret(BoxSecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.updateBoxSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in updating Box Secret with id {}", request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in updating Box Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void deleteBoxSecret(BoxSecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.deleteBoxSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in deleting Box Secret with id {}", request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in deleting Box Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+    }
 }

@@ -46,4 +46,9 @@ public interface ResourceBackend {
     public S3Resource createS3Resource(S3ResourceCreateRequest request) throws Exception;
     public boolean updateS3Resource(S3ResourceUpdateRequest request) throws Exception;
     public boolean deleteS3Resource(S3ResourceDeleteRequest request) throws Exception;
+
+    public Optional<BoxResource> getBoxResource(BoxResourceGetRequest request) throws Exception;
+    public BoxResource createBoxResource(BoxResourceCreateRequest request) throws Exception;
+    public boolean updateBoxResource(BoxResourceUpdateRequest request) throws Exception;
+    public boolean deleteBoxResource(BoxResourceDeleteRequest request) throws Exception;
 }

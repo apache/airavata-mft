@@ -32,5 +32,15 @@
     "resourcePath": "new-file.txt",
     "region": "us-east-2",
     "bucketName": "s3-bucket"
+  },
+  {
+    "type": "BOX",
+    "resourceId": "box-file-abcd",
+    "boxFileId": "655108198452"
+  },
+  {
+    "type": "BOX",
+    "resourceId": "box-file-efgh",
+    "boxFileId": "655450661536"
   }
 ]
