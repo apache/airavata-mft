@@ -68,7 +68,7 @@ public class GCSMetadataCollector implements MetadataCollector{
 
         ResourceMetadata metadata = new ResourceMetadata();
         StorageObject gcsMetadata = storage.objects().get(gcsResource.getBucketName(),"PikaTest.txt").execute();
-        metadata.setResourceSize(gcsMetadata.size());
+        metadata.setResourceSize(gcsMetadata.getSize().longValue());
         metadata.setMd5sum(gcsMetadata.getEtag());
         metadata.setUpdateTime(gcsMetadata.getTimeStorageClassUpdated().getValue());
         metadata.setCreatedTime(gcsMetadata.getTimeCreated().getValue());
