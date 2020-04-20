@@ -35,17 +35,5 @@
 			<artifactId>google-api-services-storage</artifactId>
 			<version>v1-rev171-1.25.0</version>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>com.google.guava</groupId>-->
-<!--			<artifactId>guava</artifactId>-->
-<!--			<version>29.0-jre</version>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>com.google.oauth-client</groupId>-->
-<!--			<artifactId>google-oauth-client-jetty</artifactId>-->
-<!--			<version>1.30.6</version>-->
-<!--		</dependency>-->
 	</dependencies>
-
-
 </project>
