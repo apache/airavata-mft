@@ -188,7 +188,7 @@ public class FileBasedSecretBackend implements SecretBackend {
 
                         GCSSecret gcsSecret = GCSSecret.newBuilder()
                                 .setSecretId(r.get("secretId").toString())
-                                .setConnectionString(r.get("connectionString").toString()).build();
+                                .setJsonCredentialsFilePath(r.get("jsonCredentialsFilePath").toString()).build();
 
                         return gcsSecret;
                     }).collect(Collectors.toList());

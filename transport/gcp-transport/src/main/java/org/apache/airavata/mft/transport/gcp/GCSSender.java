@@ -56,7 +56,7 @@ public class GCSSender implements Connector{
 //                .getService();
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-        GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream(gcsSecret.getConnectionString()));
+        GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream(gcsSecret.getJsonCredentialsFilePath()));
         if (credential.createScopedRequired()) {
             Collection<String> scopes = StorageScopes.all();
             credential = credential.createScoped(scopes);
@@ -81,7 +81,7 @@ public class GCSSender implements Connector{
                 "text/plain", context.getStreamBuffer().getInputStream());
         StorageObject objectMetadata = new StorageObject()
                 // Set the destination object name
-                .setName("PikaTest.txt")
+                .setName(gcsResource.getResourcePath())
                 // Set the access control list to publicly read-only
                 .setAcl(Arrays.asList(new ObjectAccessControl().setEntity("allUsers").setRole("READER")));
 

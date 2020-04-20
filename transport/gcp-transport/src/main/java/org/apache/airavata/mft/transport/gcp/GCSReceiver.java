@@ -40,7 +40,7 @@ public class GCSReceiver implements Connector{
         GCSSecret gcsSecret = secretClient.getGCSSecret(GCSSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-        GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream(gcsSecret.getConnectionString()));
+        GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream(gcsSecret.getJsonCredentialsFilePath()));
         if (credential.createScopedRequired()) {
             Collection<String> scopes = StorageScopes.all();
             credential = credential.createScoped(scopes);
@@ -60,7 +60,7 @@ public class GCSReceiver implements Connector{
 //        S3Object s3object = s3Client.getObject(s3Resource.getBucketName(), s3Resource.getResourcePath());
 //        S3ObjectInputStream inputStream = s3object.getObjectContent();
 
-        InputStream inputStream=storage.objects().get(gcsResource.getBucketName(),"PikaTest.txt").executeMediaAsInputStream();
+        InputStream inputStream=storage.objects().get(gcsResource.getBucketName(),gcsResource.getResourcePath()).executeMediaAsInputStream();
         OutputStream os = context.getStreamBuffer().getOutputStream();
         int read;
         long bytes = 0;

@@ -276,6 +276,7 @@ public class FileBasedResourceBackend implements ResourceBackend {
                         GCSResource gcsResource = GCSResource.newBuilder()
                                 .setBucketName(r.get("bucketName").toString())
                                 .setResourceId(r.get("resourceId").toString())
+                                .setResourcePath(r.get("resourcePath").toString())
                                 .build();
 
                         return gcsResource;

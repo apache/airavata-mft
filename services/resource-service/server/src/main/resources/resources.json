@@ -42,6 +42,7 @@
   {
     "type": "GCS",
     "resourceId": "gcs-bucket",
-    "bucketName": "pika-pika-bucket"
+    "bucketName": "pika-pika-bucket",
+    "resourcePath": "PikaPikaTest.txt"
   }
 ]

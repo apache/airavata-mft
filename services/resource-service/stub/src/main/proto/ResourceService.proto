@@ -166,6 +166,7 @@ message AzureResourceDeleteRequest {
 message GCSResource {
     string resourceId = 1;
     string bucketName = 2;
+    string resourcePath = 3;
 }
 
 message GCSResourceGetRequest {
@@ -174,11 +175,13 @@ message GCSResourceGetRequest {
 
 message GCSResourceCreateRequest {
     string bucketName = 1;
+    string resourcePath = 2;
 }
 
 message GCSResourceUpdateRequest {
     string resourceId = 1;
     string bucketName = 2;
+    string resourcePath = 3;
 }
 
 message GCSResourceDeleteRequest {

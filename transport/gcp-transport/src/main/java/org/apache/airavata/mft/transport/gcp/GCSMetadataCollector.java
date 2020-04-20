@@ -60,7 +60,7 @@ public class GCSMetadataCollector implements MetadataCollector{
 //                .getService();
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-        GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream(gcsSecret.getConnectionString()),transport,jsonFactory);
+        GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream(gcsSecret.getJsonCredentialsFilePath()),transport,jsonFactory);
         if (credential.createScopedRequired()) {
             Collection<String> scopes = StorageScopes.all();
             credential = credential.createScoped(scopes);
@@ -69,7 +69,7 @@ public class GCSMetadataCollector implements MetadataCollector{
         Storage storage=new Storage.Builder(transport, jsonFactory, credential).build();
 
         ResourceMetadata metadata = new ResourceMetadata();
-        StorageObject gcsMetadata = storage.objects().get(gcsResource.getBucketName(),"PikaTest.txt").execute();
+        StorageObject gcsMetadata = storage.objects().get(gcsResource.getBucketName(),gcsResource.getResourcePath()).execute();
         metadata.setResourceSize(gcsMetadata.getSize().longValue());
         String md5Sum=String.format("%032x", new BigInteger(1, Base64.getDecoder().decode(gcsMetadata.getMd5Hash())));
         metadata.setMd5sum(md5Sum);
@@ -93,13 +93,13 @@ public class GCSMetadataCollector implements MetadataCollector{
 //                .getService();
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-        GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream(gcsSecret.getConnectionString()),transport,jsonFactory);
+        GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream(gcsSecret.getJsonCredentialsFilePath()),transport,jsonFactory);
         if (credential.createScopedRequired()) {
             Collection<String> scopes = StorageScopes.all();
             credential = credential.createScoped(scopes);
         }
 
         Storage storage=new Storage.Builder(transport, jsonFactory, credential).build();
-        return !storage.objects().get(gcsResource.getBucketName(),"PikaTest.txt").execute().isEmpty();
+        return !storage.objects().get(gcsResource.getBucketName(),gcsResource.getResourcePath()).execute().isEmpty();
     }
 }

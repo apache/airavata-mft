@@ -42,6 +42,7 @@
   {
     "type": "GCS",
     "resourceId": "gcs-bucket",
-    "bucketName": ""
+    "bucketName": "",
+    "resourcePath": ""
   }
 ]
