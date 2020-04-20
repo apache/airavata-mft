@@ -194,4 +194,65 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
                     .asRuntimeException());
         }
     }
+
+    // GCS
+
+    @Override
+    public void getGCSSecret(GCSSecretGetRequest request, StreamObserver<GCSSecret> responseObserver) {
+        try {
+            this.backend.getGCSSecret(request).ifPresentOrElse(secret -> {
+                responseObserver.onNext(secret);
+                responseObserver.onCompleted();
+            }, () -> {
+                responseObserver.onError(Status.INTERNAL
+                        .withDescription("No GCS Secret with id " + request.getSecretId())
+                        .asRuntimeException());
+            });
+
+        } catch (Exception e) {
+            logger.error("Error in retrieving GCS Secret with id " + request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in retrieving GCS Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+        super.getGCSSecret(request, responseObserver);
+    }
+
+    @Override
+    public void createGCSSecret(GCSSecretCreateRequest request, StreamObserver<GCSSecret> responseObserver) {
+        try {
+            this.backend.createGCSSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in creating GCS Secret", e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in creating GCS Secret")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void updateGCSSecret(GCSSecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.updateGCSSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in updating GCS Secret with id {}", request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in updating GCS Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void deleteGCSSecret(GCSSecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.deleteGCSSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in deleting GCS Secret with id {}", request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in deleting GCS Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+    }
+
+
 }

@@ -161,6 +161,32 @@ message AzureResourceDeleteRequest {
     string resourceId = 1;
 }
 
+// GCS Resource
+
+message GCSResource {
+    string resourceId = 1;
+    string bucketName = 2;
+    string resourcePath = 3;
+}
+
+message GCSResourceGetRequest {
+    string resourceId = 1;
+}
+
+message GCSResourceCreateRequest {
+    string bucketName = 1;
+    string resourcePath = 2;
+}
+
+message GCSResourceUpdateRequest {
+    string resourceId = 1;
+    string bucketName = 2;
+    string resourcePath = 3;
+}
+
+message GCSResourceDeleteRequest {
+    string resourceId = 1;
+}
 service  ResourceService {
     // SCP Storage
 
@@ -289,6 +315,32 @@ service  ResourceService {
     rpc deleteAzureResource (AzureResourceDeleteRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
            delete: "/v1.0/resource/azure"
+        };
+    }
+
+    // GCS Resource
+
+    rpc getGCSResource (GCSResourceGetRequest) returns (GCSResource) {
+        option (google.api.http) = {
+            get: "/v1.0/resource/gcs"
+        };
+    }
+
+    rpc createGCSResource (GCSResourceCreateRequest) returns (GCSResource) {
+        option (google.api.http) = {
+            post: "/v1.0/resource/gcs"
+        };
+    }
+
+    rpc updateGCSResource (GCSResourceUpdateRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            put: "/v1.0/resource/gcs"
+        };
+    }
+
+    rpc deleteGCSResource (GCSResourceDeleteRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/v1.0/resource/gcs"
         };
     }
 }

@@ -257,4 +257,46 @@ public class FileBasedResourceBackend implements ResourceBackend {
     public boolean deleteAzureResource(AzureResourceDeleteRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
+
+    @Override
+    public Optional<GCSResource> getGCSResource(GCSResourceGetRequest request) throws Exception {
+        JSONParser jsonParser = new JSONParser();
+        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
+
+        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            Object obj = jsonParser.parse(reader);
+
+            JSONArray resourceList = (JSONArray) obj;
+
+            List<GCSResource> gcsResources = (List<GCSResource>) resourceList.stream()
+                    .filter(resource -> "GCS".equals(((JSONObject) resource).get("type").toString()))
+                    .map(resource -> {
+                        JSONObject r = (JSONObject) resource;
+
+                        GCSResource gcsResource = GCSResource.newBuilder()
+                                .setBucketName(r.get("bucketName").toString())
+                                .setResourceId(r.get("resourceId").toString())
+                                .setResourcePath(r.get("resourcePath").toString())
+                                .build();
+
+                        return gcsResource;
+                    }).collect(Collectors.toList());
+            return gcsResources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
+        }
+    }
+
+    @Override
+    public GCSResource createGCSResource(GCSResourceCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateGCSResource(GCSResourceUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteGCSResource(GCSResourceDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
 }
