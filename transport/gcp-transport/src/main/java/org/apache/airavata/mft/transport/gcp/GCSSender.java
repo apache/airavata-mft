@@ -9,12 +9,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.storage.StorageScopes;
 import com.google.api.services.storage.model.ObjectAccessControl;
 import com.google.api.services.storage.model.StorageObject;
-import com.google.auth.oauth2.ServiceAccountCredentials;
-//import com.google.cloud.storage.Storage;
-
 import com.google.api.services.storage.Storage;
-
-import com.google.cloud.storage.StorageOptions;
 import com.google.api.services.storage.Storage.Objects.Insert;
 
 import org.apache.airavata.mft.secret.service.*;
@@ -27,7 +22,6 @@ import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.resource.service.GCSResource;
 import org.apache.airavata.mft.resource.service.GCSResourceGetRequest;
-import org.apache.airavata.mft.secret.client.SecretServiceClient;
 
 import java.io.FileInputStream;
 import java.util.Arrays;
@@ -49,11 +43,6 @@ public class GCSSender implements Connector{
         SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
         GCSSecret gcsSecret = secretClient.getGCSSecret(GCSSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
-        //Path of the credentials json is connectionString
-//        storage = StorageOptions.newBuilder()
-//                .setCredentials(ServiceAccountCredentials.fromStream(new FileInputStream(gcsSecret.getConnectionString())))
-//                .build()
-//                .getService();
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
         GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream(gcsSecret.getJsonCredentialsFilePath()));
@@ -74,9 +63,7 @@ public class GCSSender implements Connector{
     public void startStream(ConnectorContext context) throws Exception {
         logger.info("Starting GCS Sender stream for transfer {}", context.getTransferId());
         logger.info("Content length for transfer {} {}", context.getTransferId(), context.getMetadata().getResourceSize());
-//        ObjectMetadata metadata = new ObjectMetadata();
-//        metadata.setContentLength(context.getMetadata().getResourceSize());
-//        s3Client.putObject(this.s3Resource.getBucketName(), this.s3Resource.getResourcePath(), context.getStreamBuffer().getInputStream(), metadata);
+
         InputStreamContent contentStream = new InputStreamContent(
                 "text/plain", context.getStreamBuffer().getInputStream());
         StorageObject objectMetadata = new StorageObject()

@@ -7,14 +7,13 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
-import com.google.api.services.storage.model.StorageObject;
+
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
 import org.apache.airavata.mft.resource.service.GCSResource;
 import org.apache.airavata.mft.resource.service.GCSResourceGetRequest;
-import org.apache.airavata.mft.resource.service.S3ResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.service.*;
 import org.slf4j.Logger;
@@ -56,9 +55,6 @@ public class GCSReceiver implements Connector{
     @Override
     public void startStream(ConnectorContext context) throws Exception {
         logger.info("Starting GCS Receiver stream for transfer {}", context.getTransferId());
-
-//        S3Object s3object = s3Client.getObject(s3Resource.getBucketName(), s3Resource.getResourcePath());
-//        S3ObjectInputStream inputStream = s3object.getObjectContent();
 
         InputStream inputStream=storage.objects().get(gcsResource.getBucketName(),gcsResource.getResourcePath()).executeMediaAsInputStream();
         OutputStream os = context.getStreamBuffer().getOutputStream();
