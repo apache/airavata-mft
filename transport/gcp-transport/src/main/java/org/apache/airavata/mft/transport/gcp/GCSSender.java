@@ -6,34 +6,36 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.storage.Storage;
+import com.google.api.services.storage.Storage.Objects.Insert;
 import com.google.api.services.storage.StorageScopes;
 import com.google.api.services.storage.model.ObjectAccessControl;
 import com.google.api.services.storage.model.StorageObject;
-import com.google.api.services.storage.Storage;
-import com.google.api.services.storage.Storage.Objects.Insert;
-
-import org.apache.airavata.mft.secret.service.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
-import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.resource.service.GCSResource;
 import org.apache.airavata.mft.resource.service.GCSResourceGetRequest;
+import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
+import org.apache.airavata.mft.secret.client.SecretServiceClient;
+import org.apache.airavata.mft.secret.service.GCSSecret;
+import org.apache.airavata.mft.secret.service.GCSSecretGetRequest;
+import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.util.Arrays;
 import java.util.Collection;
 
 
-public class GCSSender implements Connector{
+public class GCSSender implements Connector {
 
     private static final Logger logger = LoggerFactory.getLogger(GCSSender.class);
 
     private GCSResource gcsResource;
     private Storage storage;
+
     @Override
     public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
 
@@ -51,7 +53,7 @@ public class GCSSender implements Connector{
             credential = credential.createScoped(scopes);
         }
 
-        storage=new Storage.Builder(transport, jsonFactory, credential).build();
+        storage = new Storage.Builder(transport, jsonFactory, credential).build();
     }
 
     @Override
@@ -73,7 +75,7 @@ public class GCSSender implements Connector{
                 .setAcl(Arrays.asList(new ObjectAccessControl().setEntity("allUsers").setRole("READER")));
 
         Insert insertRequest = storage.objects().insert(
-                gcsResource.getBucketName(), objectMetadata,contentStream);
+                gcsResource.getBucketName(), objectMetadata, contentStream);
 
         insertRequest.execute();
 

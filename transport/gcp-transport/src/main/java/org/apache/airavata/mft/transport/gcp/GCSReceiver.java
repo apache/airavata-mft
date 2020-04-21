@@ -7,23 +7,26 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
-
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
 import org.apache.airavata.mft.resource.service.GCSResource;
 import org.apache.airavata.mft.resource.service.GCSResourceGetRequest;
+import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.service.*;
+import org.apache.airavata.mft.secret.service.GCSSecret;
+import org.apache.airavata.mft.secret.service.GCSSecretGetRequest;
+import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
 
 
-public class GCSReceiver implements Connector{
+public class GCSReceiver implements Connector {
 
     private static final Logger logger = LoggerFactory.getLogger(GCSReceiver.class);
 
@@ -44,7 +47,7 @@ public class GCSReceiver implements Connector{
             Collection<String> scopes = StorageScopes.all();
             credential = credential.createScoped(scopes);
         }
-        storage=new Storage.Builder(transport, jsonFactory, credential).build();
+        storage = new Storage.Builder(transport, jsonFactory, credential).build();
     }
 
     @Override
@@ -56,7 +59,7 @@ public class GCSReceiver implements Connector{
     public void startStream(ConnectorContext context) throws Exception {
         logger.info("Starting GCS Receiver stream for transfer {}", context.getTransferId());
 
-        InputStream inputStream=storage.objects().get(gcsResource.getBucketName(),gcsResource.getResourcePath()).executeMediaAsInputStream();
+        InputStream inputStream = storage.objects().get(gcsResource.getBucketName(), gcsResource.getResourcePath()).executeMediaAsInputStream();
         OutputStream os = context.getStreamBuffer().getOutputStream();
         int read;
         long bytes = 0;

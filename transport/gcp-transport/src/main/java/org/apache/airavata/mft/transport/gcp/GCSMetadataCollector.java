@@ -8,26 +8,29 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
 import com.google.api.services.storage.model.StorageObject;
-
 import org.apache.airavata.mft.core.ResourceMetadata;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.service.*;
+import org.apache.airavata.mft.resource.service.GCSResource;
+import org.apache.airavata.mft.resource.service.GCSResourceGetRequest;
+import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.service.*;
+import org.apache.airavata.mft.secret.service.GCSSecret;
+import org.apache.airavata.mft.secret.service.GCSSecretGetRequest;
+import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
 
 import java.io.FileInputStream;
 import java.math.BigInteger;
 import java.util.Base64;
 import java.util.Collection;
 
-public class GCSMetadataCollector implements MetadataCollector{
+public class GCSMetadataCollector implements MetadataCollector {
 
+    boolean initialized = false;
     private String resourceServiceHost;
     private int resourceServicePort;
     private String secretServiceHost;
     private int secretServicePort;
-    boolean initialized = false;
 
     @Override
     public void init(String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) {
@@ -55,18 +58,18 @@ public class GCSMetadataCollector implements MetadataCollector{
 
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-        GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream(gcsSecret.getJsonCredentialsFilePath()),transport,jsonFactory);
+        GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream(gcsSecret.getJsonCredentialsFilePath()), transport, jsonFactory);
         if (credential.createScopedRequired()) {
             Collection<String> scopes = StorageScopes.all();
             credential = credential.createScoped(scopes);
         }
 
-        Storage storage=new Storage.Builder(transport, jsonFactory, credential).build();
+        Storage storage = new Storage.Builder(transport, jsonFactory, credential).build();
 
         ResourceMetadata metadata = new ResourceMetadata();
-        StorageObject gcsMetadata = storage.objects().get(gcsResource.getBucketName(),gcsResource.getResourcePath()).execute();
+        StorageObject gcsMetadata = storage.objects().get(gcsResource.getBucketName(), gcsResource.getResourcePath()).execute();
         metadata.setResourceSize(gcsMetadata.getSize().longValue());
-        String md5Sum=String.format("%032x", new BigInteger(1, Base64.getDecoder().decode(gcsMetadata.getMd5Hash())));
+        String md5Sum = String.format("%032x", new BigInteger(1, Base64.getDecoder().decode(gcsMetadata.getMd5Hash())));
         metadata.setMd5sum(md5Sum);
         metadata.setUpdateTime(gcsMetadata.getTimeStorageClassUpdated().getValue());
         metadata.setCreatedTime(gcsMetadata.getTimeCreated().getValue());
@@ -84,13 +87,13 @@ public class GCSMetadataCollector implements MetadataCollector{
 
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-        GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream(gcsSecret.getJsonCredentialsFilePath()),transport,jsonFactory);
+        GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream(gcsSecret.getJsonCredentialsFilePath()), transport, jsonFactory);
         if (credential.createScopedRequired()) {
             Collection<String> scopes = StorageScopes.all();
             credential = credential.createScoped(scopes);
         }
 
-        Storage storage=new Storage.Builder(transport, jsonFactory, credential).build();
-        return !storage.objects().get(gcsResource.getBucketName(),gcsResource.getResourcePath()).execute().isEmpty();
+        Storage storage = new Storage.Builder(transport, jsonFactory, credential).build();
+        return !storage.objects().get(gcsResource.getBucketName(), gcsResource.getResourcePath()).execute().isEmpty();
     }
 }
