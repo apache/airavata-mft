@@ -19,8 +19,10 @@ import org.apache.airavata.mft.secret.service.GCSSecret;
 import org.apache.airavata.mft.secret.service.GCSSecretGetRequest;
 import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collection;
 
@@ -58,7 +60,7 @@ public class GCSMetadataCollector implements MetadataCollector {
 
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-        GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream(gcsSecret.getJsonCredentialsFilePath()), transport, jsonFactory);
+        GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(gcsSecret.getJsonCredentialsFilePath().getBytes(StandardCharsets.UTF_8)), transport, jsonFactory);
         if (credential.createScopedRequired()) {
             Collection<String> scopes = StorageScopes.all();
             credential = credential.createScoped(scopes);
@@ -87,7 +89,7 @@ public class GCSMetadataCollector implements MetadataCollector {
 
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-        GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream(gcsSecret.getJsonCredentialsFilePath()), transport, jsonFactory);
+        GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(gcsSecret.getJsonCredentialsFilePath().getBytes(StandardCharsets.UTF_8)), transport, jsonFactory);
         if (credential.createScopedRequired()) {
             Collection<String> scopes = StorageScopes.all();
             credential = credential.createScoped(scopes);
