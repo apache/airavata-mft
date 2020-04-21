@@ -161,6 +161,30 @@ message AzureResourceDeleteRequest {
     string resourceId = 1;
 }
 
+// Box Resource
+
+message BoxResource {
+    string resourceId = 1;
+    string boxFileId = 2;
+}
+
+message BoxResourceGetRequest {
+    string resourceId = 1;
+}
+
+message BoxResourceCreateRequest {
+    string boxFileId = 1;
+}
+
+message BoxResourceUpdateRequest {
+    string resourceId = 1;
+    string boxFileId = 2;
+}
+
+message BoxResourceDeleteRequest {
+    string resourceId = 1;
+}
+
 service  ResourceService {
     // SCP Storage
 
@@ -263,6 +287,32 @@ service  ResourceService {
     rpc deleteS3Resource (S3ResourceDeleteRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
            delete: "/v1.0/resource/s3"
+        };
+    }
+
+    // Box Resource
+
+    rpc getBoxResource (BoxResourceGetRequest) returns (BoxResource) {
+        option (google.api.http) = {
+           get: "/v1.0/resource/box"
+        };
+    }
+
+    rpc createBoxResource (BoxResourceCreateRequest) returns (BoxResource) {
+        option (google.api.http) = {
+           post: "/v1.0/resource/box"
+        };
+    }
+
+    rpc updateBoxResource (BoxResourceUpdateRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+           put: "/v1.0/resource/box"
+        };
+    }
+
+    rpc deleteBoxResource (BoxResourceDeleteRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+           delete: "/v1.0/resource/box"
         };
     }
 
