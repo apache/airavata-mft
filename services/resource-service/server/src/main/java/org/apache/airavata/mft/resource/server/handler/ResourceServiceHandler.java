@@ -310,6 +310,71 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed in deleting the S3 resource with id " + request.getResourceId())
                     .asRuntimeException());
+        }    }
+
+
+    @Override
+    public void getBoxResource(BoxResourceGetRequest request, StreamObserver<BoxResource> responseObserver) {
+        try {
+            this.backend.getBoxResource(request).ifPresentOrElse(resource -> {
+                responseObserver.onNext(resource);
+                responseObserver.onCompleted();
+            }, () -> {
+                responseObserver.onError(Status.INTERNAL
+                        .withDescription("No Box Resource with id " + request.getResourceId())
+                        .asRuntimeException());
+            });
+        } catch (Exception e) {
+            logger.error("Failed in retrieving Box resource with id {}", request.getResourceId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in retrieving Box resource with id " + request.getResourceId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void createBoxResource(BoxResourceCreateRequest request, StreamObserver<BoxResource> responseObserver) {
+        try {
+            responseObserver.onNext(this.backend.createBoxResource(request));
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in creating the Box resource", e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in creating the Box resource")
+                    .asRuntimeException());
+        }    }
+
+    @Override
+    public void updateBoxResource(BoxResourceUpdateRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.updateBoxResource(request);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in updating the Box resource {}", request.getResourceId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in updating the Box resource with id " + request.getResourceId())
+                    .asRuntimeException());
+        }    }
+
+    @Override
+    public void deleteBoxResource(BoxResourceDeleteRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            boolean res = this.backend.deleteBoxResource(request);
+            if (res) {
+                responseObserver.onCompleted();
+            } else {
+                responseObserver.onError(new Exception("Failed to delete Box Resource with id " + request.getResourceId()));
+            }
+        } catch (Exception e) {
+            logger.error("Failed in deleting the Box resource {}", request.getResourceId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in deleting the Box resource with id " + request.getResourceId())
+                    .asRuntimeException());
+        }    }
         }
     }
 

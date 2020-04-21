@@ -20,38 +20,31 @@
     under the License.
 
 -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>airavata-mft</artifactId>
+        <artifactId>mft-transport</artifactId>
         <groupId>org.apache.airavata</groupId>
         <version>0.01-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>mft-transport</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>scp-transport</module>
-        <module>local-transport</module>
-        <module>s3-transport</module>
-        <module>box-transport</module>
-        <module>azure-transport</module>
-        <module>gcp-transport</module>
-    </modules>
+    <artifactId>mft-box-transport</artifactId>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.airavata</groupId>
-            <artifactId>mft-resource-service-client</artifactId>
+            <artifactId>mft-core</artifactId>
             <version>0.01-SNAPSHOT</version>
         </dependency>
+
         <dependency>
-            <groupId>org.apache.airavata</groupId>
-            <artifactId>mft-secret-service-client</artifactId>
-            <version>0.01-SNAPSHOT</version>
+            <groupId>com.box</groupId>
+            <artifactId>box-java-sdk</artifactId>
+            <version>2.32.0</version>
         </dependency>
     </dependencies>
-
 
 </project>

@@ -47,6 +47,11 @@ public interface ResourceBackend {
     public boolean updateS3Resource(S3ResourceUpdateRequest request) throws Exception;
     public boolean deleteS3Resource(S3ResourceDeleteRequest request) throws Exception;
 
+    public Optional<BoxResource> getBoxResource(BoxResourceGetRequest request) throws Exception;
+    public BoxResource createBoxResource(BoxResourceCreateRequest request) throws Exception;
+    public boolean updateBoxResource(BoxResourceUpdateRequest request) throws Exception;
+    public boolean deleteBoxResource(BoxResourceDeleteRequest request) throws Exception;
+
     public Optional<AzureResource> getAzureResource(AzureResourceGetRequest request) throws Exception;
     public AzureResource createAzureResource(AzureResourceCreateRequest request) throws Exception;
     public boolean updateAzureResource(AzureResourceUpdateRequest request) throws Exception;

@@ -157,6 +157,26 @@ public class SQLResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public Optional<BoxResource> getBoxResource(BoxResourceGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public BoxResource createBoxResource(BoxResourceCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateBoxResource(BoxResourceUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteBoxResource(BoxResourceDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<AzureResource> getAzureResource(AzureResourceGetRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }

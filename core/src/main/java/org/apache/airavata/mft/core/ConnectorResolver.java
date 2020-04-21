@@ -57,6 +57,16 @@ public final class ConnectorResolver {
                         break;
                 }
                 break;
+            case "BOX":
+                switch (direction) {
+                    case "IN":
+                        className = "org.apache.airavata.mft.transport.box.BoxReceiver";
+                        break;
+                    case "OUT":
+                        className = "org.apache.airavata.mft.transport.box.BoxSender";
+                        break;
+                }
+                break;
             case "AZURE":
                 switch (direction) {
                     case "IN":

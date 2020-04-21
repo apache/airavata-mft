@@ -92,6 +92,26 @@ public class SQLSecretBackend implements SecretBackend {
     }
 
     @Override
+    public Optional<BoxSecret> getBoxSecret(BoxSecretGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public BoxSecret createBoxSecret(BoxSecretCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateBoxSecret(BoxSecretUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteBoxSecret(BoxSecretDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<AzureSecret> getAzureSecret(AzureSecretGetRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }

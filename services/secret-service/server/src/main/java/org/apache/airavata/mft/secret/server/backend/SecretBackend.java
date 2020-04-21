@@ -36,6 +36,11 @@ public interface SecretBackend {
     public boolean updateS3Secret(S3SecretUpdateRequest request) throws Exception;
     public boolean deleteS3Secret(S3SecretDeleteRequest request) throws Exception;
 
+    public Optional<BoxSecret> getBoxSecret(BoxSecretGetRequest request) throws Exception;
+    public BoxSecret createBoxSecret(BoxSecretCreateRequest request) throws Exception;
+    public boolean updateBoxSecret(BoxSecretUpdateRequest request) throws Exception;
+    public boolean deleteBoxSecret(BoxSecretDeleteRequest request) throws Exception;
+
     public Optional<AzureSecret> getAzureSecret(AzureSecretGetRequest request) throws Exception;
     public AzureSecret createAzureSecret(AzureSecretCreateRequest request) throws Exception;
     public boolean updateAzureSecret(AzureSecretUpdateRequest request) throws Exception;

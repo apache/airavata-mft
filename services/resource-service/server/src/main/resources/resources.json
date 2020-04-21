@@ -34,6 +34,16 @@
     "bucketName": "elasticbeanstalk-us-east-1-065325321358"
   },
   {
+    "type": "BOX",
+    "resourceId": "box-file-abcd",
+    "boxFileId": "655108198452"
+  },
+  {
+    "type": "BOX",
+    "resourceId": "box-file-efgh",
+    "boxFileId": "655450661536"
+  },
+  {
     "type": "AZURE",
     "resourceId": "azure-blob",
     "container": "sample-container",
