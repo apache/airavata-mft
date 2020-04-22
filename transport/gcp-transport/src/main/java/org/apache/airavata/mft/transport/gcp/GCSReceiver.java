@@ -43,7 +43,7 @@ public class GCSReceiver implements Connector {
         GCSSecret gcsSecret = secretClient.getGCSSecret(GCSSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-        String jsonString = gcsSecret.getJsonCredentialsFilePath();
+        String jsonString = gcsSecret.getCredentialsJson();
         GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8)));
         if (credential.createScopedRequired()) {
             Collection<String> scopes = StorageScopes.all();
@@ -65,11 +65,30 @@ public class GCSReceiver implements Connector {
         OutputStream os = context.getStreamBuffer().getOutputStream();
         int read;
         long bytes = 0;
-        while ((read = inputStream.read()) != -1) {
-            bytes++;
-            os.write(read);
+        long fileSize = context.getMetadata().getResourceSize();
+        byte[] buf = new byte[1024];
+        while (true) {
+            int bufSize = 0;
+
+            if (buf.length < fileSize) {
+                bufSize = buf.length;
+            } else {
+                bufSize = (int) fileSize;
+            }
+            bufSize = inputStream.read(buf, 0, bufSize);
+
+            if (bufSize < 0) {
+                break;
+            }
+
+            os.write(buf, 0, bufSize);
+            os.flush();
+
+            fileSize -= bufSize;
+            if (fileSize == 0L)
+                break;
         }
-        os.flush();
+
         os.close();
 
         logger.info("Completed GCS Receiver stream for transfer {}", context.getTransferId());

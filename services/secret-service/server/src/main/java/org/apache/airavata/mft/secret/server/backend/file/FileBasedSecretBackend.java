@@ -227,22 +227,10 @@ public class FileBasedSecretBackend implements SecretBackend {
                     .filter(resource -> "GCS".equals(((JSONObject) resource).get("type").toString()))
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
-                        StringBuilder contentBuilder = new StringBuilder();
-                        BufferedReader br = null;
-                        String jsonContents = "";
-                        try {
-                            br = new BufferedReader(new FileReader(r.get("jsonCredentialsFilePath").toString()));
 
-                            while ((jsonContents = br.readLine()) != null)
-                            {
-                                contentBuilder.append(jsonContents).append("\n");
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
                         GCSSecret gcsSecret = GCSSecret.newBuilder()
                                     .setSecretId(r.get("secretId").toString())
-                                    .setJsonCredentialsFilePath(contentBuilder.toString()).build();
+                                    .setCredentialsJson(r.get("credentialsJson").toString()).build();
                             return gcsSecret;
 
                     }).collect(Collectors.toList());

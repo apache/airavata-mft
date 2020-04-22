@@ -27,8 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Optional;
-
 @GRpcService
 public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBase {
 
@@ -271,7 +269,6 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
                     .withDescription("Error in retrieving GCS Secret with id " + request.getSecretId())
                     .asRuntimeException());
         }
-        super.getGCSSecret(request, responseObserver);
     }
 
     @Override

@@ -11,6 +11,8 @@ import com.google.api.services.storage.Storage.Objects.Insert;
 import com.google.api.services.storage.StorageScopes;
 import com.google.api.services.storage.model.ObjectAccessControl;
 import com.google.api.services.storage.model.StorageObject;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
@@ -36,6 +38,7 @@ public class GCSSender implements Connector {
 
     private GCSResource gcsResource;
     private Storage storage;
+    private JsonObject jsonObject;
 
     @Override
     public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
@@ -48,7 +51,8 @@ public class GCSSender implements Connector {
 
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-        String jsonString = gcsSecret.getJsonCredentialsFilePath();
+        String jsonString = gcsSecret.getCredentialsJson();
+        jsonObject = new JsonParser().parse(jsonString).getAsJsonObject();
         GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8)));
         if (credential.createScopedRequired()) {
             Collection<String> scopes = StorageScopes.all();
@@ -69,12 +73,13 @@ public class GCSSender implements Connector {
         logger.info("Content length for transfer {} {}", context.getTransferId(), context.getMetadata().getResourceSize());
 
         InputStreamContent contentStream = new InputStreamContent(
-                "text/plain", context.getStreamBuffer().getInputStream());
+                null, context.getStreamBuffer().getInputStream());
+        String entityUser = jsonObject.get("client_email").getAsString();
         StorageObject objectMetadata = new StorageObject()
                 // Set the destination object name
                 .setName(this.gcsResource.getResourcePath())
                 // Set the access control list to publicly read-only
-                .setAcl(Arrays.asList(new ObjectAccessControl().setEntity("allUsers").setRole("READER")));
+                .setAcl(Arrays.asList(new ObjectAccessControl().setEntity("user-" + entityUser).setRole("OWNER")));
 
         Insert insertRequest = storage.objects().insert(
                 this.gcsResource.getBucketName(), objectMetadata, contentStream);
