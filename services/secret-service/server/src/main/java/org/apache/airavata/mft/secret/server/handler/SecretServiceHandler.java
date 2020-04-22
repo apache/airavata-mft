@@ -99,7 +99,6 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
                     .withDescription("Error in retrieving S3 Secret with id " + request.getSecretId())
                     .asRuntimeException());
         }
-        super.getS3Secret(request, responseObserver);
     }
 
     @Override
