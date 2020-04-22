@@ -65,8 +65,8 @@ public class GCSReceiver implements Connector {
         OutputStream os = context.getStreamBuffer().getOutputStream();
         int read;
         long bytes = 0;
-        long fileSize=context.getMetadata().getResourceSize();
-        byte[] buf=new byte[1024];
+        long fileSize = context.getMetadata().getResourceSize();
+        byte[] buf = new byte[1024];
         while (true) {
             int bufSize = 0;
 
