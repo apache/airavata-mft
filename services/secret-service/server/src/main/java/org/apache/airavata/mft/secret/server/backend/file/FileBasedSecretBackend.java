@@ -25,10 +25,12 @@ import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class FileBasedSecretBackend implements SecretBackend {
@@ -219,19 +221,30 @@ public class FileBasedSecretBackend implements SecretBackend {
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
-
             JSONArray resourceList = (JSONArray) obj;
 
             List<GCSSecret> gcsSecrets = (List<GCSSecret>) resourceList.stream()
                     .filter(resource -> "GCS".equals(((JSONObject) resource).get("type").toString()))
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
+                        StringBuilder contentBuilder = new StringBuilder();
+                        BufferedReader br = null;
+                        String jsonContents = "";
+                        try {
+                            br = new BufferedReader(new FileReader(r.get("jsonCredentialsFilePath").toString()));
 
+                            while ((jsonContents = br.readLine()) != null)
+                            {
+                                contentBuilder.append(jsonContents).append("\n");
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                         GCSSecret gcsSecret = GCSSecret.newBuilder()
-                                .setSecretId(r.get("secretId").toString())
-                                .setJsonCredentialsFilePath(r.get("jsonCredentialsFilePath").toString()).build();
+                                    .setSecretId(r.get("secretId").toString())
+                                    .setJsonCredentialsFilePath(contentBuilder.toString()).build();
+                            return gcsSecret;
 
-                        return gcsSecret;
                     }).collect(Collectors.toList());
             return gcsSecrets.stream().filter(r -> request.getSecretId().equals(r.getSecretId())).findFirst();
         }
