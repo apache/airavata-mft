@@ -22,7 +22,6 @@ import org.apache.airavata.registry.api.exception.RegistryServiceException;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public interface ResourceBackend {
 

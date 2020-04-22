@@ -75,13 +75,13 @@ public class FileBasedResourceBackend implements ResourceBackend {
 
     @Override
     public List<SCPStorage> getSCPStorages() throws Exception {
-        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream("resources.json");
+        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
         JSONParser jsonParser = new JSONParser();
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
             JSONArray storageList = (JSONArray) obj;
-            List<SCPStorage> scpStorages = (List<SCPStorage>) storageList.stream()
+            Set<SCPStorage> scpStorages = (Set<SCPStorage>) storageList.stream()
                     .filter(resource -> "SCP" .equals(((JSONObject) resource).get("type").toString()))
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
@@ -92,8 +92,8 @@ public class FileBasedResourceBackend implements ResourceBackend {
                                 .setPort(Integer.parseInt(((JSONObject) r.get("scpStorage")).get("port").toString())).build();
 
                         return storage;
-                    }).collect(Collectors.toList());
-            return scpStorages;
+                    }).collect(Collectors.toSet());
+            return scpStorages.stream().collect(Collectors.toList());
         }
     }
 
