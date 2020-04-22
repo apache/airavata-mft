@@ -394,7 +394,7 @@ service  ResourceService {
 
     rpc getAzureResources(AzureResourcesGetRequest) returns (stream AzureResource){
         option (google.api.http) = {
-            get: "/v1.0/resource/azure"
+            get: "/v1.0/resources/azure"
         };
     }
 

@@ -229,7 +229,6 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public StorageTypes getStorageTypes() throws Exception {
-        System.out.println("this is sql backend");
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 }

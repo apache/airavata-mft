@@ -265,7 +265,6 @@ public class AiravataResourceBackend implements ResourceBackend {
 
     @Override
     public StorageTypes getStorageTypes() throws Exception {
-        System.out.println("This is resource backend");
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 }

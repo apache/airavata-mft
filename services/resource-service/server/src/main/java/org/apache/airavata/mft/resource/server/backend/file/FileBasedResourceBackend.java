@@ -243,7 +243,6 @@ public class FileBasedResourceBackend implements ResourceBackend {
 
     @Override
     public StorageTypes getStorageTypes() throws Exception {
-        System.out.println("This is File based backend");
         JSONParser jsonParser = new JSONParser();
         InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
 

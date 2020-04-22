@@ -534,7 +534,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
             responseObserver.onNext(this.backend.getStorageTypes());
             responseObserver.onCompleted();
         } catch (Exception e) {
-            logger.error("Failed to retrieve storage types");
+            logger.error("Failed to retrieve storage types", e);
 
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed to retrieve storage types")
