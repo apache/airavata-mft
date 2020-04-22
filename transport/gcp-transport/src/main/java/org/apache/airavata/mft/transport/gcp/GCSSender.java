@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
@@ -49,7 +48,7 @@ public class GCSSender implements Connector {
 
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-        String jsonString=gcsSecret.getJsonCredentialsFilePath();
+        String jsonString = gcsSecret.getJsonCredentialsFilePath();
         GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8)));
         if (credential.createScopedRequired()) {
             Collection<String> scopes = StorageScopes.all();

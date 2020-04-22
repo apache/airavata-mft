@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -44,7 +43,7 @@ public class GCSReceiver implements Connector {
         GCSSecret gcsSecret = secretClient.getGCSSecret(GCSSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-        String jsonString=gcsSecret.getJsonCredentialsFilePath();
+        String jsonString = gcsSecret.getJsonCredentialsFilePath();
         GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8)));
         if (credential.createScopedRequired()) {
             Collection<String> scopes = StorageScopes.all();

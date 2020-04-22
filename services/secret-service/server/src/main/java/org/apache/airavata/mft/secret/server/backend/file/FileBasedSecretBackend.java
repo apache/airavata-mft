@@ -221,35 +221,28 @@ public class FileBasedSecretBackend implements SecretBackend {
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
-            AtomicReference<String> jsonCredentials = new AtomicReference<String>("");
             JSONArray resourceList = (JSONArray) obj;
 
             List<GCSSecret> gcsSecrets = (List<GCSSecret>) resourceList.stream()
                     .filter(resource -> "GCS".equals(((JSONObject) resource).get("type").toString()))
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
+                        StringBuilder contentBuilder = new StringBuilder();
+                        BufferedReader br = null;
+                        String jsonContents = "";
                         try {
-                            jsonCredentials.set(new String(Files.readAllBytes(Paths.get(r.get("jsonCredentialsFilePath").toString()))));
+                            br = new BufferedReader(new FileReader(r.get("jsonCredentialsFilePath").toString()));
+
+                            while ((jsonContents = br.readLine()) != null)
+                            {
+                                contentBuilder.append(jsonContents).append("\n");
+                            }
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-//                        StringBuilder contentBuilder = new StringBuilder();
-//                        BufferedReader br = null;
-//                        String jsonContents = "";
-//                        try {
-//                            br = new BufferedReader(new FileReader(r.get("jsonCredentialsFilePath").toString()));
-//
-//                            while ((jsonContents = br.readLine()) != null)
-//                            {
-//                                contentBuilder.append(jsonContents).append("\n");
-//                            }
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        }
-
                         GCSSecret gcsSecret = GCSSecret.newBuilder()
                                     .setSecretId(r.get("secretId").toString())
-                                    .setJsonCredentialsFilePath(jsonCredentials.get()).build();
+                                    .setJsonCredentialsFilePath(contentBuilder.toString()).build();
                             return gcsSecret;
 
                     }).collect(Collectors.toList());
