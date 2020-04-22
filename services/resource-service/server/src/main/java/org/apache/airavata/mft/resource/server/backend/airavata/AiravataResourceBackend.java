@@ -29,6 +29,7 @@ import org.apache.airavata.registry.api.client.RegistryServiceClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Optional;
 
 public class AiravataResourceBackend implements ResourceBackend {
@@ -113,6 +114,11 @@ public class AiravataResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public List<SCPStorage> getSCPStorages() throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<SCPResource> getSCPResource(SCPResourceGetRequest request) throws Exception {
         String resourceId = request.getResourceId();
         String[] parts = resourceId.split(":");
@@ -145,6 +151,11 @@ public class AiravataResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public List<SCPResource> getSCPResources(SCPResourcesGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<LocalResource> getLocalResource(LocalResourceGetRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
 
@@ -166,6 +177,11 @@ public class AiravataResourceBackend implements ResourceBackend {
     public boolean deleteLocalResource(LocalResourceDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
 
+    }
+
+    @Override
+    public List<LocalResource> getLocalResources(LocalResourcesGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
@@ -193,6 +209,11 @@ public class AiravataResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public List<S3Resource> getS3Resources(S3ResourcesGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<BoxResource> getBoxResource(BoxResourceGetRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
@@ -213,6 +234,11 @@ public class AiravataResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public List<BoxResource> getBoxResources(BoxResourcesGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<AzureResource> getAzureResource(AzureResourceGetRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
@@ -229,6 +255,17 @@ public class AiravataResourceBackend implements ResourceBackend {
 
     @Override
     public boolean deleteAzureResource(AzureResourceDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public List<AzureResource> getAzureResources(AzureResourcesGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public StorageTypes getStorageTypes() throws Exception {
+        System.out.println("This is resource backend");
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 }

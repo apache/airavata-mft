@@ -29,7 +29,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FileBasedResourceBackend implements ResourceBackend {
 
@@ -72,39 +74,34 @@ public class FileBasedResourceBackend implements ResourceBackend {
     }
 
     @Override
-    public Optional<SCPResource> getSCPResource(SCPResourceGetRequest request) throws Exception {
-
+    public List<SCPStorage> getSCPStorages() throws Exception {
         InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream("resources.json");
-
         JSONParser jsonParser = new JSONParser();
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
-
             Object obj = jsonParser.parse(reader);
-
-            JSONArray resourceList = (JSONArray) obj;
-
-            List<SCPResource> scpResources = (List<SCPResource>) resourceList.stream()
-                    .filter(resource -> "SCP".equals(((JSONObject) resource).get("type").toString()))
+            JSONArray storageList = (JSONArray) obj;
+            List<SCPStorage> scpStorages = (List<SCPStorage>) storageList.stream()
+                    .filter(resource -> "SCP" .equals(((JSONObject) resource).get("type").toString()))
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
-
                         SCPStorage storage = SCPStorage.newBuilder()
-                                .setStorageId(((JSONObject)r.get("scpStorage")).get("storageId").toString())
-                                .setHost(((JSONObject)r.get("scpStorage")).get("host").toString())
-                                .setUser(((JSONObject)r.get("scpStorage")).get("user").toString())
-                                .setPort(Integer.parseInt(((JSONObject)r.get("scpStorage")).get("port").toString())).build();
+                                .setStorageId(((JSONObject) r.get("scpStorage")).get("storageId").toString())
+                                .setHost(((JSONObject) r.get("scpStorage")).get("host").toString())
+                                .setUser(((JSONObject) r.get("scpStorage")).get("user").toString())
+                                .setPort(Integer.parseInt(((JSONObject) r.get("scpStorage")).get("port").toString())).build();
 
-                        SCPResource scpResource = SCPResource.newBuilder()
-                                .setResourcePath(r.get("resourcePath").toString())
-                                .setResourceId(r.get("resourceId").toString())
-                                .setScpStorage(storage).build();
-
-                        return scpResource;
+                        return storage;
                     }).collect(Collectors.toList());
-
-            return scpResources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
+            return scpStorages;
         }
+    }
+
+    @Override
+    public Optional<SCPResource> getSCPResource(SCPResourceGetRequest request) throws Exception {
+        List<SCPResource> scpResources = getSCPResources(resourceFile);
+        return scpResources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
+
     }
 
 
@@ -127,28 +124,15 @@ public class FileBasedResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public List<SCPResource> getSCPResources(SCPResourcesGetRequest request) throws Exception {
+        List<SCPResource> scpResources = getSCPResources(resourceFile);
+        return scpResources.stream().filter(r -> request.getStorageId().equals(r.getScpStorage().getStorageId())).collect(Collectors.toList());
+    }
+
+    @Override
     public Optional<LocalResource> getLocalResource(LocalResourceGetRequest request) throws Exception {
-        JSONParser jsonParser = new JSONParser();
-        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
-
-        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
-            Object obj = jsonParser.parse(reader);
-
-            JSONArray resourceList = (JSONArray) obj;
-
-            List<LocalResource> localResources = (List<LocalResource>) resourceList.stream()
-                    .filter(resource -> "LOCAL".equals(((JSONObject) resource).get("type").toString()))
-                    .map(resource -> {
-                        JSONObject r = (JSONObject) resource;
-
-                        LocalResource localResource = LocalResource.newBuilder()
-                                .setResourcePath(r.get("resourcePath").toString())
-                                .setResourceId(r.get("resourceId").toString()).build();
-
-                        return localResource;
-                    }).collect(Collectors.toList());
-            return localResources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
-        }
+        List<LocalResource> localResources = getLocalResources(resourceFile);
+        return localResources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
     }
 
     @Override
@@ -170,32 +154,14 @@ public class FileBasedResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public List<LocalResource> getLocalResources(LocalResourcesGetRequest request) throws Exception {
+        return getLocalResources(resourceFile);
+    }
+
+    @Override
     public Optional<S3Resource> getS3Resource(S3ResourceGetRequest request) throws Exception {
-        JSONParser jsonParser = new JSONParser();
-        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
-
-        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
-            Object obj = jsonParser.parse(reader);
-
-            JSONArray resourceList = (JSONArray) obj;
-
-            List<S3Resource> s3Resources = (List<S3Resource>) resourceList.stream()
-                    .filter(resource -> "S3".equals(((JSONObject) resource).get("type").toString()))
-                    .map(resource -> {
-                        JSONObject r = (JSONObject) resource;
-
-                        S3Resource s3Resource = S3Resource.newBuilder()
-                                .setResourcePath(r.get("resourcePath").toString())
-                                .setResourceId(r.get("resourceId").toString())
-                                .setBucketName(r.get("bucketName").toString())
-                                .setRegion(r.get("region").toString())
-                                .build();
-
-                        return s3Resource;
-                    }).collect(Collectors.toList());
-            return s3Resources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
-        }
-
+        List<S3Resource> s3Resources = getS3Resources(resourceFile);
+        return s3Resources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
     }
 
     @Override
@@ -210,6 +176,8 @@ public class FileBasedResourceBackend implements ResourceBackend {
 
     }
 
+
+
     @Override
     public boolean deleteS3Resource(S3ResourceDeleteRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
@@ -217,31 +185,14 @@ public class FileBasedResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public List<S3Resource> getS3Resources(S3ResourcesGetRequest request) throws Exception {
+        return getS3Resources(resourceFile);
+    }
+
+    @Override
     public Optional<BoxResource> getBoxResource(BoxResourceGetRequest request) throws Exception {
-        JSONParser jsonParser = new JSONParser();
-        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
-
-        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
-            Object obj = jsonParser.parse(reader);
-
-            JSONArray resourceList = (JSONArray) obj;
-
-            System.out.println("All resources ");
-            List<BoxResource> boxResources = (List<BoxResource>) resourceList.stream()
-                    .filter(resource -> "BOX".equals(((JSONObject) resource).get("type").toString()))
-                    .map(resource -> {
-                        JSONObject r = (JSONObject) resource;
-
-                        BoxResource boxResource = BoxResource.newBuilder()
-                                .setResourceId(r.get("resourceId").toString())
-                                .setBoxFileId(r.get("boxFileId").toString())
-                                .build();
-
-                        return boxResource;
-                    }).collect(Collectors.toList());
-            return boxResources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
-        }
-
+        List<BoxResource> boxResources = getBoxResources(resourceFile);
+        return boxResources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
     }
 
     @Override
@@ -260,30 +211,14 @@ public class FileBasedResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public List<BoxResource> getBoxResources(BoxResourcesGetRequest request) throws Exception {
+        return getBoxResources(resourceFile);
+    }
+
+    @Override
     public Optional<AzureResource> getAzureResource(AzureResourceGetRequest request) throws Exception {
-        JSONParser jsonParser = new JSONParser();
-        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
-
-        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
-            Object obj = jsonParser.parse(reader);
-
-            JSONArray resourceList = (JSONArray) obj;
-
-            List<AzureResource> azureResources = (List<AzureResource>) resourceList.stream()
-                    .filter(resource -> "AZURE".equals(((JSONObject) resource).get("type").toString()))
-                    .map(resource -> {
-                        JSONObject r = (JSONObject) resource;
-
-                        AzureResource azureResource = AzureResource.newBuilder()
-                                .setBlobName(r.get("blobName").toString())
-                                .setContainer(r.get("container").toString())
-                                .setResourceId(r.get("resourceId").toString())
-                                .build();
-
-                        return azureResource;
-                    }).collect(Collectors.toList());
-            return azureResources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
-        }
+        List<AzureResource> azureResources = getAzureResources(resourceFile);
+        return azureResources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
     }
 
     @Override
@@ -299,5 +234,165 @@ public class FileBasedResourceBackend implements ResourceBackend {
     @Override
     public boolean deleteAzureResource(AzureResourceDeleteRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public List<AzureResource> getAzureResources(AzureResourcesGetRequest request) throws Exception {
+        return getAzureResources(resourceFile);
+    }
+
+    @Override
+    public StorageTypes getStorageTypes() throws Exception {
+        System.out.println("This is File based backend");
+        JSONParser jsonParser = new JSONParser();
+        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
+
+        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            Object obj = jsonParser.parse(reader);
+
+            JSONArray resourceList = (JSONArray) obj;
+
+            Set<String> types = (Set<String>) resourceList.stream().map(resource -> {
+                return ((JSONObject) resource).get("type").toString();
+            }).collect(Collectors.toSet());
+
+            StorageTypes.Builder builder = StorageTypes.newBuilder();
+            types.forEach(builder::addType);
+            return builder.build();
+        }
+    }
+
+    private List<SCPResource> getSCPResources(String resourceFile) throws Exception{
+
+        JSONParser jsonParser = new JSONParser();
+        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
+
+        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            Object obj = jsonParser.parse(reader);
+
+            JSONArray resourceList = (JSONArray) obj;
+
+            List<SCPResource> scpResources = (List<SCPResource>) resourceList.stream()
+                    .filter(resource -> "SCP" .equals(((JSONObject) resource).get("type").toString()))
+                    .map(resource -> {
+                        JSONObject r = (JSONObject) resource;
+
+                        SCPStorage storage = SCPStorage.newBuilder()
+                                .setStorageId(((JSONObject) r.get("scpStorage")).get("storageId").toString())
+                                .setHost(((JSONObject) r.get("scpStorage")).get("host").toString())
+                                .setUser(((JSONObject) r.get("scpStorage")).get("user").toString())
+                                .setPort(Integer.parseInt(((JSONObject) r.get("scpStorage")).get("port").toString())).build();
+
+                        SCPResource scpResource = SCPResource.newBuilder()
+                                .setResourcePath(r.get("resourcePath").toString())
+                                .setResourceId(r.get("resourceId").toString())
+                                .setScpStorage(storage).build();
+
+                        return scpResource;
+                    }).collect(Collectors.toList());
+            return scpResources;
+        }
+    }
+
+    private List<LocalResource> getLocalResources(String resourceFile) throws Exception {
+        JSONParser jsonParser = new JSONParser();
+        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
+
+        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            Object obj = jsonParser.parse(reader);
+
+            JSONArray resourceList = (JSONArray) obj;
+
+            List<LocalResource> localResources = (List<LocalResource>) resourceList.stream()
+                    .filter(resource -> "LOCAL" .equals(((JSONObject) resource).get("type").toString()))
+                    .map(resource -> {
+                        JSONObject r = (JSONObject) resource;
+
+                        LocalResource localResource = LocalResource.newBuilder()
+                                .setResourcePath(r.get("resourcePath").toString())
+                                .setResourceId(r.get("resourceId").toString()).build();
+
+                        return localResource;
+                    }).collect(Collectors.toList());
+            return localResources;
+        }
+    }
+
+    private List<S3Resource> getS3Resources(String resourceFile) throws Exception {
+        JSONParser jsonParser = new JSONParser();
+        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
+
+        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            Object obj = jsonParser.parse(reader);
+
+            JSONArray resourceList = (JSONArray) obj;
+
+            List<S3Resource> s3Resources = (List<S3Resource>) resourceList.stream()
+                    .filter(resource -> "S3" .equals(((JSONObject) resource).get("type").toString()))
+                    .map(resource -> {
+                        JSONObject r = (JSONObject) resource;
+
+                        S3Resource s3Resource = S3Resource.newBuilder()
+                                .setResourcePath(r.get("resourcePath").toString())
+                                .setResourceId(r.get("resourceId").toString())
+                                .setBucketName(r.get("bucketName").toString())
+                                .setRegion(r.get("region").toString())
+                                .build();
+
+                        return s3Resource;
+                    }).collect(Collectors.toList());
+            return s3Resources;
+        }
+    }
+
+    private List<BoxResource> getBoxResources(String resourceFile) throws Exception{
+        JSONParser jsonParser = new JSONParser();
+        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
+
+        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            Object obj = jsonParser.parse(reader);
+
+            JSONArray resourceList = (JSONArray) obj;
+
+            List<BoxResource> boxResources = (List<BoxResource>) resourceList.stream()
+                    .filter(resource -> "BOX" .equals(((JSONObject) resource).get("type").toString()))
+                    .map(resource -> {
+                        JSONObject r = (JSONObject) resource;
+
+                        BoxResource boxResource = BoxResource.newBuilder()
+                                .setResourceId(r.get("resourceId").toString())
+                                .setBoxFileId(r.get("boxFileId").toString())
+                                .build();
+
+                        return boxResource;
+                    }).collect(Collectors.toList());
+            return boxResources;
+        }
+    }
+
+    private List<AzureResource> getAzureResources(String resourceFile) throws Exception {
+        JSONParser jsonParser = new JSONParser();
+        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
+
+        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            Object obj = jsonParser.parse(reader);
+
+            JSONArray resourceList = (JSONArray) obj;
+
+            List<AzureResource> azureResources = (List<AzureResource>) resourceList.stream()
+                    .filter(resource -> "AZURE" .equals(((JSONObject) resource).get("type").toString()))
+                    .map(resource -> {
+                        JSONObject r = (JSONObject) resource;
+
+                        AzureResource azureResource = AzureResource.newBuilder()
+                                .setBlobName(r.get("blobName").toString())
+                                .setContainer(r.get("container").toString())
+                                .setResourceId(r.get("resourceId").toString())
+                                .build();
+
+                        return azureResource;
+                    }).collect(Collectors.toList());
+            return azureResources;
+        }
     }
 }

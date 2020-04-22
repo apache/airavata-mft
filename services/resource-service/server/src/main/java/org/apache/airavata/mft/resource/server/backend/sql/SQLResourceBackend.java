@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.Optional;
 
 public class SQLResourceBackend implements ResourceBackend {
@@ -82,6 +83,11 @@ public class SQLResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public List<SCPStorage> getSCPStorages() throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<SCPResource> getSCPResource(SCPResourceGetRequest request) {
         Optional<SCPResourceEntity> resourceEntity = scpResourceRepository.findByResourceId(request.getResourceId());
 
@@ -109,6 +115,16 @@ public class SQLResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public List<SCPResource> getSCPResources(SCPResourcesGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public List<S3Resource> getS3Resources(S3ResourcesGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<LocalResource> getLocalResource(LocalResourceGetRequest request) {
         Optional<LocalResourceEntity> resourceEntity = localResourceRepository.findByResourceId(request.getResourceId());
         return resourceEntity.map(scpResourceEntity -> mapper.map(scpResourceEntity, LocalResource.newBuilder().getClass()).build());
@@ -130,6 +146,11 @@ public class SQLResourceBackend implements ResourceBackend {
     public boolean deleteLocalResource(LocalResourceDeleteRequest request) {
         localResourceRepository.deleteById(request.getResourceId());
         return true;
+    }
+
+    @Override
+    public List<LocalResource> getLocalResources(LocalResourcesGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
@@ -177,6 +198,11 @@ public class SQLResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public List<BoxResource> getBoxResources(BoxResourcesGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<AzureResource> getAzureResource(AzureResourceGetRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
@@ -193,6 +219,17 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public boolean deleteAzureResource(AzureResourceDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public List<AzureResource> getAzureResources(AzureResourcesGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public StorageTypes getStorageTypes() throws Exception {
+        System.out.println("this is sql backend");
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 }

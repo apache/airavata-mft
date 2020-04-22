@@ -53,6 +53,8 @@ message SCPStorageDeleteRequest {
     string storageId = 1;
 }
 
+message SCPStoragesGetRequest{}
+
 // SCP Resource
 
 message SCPResource {
@@ -80,6 +82,10 @@ message SCPResourceDeleteRequest {
     string resourceId = 1;
 }
 
+message SCPResourcesGetRequest {
+    string storageId = 1;
+}
+
 // Local Resource
 
 message LocalResource {
@@ -103,6 +109,8 @@ message LocalResourceUpdateRequest {
 message LocalResourceDeleteRequest {
     string resourceId = 1;
 }
+
+message LocalResourcesGetRequest{}
 
 // S3 Resource
 
@@ -134,6 +142,8 @@ message S3ResourceDeleteRequest {
     string resourceId = 1;
 }
 
+message S3ResourcesGetRequest{}
+
 // Azure Resource
 
 message AzureResource {
@@ -161,6 +171,8 @@ message AzureResourceDeleteRequest {
     string resourceId = 1;
 }
 
+message AzureResourcesGetRequest{}
+
 // Box Resource
 
 message BoxResource {
@@ -183,6 +195,14 @@ message BoxResourceUpdateRequest {
 
 message BoxResourceDeleteRequest {
     string resourceId = 1;
+}
+
+message BoxResourcesGetRequest{}
+
+// storage types
+
+message StorageTypes {
+    repeated string type = 1;
 }
 
 service  ResourceService {
@@ -212,6 +232,12 @@ service  ResourceService {
         };
     }
 
+    rpc getSCPStorages(SCPStoragesGetRequest) returns (stream SCPStorage) {
+        option(google.api.http) = {
+            get: "/v1.0/resource/scp/storages"
+        };
+    }
+
     // SCP Resource
 
     rpc getSCPResource (SCPResourceGetRequest) returns (SCPResource) {
@@ -235,6 +261,12 @@ service  ResourceService {
     rpc deleteSCPResource (SCPResourceDeleteRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
            delete: "/v1.0/resource/scp"
+        };
+    }
+
+    rpc getSCPResources(SCPResourcesGetRequest) returns (stream SCPResource) {
+        option(google.api.http) = {
+          get: "/v1.0/resources/scp"
         };
     }
 
@@ -264,6 +296,12 @@ service  ResourceService {
         };
     }
 
+    rpc getLocalResources(LocalResourcesGetRequest) returns (stream LocalResource){
+        option (google.api.http) = {
+            get: "/v1.0/resources/local"
+        };
+    }
+
     // S3 Resource
 
     rpc getS3Resource (S3ResourceGetRequest) returns (S3Resource) {
@@ -287,6 +325,12 @@ service  ResourceService {
     rpc deleteS3Resource (S3ResourceDeleteRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
            delete: "/v1.0/resource/s3"
+        };
+    }
+
+    rpc getS3Resources(S3ResourcesGetRequest) returns(stream S3Resource){
+        option (google.api.http) = {
+            get: "/v1.0/resources/s3"
         };
     }
 
@@ -316,6 +360,12 @@ service  ResourceService {
         };
     }
 
+    rpc getBoxResources(BoxResourcesGetRequest) returns (stream BoxResource) {
+        option (google.api.http) = {
+            get: "/v1.0/resources/box"
+        };
+    }
+
     // Azure Resource
 
     rpc getAzureResource (AzureResourceGetRequest) returns (AzureResource) {
@@ -339,6 +389,20 @@ service  ResourceService {
     rpc deleteAzureResource (AzureResourceDeleteRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
            delete: "/v1.0/resource/azure"
+        };
+    }
+
+    rpc getAzureResources(AzureResourcesGetRequest) returns (stream AzureResource){
+        option (google.api.http) = {
+            get: "/v1.0/resource/azure"
+        };
+    }
+
+    // storage types
+
+    rpc getStorageTypes(google.protobuf.Empty) returns (StorageTypes) {
+        option(google.api.http) = {
+          get: "/v1.0/resource/storage/types"
         };
     }
 }

@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.Optional;
 
 @GRpcService
@@ -111,6 +112,20 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     }
 
     @Override
+    public void getSCPStorages(SCPStoragesGetRequest request, StreamObserver<SCPStorage> responseObserver) {
+        try {
+            this.backend.getSCPStorages().forEach(responseObserver::onNext);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in retrieving all scp storage");
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in retrieving all scp storage")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
     public void getSCPResource(SCPResourceGetRequest request, StreamObserver<SCPResource> responseObserver) {
         try {
             this.backend.getSCPResource(request).ifPresentOrElse(resource -> {
@@ -176,6 +191,20 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
 
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed in deleting the scp resource")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void getSCPResources(SCPResourcesGetRequest request, StreamObserver<SCPResource> responseObserver) {
+        try {
+            this.backend.getSCPResources(request).forEach(responseObserver::onNext);
+            responseObserver.onCompleted();
+        }catch (Exception e) {
+            logger.error("Failed to get scp resources for storage id {}", request.getStorageId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed to get scp resources for storage id " + request.getStorageId())
                     .asRuntimeException());
         }
     }
@@ -248,6 +277,20 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     }
 
     @Override
+    public void getLocalResources(LocalResourcesGetRequest request, StreamObserver<LocalResource> responseObserver) {
+        try {
+            this.backend.getLocalResources(request).forEach(responseObserver::onNext);
+            responseObserver.onCompleted();
+        }catch (Exception e) {
+            logger.error("Failed to get local resources", e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed to get local resources")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
     public void getS3Resource(S3ResourceGetRequest request, StreamObserver<S3Resource> responseObserver) {
         try {
             this.backend.getS3Resource(request).ifPresentOrElse(resource -> {
@@ -310,8 +353,22 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed in deleting the S3 resource with id " + request.getResourceId())
                     .asRuntimeException());
-        }    }
+        }
+    }
 
+    @Override
+    public void getS3Resources(S3ResourcesGetRequest request, StreamObserver<S3Resource> responseObserver) {
+        try {
+            this.backend.getS3Resources(request).forEach(responseObserver::onNext);
+            responseObserver.onCompleted();
+        }catch (Exception e) {
+            logger.error("Failed to get S3 resources", e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed to get S3 resources")
+                    .asRuntimeException());
+        }
+    }
 
     @Override
     public void getBoxResource(BoxResourceGetRequest request, StreamObserver<BoxResource> responseObserver) {
@@ -374,7 +431,20 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed in deleting the Box resource with id " + request.getResourceId())
                     .asRuntimeException());
-        }    }
+        }
+    }
+
+    @Override
+    public void getBoxResources(BoxResourcesGetRequest request, StreamObserver<BoxResource> responseObserver) {
+        try {
+            this.backend.getBoxResources(request).forEach(responseObserver::onNext);
+            responseObserver.onCompleted();
+        }catch (Exception e) {
+            logger.error("Failed to get box resources", e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed to get box resources")
+                    .asRuntimeException());
         }
     }
 
@@ -440,6 +510,34 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
 
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed in deleting the Azure resource with id " + request.getResourceId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void getAzureResources(AzureResourcesGetRequest request, StreamObserver<AzureResource> responseObserver) {
+        try {
+            this.backend.getAzureResources(request).forEach(responseObserver::onNext);
+            responseObserver.onCompleted();
+        }catch (Exception e) {
+            logger.error("Failed to get azure resources", e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed to get azure resources")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void getStorageTypes(Empty request, StreamObserver<StorageTypes> responseObserver) {
+        try {
+            responseObserver.onNext(this.backend.getStorageTypes());
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed to retrieve storage types");
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed to retrieve storage types")
                     .asRuntimeException());
         }
     }

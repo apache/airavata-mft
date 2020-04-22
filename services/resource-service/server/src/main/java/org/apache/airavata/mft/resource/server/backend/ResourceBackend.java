@@ -20,7 +20,9 @@ package org.apache.airavata.mft.resource.server.backend;
 import org.apache.airavata.mft.resource.service.*;
 import org.apache.airavata.registry.api.exception.RegistryServiceException;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface ResourceBackend {
 
@@ -31,29 +33,37 @@ public interface ResourceBackend {
     public SCPStorage createSCPStorage(SCPStorageCreateRequest request) throws Exception;
     public boolean updateSCPStorage(SCPStorageUpdateRequest request) throws Exception;
     public boolean deleteSCPStorage(SCPStorageDeleteRequest request) throws Exception;
+    public List<SCPStorage> getSCPStorages() throws Exception;
 
     public Optional<SCPResource> getSCPResource(SCPResourceGetRequest request) throws Exception;
     public SCPResource createSCPResource(SCPResourceCreateRequest request) throws Exception;
     public boolean updateSCPResource(SCPResourceUpdateRequest request) throws Exception;
     public boolean deleteSCPResource(SCPResourceDeleteRequest request) throws Exception;
+    public List<SCPResource> getSCPResources(SCPResourcesGetRequest request) throws Exception;
 
     public Optional<LocalResource> getLocalResource(LocalResourceGetRequest request) throws Exception;
     public LocalResource createLocalResource(LocalResourceCreateRequest request) throws Exception;
     public boolean updateLocalResource(LocalResourceUpdateRequest request) throws Exception;
     public boolean deleteLocalResource(LocalResourceDeleteRequest request) throws Exception;
+    public List<LocalResource> getLocalResources(LocalResourcesGetRequest request) throws Exception;
 
     public Optional<S3Resource> getS3Resource(S3ResourceGetRequest request) throws Exception;
     public S3Resource createS3Resource(S3ResourceCreateRequest request) throws Exception;
     public boolean updateS3Resource(S3ResourceUpdateRequest request) throws Exception;
     public boolean deleteS3Resource(S3ResourceDeleteRequest request) throws Exception;
+    public List<S3Resource> getS3Resources(S3ResourcesGetRequest request) throws Exception;
 
     public Optional<BoxResource> getBoxResource(BoxResourceGetRequest request) throws Exception;
     public BoxResource createBoxResource(BoxResourceCreateRequest request) throws Exception;
     public boolean updateBoxResource(BoxResourceUpdateRequest request) throws Exception;
     public boolean deleteBoxResource(BoxResourceDeleteRequest request) throws Exception;
+    public List<BoxResource> getBoxResources(BoxResourcesGetRequest request) throws Exception;
 
     public Optional<AzureResource> getAzureResource(AzureResourceGetRequest request) throws Exception;
     public AzureResource createAzureResource(AzureResourceCreateRequest request) throws Exception;
     public boolean updateAzureResource(AzureResourceUpdateRequest request) throws Exception;
     public boolean deleteAzureResource(AzureResourceDeleteRequest request) throws Exception;
+    public List<AzureResource> getAzureResources(AzureResourcesGetRequest request) throws Exception;
+
+    public StorageTypes getStorageTypes() throws Exception;
 }
