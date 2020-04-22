@@ -49,7 +49,8 @@ public class GCSSender implements Connector {
 
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-        GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(gcsSecret.getJsonCredentialsFilePath().getBytes(StandardCharsets.UTF_8)));
+        String jsonString=gcsSecret.getJsonCredentialsFilePath();
+        GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8)));
         if (credential.createScopedRequired()) {
             Collection<String> scopes = StorageScopes.all();
             credential = credential.createScoped(scopes);
@@ -72,12 +73,12 @@ public class GCSSender implements Connector {
                 "text/plain", context.getStreamBuffer().getInputStream());
         StorageObject objectMetadata = new StorageObject()
                 // Set the destination object name
-                .setName(gcsResource.getResourcePath())
+                .setName(this.gcsResource.getResourcePath())
                 // Set the access control list to publicly read-only
                 .setAcl(Arrays.asList(new ObjectAccessControl().setEntity("allUsers").setRole("READER")));
 
         Insert insertRequest = storage.objects().insert(
-                gcsResource.getBucketName(), objectMetadata, contentStream);
+                this.gcsResource.getBucketName(), objectMetadata, contentStream);
 
         insertRequest.execute();
 

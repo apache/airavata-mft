@@ -60,7 +60,8 @@ public class GCSMetadataCollector implements MetadataCollector {
 
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-        GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(gcsSecret.getJsonCredentialsFilePath().getBytes(StandardCharsets.UTF_8)), transport, jsonFactory);
+        String jsonString=gcsSecret.getJsonCredentialsFilePath();
+        GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8)), transport, jsonFactory);
         if (credential.createScopedRequired()) {
             Collection<String> scopes = StorageScopes.all();
             credential = credential.createScoped(scopes);
@@ -89,7 +90,8 @@ public class GCSMetadataCollector implements MetadataCollector {
 
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-        GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(gcsSecret.getJsonCredentialsFilePath().getBytes(StandardCharsets.UTF_8)), transport, jsonFactory);
+        String jsonString=gcsSecret.getJsonCredentialsFilePath();
+        GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8)), transport, jsonFactory);
         if (credential.createScopedRequired()) {
             Collection<String> scopes = StorageScopes.all();
             credential = credential.createScoped(scopes);

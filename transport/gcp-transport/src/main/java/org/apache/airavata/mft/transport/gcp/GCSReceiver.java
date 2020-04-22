@@ -44,7 +44,8 @@ public class GCSReceiver implements Connector {
         GCSSecret gcsSecret = secretClient.getGCSSecret(GCSSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-        GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(gcsSecret.getJsonCredentialsFilePath().getBytes(StandardCharsets.UTF_8)));
+        String jsonString=gcsSecret.getJsonCredentialsFilePath();
+        GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8)));
         if (credential.createScopedRequired()) {
             Collection<String> scopes = StorageScopes.all();
             credential = credential.createScoped(scopes);
@@ -61,7 +62,7 @@ public class GCSReceiver implements Connector {
     public void startStream(ConnectorContext context) throws Exception {
         logger.info("Starting GCS Receiver stream for transfer {}", context.getTransferId());
 
-        InputStream inputStream = storage.objects().get(gcsResource.getBucketName(), gcsResource.getResourcePath()).executeMediaAsInputStream();
+        InputStream inputStream = storage.objects().get(this.gcsResource.getBucketName(), this.gcsResource.getResourcePath()).executeMediaAsInputStream();
         OutputStream os = context.getStreamBuffer().getOutputStream();
         int read;
         long bytes = 0;
