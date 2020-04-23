@@ -255,8 +255,27 @@ public class FileBasedSecretBackend implements SecretBackend {
 
     @Override
     public Optional<DropboxSecret> getDropboxSecret(DropboxSecretGetRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
+        JSONParser jsonParser = new JSONParser();
+        InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(secretFile);
+
+        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            Object obj = jsonParser.parse(reader);
+            JSONArray resourceList = (JSONArray) obj;
+
+            List<DropboxSecret> dbxSecrets = (List<DropboxSecret>) resourceList.stream()
+                    .filter(resource -> "DROPBOX".equals(((JSONObject) resource).get("type").toString()))
+                    .map(resource -> {
+                        JSONObject r = (JSONObject) resource;
+
+                        DropboxSecret dbxSecret = DropboxSecret.newBuilder()
+                                .setSecretId(r.get("secretId").toString())
+                                .setAccessToken(r.get("accessToken").toString()).build();
+                        return dbxSecret;
+
+                    }).collect(Collectors.toList());
+            return dbxSecrets.stream().filter(r -> request.getSecretId().equals(r.getSecretId())).findFirst();
+        }
+        }
 
     @Override
     public DropboxSecret createDropboxSecret(DropboxSecretCreateRequest request) throws Exception {
