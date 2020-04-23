@@ -50,4 +50,9 @@ public interface SecretBackend {
     public GCSSecret createGCSSecret(GCSSecretCreateRequest request) throws Exception;
     public boolean updateGCSSecret(GCSSecretUpdateRequest request) throws Exception;
     public boolean deleteGCSSecret(GCSSecretDeleteRequest request) throws Exception;
+
+    public Optional<DropboxSecret> getDropboxSecret(DropboxSecretGetRequest request) throws Exception;
+    public DropboxSecret createDropboxSecret(DropboxSecretCreateRequest request) throws Exception;
+    public boolean updateDropboxSecret(DropboxSecretUpdateRequest request) throws Exception;
+    public boolean deleteDropboxSecret(DropboxSecretDeleteRequest request) throws Exception;
 }
