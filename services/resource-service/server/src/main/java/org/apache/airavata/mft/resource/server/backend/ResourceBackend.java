@@ -61,4 +61,9 @@ public interface ResourceBackend {
     public GCSResource createGCSResource(GCSResourceCreateRequest request) throws Exception;
     public boolean updateGCSResource(GCSResourceUpdateRequest request) throws Exception;
     public boolean deleteGCSResource(GCSResourceDeleteRequest request) throws Exception;
+
+    public Optional<DropboxResource> getDropboxResource(DropboxResourceGetRequest request) throws Exception;
+    public DropboxResource createDropboxResource(DropboxResourceCreateRequest request) throws Exception;
+    public boolean updateDropboxResource(DropboxResourceUpdateRequest request) throws Exception;
+    public boolean deleteDropboxResource(DropboxResourceDeleteRequest request) throws Exception;
 }
