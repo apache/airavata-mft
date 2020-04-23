@@ -1,4 +1,4 @@
-package org.apache.airavata.mft.dropbox.transport;
+package org.apache.airavata.mft.transport.dropbox;
 
 import org.apache.airavata.mft.core.ResourceMetadata;
 import org.apache.airavata.mft.core.api.MetadataCollector;
