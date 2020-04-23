@@ -54,5 +54,10 @@
     "resourceId": "gcs-bucket",
     "bucketName": "pika-pika-bucket",
     "resourcePath": "PikaPikaTest.txt"
+  },
+  {
+    "type": "DROPBOX",
+    "resourceId": "dropbox-file",
+    "resourcePath": "test.txt"
   }
 ]

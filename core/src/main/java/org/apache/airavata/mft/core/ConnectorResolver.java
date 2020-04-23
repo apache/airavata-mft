@@ -87,6 +87,16 @@ public final class ConnectorResolver {
                         break;
                 }
                 break;
+            case "DROPBOX":
+                switch (direction) {
+                    case "IN":
+                        className = "org.apache.airavata.mft.transport.dropbox.DropboxReceiver";
+                        break;
+                    case "OUT":
+                        className = "org.apache.airavata.mft.transport.dropbox.DropboxSender";
+                        break;
+                }
+                break;
         }
 
         if (className != null) {

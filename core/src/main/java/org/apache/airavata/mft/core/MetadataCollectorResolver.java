@@ -45,6 +45,9 @@ public final class MetadataCollectorResolver {
             case "GCS":
                 className = "org.apache.airavata.mft.transport.gcp.GCSMetadataCollector";
                 break;
+            case "DROPBOX":
+                className = "org.apache.airavata.mft.transport.dropbox.DropboxMetadataCollector";
+                break;
         }
 
         if (className != null) {
