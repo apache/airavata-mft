@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.resource.server.backend.file;
+ package org.apache.airavata.mft.resource.server.backend.file;
 
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
 import org.apache.airavata.mft.resource.service.*;
@@ -90,10 +90,10 @@ public class FileBasedResourceBackend implements ResourceBackend {
                         JSONObject r = (JSONObject) resource;
 
                         SCPStorage storage = SCPStorage.newBuilder()
-                                .setStorageId(((JSONObject) r.get("scpStorage")).get("storageId").toString())
-                                .setHost(((JSONObject) r.get("scpStorage")).get("host").toString())
-                                .setUser(((JSONObject) r.get("scpStorage")).get("user").toString())
-                                .setPort(Integer.parseInt(((JSONObject) r.get("scpStorage")).get("port").toString())).build();
+                                .setStorageId(((JSONObject)r.get("scpStorage")).get("storageId").toString())
+                                .setHost(((JSONObject)r.get("scpStorage")).get("host").toString())
+                                .setUser(((JSONObject)r.get("scpStorage")).get("user").toString())
+                                .setPort(Integer.parseInt(((JSONObject)r.get("scpStorage")).get("port").toString())).build();
 
                         SCPResource scpResource = SCPResource.newBuilder()
                                 .setResourcePath(r.get("resourcePath").toString())
