@@ -67,11 +67,11 @@ public class AzureSender implements Connector {
 
     @Override
     public void startStream(ConnectorContext context) throws Exception {
-        logger.info("Starting scp send for remote server for transfer {}", context.getTransferId());
+        logger.info("Starting Azure send for remote server for transfer {}", context.getTransferId());
         checkInitialized();
         BlockBlobClient blockBlobClient = containerClient.getBlobClient(azureResource.getBlobName()).getBlockBlobClient();
         blockBlobClient.upload(context.getStreamBuffer().getInputStream(), context.getMetadata().getResourceSize(), true);
-        logger.info("Completed scp send for remote server for transfer {}", context.getTransferId());
+        logger.info("Completed Azure send for remote server for transfer {}", context.getTransferId());
 
     }
 }

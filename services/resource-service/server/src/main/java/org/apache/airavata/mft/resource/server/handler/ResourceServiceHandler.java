@@ -376,7 +376,6 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
                     .asRuntimeException());
         }
     }
-
     @Override
     public void getAzureResource(AzureResourceGetRequest request, StreamObserver<AzureResource> responseObserver) {
         try {
@@ -439,6 +438,71 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
 
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed in deleting the Azure resource with id " + request.getResourceId())
+                    .asRuntimeException());
+        }
+    }
+    @Override
+    public void getGCSResource(GCSResourceGetRequest request, StreamObserver<GCSResource> responseObserver) {
+        try {
+            this.backend.getGCSResource(request).ifPresentOrElse(resource -> {
+                responseObserver.onNext(resource);
+                responseObserver.onCompleted();
+            }, () -> {
+                responseObserver.onError(Status.INTERNAL
+                        .withDescription("No GCS Resource with id " + request.getResourceId())
+                        .asRuntimeException());
+            });
+        } catch (Exception e) {
+            logger.error("Failed in retrieving GCS resource with id {}", request.getResourceId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in retrieving GCS resource with id " + request.getResourceId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void createGCSResource(GCSResourceCreateRequest request, StreamObserver<GCSResource> responseObserver) {
+        try {
+            responseObserver.onNext(this.backend.createGCSResource(request));
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in creating the GCS resource", e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in creating the GCS resource")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void updateGCSResource(GCSResourceUpdateRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.updateGCSResource(request);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in updating the GCS resource {}", request.getResourceId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in updating the GCS resource with id " + request.getResourceId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void deleteGCSResource(GCSResourceDeleteRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            boolean res = this.backend.deleteGCSResource(request);
+            if (res) {
+                responseObserver.onCompleted();
+            } else {
+                responseObserver.onError(new Exception("Failed to delete GCS Resource with id " + request.getResourceId()));
+            }
+        } catch (Exception e) {
+            logger.error("Failed in deleting the GCS resource {}", request.getResourceId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in deleting the GCS resource with id " + request.getResourceId())
                     .asRuntimeException());
         }
     }

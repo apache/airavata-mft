@@ -25,10 +25,12 @@ import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class FileBasedSecretBackend implements SecretBackend {
@@ -211,4 +213,45 @@ public class FileBasedSecretBackend implements SecretBackend {
     public boolean deleteAzureSecret(AzureSecretDeleteRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
+
+    @Override
+    public Optional<GCSSecret> getGCSSecret(GCSSecretGetRequest request) throws Exception {
+        JSONParser jsonParser = new JSONParser();
+        InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(secretFile);
+
+        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            Object obj = jsonParser.parse(reader);
+            JSONArray resourceList = (JSONArray) obj;
+
+            List<GCSSecret> gcsSecrets = (List<GCSSecret>) resourceList.stream()
+                    .filter(resource -> "GCS".equals(((JSONObject) resource).get("type").toString()))
+                    .map(resource -> {
+                        JSONObject r = (JSONObject) resource;
+
+                        GCSSecret gcsSecret = GCSSecret.newBuilder()
+                                    .setSecretId(r.get("secretId").toString())
+                                    .setCredentialsJson(r.get("credentialsJson").toString()).build();
+                            return gcsSecret;
+
+                    }).collect(Collectors.toList());
+            return gcsSecrets.stream().filter(r -> request.getSecretId().equals(r.getSecretId())).findFirst();
+        }
+    }
+
+    @Override
+    public GCSSecret createGCSSecret(GCSSecretCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateGCSSecret(GCSSecretUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteGCSSecret(GCSSecretDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+
 }
