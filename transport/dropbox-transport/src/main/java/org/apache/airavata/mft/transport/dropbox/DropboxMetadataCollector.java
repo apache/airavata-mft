@@ -31,7 +31,7 @@ import org.apache.airavata.mft.secret.service.DropboxSecret;
 import org.apache.airavata.mft.secret.service.DropboxSecretGetRequest;
 import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
 
-public class DropboxMetadataCollector implements MetadataCollector{
+public class DropboxMetadataCollector implements MetadataCollector {
 
     private String resourceServiceHost;
     private int resourceServicePort;
