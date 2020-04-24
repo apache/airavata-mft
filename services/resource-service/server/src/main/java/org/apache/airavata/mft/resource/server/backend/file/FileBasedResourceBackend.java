@@ -356,10 +356,11 @@ public class FileBasedResourceBackend implements ResourceBackend {
                     .filter(resource -> "DROPBOX".equals(((JSONObject) resource).get("type").toString()))
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
-
+                        String resourcePath = r.get("resourcePath").toString();
+                        resourcePath = resourcePath.startsWith("/") ? resourcePath : "/" + resourcePath;
                         DropboxResource dropboxResource = DropboxResource.newBuilder()
                                 .setResourceId(r.get("resourceId").toString())
-                                .setResourcePath(r.get("resourcePath").toString())
+                                .setResourcePath(resourcePath)
                                 .build();
 
                         return dropboxResource;
