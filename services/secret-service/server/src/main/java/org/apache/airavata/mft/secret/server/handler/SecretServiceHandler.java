@@ -307,5 +307,63 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
         }
     }
 
+    // Dropbox
+
+    @Override
+    public void getDropboxSecret(DropboxSecretGetRequest request, StreamObserver<DropboxSecret> responseObserver) {
+        try {
+            this.backend.getDropboxSecret(request).ifPresentOrElse(secret -> {
+                responseObserver.onNext(secret);
+                responseObserver.onCompleted();
+            }, () -> {
+                responseObserver.onError(Status.INTERNAL
+                        .withDescription("No Dropbox Secret with id " + request.getSecretId())
+                        .asRuntimeException());
+            });
+
+        } catch (Exception e) {
+            logger.error("Error in retrieving Dropbox Secret with id " + request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in retrieving Dropbox Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void createDropboxSecret(DropboxSecretCreateRequest request, StreamObserver<DropboxSecret> responseObserver) {
+        try {
+            this.backend.createDropboxSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in creating Dropbox Secret", e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in creating Dropbox Secret")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void updateDropboxSecret(DropboxSecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.updateDropboxSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in updating Dropbox Secret with id {}", request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in updating Dropbox Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void deleteDropboxSecret(DropboxSecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.deleteDropboxSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in deleting Dropbox Secret with id {}", request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in deleting Dropbox Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+    }
+
 
 }

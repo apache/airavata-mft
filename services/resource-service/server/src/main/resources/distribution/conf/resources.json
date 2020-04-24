@@ -54,5 +54,10 @@
     "resourceId": "gcs-bucket",
     "bucketName": "",
     "resourcePath": ""
+  },
+  {
+    "type": "DROPBOX",
+    "resourceId": "",
+    "resourcePath": ""
   }
 ]

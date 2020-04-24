@@ -212,6 +212,30 @@ message BoxResourceDeleteRequest {
     string resourceId = 1;
 }
 
+// Dropbox Resource
+
+message DropboxResource {
+    string resourceId = 1;
+    string resourcePath = 2;
+}
+
+message DropboxResourceGetRequest {
+    string resourceId = 1;
+}
+
+message DropboxResourceCreateRequest {
+    string resourcePath = 1;
+}
+
+message DropboxResourceUpdateRequest {
+    string resourceId = 1;
+    string resourcePath = 2;
+}
+
+message DropboxResourceDeleteRequest {
+    string resourceId = 1;
+}
+
 service  ResourceService {
     // SCP Storage
 
@@ -394,4 +418,30 @@ service  ResourceService {
             delete: "/v1.0/resource/gcs"
         };
     }
+    // Dropbox Resource
+
+    rpc getDropboxResource (DropboxResourceGetRequest) returns (DropboxResource) {
+        option (google.api.http) = {
+            get: "/v1.0/resource/dropbox"
+        };
+    }
+
+    rpc createDropboxResource (DropboxResourceCreateRequest) returns (DropboxResource) {
+        option (google.api.http) = {
+            post: "/v1.0/resource/dropbox"
+        };
+    }
+
+    rpc updateDropboxResource (DropboxResourceUpdateRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            put: "/v1.0/resource/dropbox"
+        };
+    }
+
+    rpc deleteDropboxResource (DropboxResourceDeleteRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/v1.0/resource/dropbox"
+        };
+    }
+
 }

@@ -342,4 +342,44 @@ public class FileBasedResourceBackend implements ResourceBackend {
     public boolean deleteGCSResource(GCSResourceDeleteRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
+    @Override
+    public Optional<DropboxResource> getDropboxResource(DropboxResourceGetRequest request) throws Exception {
+        JSONParser jsonParser = new JSONParser();
+        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
+
+        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            Object obj = jsonParser.parse(reader);
+
+            JSONArray resourceList = (JSONArray) obj;
+
+            List<DropboxResource> dropboxResources = (List<DropboxResource>) resourceList.stream()
+                    .filter(resource -> "DROPBOX".equals(((JSONObject) resource).get("type").toString()))
+                    .map(resource -> {
+                        JSONObject r = (JSONObject) resource;
+
+                        DropboxResource dropboxResource = DropboxResource.newBuilder()
+                                .setResourceId(r.get("resourceId").toString())
+                                .setResourcePath(r.get("resourcePath").toString())
+                                .build();
+
+                        return dropboxResource;
+                    }).collect(Collectors.toList());
+            return dropboxResources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
+        }
+    }
+
+    @Override
+    public DropboxResource createDropboxResource(DropboxResourceCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateDropboxResource(DropboxResourceUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteDropboxResource(DropboxResourceDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
 }
