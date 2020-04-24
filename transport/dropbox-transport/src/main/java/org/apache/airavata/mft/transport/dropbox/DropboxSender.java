@@ -20,7 +20,6 @@ package org.apache.airavata.mft.transport.dropbox;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
-import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.WriteMode;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
@@ -34,7 +33,7 @@ import org.apache.airavata.mft.secret.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DropboxSender implements Connector{
+public class DropboxSender implements Connector {
 
     private static final Logger logger = LoggerFactory.getLogger(DropboxSender.class);
 

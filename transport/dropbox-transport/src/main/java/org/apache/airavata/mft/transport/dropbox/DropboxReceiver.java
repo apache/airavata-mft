@@ -33,11 +33,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 
-public class DropboxReceiver implements Connector{
+public class DropboxReceiver implements Connector {
 
     private static final Logger logger = LoggerFactory.getLogger(DropboxReceiver.class);
 
-    private  DropboxResource dropboxResource;
+    private DropboxResource dropboxResource;
     private DbxClientV2 dbxClientV2;
 
     @Override

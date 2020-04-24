@@ -58,6 +58,6 @@
   {
     "type": "DROPBOX",
     "resourceId": "dropbox-file",
-    "resourcePath": "test.txt"
+    "resourcePath": "/test.txt"
   }
 ]
