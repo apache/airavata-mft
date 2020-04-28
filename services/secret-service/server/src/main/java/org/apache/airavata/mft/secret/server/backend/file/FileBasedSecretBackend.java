@@ -304,7 +304,7 @@ public class FileBasedSecretBackend implements SecretBackend {
             JSONArray resourceList = (JSONArray) obj;
 
             List<GDriveSecret> gDriveSecrets = (List<GDriveSecret>) resourceList.stream()
-                    .filter(resource -> "GDrive".equals(((JSONObject) resource).get("type").toString()))
+                    .filter(resource -> "GDRIVE".equals(((JSONObject) resource).get("type").toString()))
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
 
