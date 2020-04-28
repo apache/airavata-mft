@@ -365,5 +365,65 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
         }
     }
 
+    //GDrive
+
+    @Override
+    public void getGDriveSecret(GDriveSecretGetRequest request, StreamObserver<GDriveSecret> responseObserver) {
+        try {
+            this.backend.getGDriveSecret(request).ifPresentOrElse(secret -> {
+                responseObserver.onNext(secret);
+                responseObserver.onCompleted();
+            }, () -> {
+                responseObserver.onError(Status.INTERNAL
+                        .withDescription("No GDRive Secret with id " + request.getSecretId())
+                        .asRuntimeException());
+            });
+
+        } catch (Exception e) {
+            logger.error("Error in retrieving GDrive Secret with id " + request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in retrieving GDrive Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+        super.getGDriveSecret(request, responseObserver);
+    }
+
+    @Override
+    public void createGDriveSecret(GDriveSecretCreateRequest request, StreamObserver<GDriveSecret> responseObserver) {
+        try {
+            this.backend.createGDriveSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in creating GDrive Secret", e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in creating GDrive Secret")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void updateGDriveSecret(GDriveSecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.updateGDriveSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in updating GDrive Secret with id {}", request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in updating GDrive Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void deleteGDriveSecret(GDriveSecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.deleteGDriveSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in deleting GDRive Secret with id {}", request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in deleting GDrive Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+    }
+
+
 
 }

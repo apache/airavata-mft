@@ -55,4 +55,9 @@ public interface SecretBackend {
     public DropboxSecret createDropboxSecret(DropboxSecretCreateRequest request) throws Exception;
     public boolean updateDropboxSecret(DropboxSecretUpdateRequest request) throws Exception;
     public boolean deleteDropboxSecret(DropboxSecretDeleteRequest request) throws Exception;
+
+    public Optional<GDriveSecret> getGDriveSecret(GDriveSecretGetRequest request) throws Exception;
+    public GDriveSecret createGDriveSecret(GDriveSecretCreateRequest request) throws Exception;
+    public boolean updateGDriveSecret(GDriveSecretUpdateRequest request) throws Exception;
+    public boolean deleteGDriveSecret(GDriveSecretDeleteRequest request) throws Exception;
 }
