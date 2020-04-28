@@ -97,6 +97,16 @@ public final class ConnectorResolver {
                         break;
                 }
                 break;
+            case "GDRIVE":
+                switch (direction) {
+                    case "IN":
+                        className = "org.apache.airavata.mft.transport.gdrive.GDriveReceiver";
+                        break;
+                    case "OUT":
+                        className = "org.apache.airavata.mft.transport.gdrive.GDriveSender";
+                        break;
+                }
+                break;
         }
 
         if (className != null) {
