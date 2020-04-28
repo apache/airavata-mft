@@ -17,7 +17,6 @@
 
 package org.apache.airavata.mft.core;
 
-import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
 
 import java.util.concurrent.Callable;

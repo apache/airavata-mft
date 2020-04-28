@@ -97,6 +97,16 @@ public final class ConnectorResolver {
                         break;
                 }
                 break;
+            case "FTP":
+                switch (direction) {
+                    case "IN":
+                        className = "org.apache.airavata.mft.transport.ftp.FTPReceiver";
+                        break;
+                    case "OUT":
+                        className = "org.apache.airavata.mft.transport.ftp.FTPSender";
+                        break;
+                }
+                break;
         }
 
         if (className != null) {

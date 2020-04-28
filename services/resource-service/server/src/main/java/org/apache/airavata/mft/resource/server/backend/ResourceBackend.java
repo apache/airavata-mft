@@ -18,52 +18,61 @@
 package org.apache.airavata.mft.resource.server.backend;
 
 import org.apache.airavata.mft.resource.service.*;
-import org.apache.airavata.registry.api.exception.RegistryServiceException;
 
 import java.util.Optional;
 
 public interface ResourceBackend {
 
-    public void init();
-    public void destroy();
+    void init();
+    void destroy();
 
-    public Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request) throws Exception;
-    public SCPStorage createSCPStorage(SCPStorageCreateRequest request) throws Exception;
-    public boolean updateSCPStorage(SCPStorageUpdateRequest request) throws Exception;
-    public boolean deleteSCPStorage(SCPStorageDeleteRequest request) throws Exception;
+    Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request) throws Exception;
+    SCPStorage createSCPStorage(SCPStorageCreateRequest request) throws Exception;
+    boolean updateSCPStorage(SCPStorageUpdateRequest request) throws Exception;
+    boolean deleteSCPStorage(SCPStorageDeleteRequest request) throws Exception;
 
-    public Optional<SCPResource> getSCPResource(SCPResourceGetRequest request) throws Exception;
-    public SCPResource createSCPResource(SCPResourceCreateRequest request) throws Exception;
-    public boolean updateSCPResource(SCPResourceUpdateRequest request) throws Exception;
-    public boolean deleteSCPResource(SCPResourceDeleteRequest request) throws Exception;
+    Optional<SCPResource> getSCPResource(SCPResourceGetRequest request) throws Exception;
+    SCPResource createSCPResource(SCPResourceCreateRequest request) throws Exception;
+    boolean updateSCPResource(SCPResourceUpdateRequest request) throws Exception;
+    boolean deleteSCPResource(SCPResourceDeleteRequest request) throws Exception;
 
-    public Optional<LocalResource> getLocalResource(LocalResourceGetRequest request) throws Exception;
-    public LocalResource createLocalResource(LocalResourceCreateRequest request) throws Exception;
-    public boolean updateLocalResource(LocalResourceUpdateRequest request) throws Exception;
-    public boolean deleteLocalResource(LocalResourceDeleteRequest request) throws Exception;
+    Optional<LocalResource> getLocalResource(LocalResourceGetRequest request) throws Exception;
+    LocalResource createLocalResource(LocalResourceCreateRequest request) throws Exception;
+    boolean updateLocalResource(LocalResourceUpdateRequest request) throws Exception;
+    boolean deleteLocalResource(LocalResourceDeleteRequest request) throws Exception;
 
-    public Optional<S3Resource> getS3Resource(S3ResourceGetRequest request) throws Exception;
-    public S3Resource createS3Resource(S3ResourceCreateRequest request) throws Exception;
-    public boolean updateS3Resource(S3ResourceUpdateRequest request) throws Exception;
-    public boolean deleteS3Resource(S3ResourceDeleteRequest request) throws Exception;
+    Optional<S3Resource> getS3Resource(S3ResourceGetRequest request) throws Exception;
+    S3Resource createS3Resource(S3ResourceCreateRequest request) throws Exception;
+    boolean updateS3Resource(S3ResourceUpdateRequest request) throws Exception;
+    boolean deleteS3Resource(S3ResourceDeleteRequest request) throws Exception;
 
-    public Optional<BoxResource> getBoxResource(BoxResourceGetRequest request) throws Exception;
-    public BoxResource createBoxResource(BoxResourceCreateRequest request) throws Exception;
-    public boolean updateBoxResource(BoxResourceUpdateRequest request) throws Exception;
-    public boolean deleteBoxResource(BoxResourceDeleteRequest request) throws Exception;
+    Optional<BoxResource> getBoxResource(BoxResourceGetRequest request) throws Exception;
+    BoxResource createBoxResource(BoxResourceCreateRequest request) throws Exception;
+    boolean updateBoxResource(BoxResourceUpdateRequest request) throws Exception;
+    boolean deleteBoxResource(BoxResourceDeleteRequest request) throws Exception;
 
-    public Optional<AzureResource> getAzureResource(AzureResourceGetRequest request) throws Exception;
-    public AzureResource createAzureResource(AzureResourceCreateRequest request) throws Exception;
-    public boolean updateAzureResource(AzureResourceUpdateRequest request) throws Exception;
-    public boolean deleteAzureResource(AzureResourceDeleteRequest request) throws Exception;
+    Optional<AzureResource> getAzureResource(AzureResourceGetRequest request) throws Exception;
+    AzureResource createAzureResource(AzureResourceCreateRequest request) throws Exception;
+    boolean updateAzureResource(AzureResourceUpdateRequest request) throws Exception;
+    boolean deleteAzureResource(AzureResourceDeleteRequest request) throws Exception;
 
-    public Optional<GCSResource> getGCSResource(GCSResourceGetRequest request) throws Exception;
-    public GCSResource createGCSResource(GCSResourceCreateRequest request) throws Exception;
-    public boolean updateGCSResource(GCSResourceUpdateRequest request) throws Exception;
-    public boolean deleteGCSResource(GCSResourceDeleteRequest request) throws Exception;
+    Optional<GCSResource> getGCSResource(GCSResourceGetRequest request) throws Exception;
+    GCSResource createGCSResource(GCSResourceCreateRequest request) throws Exception;
+    boolean updateGCSResource(GCSResourceUpdateRequest request) throws Exception;
+    boolean deleteGCSResource(GCSResourceDeleteRequest request) throws Exception;
 
-    public Optional<DropboxResource> getDropboxResource(DropboxResourceGetRequest request) throws Exception;
-    public DropboxResource createDropboxResource(DropboxResourceCreateRequest request) throws Exception;
-    public boolean updateDropboxResource(DropboxResourceUpdateRequest request) throws Exception;
-    public boolean deleteDropboxResource(DropboxResourceDeleteRequest request) throws Exception;
+    Optional<FTPResource> getFTPResource(FTPResourceGetRequest request) throws Exception;
+    FTPResource createFTPResource(FTPResourceCreateRequest request) throws Exception;
+    boolean updateFTPResource(FTPResourceUpdateRequest request) throws Exception;
+    boolean deleteFTPResource(FTPResourceDeleteRequest request) throws Exception;
+
+    Optional<FTPStorage> getFTPStorage(FTPStorageGetRequest request) throws Exception;
+    FTPStorage createFTPStorage(FTPStorageCreateRequest request) throws Exception;
+    boolean updateFTPStorage(FTPStorageUpdateRequest request) throws Exception;
+    boolean deleteFTPStorage(FTPStorageDeleteRequest request) throws Exception;
+
+    Optional<DropboxResource> getDropboxResource(DropboxResourceGetRequest request) throws Exception;
+    DropboxResource createDropboxResource(DropboxResourceCreateRequest request) throws Exception;
+    boolean updateDropboxResource(DropboxResourceUpdateRequest request) throws Exception;
+    boolean deleteDropboxResource(DropboxResourceDeleteRequest request) throws Exception;
 }

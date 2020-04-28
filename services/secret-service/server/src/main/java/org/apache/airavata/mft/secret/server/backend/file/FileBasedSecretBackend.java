@@ -25,14 +25,14 @@ import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unchecked")
 public class FileBasedSecretBackend implements SecretBackend {
 
     private static final Logger logger = LoggerFactory.getLogger(FileBasedSecretBackend.class);
@@ -55,6 +55,10 @@ public class FileBasedSecretBackend implements SecretBackend {
         JSONParser jsonParser = new JSONParser();
         InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(secretFile);
 
+        if (inputStream == null) {
+            throw new IOException("secrets file not found");
+        }
+
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
 
@@ -65,13 +69,11 @@ public class FileBasedSecretBackend implements SecretBackend {
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
 
-                        SCPSecret scpSecret = SCPSecret.newBuilder()
+                        return SCPSecret.newBuilder()
                                 .setSecretId(r.get("secretId").toString())
                                 .setPublicKey(r.get("publicKey").toString())
                                 .setPassphrase(r.get("passphrase").toString())
                                 .setPrivateKey(r.get("privateKey").toString()).build();
-
-                        return scpSecret;
                     }).collect(Collectors.toList());
             return scpSecrets.stream().filter(r -> request.getSecretId().equals(r.getSecretId())).findFirst();
         }
@@ -97,6 +99,10 @@ public class FileBasedSecretBackend implements SecretBackend {
         JSONParser jsonParser = new JSONParser();
         InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(secretFile);
 
+        if (inputStream == null) {
+            throw new IOException("secrets file not found");
+        }
+
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
 
@@ -107,29 +113,27 @@ public class FileBasedSecretBackend implements SecretBackend {
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
 
-                        S3Secret s3Secret = S3Secret.newBuilder()
+                        return S3Secret.newBuilder()
                                 .setSecretId(r.get("secretId").toString())
                                 .setAccessKey(r.get("accessKey").toString())
                                 .setSecretKey(r.get("secretKey").toString()).build();
-
-                        return s3Secret;
                     }).collect(Collectors.toList());
             return s3Secrets.stream().filter(r -> request.getSecretId().equals(r.getSecretId())).findFirst();
         }
     }
 
     @Override
-    public S3Secret createS3Secret(S3SecretCreateRequest request) throws Exception {
+    public S3Secret createS3Secret(S3SecretCreateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean updateS3Secret(S3SecretUpdateRequest request) throws Exception {
+    public boolean updateS3Secret(S3SecretUpdateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean deleteS3Secret(S3SecretDeleteRequest request) throws Exception {
+    public boolean deleteS3Secret(S3SecretDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
@@ -137,6 +141,10 @@ public class FileBasedSecretBackend implements SecretBackend {
     public Optional<BoxSecret> getBoxSecret(BoxSecretGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
         InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(secretFile);
+
+        if (inputStream == null) {
+            throw new IOException("secrets file not found");
+        }
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
@@ -148,29 +156,27 @@ public class FileBasedSecretBackend implements SecretBackend {
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
 
-                        BoxSecret boxSecret = BoxSecret.newBuilder()
+                        return BoxSecret.newBuilder()
                                 .setSecretId(r.get("secretId").toString())
                                 .setAccessToken(r.get("accessToken").toString())
                                 .build();
-
-                        return boxSecret;
                     }).collect(Collectors.toList());
             return boxSecrets.stream().filter(r -> request.getSecretId().equals(r.getSecretId())).findFirst();
         }
     }
 
     @Override
-    public BoxSecret createBoxSecret(BoxSecretCreateRequest request) throws Exception {
+    public BoxSecret createBoxSecret(BoxSecretCreateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean updateBoxSecret(BoxSecretUpdateRequest request) throws Exception {
+    public boolean updateBoxSecret(BoxSecretUpdateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean deleteBoxSecret(BoxSecretDeleteRequest request) throws Exception {
+    public boolean deleteBoxSecret(BoxSecretDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
@@ -178,6 +184,10 @@ public class FileBasedSecretBackend implements SecretBackend {
     public Optional<AzureSecret> getAzureSecret(AzureSecretGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
         InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(secretFile);
+
+        if (inputStream == null) {
+            throw new IOException("secrets file not found");
+        }
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
@@ -189,28 +199,26 @@ public class FileBasedSecretBackend implements SecretBackend {
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
 
-                        AzureSecret azureSecret = AzureSecret.newBuilder()
+                        return AzureSecret.newBuilder()
                                 .setSecretId(r.get("secretId").toString())
                                 .setConnectionString(r.get("connectionString").toString()).build();
-
-                        return azureSecret;
                     }).collect(Collectors.toList());
             return azureSecrets.stream().filter(r -> request.getSecretId().equals(r.getSecretId())).findFirst();
         }
     }
 
     @Override
-    public AzureSecret createAzureSecret(AzureSecretCreateRequest request) throws Exception {
+    public AzureSecret createAzureSecret(AzureSecretCreateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean updateAzureSecret(AzureSecretUpdateRequest request) throws Exception {
+    public boolean updateAzureSecret(AzureSecretUpdateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean deleteAzureSecret(AzureSecretDeleteRequest request) throws Exception {
+    public boolean deleteAzureSecret(AzureSecretDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
@@ -218,6 +226,10 @@ public class FileBasedSecretBackend implements SecretBackend {
     public Optional<GCSSecret> getGCSSecret(GCSSecretGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
         InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(secretFile);
+
+        if (inputStream == null) {
+            throw new IOException("secrets file not found");
+        }
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
@@ -228,10 +240,9 @@ public class FileBasedSecretBackend implements SecretBackend {
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
 
-                        GCSSecret gcsSecret = GCSSecret.newBuilder()
+                        return GCSSecret.newBuilder()
                                     .setSecretId(r.get("secretId").toString())
                                     .setCredentialsJson(r.get("credentialsJson").toString()).build();
-                            return gcsSecret;
 
                     }).collect(Collectors.toList());
             return gcsSecrets.stream().filter(r -> request.getSecretId().equals(r.getSecretId())).findFirst();
@@ -239,17 +250,17 @@ public class FileBasedSecretBackend implements SecretBackend {
     }
 
     @Override
-    public GCSSecret createGCSSecret(GCSSecretCreateRequest request) throws Exception {
+    public GCSSecret createGCSSecret(GCSSecretCreateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean updateGCSSecret(GCSSecretUpdateRequest request) throws Exception {
+    public boolean updateGCSSecret(GCSSecretUpdateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean deleteGCSSecret(GCSSecretDeleteRequest request) throws Exception {
+    public boolean deleteGCSSecret(GCSSecretDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
@@ -257,6 +268,10 @@ public class FileBasedSecretBackend implements SecretBackend {
     public Optional<DropboxSecret> getDropboxSecret(DropboxSecretGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
         InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(secretFile);
+
+        if (inputStream == null) {
+            throw new IOException("resources file not found");
+        }
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
@@ -267,10 +282,9 @@ public class FileBasedSecretBackend implements SecretBackend {
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
 
-                        DropboxSecret dbxSecret = DropboxSecret.newBuilder()
+                        return DropboxSecret.newBuilder()
                                 .setSecretId(r.get("secretId").toString())
                                 .setAccessToken(r.get("accessToken").toString()).build();
-                        return dbxSecret;
 
                     }).collect(Collectors.toList());
             return dbxSecrets.stream().filter(r -> request.getSecretId().equals(r.getSecretId())).findFirst();
@@ -278,19 +292,59 @@ public class FileBasedSecretBackend implements SecretBackend {
         }
 
     @Override
-    public DropboxSecret createDropboxSecret(DropboxSecretCreateRequest request) throws Exception {
+    public DropboxSecret createDropboxSecret(DropboxSecretCreateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean updateDropboxSecret(DropboxSecretUpdateRequest request) throws Exception {
+    public boolean updateDropboxSecret(DropboxSecretUpdateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean deleteDropboxSecret(DropboxSecretDeleteRequest request) throws Exception {
+    public boolean deleteDropboxSecret(DropboxSecretDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
+    public Optional<FTPSecret> getFTPSecret(FTPSecretGetRequest request) throws Exception {
+        JSONParser jsonParser = new JSONParser();
+        InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(secretFile);
 
+        if (inputStream == null) {
+            throw new IOException("secrets file not found");
+        }
+
+        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            Object obj = jsonParser.parse(reader);
+            JSONArray resourceList = (JSONArray) obj;
+
+            List<FTPSecret> ftpSecrets = (List<FTPSecret>) resourceList.stream()
+                    .filter(resource -> "FTP".equals(((JSONObject) resource).get("type").toString()))
+                    .map(resource -> {
+                        JSONObject r = (JSONObject) resource;
+
+                        return FTPSecret.newBuilder()
+                                .setSecretId(r.get("secretId").toString())
+                                .setUserId(r.get("userId").toString())
+                                .setPassword(r.get("password").toString()).build();
+
+                    }).collect(Collectors.toList());
+            return ftpSecrets.stream().filter(r -> request.getSecretId().equals(r.getSecretId())).findFirst();
+        }
+    }
+
+    @Override
+    public FTPSecret createFTPSecret(FTPSecretCreateRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateFTPSecret(FTPSecretUpdateRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteFTPSecret(FTPSecretDeleteRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
 }

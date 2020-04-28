@@ -23,36 +23,41 @@ import java.util.Optional;
 
 public interface SecretBackend {
 
-    public void init();
-    public void destroy();
+    void init();
+    void destroy();
 
-    public Optional<SCPSecret> getSCPSecret(SCPSecretGetRequest request) throws Exception;
-    public SCPSecret createSCPSecret(SCPSecretCreateRequest request);
-    public boolean updateSCPSecret(SCPSecretUpdateRequest request);
-    public boolean deleteSCPSecret(SCPSecretDeleteRequest request);
+    Optional<SCPSecret> getSCPSecret(SCPSecretGetRequest request) throws Exception;
+    SCPSecret createSCPSecret(SCPSecretCreateRequest request);
+    boolean updateSCPSecret(SCPSecretUpdateRequest request);
+    boolean deleteSCPSecret(SCPSecretDeleteRequest request);
 
-    public Optional<S3Secret> getS3Secret(S3SecretGetRequest request) throws Exception;
-    public S3Secret createS3Secret(S3SecretCreateRequest request) throws Exception;
-    public boolean updateS3Secret(S3SecretUpdateRequest request) throws Exception;
-    public boolean deleteS3Secret(S3SecretDeleteRequest request) throws Exception;
+    Optional<S3Secret> getS3Secret(S3SecretGetRequest request) throws Exception;
+    S3Secret createS3Secret(S3SecretCreateRequest request) throws Exception;
+    boolean updateS3Secret(S3SecretUpdateRequest request) throws Exception;
+    boolean deleteS3Secret(S3SecretDeleteRequest request) throws Exception;
 
-    public Optional<BoxSecret> getBoxSecret(BoxSecretGetRequest request) throws Exception;
-    public BoxSecret createBoxSecret(BoxSecretCreateRequest request) throws Exception;
-    public boolean updateBoxSecret(BoxSecretUpdateRequest request) throws Exception;
-    public boolean deleteBoxSecret(BoxSecretDeleteRequest request) throws Exception;
+    Optional<BoxSecret> getBoxSecret(BoxSecretGetRequest request) throws Exception;
+    BoxSecret createBoxSecret(BoxSecretCreateRequest request) throws Exception;
+    boolean updateBoxSecret(BoxSecretUpdateRequest request) throws Exception;
+    boolean deleteBoxSecret(BoxSecretDeleteRequest request) throws Exception;
 
-    public Optional<AzureSecret> getAzureSecret(AzureSecretGetRequest request) throws Exception;
-    public AzureSecret createAzureSecret(AzureSecretCreateRequest request) throws Exception;
-    public boolean updateAzureSecret(AzureSecretUpdateRequest request) throws Exception;
-    public boolean deleteAzureSecret(AzureSecretDeleteRequest request) throws Exception;
+    Optional<AzureSecret> getAzureSecret(AzureSecretGetRequest request) throws Exception;
+    AzureSecret createAzureSecret(AzureSecretCreateRequest request) throws Exception;
+    boolean updateAzureSecret(AzureSecretUpdateRequest request) throws Exception;
+    boolean deleteAzureSecret(AzureSecretDeleteRequest request) throws Exception;
 
-    public Optional<GCSSecret> getGCSSecret(GCSSecretGetRequest request) throws Exception;
-    public GCSSecret createGCSSecret(GCSSecretCreateRequest request) throws Exception;
-    public boolean updateGCSSecret(GCSSecretUpdateRequest request) throws Exception;
-    public boolean deleteGCSSecret(GCSSecretDeleteRequest request) throws Exception;
+    Optional<GCSSecret> getGCSSecret(GCSSecretGetRequest request) throws Exception;
+    GCSSecret createGCSSecret(GCSSecretCreateRequest request) throws Exception;
+    boolean updateGCSSecret(GCSSecretUpdateRequest request) throws Exception;
+    boolean deleteGCSSecret(GCSSecretDeleteRequest request) throws Exception;
 
-    public Optional<DropboxSecret> getDropboxSecret(DropboxSecretGetRequest request) throws Exception;
-    public DropboxSecret createDropboxSecret(DropboxSecretCreateRequest request) throws Exception;
-    public boolean updateDropboxSecret(DropboxSecretUpdateRequest request) throws Exception;
-    public boolean deleteDropboxSecret(DropboxSecretDeleteRequest request) throws Exception;
+    Optional<FTPSecret> getFTPSecret(FTPSecretGetRequest request) throws Exception;
+    FTPSecret createFTPSecret(FTPSecretCreateRequest request) throws Exception;
+    boolean updateFTPSecret(FTPSecretUpdateRequest request) throws Exception;
+    boolean deleteFTPSecret(FTPSecretDeleteRequest request) throws Exception;
+
+    Optional<DropboxSecret> getDropboxSecret(DropboxSecretGetRequest request) throws Exception;
+    DropboxSecret createDropboxSecret(DropboxSecretCreateRequest request) throws Exception;
+    boolean updateDropboxSecret(DropboxSecretUpdateRequest request) throws Exception;
+    boolean deleteDropboxSecret(DropboxSecretDeleteRequest request) throws Exception;
 }

@@ -22,6 +22,6 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.Optional;
 
-public interface SecretRepository extends CrudRepository<SCPSecretEntity, String> {
-    Optional<SCPSecretEntity> findBySecretId(String resourceId);
+public interface SCPSecretRepository extends CrudRepository<SCPSecretEntity, String> {
+    Optional<SCPSecretEntity> findBySecretId(String secretId);
 }

@@ -121,7 +121,7 @@ public class AiravataResourceBackend implements ResourceBackend {
         SCPResource scpResource = SCPResource.newBuilder()
                 .setResourceId(resourceId)
                 .setResourcePath(path)
-                .setScpStorage(getSCPStorage(SCPStorageGetRequest.newBuilder().setStorageId(resourceId).build()).get())
+                .setScpStorage(getSCPStorage(SCPStorageGetRequest.newBuilder().setStorageId(resourceId).build()).orElse(null))
                 .build();
         return Optional.of(scpResource);
     }
@@ -169,105 +169,145 @@ public class AiravataResourceBackend implements ResourceBackend {
     }
 
     @Override
-    public Optional<S3Resource> getS3Resource(S3ResourceGetRequest request) throws Exception {
+    public Optional<S3Resource> getS3Resource(S3ResourceGetRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
 
     }
 
     @Override
-    public S3Resource createS3Resource(S3ResourceCreateRequest request) throws Exception {
+    public S3Resource createS3Resource(S3ResourceCreateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
 
     }
 
     @Override
-    public boolean updateS3Resource(S3ResourceUpdateRequest request) throws Exception {
+    public boolean updateS3Resource(S3ResourceUpdateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
 
     }
 
     @Override
-    public boolean deleteS3Resource(S3ResourceDeleteRequest request) throws Exception {
+    public boolean deleteS3Resource(S3ResourceDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
 
     }
 
     @Override
-    public Optional<BoxResource> getBoxResource(BoxResourceGetRequest request) throws Exception {
+    public Optional<BoxResource> getBoxResource(BoxResourceGetRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public BoxResource createBoxResource(BoxResourceCreateRequest request) throws Exception {
+    public BoxResource createBoxResource(BoxResourceCreateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean updateBoxResource(BoxResourceUpdateRequest request) throws Exception {
+    public boolean updateBoxResource(BoxResourceUpdateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean deleteBoxResource(BoxResourceDeleteRequest request) throws Exception {
+    public boolean deleteBoxResource(BoxResourceDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public Optional<AzureResource> getAzureResource(AzureResourceGetRequest request) throws Exception {
+    public Optional<AzureResource> getAzureResource(AzureResourceGetRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public AzureResource createAzureResource(AzureResourceCreateRequest request) throws Exception {
+    public AzureResource createAzureResource(AzureResourceCreateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean updateAzureResource(AzureResourceUpdateRequest request) throws Exception {
+    public boolean updateAzureResource(AzureResourceUpdateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean deleteAzureResource(AzureResourceDeleteRequest request) throws Exception {
+    public boolean deleteAzureResource(AzureResourceDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public Optional<GCSResource> getGCSResource(GCSResourceGetRequest request) throws Exception {
+    public Optional<GCSResource> getGCSResource(GCSResourceGetRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public GCSResource createGCSResource(GCSResourceCreateRequest request) throws Exception {
+    public GCSResource createGCSResource(GCSResourceCreateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean updateGCSResource(GCSResourceUpdateRequest request) throws Exception {
+    public boolean updateGCSResource(GCSResourceUpdateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean deleteGCSResource(GCSResourceDeleteRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-    @Override
-    public Optional<DropboxResource> getDropboxResource(DropboxResourceGetRequest request) throws Exception {
+    public boolean deleteGCSResource(GCSResourceDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public DropboxResource createDropboxResource(DropboxResourceCreateRequest request) throws Exception {
+    public Optional<FTPResource> getFTPResource(FTPResourceGetRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean updateDropboxResource(DropboxResourceUpdateRequest request) throws Exception {
+    public FTPResource createFTPResource(FTPResourceCreateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean deleteDropboxResource(DropboxResourceDeleteRequest request) throws Exception {
+    public boolean updateFTPResource(FTPResourceUpdateRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteFTPResource(FTPResourceDeleteRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public Optional<FTPStorage> getFTPStorage(FTPStorageGetRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public FTPStorage createFTPStorage(FTPStorageCreateRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateFTPStorage(FTPStorageUpdateRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteFTPStorage(FTPStorageDeleteRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+    @Override
+    public Optional<DropboxResource> getDropboxResource(DropboxResourceGetRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public DropboxResource createDropboxResource(DropboxResourceCreateRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateDropboxResource(DropboxResourceUpdateRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteDropboxResource(DropboxResourceDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 }

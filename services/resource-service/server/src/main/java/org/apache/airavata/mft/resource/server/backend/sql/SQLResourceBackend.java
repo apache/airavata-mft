@@ -18,12 +18,8 @@
 package org.apache.airavata.mft.resource.server.backend.sql;
 
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
-import org.apache.airavata.mft.resource.server.backend.sql.entity.LocalResourceEntity;
-import org.apache.airavata.mft.resource.server.backend.sql.entity.SCPResourceEntity;
-import org.apache.airavata.mft.resource.server.backend.sql.entity.SCPStorageEntity;
-import org.apache.airavata.mft.resource.server.backend.sql.repository.LocalResourceRepository;
-import org.apache.airavata.mft.resource.server.backend.sql.repository.SCPResourceRepository;
-import org.apache.airavata.mft.resource.server.backend.sql.repository.SCPStorageRepository;
+import org.apache.airavata.mft.resource.server.backend.sql.entity.*;
+import org.apache.airavata.mft.resource.server.backend.sql.repository.*;
 import org.apache.airavata.mft.resource.service.*;
 import org.dozer.DozerBeanMapper;
 import org.slf4j.Logger;
@@ -44,6 +40,12 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Autowired
     private LocalResourceRepository localResourceRepository;
+
+    @Autowired
+    private FTPResourceRepository ftpResourceRepository;
+
+    @Autowired
+    private FTPStorageRepository ftpStorageRepository;
 
     private DozerBeanMapper mapper = new DozerBeanMapper();
 
@@ -71,13 +73,13 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public boolean updateSCPStorage(SCPStorageUpdateRequest request) {
-        SCPStorageEntity updatedEntity = scpStorageRepository.save(mapper.map(request, SCPStorageEntity.class));
+        scpStorageRepository.save(mapper.map(request, SCPStorageEntity.class));
         return true;
     }
 
     @Override
     public boolean deleteSCPStorage(SCPStorageDeleteRequest request) {
-        //scpStorageRepository.delete(request.getStorageId());
+        scpStorageRepository.deleteById(request.getStorageId());
         return true;
     }
 
@@ -93,12 +95,12 @@ public class SQLResourceBackend implements ResourceBackend {
     @Override
     public SCPResource createSCPResource(SCPResourceCreateRequest request) {
         SCPResourceEntity savedEntity = scpResourceRepository.save(mapper.map(request, SCPResourceEntity.class));
-        return getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(savedEntity.getResourceId()).build()).get();
+        return getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(savedEntity.getResourceId()).build()).orElse(null);
     }
 
     @Override
     public boolean updateSCPResource(SCPResourceUpdateRequest request) {
-        SCPResourceEntity updatedEntity = scpResourceRepository.save(mapper.map(request, SCPResourceEntity.class));
+        scpResourceRepository.save(mapper.map(request, SCPResourceEntity.class));
         return true;
     }
 
@@ -122,7 +124,7 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public boolean updateLocalResource(LocalResourceUpdateRequest request) {
-        LocalResourceEntity updatedEntity = localResourceRepository.save(mapper.map(request, LocalResourceEntity.class));
+        localResourceRepository.save(mapper.map(request, LocalResourceEntity.class));
         return true;
     }
 
@@ -133,107 +135,155 @@ public class SQLResourceBackend implements ResourceBackend {
     }
 
     @Override
-    public Optional<S3Resource> getS3Resource(S3ResourceGetRequest request) throws Exception {
+    public Optional<S3Resource> getS3Resource(S3ResourceGetRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
 
     }
 
     @Override
-    public S3Resource createS3Resource(S3ResourceCreateRequest request) throws Exception {
+    public S3Resource createS3Resource(S3ResourceCreateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
 
     }
 
     @Override
-    public boolean updateS3Resource(S3ResourceUpdateRequest request) throws Exception {
+    public boolean updateS3Resource(S3ResourceUpdateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
 
     }
 
     @Override
-    public boolean deleteS3Resource(S3ResourceDeleteRequest request) throws Exception {
+    public boolean deleteS3Resource(S3ResourceDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
 
     }
 
     @Override
-    public Optional<BoxResource> getBoxResource(BoxResourceGetRequest request) throws Exception {
+    public Optional<BoxResource> getBoxResource(BoxResourceGetRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public BoxResource createBoxResource(BoxResourceCreateRequest request) throws Exception {
+    public BoxResource createBoxResource(BoxResourceCreateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean updateBoxResource(BoxResourceUpdateRequest request) throws Exception {
+    public boolean updateBoxResource(BoxResourceUpdateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean deleteBoxResource(BoxResourceDeleteRequest request) throws Exception {
+    public boolean deleteBoxResource(BoxResourceDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public Optional<AzureResource> getAzureResource(AzureResourceGetRequest request) throws Exception {
+    public Optional<AzureResource> getAzureResource(AzureResourceGetRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public AzureResource createAzureResource(AzureResourceCreateRequest request) throws Exception {
+    public AzureResource createAzureResource(AzureResourceCreateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean updateAzureResource(AzureResourceUpdateRequest request) throws Exception {
+    public boolean updateAzureResource(AzureResourceUpdateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean deleteAzureResource(AzureResourceDeleteRequest request) throws Exception {
+    public boolean deleteAzureResource(AzureResourceDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public Optional<GCSResource> getGCSResource(GCSResourceGetRequest request) throws Exception {
+    public Optional<GCSResource> getGCSResource(GCSResourceGetRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public GCSResource createGCSResource(GCSResourceCreateRequest request) throws Exception {
+    public GCSResource createGCSResource(GCSResourceCreateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean updateGCSResource(GCSResourceUpdateRequest request) throws Exception {
+    public boolean updateGCSResource(GCSResourceUpdateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean deleteGCSResource(GCSResourceDeleteRequest request) throws Exception {
+    public boolean deleteGCSResource(GCSResourceDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public Optional<DropboxResource> getDropboxResource(DropboxResourceGetRequest request) throws Exception {
+    public Optional<DropboxResource> getDropboxResource(DropboxResourceGetRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public DropboxResource createDropboxResource(DropboxResourceCreateRequest request) throws Exception {
+    public DropboxResource createDropboxResource(DropboxResourceCreateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean updateDropboxResource(DropboxResourceUpdateRequest request) throws Exception {
+    public boolean updateDropboxResource(DropboxResourceUpdateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean deleteDropboxResource(DropboxResourceDeleteRequest request) throws Exception {
+    public boolean deleteDropboxResource(DropboxResourceDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
+    public Optional<FTPResource> getFTPResource(FTPResourceGetRequest request) {
+        Optional<FTPResourceEntity> resourceEntity = ftpResourceRepository.findByResourceId(request.getResourceId());
+
+        return resourceEntity.map(ftpResourceEntity -> mapper.map(ftpResourceEntity, FTPResource.newBuilder().getClass())
+                .setFtpStorage(mapper.map(ftpResourceEntity.getFtpStorage(), FTPStorage.newBuilder().getClass())).build());
+    }
+
+    @Override
+    public FTPResource createFTPResource(FTPResourceCreateRequest request) {
+        FTPResourceEntity savedEntity = ftpResourceRepository.save(mapper.map(request, FTPResourceEntity.class));
+        return getFTPResource(FTPResourceGetRequest.newBuilder().setResourceId(savedEntity.getResourceId()).build()).orElse(null);
+    }
+
+    @Override
+    public boolean updateFTPResource(FTPResourceUpdateRequest request) {
+        ftpResourceRepository.save(mapper.map(request, FTPResourceEntity.class));
+        return true;
+    }
+
+    @Override
+    public boolean deleteFTPResource(FTPResourceDeleteRequest request) {
+        ftpResourceRepository.deleteById(request.getResourceId());
+        return true;
+    }
+
+    @Override
+    public Optional<FTPStorage> getFTPStorage(FTPStorageGetRequest request) {
+        Optional<FTPStorageEntity> storageEty = ftpStorageRepository.findByStorageId(request.getStorageId());
+        return storageEty.map(ftpStorageEntity -> mapper.map(ftpStorageEntity, FTPStorage.newBuilder().getClass()).build());
+    }
+
+    @Override
+    public FTPStorage createFTPStorage(FTPStorageCreateRequest request) {
+        FTPStorageEntity savedEntity = ftpStorageRepository.save(mapper.map(request, FTPStorageEntity.class));
+        return mapper.map(savedEntity, FTPStorage.newBuilder().getClass()).build();
+    }
+
+    @Override
+    public boolean updateFTPStorage(FTPStorageUpdateRequest request) {
+        ftpStorageRepository.save(mapper.map(request, FTPStorageEntity.class));
+        return true;
+    }
+
+    @Override
+    public boolean deleteFTPStorage(FTPStorageDeleteRequest request) {
+        ftpResourceRepository.deleteById(request.getStorageId());
+        return true;
+    }
 }

@@ -24,7 +24,7 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan(basePackages = {"org.apache.airavata"})
 @SpringBootApplication
 public class SecretServiceApplication {
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         SpringApplication.run(SecretServiceApplication.class, args);
     }
 }

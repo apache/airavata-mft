@@ -37,7 +37,7 @@ public class LocalReceiver implements Connector {
 
     @Override
     public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort,
-                     String secretServiceHost, int secretServicePort) throws Exception {
+                     String secretServiceHost, int secretServicePort) {
         this.initialized = true;
 
         ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
@@ -67,7 +67,7 @@ public class LocalReceiver implements Connector {
 
         byte[] buf = new byte[1024];
         while (true) {
-            int bufSize = 0;
+            int bufSize;
 
             if (buf.length < fileSize) {
                 bufSize = buf.length;

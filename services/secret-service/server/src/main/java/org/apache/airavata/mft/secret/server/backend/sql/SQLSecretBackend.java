@@ -18,8 +18,10 @@
 package org.apache.airavata.mft.secret.server.backend.sql;
 
 import org.apache.airavata.mft.secret.server.backend.SecretBackend;
+import org.apache.airavata.mft.secret.server.backend.sql.entity.FTPSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.SCPSecretEntity;
-import org.apache.airavata.mft.secret.server.backend.sql.repository.SecretRepository;
+import org.apache.airavata.mft.secret.server.backend.sql.repository.FTPSecretRepository;
+import org.apache.airavata.mft.secret.server.backend.sql.repository.SCPSecretRepository;
 import org.apache.airavata.mft.secret.service.*;
 import org.dozer.DozerBeanMapper;
 import org.slf4j.Logger;
@@ -33,7 +35,10 @@ public class SQLSecretBackend implements SecretBackend {
     private static final Logger logger = LoggerFactory.getLogger(SQLSecretBackend.class);
 
     @Autowired
-    private SecretRepository secretRepository;
+    private SCPSecretRepository scpSecretRepository;
+
+    @Autowired
+    private FTPSecretRepository ftpSecretRepository;
 
     private DozerBeanMapper mapper = new DozerBeanMapper();
 
@@ -49,126 +54,149 @@ public class SQLSecretBackend implements SecretBackend {
 
     @Override
     public Optional<SCPSecret> getSCPSecret(SCPSecretGetRequest request) {
-        Optional<SCPSecretEntity> secretEty = secretRepository.findBySecretId(request.getSecretId());
+        Optional<SCPSecretEntity> secretEty = scpSecretRepository.findBySecretId(request.getSecretId());
         return secretEty.map(scpSecretEntity -> mapper.map(scpSecretEntity, SCPSecret.newBuilder().getClass()).build());
     }
 
     @Override
     public SCPSecret createSCPSecret(SCPSecretCreateRequest request) {
-        SCPSecretEntity savedEntity = secretRepository.save(mapper.map(request, SCPSecretEntity.class));
+        SCPSecretEntity savedEntity = scpSecretRepository.save(mapper.map(request, SCPSecretEntity.class));
         return mapper.map(savedEntity, SCPSecret.newBuilder().getClass()).build();
     }
 
     @Override
     public boolean updateSCPSecret(SCPSecretUpdateRequest request) {
-        secretRepository.save(mapper.map(request, SCPSecretEntity.class));
+        scpSecretRepository.save(mapper.map(request, SCPSecretEntity.class));
         return true;
     }
 
     @Override
     public boolean deleteSCPSecret(SCPSecretDeleteRequest request) {
-        secretRepository.deleteById(request.getSecretId());
+        scpSecretRepository.deleteById(request.getSecretId());
         return true;
     }
 
     @Override
-    public Optional<S3Secret> getS3Secret(S3SecretGetRequest request) throws Exception {
+    public Optional<S3Secret> getS3Secret(S3SecretGetRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public S3Secret createS3Secret(S3SecretCreateRequest request) throws Exception {
+    public S3Secret createS3Secret(S3SecretCreateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean updateS3Secret(S3SecretUpdateRequest request) throws Exception {
+    public boolean updateS3Secret(S3SecretUpdateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean deleteS3Secret(S3SecretDeleteRequest request) throws Exception {
+    public boolean deleteS3Secret(S3SecretDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public Optional<BoxSecret> getBoxSecret(BoxSecretGetRequest request) throws Exception {
+    public Optional<BoxSecret> getBoxSecret(BoxSecretGetRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public BoxSecret createBoxSecret(BoxSecretCreateRequest request) throws Exception {
+    public BoxSecret createBoxSecret(BoxSecretCreateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean updateBoxSecret(BoxSecretUpdateRequest request) throws Exception {
+    public boolean updateBoxSecret(BoxSecretUpdateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean deleteBoxSecret(BoxSecretDeleteRequest request) throws Exception {
+    public boolean deleteBoxSecret(BoxSecretDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public Optional<AzureSecret> getAzureSecret(AzureSecretGetRequest request) throws Exception {
+    public Optional<AzureSecret> getAzureSecret(AzureSecretGetRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public AzureSecret createAzureSecret(AzureSecretCreateRequest request) throws Exception {
+    public AzureSecret createAzureSecret(AzureSecretCreateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean updateAzureSecret(AzureSecretUpdateRequest request) throws Exception {
+    public boolean updateAzureSecret(AzureSecretUpdateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean deleteAzureSecret(AzureSecretDeleteRequest request) throws Exception {
+    public boolean deleteAzureSecret(AzureSecretDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public Optional<GCSSecret> getGCSSecret(GCSSecretGetRequest request) throws Exception {
+    public Optional<GCSSecret> getGCSSecret(GCSSecretGetRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public GCSSecret createGCSSecret(GCSSecretCreateRequest request) throws Exception {
+    public GCSSecret createGCSSecret(GCSSecretCreateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean updateGCSSecret(GCSSecretUpdateRequest request) throws Exception {
+    public boolean updateGCSSecret(GCSSecretUpdateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean deleteGCSSecret(GCSSecretDeleteRequest request) throws Exception {
+    public boolean deleteGCSSecret(GCSSecretDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public Optional<DropboxSecret> getDropboxSecret(DropboxSecretGetRequest request) throws Exception {
+    public Optional<DropboxSecret> getDropboxSecret(DropboxSecretGetRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public DropboxSecret createDropboxSecret(DropboxSecretCreateRequest request) throws Exception {
+    public DropboxSecret createDropboxSecret(DropboxSecretCreateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean updateDropboxSecret(DropboxSecretUpdateRequest request) throws Exception {
+    public boolean updateDropboxSecret(DropboxSecretUpdateRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
-    public boolean deleteDropboxSecret(DropboxSecretDeleteRequest request) throws Exception {
+    public boolean deleteDropboxSecret(DropboxSecretDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
+    @Override
+    public Optional<FTPSecret> getFTPSecret(FTPSecretGetRequest request) {
+        Optional<FTPSecretEntity> secretEty = ftpSecretRepository.findBySecretId(request.getSecretId());
+        return secretEty.map(ftpSecretEntity -> mapper.map(ftpSecretEntity, FTPSecret.newBuilder().getClass()).build());
+    }
+
+    @Override
+    public FTPSecret createFTPSecret(FTPSecretCreateRequest request) {
+        FTPSecretEntity savedEntity = ftpSecretRepository.save(mapper.map(request, FTPSecretEntity.class));
+        return mapper.map(savedEntity, FTPSecret.newBuilder().getClass()).build();
+    }
+
+    @Override
+    public boolean updateFTPSecret(FTPSecretUpdateRequest request) {
+        ftpSecretRepository.save(mapper.map(request, FTPSecretEntity.class));
+        return true;
+    }
+
+    @Override
+    public boolean deleteFTPSecret(FTPSecretDeleteRequest request) {
+        ftpSecretRepository.deleteById(request.getSecretId());
+        return true;
+    }
 }

@@ -27,8 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Optional;
-
 @GRpcService
 public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceImplBase {
 
@@ -116,12 +114,9 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
             this.backend.getSCPResource(request).ifPresentOrElse(resource -> {
                 responseObserver.onNext(resource);
                 responseObserver.onCompleted();
-            }, () -> {
-
-                responseObserver.onError(Status.INTERNAL
-                        .withDescription("No SCP Resource with id " + request.getResourceId())
-                        .asRuntimeException());
-            });
+            }, () -> responseObserver.onError(Status.INTERNAL
+                    .withDescription("No SCP Resource with id " + request.getResourceId())
+                    .asRuntimeException()));
         } catch (Exception e) {
             logger.error("Failed in retrieving resource with id {}", request.getResourceId(), e);
 
@@ -187,17 +182,15 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
             this.backend.getLocalResource(request).ifPresentOrElse(resource -> {
                 responseObserver.onNext(resource);
                 responseObserver.onCompleted();
-            }, () -> {
-                responseObserver.onError(Status.INTERNAL
-                        .withDescription("No Local Resource with id " + request.getResourceId())
-                        .asRuntimeException());
-            });
+            }, () -> responseObserver.onError(Status.INTERNAL
+                    .withDescription("No Local Resource with id " + request.getResourceId())
+                    .asRuntimeException()));
         } catch (Exception e) {
             logger.error("Failed in retrieving resource with id {}", request.getResourceId(), e);
 
             responseObserver.onError(Status.INTERNAL.withCause(e)
-                .withDescription("Failed in retrieving resource with id " + request.getResourceId())
-                .asRuntimeException());
+                    .withDescription("Failed in retrieving resource with id " + request.getResourceId())
+                    .asRuntimeException());
         }
     }
 
@@ -253,11 +246,9 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
             this.backend.getS3Resource(request).ifPresentOrElse(resource -> {
                 responseObserver.onNext(resource);
                 responseObserver.onCompleted();
-            }, () -> {
-                responseObserver.onError(Status.INTERNAL
-                        .withDescription("No S3 Resource with id " + request.getResourceId())
-                        .asRuntimeException());
-            });
+            }, () -> responseObserver.onError(Status.INTERNAL
+                    .withDescription("No S3 Resource with id " + request.getResourceId())
+                    .asRuntimeException()));
         } catch (Exception e) {
             logger.error("Failed in retrieving S3 resource with id {}", request.getResourceId(), e);
 
@@ -310,7 +301,8 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed in deleting the S3 resource with id " + request.getResourceId())
                     .asRuntimeException());
-        }    }
+        }
+    }
 
 
     @Override
@@ -319,11 +311,9 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
             this.backend.getBoxResource(request).ifPresentOrElse(resource -> {
                 responseObserver.onNext(resource);
                 responseObserver.onCompleted();
-            }, () -> {
-                responseObserver.onError(Status.INTERNAL
-                        .withDescription("No Box Resource with id " + request.getResourceId())
-                        .asRuntimeException());
-            });
+            }, () -> responseObserver.onError(Status.INTERNAL
+                    .withDescription("No Box Resource with id " + request.getResourceId())
+                    .asRuntimeException()));
         } catch (Exception e) {
             logger.error("Failed in retrieving Box resource with id {}", request.getResourceId(), e);
 
@@ -344,7 +334,8 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed in creating the Box resource")
                     .asRuntimeException());
-        }    }
+        }
+    }
 
     @Override
     public void updateBoxResource(BoxResourceUpdateRequest request, StreamObserver<Empty> responseObserver) {
@@ -357,7 +348,8 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed in updating the Box resource with id " + request.getResourceId())
                     .asRuntimeException());
-        }    }
+        }
+    }
 
     @Override
     public void deleteBoxResource(BoxResourceDeleteRequest request, StreamObserver<Empty> responseObserver) {
@@ -376,17 +368,16 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
                     .asRuntimeException());
         }
     }
+
     @Override
     public void getAzureResource(AzureResourceGetRequest request, StreamObserver<AzureResource> responseObserver) {
         try {
             this.backend.getAzureResource(request).ifPresentOrElse(resource -> {
                 responseObserver.onNext(resource);
                 responseObserver.onCompleted();
-            }, () -> {
-                responseObserver.onError(Status.INTERNAL
-                        .withDescription("No Azure Resource with id " + request.getResourceId())
-                        .asRuntimeException());
-            });
+            }, () -> responseObserver.onError(Status.INTERNAL
+                    .withDescription("No Azure Resource with id " + request.getResourceId())
+                    .asRuntimeException()));
         } catch (Exception e) {
             logger.error("Failed in retrieving Azure resource with id {}", request.getResourceId(), e);
 
@@ -441,17 +432,16 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
                     .asRuntimeException());
         }
     }
+
     @Override
     public void getGCSResource(GCSResourceGetRequest request, StreamObserver<GCSResource> responseObserver) {
         try {
             this.backend.getGCSResource(request).ifPresentOrElse(resource -> {
                 responseObserver.onNext(resource);
                 responseObserver.onCompleted();
-            }, () -> {
-                responseObserver.onError(Status.INTERNAL
-                        .withDescription("No GCS Resource with id " + request.getResourceId())
-                        .asRuntimeException());
-            });
+            }, () -> responseObserver.onError(Status.INTERNAL
+                    .withDescription("No GCS Resource with id " + request.getResourceId())
+                    .asRuntimeException()));
         } catch (Exception e) {
             logger.error("Failed in retrieving GCS resource with id {}", request.getResourceId(), e);
 
@@ -506,17 +496,16 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
                     .asRuntimeException());
         }
     }
+
     @Override
     public void getDropboxResource(DropboxResourceGetRequest request, StreamObserver<DropboxResource> responseObserver) {
         try {
             this.backend.getDropboxResource(request).ifPresentOrElse(resource -> {
                 responseObserver.onNext(resource);
                 responseObserver.onCompleted();
-            }, () -> {
-                responseObserver.onError(Status.INTERNAL
-                        .withDescription("No dropbox Resource with id " + request.getResourceId())
-                        .asRuntimeException());
-            });
+            }, () -> responseObserver.onError(Status.INTERNAL
+                    .withDescription("No dropbox Resource with id " + request.getResourceId())
+                    .asRuntimeException()));
         } catch (Exception e) {
             logger.error("Failed in retrieving dropbox resource with id {}", request.getResourceId(), e);
 
@@ -568,6 +557,141 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
 
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed in deleting the dropbox resource with id " + request.getResourceId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void getFTPStorage(FTPStorageGetRequest request, StreamObserver<FTPStorage> responseObserver) {
+        try {
+            this.backend.getFTPStorage(request).ifPresentOrElse(storage -> {
+                responseObserver.onNext(storage);
+                responseObserver.onCompleted();
+            }, () -> responseObserver.onError(Status.INTERNAL
+                    .withDescription("No FTP Storage with id " + request.getStorageId())
+                    .asRuntimeException()));
+        } catch (Exception e) {
+            logger.error("Failed in retrieving storage with id " + request.getStorageId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in retrieving storage with id " + request.getStorageId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void createFTPStorage(FTPStorageCreateRequest request, StreamObserver<FTPStorage> responseObserver) {
+        try {
+            responseObserver.onNext(this.backend.createFTPStorage(request));
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in creating the ftp storage", e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in creating the ftp storage")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void updateFTPStorage(FTPStorageUpdateRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.updateFTPStorage(request);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in updating the ftp storage {}", request.getStorageId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in updating the ftp storage")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void deleteFTPStorage(FTPStorageDeleteRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            boolean res = this.backend.deleteFTPStorage(request);
+            if (res) {
+                responseObserver.onCompleted();
+            } else {
+                logger.error("Failed to delete FTP Storage with id " + request.getStorageId());
+
+                responseObserver.onError(Status.INTERNAL
+                        .withDescription("Failed to delete FTP Storage with id " + request.getStorageId())
+                        .asRuntimeException());
+            }
+        } catch (Exception e) {
+            logger.error("Failed in deleting the ftp storage {}", request.getStorageId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in deleting the ftp storage")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void getFTPResource(FTPResourceGetRequest request, StreamObserver<FTPResource> responseObserver) {
+        try {
+            this.backend.getFTPResource(request).ifPresentOrElse(resource -> {
+                responseObserver.onNext(resource);
+                responseObserver.onCompleted();
+            }, () -> responseObserver.onError(Status.INTERNAL
+                    .withDescription("No FTP Resource with id " + request.getResourceId())
+                    .asRuntimeException()));
+        } catch (Exception e) {
+            logger.error("Failed in retrieving resource with id {}", request.getResourceId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in retrieving resource with id " + request.getResourceId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void createFTPResource(FTPResourceCreateRequest request, StreamObserver<FTPResource> responseObserver) {
+        try {
+            responseObserver.onNext(this.backend.createFTPResource(request));
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in creating the ftp resource", e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in creating the ftp resource")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void updateFTPResource(FTPResourceUpdateRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.updateFTPResource(request);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in updating the ftp resource {}", request.getResourceId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in updating the ftp resource")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void deleteFTPResource(FTPResourceDeleteRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            boolean res = this.backend.deleteFTPResource(request);
+            if (res) {
+                responseObserver.onCompleted();
+            } else {
+
+                responseObserver.onError(Status.INTERNAL
+                        .withDescription("Failed to delete SCP Resource with id " + request.getResourceId())
+                        .asRuntimeException());
+            }
+        } catch (Exception e) {
+            logger.error("Failed in deleting the scp resource {}", request.getResourceId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in deleting the scp resource")
                     .asRuntimeException());
         }
     }

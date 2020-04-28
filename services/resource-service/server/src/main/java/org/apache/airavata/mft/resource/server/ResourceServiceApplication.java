@@ -24,7 +24,7 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication
 @ComponentScan(basePackages = {"org.apache.airavata"})
 public class ResourceServiceApplication {
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         SpringApplication.run(ResourceServiceApplication.class, args);
     }
 }
