@@ -41,11 +41,15 @@ import java.util.Collection;
 
 public class GDriveMetadataCollector implements MetadataCollector {
 
-    boolean initialized = false;
     private String resourceServiceHost;
     private int resourceServicePort;
     private String secretServiceHost;
     private int secretServicePort;
+    boolean initialized = false;
+    // private static final List<String> SCOPES = Arrays.asList(DriveScopes.DRIVE,
+    //       "https://www.googleapis.com/auth/drive.install");
+    private static final Logger logger = LoggerFactory.getLogger(GDriveMetadataCollector.class);
+
 
     @Override
     public void init(String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) {
@@ -56,6 +60,7 @@ public class GDriveMetadataCollector implements MetadataCollector {
         this.initialized = true;
     }
 
+
     private void checkInitialized() {
         if (!initialized) {
             throw new IllegalStateException("GDrive Metadata Collector is not initialized");
@@ -64,13 +69,77 @@ public class GDriveMetadataCollector implements MetadataCollector {
 
     @Override
     public ResourceMetadata getGetResourceMetadata(String resourceId, String credentialToken) throws Exception {
+        checkInitialized();
+        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
+        GDriveResource gdriveResource = resourceClient.getGDriveResource(GDriveResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        return null;
+        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
+        GDriveSecret gdriveSecret = secretClient.getGDriveSecret(GDriveSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+
+
+
+        HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
+        JsonFactory jsonFactory = new JacksonFactory();
+        String jsonString=gdriveSecret.getCredentialsJson();
+        GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8)), transport, jsonFactory);
+        if (credential.createScopedRequired()) {
+            Collection<String> scopes =  DriveScopes.all();
+            //Arrays.asList(DriveScopes.DRIVE,"https://www.googleapis.com/auth/drive");
+            credential = credential.createScoped(scopes);
+
+        }
+
+
+        Drive drive = new Drive.Builder(transport, jsonFactory, credential)
+                .setApplicationName("My Project").build();
+        ResourceMetadata metadata = new ResourceMetadata();
+        FileList fileList=drive.files().list().setFields("files(id,name,modifiedTime,md5Checksum,size,mimeType)").execute();
+
+        for (File f:fileList.getFiles()){
+            if(f.getName().equalsIgnoreCase(gdriveResource.getResourcePath())){
+                metadata.setMd5sum(f.getMd5Checksum());
+                metadata.setUpdateTime(f.getModifiedTime().getValue());
+                metadata.setResourceSize(f.getSize().longValue());
+            }
+        }
+        return metadata;
     }
 
     @Override
     public Boolean isAvailable(String resourceId, String credentialToken) throws Exception {
+        checkInitialized();
+        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
+        GDriveResource gdriveResource = resourceClient.getGDriveResource(GDriveResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+
+        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
+        GDriveSecret gdriveSecret = secretClient.getGDriveSecret(GDriveSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        logger.info("Inside GDRiveMetadata is available()");
+        HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
+        JsonFactory jsonFactory = new JacksonFactory();
+        String jsonString=gdriveSecret.getCredentialsJson();
+        GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8)), transport, jsonFactory);
+        if (credential.createScopedRequired()) {
+            Collection<String> scopes =  DriveScopes.all();
+            //Arrays.asList(DriveScopes.DRIVE,"https://www.googleapis.com/auth/drive");
+            credential = credential.createScoped(scopes);
+
+        }
+
+        Drive drive = new Drive.Builder(transport, jsonFactory, credential)
+                .setApplicationName("My Project").build();
+        logger.info("Before getting resource");
+        String id=null;
+
+        FileList fileList=drive.files().list().setFields("files(id,name)").execute();
+        for (File f:fileList.getFiles()) {
+            if(f.getName().equalsIgnoreCase(gdriveResource.getResourcePath())){
+                id = f.getId();
+                return !drive.files().get(id).execute().isEmpty();
+            }
+
+        }
 
         return false;
+
     }
 }
