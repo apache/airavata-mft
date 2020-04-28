@@ -43,6 +43,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collection;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class GDriveMetadataCollector implements MetadataCollector {
 
     private String resourceServiceHost;
