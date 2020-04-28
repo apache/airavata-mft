@@ -57,7 +57,6 @@ public class GDriveSender implements Connector {
     private JsonObject jsonObject;
 
 
-
     @Override
     public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
         ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
@@ -68,12 +67,12 @@ public class GDriveSender implements Connector {
 
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-        String jsonString= gdriveSecret.getCredentialsJson();
-        jsonObject= new JsonParser().parse(jsonString).getAsJsonObject();
+        String jsonString = gdriveSecret.getCredentialsJson();
+        jsonObject = new JsonParser().parse(jsonString).getAsJsonObject();
         GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8)), transport, jsonFactory);
 
         if (credential.createScopedRequired()) {
-            Collection<String> scopes =  DriveScopes.all();
+            Collection<String> scopes = DriveScopes.all();
             //Arrays.asList(DriveScopes.DRIVE,"https://www.googleapis.com/auth/drive");
             credential = credential.createScoped(scopes);
 
@@ -93,33 +92,33 @@ public class GDriveSender implements Connector {
     public void startStream(ConnectorContext context) throws Exception {
         logger.info("Starting GDrive Sender stream for transfer {}", context.getTransferId());
         logger.info("Content length for transfer {} {}", context.getTransferId(), context.getMetadata().getResourceSize());
-        String id=null;
+        String id = null;
 
         InputStreamContent contentStream = new InputStreamContent(
                 "", context.getStreamBuffer().getInputStream());
 
         String entityUser = jsonObject.get("client_email").getAsString();
-        File fileMetadata= new File();
+        File fileMetadata = new File();
         fileMetadata.setName(this.gdriveResource.getResourcePath());
 
-        boolean fileupdated=false;
-        FileList fileList=drive.files().list().setFields("files(id,name)").execute();
-        logger.info("gdriveResource.getResourcePath() " +gdriveResource.getResourcePath());
-        logger.info("Listing files in GDRIVE SENDER "+drive.files().list().setFields("files(id,name)").execute());
-        for (File f:fileList.getFiles()) {
+        boolean fileupdated = false;
+        FileList fileList = drive.files().list().setFields("files(id,name)").execute();
+        logger.info("gdriveResource.getResourcePath() " + gdriveResource.getResourcePath());
+        logger.info("Listing files in GDRIVE SENDER " + drive.files().list().setFields("files(id,name)").execute());
+        for (File f : fileList.getFiles()) {
             if (f.getName().equalsIgnoreCase(gdriveResource.getResourcePath())) {
                 id = f.getId();
                 File file = drive.files().get(id).execute();
                 drive.files().update(file.getId(), fileMetadata, contentStream).setFields("id").execute();
-                fileupdated=true;
+                fileupdated = true;
             }
         }
 
-        if(fileupdated==false){
-            File file = drive.files().create(fileMetadata,contentStream).setFields("id").execute();
+        if (fileupdated == false) {
+            File file = drive.files().create(fileMetadata, contentStream).setFields("id").execute();
             Permission userPermission = new Permission();
             userPermission.setType("user").setRole("writer").setEmailAddress(entityUser);
-            drive.permissions().create(file.getId(),userPermission).execute();
+            drive.permissions().create(file.getId(), userPermission).execute();
         }
 
         logger.info("Completed GDrive Sender stream for transfer {}", context.getTransferId());

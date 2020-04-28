@@ -84,13 +84,12 @@ public class GDriveMetadataCollector implements MetadataCollector {
         GDriveSecret gdriveSecret = secretClient.getGDriveSecret(GDriveSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
 
-
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-        String jsonString=gdriveSecret.getCredentialsJson();
+        String jsonString = gdriveSecret.getCredentialsJson();
         GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8)), transport, jsonFactory);
         if (credential.createScopedRequired()) {
-            Collection<String> scopes =  DriveScopes.all();
+            Collection<String> scopes = DriveScopes.all();
             //Arrays.asList(DriveScopes.DRIVE,"https://www.googleapis.com/auth/drive");
             credential = credential.createScoped(scopes);
 
@@ -100,10 +99,10 @@ public class GDriveMetadataCollector implements MetadataCollector {
         Drive drive = new Drive.Builder(transport, jsonFactory, credential)
                 .setApplicationName("My Project").build();
         ResourceMetadata metadata = new ResourceMetadata();
-        FileList fileList=drive.files().list().setFields("files(id,name,modifiedTime,md5Checksum,size,mimeType)").execute();
+        FileList fileList = drive.files().list().setFields("files(id,name,modifiedTime,md5Checksum,size,mimeType)").execute();
 
-        for (File f:fileList.getFiles()){
-            if(f.getName().equalsIgnoreCase(gdriveResource.getResourcePath())){
+        for (File f : fileList.getFiles()) {
+            if (f.getName().equalsIgnoreCase(gdriveResource.getResourcePath())) {
                 metadata.setMd5sum(f.getMd5Checksum());
                 metadata.setUpdateTime(f.getModifiedTime().getValue());
                 metadata.setResourceSize(f.getSize().longValue());
@@ -123,10 +122,10 @@ public class GDriveMetadataCollector implements MetadataCollector {
         logger.info("Inside GDRiveMetadata is available()");
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-        String jsonString=gdriveSecret.getCredentialsJson();
+        String jsonString = gdriveSecret.getCredentialsJson();
         GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8)), transport, jsonFactory);
         if (credential.createScopedRequired()) {
-            Collection<String> scopes =  DriveScopes.all();
+            Collection<String> scopes = DriveScopes.all();
             //Arrays.asList(DriveScopes.DRIVE,"https://www.googleapis.com/auth/drive");
             credential = credential.createScoped(scopes);
 
@@ -135,11 +134,11 @@ public class GDriveMetadataCollector implements MetadataCollector {
         Drive drive = new Drive.Builder(transport, jsonFactory, credential)
                 .setApplicationName("My Project").build();
         logger.info("Before getting resource");
-        String id=null;
+        String id = null;
 
-        FileList fileList=drive.files().list().setFields("files(id,name)").execute();
-        for (File f:fileList.getFiles()) {
-            if(f.getName().equalsIgnoreCase(gdriveResource.getResourcePath())){
+        FileList fileList = drive.files().list().setFields("files(id,name)").execute();
+        for (File f : fileList.getFiles()) {
+            if (f.getName().equalsIgnoreCase(gdriveResource.getResourcePath())) {
                 id = f.getId();
                 return !drive.files().get(id).execute().isEmpty();
             }

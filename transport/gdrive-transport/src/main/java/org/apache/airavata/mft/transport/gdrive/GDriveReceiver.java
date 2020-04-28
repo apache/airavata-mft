@@ -60,6 +60,7 @@ import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.service.GDriveSecret;
 import org.apache.airavata.mft.secret.service.GDriveSecretGetRequest;
 import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
+
 import java.io.*;
 
 
@@ -80,10 +81,10 @@ public class GDriveReceiver implements Connector {
 
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-        String jsonString= gdriveSecret.getCredentialsJson();
+        String jsonString = gdriveSecret.getCredentialsJson();
         GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8)), transport, jsonFactory);
         if (credential.createScopedRequired()) {
-            Collection<String> scopes =  DriveScopes.all();
+            Collection<String> scopes = DriveScopes.all();
             credential = credential.createScoped(scopes);
         }
         drive = new Drive.Builder(transport, jsonFactory, credential)
@@ -99,16 +100,16 @@ public class GDriveReceiver implements Connector {
         logger.info("Starting GDrive Receiver stream for transfer {}", context.getTransferId());
 
         String id = null;
-        FileList fileList=drive.files().list().setFields("files(id,name,modifiedTime,md5Checksum,size)").execute();
-        for (File f:fileList.getFiles()) {
-            if(f.getName().equalsIgnoreCase(gdriveResource.getResourcePath())){
-                logger.info("File matched in receiver"+f.getName());
+        FileList fileList = drive.files().list().setFields("files(id,name,modifiedTime,md5Checksum,size)").execute();
+        for (File f : fileList.getFiles()) {
+            if (f.getName().equalsIgnoreCase(gdriveResource.getResourcePath())) {
+                logger.info("File matched in receiver" + f.getName());
                 id = f.getId();
             }
         }
 
-        InputStream inputStream=drive.files().get(id).executeMediaAsInputStream();
-        OutputStream outputStream=context.getStreamBuffer().getOutputStream();
+        InputStream inputStream = drive.files().get(id).executeMediaAsInputStream();
+        OutputStream outputStream = context.getStreamBuffer().getOutputStream();
         int read;
         long bytes = 0;
         long fileSize = context.getMetadata().getResourceSize();
