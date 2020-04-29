@@ -34,7 +34,7 @@ import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.service.GDriveResource;
-import org.apache.airavata.mft.resource.service.GDRiveResourceGetRequest;
+import org.apache.airavata.mft.resource.service.GDriveResourceGetRequest;
 import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.service.GDriveSecret;
@@ -73,9 +73,7 @@ public class GDriveSender implements Connector {
 
         if (credential.createScopedRequired()) {
             Collection<String> scopes = DriveScopes.all();
-            //Arrays.asList(DriveScopes.DRIVE,"https://www.googleapis.com/auth/drive");
             credential = credential.createScoped(scopes);
-
         }
 
         drive = new Drive.Builder(transport, jsonFactory, credential).build();
@@ -91,23 +89,25 @@ public class GDriveSender implements Connector {
     public void startStream(ConnectorContext context) throws Exception {
         logger.info("Starting GDrive send for remote server for transfer {}", context.getTransferId());
         String id = null;
+        boolean fileupdated = false;
+        String entityUser = jsonObject.get("client_email").getAsString();
+        File fileMetadata = new File();
 
         InputStreamContent contentStream = new InputStreamContent(
                 "", context.getStreamBuffer().getInputStream());
 
-        String entityUser = jsonObject.get("client_email").getAsString();
-        File fileMetadata = new File();
-        fileMetadata.setName(this.gdriveResource.getResourcePath());
 
-        boolean fileupdated = false;
-        FileList fileList = drive.files().list().setFields("files(id,name)").execute();
+        fileMetadata.setName(this.gdriveResource.getResourcePath());
+        FileList fileList = drive.files().list()
+                .setQ("name= '"+gdriveResource.getResourcePath()+"'")
+                .setFields("files(id,name)")
+                .execute();
+
         for (File f : fileList.getFiles()) {
-            if (f.getName().equalsIgnoreCase(gdriveResource.getResourcePath())) {
                 id = f.getId();
                 File file = drive.files().get(id).execute();
                 drive.files().update(file.getId(), fileMetadata, contentStream).setFields("id").execute();
                 fileupdated = true;
-            }
         }
 
         if (fileupdated == false) {

@@ -47,7 +47,7 @@
         <dependency>
             <groupId>org.apache.airavata</groupId>
             <artifactId>registry-api-stubs</artifactId>
-            <version>0.19-SNAPSHOT</version>
+            <version>0.17</version>
         </dependency>
         <dependency>
             <groupId>javax.xml.bind</groupId>

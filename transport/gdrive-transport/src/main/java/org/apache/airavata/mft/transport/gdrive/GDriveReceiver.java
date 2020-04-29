@@ -99,14 +99,16 @@ public class GDriveReceiver implements Connector {
         logger.info("Starting GDrive Receiver stream for transfer {}", context.getTransferId());
 
         String id = null;
-        FileList fileList = drive.files().list().setFields("files(id,name,modifiedTime,md5Checksum,size)").execute();
+        FileList fileList = drive.files().list()
+                .setQ("name= '"+gdriveResource.getResourcePath()+"'")
+                .setFields("files(id,name,modifiedTime,md5Checksum,size)")
+                .execute();
+
         for (File f : fileList.getFiles()) {
-            if (f.getName().equalsIgnoreCase(gdriveResource.getResourcePath())) {
                 id = f.getId();
-            }
         }
 
-        if (!id) {
+        if (id == null) {
             throw new IllegalStateException("GDrive Receiver was unable to retrieve the resource");
         }
 
