@@ -180,5 +180,24 @@ public class AiravataSecretBackend implements SecretBackend {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
+    @Override
+    public Optional<FTPSecret> getFTPSecret(FTPSecretGetRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public FTPSecret createFTPSecret(FTPSecretCreateRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateFTPSecret(FTPSecretUpdateRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteFTPSecret(FTPSecretDeleteRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
 
 }
