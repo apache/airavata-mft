@@ -18,12 +18,8 @@
 package org.apache.airavata.mft.resource.server.backend.sql;
 
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
-import org.apache.airavata.mft.resource.server.backend.sql.entity.LocalResourceEntity;
-import org.apache.airavata.mft.resource.server.backend.sql.entity.SCPResourceEntity;
-import org.apache.airavata.mft.resource.server.backend.sql.entity.SCPStorageEntity;
-import org.apache.airavata.mft.resource.server.backend.sql.repository.LocalResourceRepository;
-import org.apache.airavata.mft.resource.server.backend.sql.repository.SCPResourceRepository;
-import org.apache.airavata.mft.resource.server.backend.sql.repository.SCPStorageRepository;
+import org.apache.airavata.mft.resource.server.backend.sql.entity.*;
+import org.apache.airavata.mft.resource.server.backend.sql.repository.*;
 import org.apache.airavata.mft.resource.service.*;
 import org.dozer.DozerBeanMapper;
 import org.slf4j.Logger;
@@ -44,6 +40,12 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Autowired
     private LocalResourceRepository localResourceRepository;
+
+    @Autowired
+    private FTPResourceRepository ftpResourceRepository;
+
+    @Autowired
+    private FTPStorageRepository ftpStorageRepository;
 
     private DozerBeanMapper mapper = new DozerBeanMapper();
 
@@ -234,6 +236,56 @@ public class SQLResourceBackend implements ResourceBackend {
     @Override
     public boolean deleteDropboxResource(DropboxResourceDeleteRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public Optional<FTPResource> getFTPResource(FTPResourceGetRequest request) {
+        Optional<FTPResourceEntity> resourceEntity = ftpResourceRepository.findByResourceId(request.getResourceId());
+
+        return resourceEntity.map(ftpResourceEntity -> mapper.map(ftpResourceEntity, FTPResource.newBuilder().getClass())
+                .setFtpStorage(mapper.map(ftpResourceEntity.getFtpStorage(), FTPStorage.newBuilder().getClass())).build());
+    }
+
+    @Override
+    public FTPResource createFTPResource(FTPResourceCreateRequest request) {
+        FTPResourceEntity savedEntity = ftpResourceRepository.save(mapper.map(request, FTPResourceEntity.class));
+        return getFTPResource(FTPResourceGetRequest.newBuilder().setResourceId(savedEntity.getResourceId()).build()).orElse(null);
+    }
+
+    @Override
+    public boolean updateFTPResource(FTPResourceUpdateRequest request) {
+        ftpResourceRepository.save(mapper.map(request, FTPResourceEntity.class));
+        return true;
+    }
+
+    @Override
+    public boolean deleteFTPResource(FTPResourceDeleteRequest request) {
+        ftpResourceRepository.deleteById(request.getResourceId());
+        return true;
+    }
+
+    @Override
+    public Optional<FTPStorage> getFTPStorage(FTPStorageGetRequest request) {
+        Optional<FTPStorageEntity> storageEty = ftpStorageRepository.findByStorageId(request.getStorageId());
+        return storageEty.map(ftpStorageEntity -> mapper.map(ftpStorageEntity, FTPStorage.newBuilder().getClass()).build());
+    }
+
+    @Override
+    public FTPStorage createFTPStorage(FTPStorageCreateRequest request) {
+        FTPStorageEntity savedEntity = ftpStorageRepository.save(mapper.map(request, FTPStorageEntity.class));
+        return mapper.map(savedEntity, FTPStorage.newBuilder().getClass()).build();
+    }
+
+    @Override
+    public boolean updateFTPStorage(FTPStorageUpdateRequest request) {
+        ftpStorageRepository.save(mapper.map(request, FTPStorageEntity.class));
+        return true;
+    }
+
+    @Override
+    public boolean deleteFTPStorage(FTPStorageDeleteRequest request) {
+        ftpResourceRepository.deleteById(request.getStorageId());
+        return true;
     }
 
 }
