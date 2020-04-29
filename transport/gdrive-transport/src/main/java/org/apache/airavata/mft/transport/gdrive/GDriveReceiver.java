@@ -87,8 +87,7 @@ public class GDriveReceiver implements Connector {
             Collection<String> scopes = DriveScopes.all();
             credential = credential.createScoped(scopes);
         }
-        drive = new Drive.Builder(transport, jsonFactory, credential)
-                .setApplicationName("My Project").build();
+        drive = new Drive.Builder(transport, jsonFactory, credential).build();
     }
 
     @Override
@@ -103,9 +102,12 @@ public class GDriveReceiver implements Connector {
         FileList fileList = drive.files().list().setFields("files(id,name,modifiedTime,md5Checksum,size)").execute();
         for (File f : fileList.getFiles()) {
             if (f.getName().equalsIgnoreCase(gdriveResource.getResourcePath())) {
-                logger.info("File matched in receiver" + f.getName());
                 id = f.getId();
             }
+        }
+
+        if (!id) {
+            throw new IllegalStateException("GDrive Receiver was unable to retrieve the resource");
         }
 
         InputStream inputStream = drive.files().get(id).executeMediaAsInputStream();
