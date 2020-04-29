@@ -365,5 +365,58 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
         }
     }
 
+    @Override
+    public void getFTPSecret(FTPSecretGetRequest request, StreamObserver<FTPSecret> responseObserver) {
+        try {
+            this.backend.getFTPSecret(request).ifPresentOrElse(secret -> {
+                responseObserver.onNext(secret);
+                responseObserver.onCompleted();
+            }, () -> responseObserver.onError(Status.INTERNAL
+                    .withDescription("No FTP Secret with id " + request.getSecretId())
+                    .asRuntimeException()));
+
+        } catch (Exception e) {
+            logger.error("Error in retrieving FTP Secret with id " + request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in retrieving FTP Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void createFTPSecret(FTPSecretCreateRequest request, StreamObserver<FTPSecret> responseObserver) {
+        try {
+            this.backend.createFTPSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in creating FTP Secret", e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in creating FTP Secret")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void updateFTPSecret(FTPSecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.updateFTPSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in updating FTP Secret with id {}", request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in updating FTP Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void deleteFTPSecret(FTPSecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.deleteFTPSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in deleting FTP Secret with id {}", request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in deleting FTP Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+    }
 
 }
