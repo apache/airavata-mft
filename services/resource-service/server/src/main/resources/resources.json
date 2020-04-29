@@ -59,5 +59,15 @@
     "type": "DROPBOX",
     "resourceId": "dropbox-file",
     "resourcePath": "/test.txt"
+  },
+  {
+    "type": "FTP",
+    "resourceId": "ftp-resource",
+    "resourcePath": "mft-1mb.txt",
+    "ftpStorage": {
+      "storageId": "ftp-resource",
+      "host": "ftp.dlptest.com",
+      "port": "21"
+    }
   }
 ]
