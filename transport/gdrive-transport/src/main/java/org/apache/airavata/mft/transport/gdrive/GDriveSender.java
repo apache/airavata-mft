@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Collection;
 
 
@@ -87,7 +86,7 @@ public class GDriveSender implements Connector {
 
     @Override
     public void startStream(ConnectorContext context) throws Exception {
-        logger.info("Starting GDrive send for remote server for transfer {}", context.getTransferId());
+        logger.info("Starting GDrive send for remote server for transfer {} ", context.getTransferId());
         String id = null;
         boolean fileupdated = false;
         String entityUser = jsonObject.get("client_email").getAsString();
@@ -99,7 +98,7 @@ public class GDriveSender implements Connector {
 
         fileMetadata.setName(this.gdriveResource.getResourcePath());
         FileList fileList = drive.files().list()
-                .setQ("name= '"+gdriveResource.getResourcePath()+"'")
+                .setQ("name = '"+gdriveResource.getResourcePath()+"'")
                 .setFields("files(id,name)")
                 .execute();
 
@@ -117,6 +116,6 @@ public class GDriveSender implements Connector {
             drive.permissions().create(file.getId(), userPermission).execute();
         }
 
-        logger.info("Completed GDrive send for remote server for transfer {}", context.getTransferId());
+        logger.info("Completed GDrive send for remote server for transfer {} ", context.getTransferId());
     }
 }

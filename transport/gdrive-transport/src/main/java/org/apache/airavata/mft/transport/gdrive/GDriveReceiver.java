@@ -26,8 +26,6 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
@@ -44,25 +42,8 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.Collection;
-
-import org.apache.airavata.mft.core.ConnectorContext;
-import org.apache.airavata.mft.core.api.Connector;
-import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
-import org.apache.airavata.mft.resource.service.GDriveResource;
-import org.apache.airavata.mft.resource.service.GDriveResourceGetRequest;
-import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.service.GDriveSecret;
-import org.apache.airavata.mft.secret.service.GDriveSecretGetRequest;
-import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
-
-import java.io.*;
-
 
 public class GDriveReceiver implements Connector {
 
@@ -100,7 +81,7 @@ public class GDriveReceiver implements Connector {
 
         String id = null;
         FileList fileList = drive.files().list()
-                .setQ("name= '"+gdriveResource.getResourcePath()+"'")
+                .setQ("name = '"+gdriveResource.getResourcePath()+"'")
                 .setFields("files(id,name,modifiedTime,md5Checksum,size)")
                 .execute();
 

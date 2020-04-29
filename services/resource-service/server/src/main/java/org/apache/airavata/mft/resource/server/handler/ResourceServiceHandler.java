@@ -584,7 +584,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
                         .asRuntimeException());
             });
         } catch (Exception e) {
-            logger.error("Failed in retrieving GDrive resource with id {}", request.getResourceId(), e);
+            logger.error("Failed in retrieving GDrive resource with id {} ", request.getResourceId(), e);
 
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed in retrieving GDrive resource with id " + request.getResourceId())
@@ -598,7 +598,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
             responseObserver.onNext(this.backend.createGDriveResource(request));
             responseObserver.onCompleted();
         } catch (Exception e) {
-            logger.error("Failed in creating the GDrive resource", e);
+            logger.error("Failed in creating the GDrive resource ", e);
 
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed in creating the GDrive resource")
@@ -612,7 +612,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
             this.backend.updateGDriveResource(request);
             responseObserver.onCompleted();
         } catch (Exception e) {
-            logger.error("Failed in updating the GDrive resource {}", request.getResourceId(), e);
+            logger.error("Failed in updating the GDrive resource {} ", request.getResourceId(), e);
 
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed in updating the GDrive resource with id " + request.getResourceId())
@@ -630,7 +630,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
                 responseObserver.onError(new Exception("Failed to delete GDrive Resource with id " + request.getResourceId()));
             }
         } catch (Exception e) {
-            logger.error("Failed in deleting the GCS resource {}", request.getResourceId(), e);
+            logger.error("Failed in deleting the GDrive resource {} ", request.getResourceId(), e);
 
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed in deleting the GDrive resource with id " + request.getResourceId())

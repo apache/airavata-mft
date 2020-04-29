@@ -38,9 +38,7 @@ import org.apache.airavata.mft.secret.service.GDriveSecretGetRequest;
 import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
 
 import java.io.ByteArrayInputStream;
-import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Collection;
 
 import org.slf4j.Logger;
@@ -95,7 +93,7 @@ public class GDriveMetadataCollector implements MetadataCollector {
         Drive drive = new Drive.Builder(transport, jsonFactory, credential).build();
         ResourceMetadata metadata = new ResourceMetadata();
         FileList fileList = drive.files().list()
-                .setQ("name= '"+gdriveResource.getResourcePath()+"'")
+                .setQ("name = '"+gdriveResource.getResourcePath()+"'")
                 .setFields("files(id,name,modifiedTime,md5Checksum,size,mimeType)")
                 .execute();
 
@@ -131,7 +129,7 @@ public class GDriveMetadataCollector implements MetadataCollector {
         Drive drive = new Drive.Builder(transport, jsonFactory, credential).build();
 
         FileList fileList = drive.files().list()
-                .setQ("name= '"+gdriveResource.getResourcePath()+"'")
+                .setQ("name = '"+gdriveResource.getResourcePath()+"'")
                 .setFields("files(id,name)")
                 .execute();
 
@@ -144,6 +142,5 @@ public class GDriveMetadataCollector implements MetadataCollector {
         }
 
         return false;
-
     }
 }
