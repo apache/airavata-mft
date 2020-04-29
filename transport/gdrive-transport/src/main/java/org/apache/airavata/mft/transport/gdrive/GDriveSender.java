@@ -78,8 +78,7 @@ public class GDriveSender implements Connector {
 
         }
 
-        drive = new Drive.Builder(transport, jsonFactory, credential)
-                .setApplicationName("My Project").build();
+        drive = new Drive.Builder(transport, jsonFactory, credential).build();
 
     }
 
@@ -90,8 +89,7 @@ public class GDriveSender implements Connector {
 
     @Override
     public void startStream(ConnectorContext context) throws Exception {
-        logger.info("Starting GDrive Sender stream for transfer {}", context.getTransferId());
-        logger.info("Content length for transfer {} {}", context.getTransferId(), context.getMetadata().getResourceSize());
+        logger.info("Starting GDrive send for remote server for transfer {}", context.getTransferId());
         String id = null;
 
         InputStreamContent contentStream = new InputStreamContent(
@@ -103,8 +101,6 @@ public class GDriveSender implements Connector {
 
         boolean fileupdated = false;
         FileList fileList = drive.files().list().setFields("files(id,name)").execute();
-        logger.info("gdriveResource.getResourcePath() " + gdriveResource.getResourcePath());
-        logger.info("Listing files in GDRIVE SENDER " + drive.files().list().setFields("files(id,name)").execute());
         for (File f : fileList.getFiles()) {
             if (f.getName().equalsIgnoreCase(gdriveResource.getResourcePath())) {
                 id = f.getId();
@@ -121,6 +117,6 @@ public class GDriveSender implements Connector {
             drive.permissions().create(file.getId(), userPermission).execute();
         }
 
-        logger.info("Completed GDrive Sender stream for transfer {}", context.getTransferId());
+        logger.info("Completed GDrive send for remote server for transfer {}", context.getTransferId());
     }
 }
