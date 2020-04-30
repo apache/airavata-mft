@@ -77,12 +77,11 @@ public class S3Receiver implements Connector {
 
         OutputStream os = context.getStreamBuffer().getOutputStream();
         int read;
-        long bytes = 0;
         while ((read = inputStream.read()) != -1) {
-            bytes++;
             os.write(read);
         }
-        os.flush();
+
+        inputStream.close();
         os.close();
 
         logger.info("Completed S3 Receiver stream for transfer {}", context.getTransferId());
