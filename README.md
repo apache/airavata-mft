@@ -7,6 +7,7 @@ Airavata Managed File Transfer Service and Clients
 * Start SecretServiceApplication
 * Start MftController
 * Start ApiServiceApplication
+* Start the agent
 
 ## Building from the script
 
@@ -73,6 +74,9 @@ public class SampleClient {
             try {
                 TransferStateApiResponse transferState = client.getTransferState(TransferStateApiRequest.newBuilder().setTransferId(transferApiResponse.getTransferId()).build());
                 System.out.println("Latest Transfer State " + transferState.getState());
+                if (transferState.getState().equals("COMPLETED")) {
+                    break;
+                }
 
             } catch (Exception e) {
                 System.out.println("Errored " + e.getMessage());
