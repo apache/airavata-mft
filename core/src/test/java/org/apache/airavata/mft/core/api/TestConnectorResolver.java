@@ -1,6 +1,8 @@
 package org.apache.airavata.mft.core.api;
 
 import org.apache.airavata.mft.core.ConnectorResolver;
+import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -211,6 +213,7 @@ public class TestConnectorResolver {
         }
     }
 
+    @Disabled("Ignoring because of dependency issues with dropbox modules")
     @Test
     public void testDropboxIn() {
         try {
@@ -222,6 +225,7 @@ public class TestConnectorResolver {
         }
     }
 
+    @Disabled("Ignoring because of dependency issues with dropbox modules")
     @Test
     public void testDropboxOut() {
         try {
