@@ -388,7 +388,7 @@ public class FileBasedResourceBackend implements ResourceBackend {
 
     @Override
     public Optional<FTPResource> getFTPResource(FTPResourceGetRequest request) throws Exception {
-        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream("resources.json");
+        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
 
         JSONParser jsonParser = new JSONParser();
 
