@@ -90,7 +90,7 @@ public class GDriveReceiver implements Connector {
         }
 
         if (id == null) {
-            throw new IllegalStateException("GDrive Receiver was unable to retrieve the resource {}", gdriveResource.getResourceId());
+            throw new IllegalStateException("GDrive Receiver was unable to retrieve the resource " + gdriveResource.getResourceId());
         }
 
         InputStream inputStream = drive.files().get(id).executeMediaAsInputStream();

@@ -136,7 +136,7 @@ public class GDriveMetadataCollector implements MetadataCollector {
         for (File f : fileList.getFiles()) {
                 id = f.getId();
                 if (id == null) {
-                    throw new IllegalStateException("GDrive Receiver was unable to retrieve the resource");
+                    throw new IllegalStateException("GDrive Receiver was unable to retrieve the resource " + gdriveResource.getResourceId());
                 }
             return !drive.files().get(id).execute().isEmpty();
         }
