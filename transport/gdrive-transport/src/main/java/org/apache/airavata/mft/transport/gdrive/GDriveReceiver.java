@@ -100,7 +100,7 @@ public class GDriveReceiver implements Connector {
         long fileSize = context.getMetadata().getResourceSize();
         byte[] buf = new byte[1024];
         while (true) {
-            int bufSize = 0;
+            int bufSize;
 
             if (buf.length < fileSize) {
                 bufSize = buf.length;
