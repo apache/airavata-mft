@@ -93,7 +93,7 @@ public class GDriveMetadataCollector implements MetadataCollector {
         Drive drive = new Drive.Builder(transport, jsonFactory, credential).build();
         ResourceMetadata metadata = new ResourceMetadata();
         FileList fileList = drive.files().list()
-                .setQ("name = '"+gdriveResource.getResourcePath()+"'")
+                .setQ("name = '" + gdriveResource.getResourcePath() + "'")
                 .setFields("files(id,name,modifiedTime,md5Checksum,size,mimeType)")
                 .execute();
 
@@ -129,7 +129,7 @@ public class GDriveMetadataCollector implements MetadataCollector {
         Drive drive = new Drive.Builder(transport, jsonFactory, credential).build();
 
         FileList fileList = drive.files().list()
-                .setQ("name = '"+gdriveResource.getResourcePath()+"'")
+                .setQ("name = '" + gdriveResource.getResourcePath() + "'")
                 .setFields("files(id,name)")
                 .execute();
 

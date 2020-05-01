@@ -81,7 +81,7 @@ public class GDriveReceiver implements Connector {
 
         String id = null;
         FileList fileList = drive.files().list()
-                .setQ("name = '"+gdriveResource.getResourcePath()+"'")
+                .setQ("name = '" + gdriveResource.getResourcePath() + "'")
                 .setFields("files(id,name,modifiedTime,md5Checksum,size)")
                 .execute();
 
@@ -90,7 +90,7 @@ public class GDriveReceiver implements Connector {
         }
 
         if (id == null) {
-            throw new IllegalStateException("GDrive Receiver was unable to retrieve the resource");
+            throw new IllegalStateException("GDrive Receiver was unable to retrieve the resource {}", gdriveResource.getResourceId());
         }
 
         InputStream inputStream = drive.files().get(id).executeMediaAsInputStream();

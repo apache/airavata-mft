@@ -92,13 +92,11 @@ public class GDriveSender implements Connector {
         String entityUser = jsonObject.get("client_email").getAsString();
         File fileMetadata = new File();
 
-        InputStreamContent contentStream = new InputStreamContent(
-                "", context.getStreamBuffer().getInputStream());
-
+        InputStreamContent contentStream = new InputStreamContent("", context.getStreamBuffer().getInputStream());
 
         fileMetadata.setName(this.gdriveResource.getResourcePath());
         FileList fileList = drive.files().list()
-                .setQ("name = '"+gdriveResource.getResourcePath()+"'")
+                .setQ("name = '" + gdriveResource.getResourcePath() + "'")
                 .setFields("files(id,name)")
                 .execute();
 
