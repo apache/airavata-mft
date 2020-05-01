@@ -210,4 +210,68 @@ public class TestConnectorResolver {
             fail("Exception from connector: ", ex);
         }
     }
+
+    @Test
+    public void testDropboxIn() {
+        try {
+            Optional<Connector> connector = ConnectorResolver.resolveConnector("DROPBOX", "IN");
+            assertTrue(connector.isPresent());
+            assertEquals("org.apache.airavata.mft.transport.dropbox.DropboxReceiver", connector.get().getClass().getCanonicalName());
+        } catch(Exception ex) {
+            fail("Exception from connector: ", ex);
+        }
+    }
+
+    @Test
+    public void testDropboxOut() {
+        try {
+            Optional<Connector> connector = ConnectorResolver.resolveConnector("DROPBOX", "OUT");
+            assertTrue(connector.isPresent());
+            assertEquals("org.apache.airavata.mft.transport.dropbox.DropboxSender", connector.get().getClass().getCanonicalName());
+        } catch(Exception ex) {
+            fail("Exception from connector: ", ex);
+        }
+    }
+
+    @Test
+    public void testDropbox_WrongDirection() {
+        try {
+            Optional<Connector> connector = ConnectorResolver.resolveConnector("DROPBOX", "wrong input");
+            assertTrue(connector.isEmpty());
+        } catch(Exception ex) {
+            fail("Exception from connector: ", ex);
+        }
+    }
+
+    @Test
+    public void testFTPIn() {
+        try {
+            Optional<Connector> connector = ConnectorResolver.resolveConnector("FTP", "IN");
+            assertTrue(connector.isPresent());
+            assertEquals("org.apache.airavata.mft.transport.ftp.FTPReceiver", connector.get().getClass().getCanonicalName());
+        } catch(Exception ex) {
+            fail("Exception from connector: ", ex);
+        }
+    }
+
+    @Test
+    public void testFTPOut() {
+        try {
+            Optional<Connector> connector = ConnectorResolver.resolveConnector("FTP", "OUT");
+            assertTrue(connector.isPresent());
+            assertEquals("org.apache.airavata.mft.transport.ftp.FTPSender", connector.get().getClass().getCanonicalName());
+        } catch(Exception ex) {
+            fail("Exception from connector: ", ex);
+        }
+    }
+
+    @Test
+    public void testFTP_WrongDirection() {
+        try {
+            Optional<Connector> connector = ConnectorResolver.resolveConnector("FTP", "wrong input");
+            assertTrue(connector.isEmpty());
+        } catch(Exception ex) {
+            fail("Exception from connector: ", ex);
+        }
+    }
 }
