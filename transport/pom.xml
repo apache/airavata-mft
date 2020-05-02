@@ -39,6 +39,7 @@
         <module>box-transport</module>
         <module>azure-transport</module>
         <module>gcp-transport</module>
+        <module>ftp-transport</module>
         <module>dropbox-transport</module>
     </modules>
     <dependencies>
