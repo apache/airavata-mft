@@ -71,7 +71,6 @@ public class BoxReceiver implements Connector {
 
         OutputStream os = context.getStreamBuffer().getOutputStream();
         file.download(os);
-        os.flush();
         os.close();
 
         logger.info("Completed Box Receiver stream for transfer {}", context.getTransferId());

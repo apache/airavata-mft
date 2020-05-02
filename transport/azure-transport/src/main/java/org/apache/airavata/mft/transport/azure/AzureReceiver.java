@@ -105,6 +105,7 @@ public class AzureReceiver implements Connector {
                 break;
         }
 
+        blobInputStream.close();
         streamOs.close();
         logger.info("Completed azure receive for remote server for transfer {}", context.getTransferId());
     }

@@ -80,12 +80,10 @@ public class GCSReceiver implements Connector {
 
         InputStream inputStream = storage.objects().get(this.gcsResource.getBucketName(), this.gcsResource.getResourcePath()).executeMediaAsInputStream();
         OutputStream os = context.getStreamBuffer().getOutputStream();
-        int read;
-        long bytes = 0;
         long fileSize = context.getMetadata().getResourceSize();
         byte[] buf = new byte[1024];
         while (true) {
-            int bufSize = 0;
+            int bufSize;
 
             if (buf.length < fileSize) {
                 bufSize = buf.length;
@@ -106,6 +104,7 @@ public class GCSReceiver implements Connector {
                 break;
         }
 
+        inputStream.close();
         os.close();
 
         logger.info("Completed GCS Receiver stream for transfer {}", context.getTransferId());

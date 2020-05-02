@@ -55,4 +55,9 @@ public interface SecretBackend {
     public DropboxSecret createDropboxSecret(DropboxSecretCreateRequest request) throws Exception;
     public boolean updateDropboxSecret(DropboxSecretUpdateRequest request) throws Exception;
     public boolean deleteDropboxSecret(DropboxSecretDeleteRequest request) throws Exception;
+
+    Optional<FTPSecret> getFTPSecret(FTPSecretGetRequest request) throws Exception;
+    FTPSecret createFTPSecret(FTPSecretCreateRequest request) throws Exception;
+    boolean updateFTPSecret(FTPSecretUpdateRequest request) throws Exception;
+    boolean deleteFTPSecret(FTPSecretDeleteRequest request) throws Exception;
 }

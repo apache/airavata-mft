@@ -47,6 +47,7 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 
 public class GCSSender implements Connector {
@@ -96,7 +97,7 @@ public class GCSSender implements Connector {
                 // Set the destination object name
                 .setName(this.gcsResource.getResourcePath())
                 // Set the access control list to publicly read-only
-                .setAcl(Arrays.asList(new ObjectAccessControl().setEntity("user-" + entityUser).setRole("OWNER")));
+                .setAcl(Collections.singletonList(new ObjectAccessControl().setEntity("user-" + entityUser).setRole("OWNER")));
 
         Insert insertRequest = storage.objects().insert(
                 this.gcsResource.getBucketName(), objectMetadata, contentStream);

@@ -18,7 +18,9 @@
 package org.apache.airavata.mft.secret.server.backend.sql;
 
 import org.apache.airavata.mft.secret.server.backend.SecretBackend;
+import org.apache.airavata.mft.secret.server.backend.sql.entity.FTPSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.SCPSecretEntity;
+import org.apache.airavata.mft.secret.server.backend.sql.repository.FTPSecretRepository;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.SecretRepository;
 import org.apache.airavata.mft.secret.service.*;
 import org.dozer.DozerBeanMapper;
@@ -34,6 +36,9 @@ public class SQLSecretBackend implements SecretBackend {
 
     @Autowired
     private SecretRepository secretRepository;
+
+    @Autowired
+    private FTPSecretRepository ftpSecretRepository;
 
     private DozerBeanMapper mapper = new DozerBeanMapper();
 
@@ -171,4 +176,27 @@ public class SQLSecretBackend implements SecretBackend {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
+    @Override
+    public Optional<FTPSecret> getFTPSecret(FTPSecretGetRequest request) {
+        Optional<FTPSecretEntity> secretEty = ftpSecretRepository.findBySecretId(request.getSecretId());
+        return secretEty.map(ftpSecretEntity -> mapper.map(ftpSecretEntity, FTPSecret.newBuilder().getClass()).build());
+    }
+
+    @Override
+    public FTPSecret createFTPSecret(FTPSecretCreateRequest request) {
+        FTPSecretEntity savedEntity = ftpSecretRepository.save(mapper.map(request, FTPSecretEntity.class));
+        return mapper.map(savedEntity, FTPSecret.newBuilder().getClass()).build();
+    }
+
+    @Override
+    public boolean updateFTPSecret(FTPSecretUpdateRequest request) {
+        ftpSecretRepository.save(mapper.map(request, FTPSecretEntity.class));
+        return true;
+    }
+
+    @Override
+    public boolean deleteFTPSecret(FTPSecretDeleteRequest request) {
+        ftpSecretRepository.deleteById(request.getSecretId());
+        return true;
+    }
 }

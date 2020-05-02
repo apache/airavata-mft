@@ -571,4 +571,139 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
                     .asRuntimeException());
         }
     }
+
+    @Override
+    public void getFTPStorage(FTPStorageGetRequest request, StreamObserver<FTPStorage> responseObserver) {
+        try {
+            this.backend.getFTPStorage(request).ifPresentOrElse(storage -> {
+                responseObserver.onNext(storage);
+                responseObserver.onCompleted();
+            }, () -> responseObserver.onError(Status.INTERNAL
+                    .withDescription("No FTP Storage with id " + request.getStorageId())
+                    .asRuntimeException()));
+        } catch (Exception e) {
+            logger.error("Failed in retrieving FTP storage with id " + request.getStorageId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in retrieving FTP storage with id " + request.getStorageId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void createFTPStorage(FTPStorageCreateRequest request, StreamObserver<FTPStorage> responseObserver) {
+        try {
+            responseObserver.onNext(this.backend.createFTPStorage(request));
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in creating the FTP storage", e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in creating the FTP storage")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void updateFTPStorage(FTPStorageUpdateRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.updateFTPStorage(request);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in updating the FTP storage {}", request.getStorageId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in updating the FTP storage")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void deleteFTPStorage(FTPStorageDeleteRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            boolean res = this.backend.deleteFTPStorage(request);
+            if (res) {
+                responseObserver.onCompleted();
+            } else {
+                logger.error("Failed to delete FTP Storage with id " + request.getStorageId());
+
+                responseObserver.onError(Status.INTERNAL
+                        .withDescription("Failed to delete FTP Storage with id " + request.getStorageId())
+                        .asRuntimeException());
+            }
+        } catch (Exception e) {
+            logger.error("Failed in deleting the FTP storage {}", request.getStorageId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in deleting the FTP storage")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void getFTPResource(FTPResourceGetRequest request, StreamObserver<FTPResource> responseObserver) {
+        try {
+            this.backend.getFTPResource(request).ifPresentOrElse(resource -> {
+                responseObserver.onNext(resource);
+                responseObserver.onCompleted();
+            }, () -> responseObserver.onError(Status.INTERNAL
+                    .withDescription("No FTP Resource with id " + request.getResourceId())
+                    .asRuntimeException()));
+        } catch (Exception e) {
+            logger.error("Failed in retrieving FTP resource with id {}", request.getResourceId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in retrieving FTP resource with id " + request.getResourceId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void createFTPResource(FTPResourceCreateRequest request, StreamObserver<FTPResource> responseObserver) {
+        try {
+            responseObserver.onNext(this.backend.createFTPResource(request));
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in creating the FTP resource", e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in creating the FTP resource")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void updateFTPResource(FTPResourceUpdateRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.updateFTPResource(request);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in updating the FTP resource {}", request.getResourceId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in updating the FTP resource")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void deleteFTPResource(FTPResourceDeleteRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            boolean res = this.backend.deleteFTPResource(request);
+            if (res) {
+                responseObserver.onCompleted();
+            } else {
+
+                responseObserver.onError(Status.INTERNAL
+                        .withDescription("Failed to delete FTP Resource with id " + request.getResourceId())
+                        .asRuntimeException());
+            }
+        } catch (Exception e) {
+            logger.error("Failed in deleting the scp resource {}", request.getResourceId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in deleting the FTP resource")
+                    .asRuntimeException());
+        }
+    }
 }
