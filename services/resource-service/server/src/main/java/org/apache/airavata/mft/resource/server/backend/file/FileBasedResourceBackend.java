@@ -17,6 +17,7 @@
 
  package org.apache.airavata.mft.resource.server.backend.file;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
 import org.apache.airavata.mft.resource.service.*;
 import org.json.simple.JSONArray;
@@ -129,7 +130,7 @@ public class FileBasedResourceBackend implements ResourceBackend {
     @Override
     public Optional<LocalResource> getLocalResource(LocalResourceGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
-        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
+        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(getResourceFile());
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
@@ -172,7 +173,7 @@ public class FileBasedResourceBackend implements ResourceBackend {
     @Override
     public Optional<S3Resource> getS3Resource(S3ResourceGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
-        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
+        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(getResourceFile());
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
@@ -219,7 +220,7 @@ public class FileBasedResourceBackend implements ResourceBackend {
     @Override
     public Optional<BoxResource> getBoxResource(BoxResourceGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
-        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
+        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(getResourceFile());
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
@@ -262,7 +263,7 @@ public class FileBasedResourceBackend implements ResourceBackend {
     @Override
     public Optional<AzureResource> getAzureResource(AzureResourceGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
-        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
+        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(getResourceFile());
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
@@ -304,7 +305,7 @@ public class FileBasedResourceBackend implements ResourceBackend {
     @Override
     public Optional<GCSResource> getGCSResource(GCSResourceGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
-        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
+        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(getResourceFile());
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
@@ -345,7 +346,7 @@ public class FileBasedResourceBackend implements ResourceBackend {
     @Override
     public Optional<DropboxResource> getDropboxResource(DropboxResourceGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
-        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(resourceFile);
+        InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(getResourceFile());
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
@@ -382,5 +383,10 @@ public class FileBasedResourceBackend implements ResourceBackend {
     @Override
     public boolean deleteDropboxResource(DropboxResourceDeleteRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @VisibleForTesting
+    protected String getResourceFile() {
+        return resourceFile;
     }
 }
