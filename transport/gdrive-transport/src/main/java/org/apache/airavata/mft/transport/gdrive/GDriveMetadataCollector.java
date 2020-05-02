@@ -97,11 +97,14 @@ public class GDriveMetadataCollector implements MetadataCollector {
                 .setFields("files(id,name,modifiedTime,md5Checksum,size,mimeType)")
                 .execute();
 
-        for (File f : fileList.getFiles()) {
+        if(fileList.size()>0){
+            for (File f : fileList.getFiles()) {
                 metadata.setMd5sum(f.getMd5Checksum());
                 metadata.setUpdateTime(f.getModifiedTime().getValue());
                 metadata.setResourceSize(f.getSize().longValue());
+            }
         }
+
 
         return metadata;
     }
@@ -133,13 +136,16 @@ public class GDriveMetadataCollector implements MetadataCollector {
                 .setFields("files(id,name)")
                 .execute();
 
-        for (File f : fileList.getFiles()) {
+        if(fileList.size()>0){
+            for (File f : fileList.getFiles()) {
                 id = f.getId();
                 if (id == null) {
                     throw new IllegalStateException("GDrive Receiver was unable to retrieve the resource " + gdriveResource.getResourceId());
                 }
-            return !drive.files().get(id).execute().isEmpty();
+                return !drive.files().get(id).execute().isEmpty();
+            }
         }
+
 
         return false;
     }

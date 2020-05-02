@@ -85,8 +85,10 @@ public class GDriveReceiver implements Connector {
                 .setFields("files(id,name,modifiedTime,md5Checksum,size)")
                 .execute();
 
-        for (File f : fileList.getFiles()) {
+        if(fileList.size()>0){
+            for (File f : fileList.getFiles()) {
                 id = f.getId();
+            }
         }
 
         if (id == null) {
