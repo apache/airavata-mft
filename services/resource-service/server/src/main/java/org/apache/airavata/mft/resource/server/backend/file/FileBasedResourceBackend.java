@@ -17,6 +17,7 @@
 
  package org.apache.airavata.mft.resource.server.backend.file;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
 import org.apache.airavata.mft.resource.service.*;
 import org.json.simple.JSONArray;
@@ -455,5 +456,10 @@ public class FileBasedResourceBackend implements ResourceBackend {
     @Override
     public boolean deleteFTPStorage(FTPStorageDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @VisibleForTesting
+    protected void setResourceFile(String resourceFile) {
+        this.resourceFile = resourceFile;
     }
 }
