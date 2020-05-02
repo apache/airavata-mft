@@ -54,7 +54,6 @@ public class GDriveMetadataCollector implements MetadataCollector {
 
     private static final Logger logger = LoggerFactory.getLogger(GDriveMetadataCollector.class);
 
-
     @Override
     public void init(String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) {
         this.resourceServiceHost = resourceServiceHost;
@@ -63,7 +62,6 @@ public class GDriveMetadataCollector implements MetadataCollector {
         this.secretServicePort = secretServicePort;
         this.initialized = true;
     }
-
 
     private void checkInitialized() {
         if (!initialized) {
@@ -79,7 +77,6 @@ public class GDriveMetadataCollector implements MetadataCollector {
 
         SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
         GDriveSecret gdriveSecret = secretClient.getGDriveSecret(GDriveSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
-
 
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
@@ -97,14 +94,13 @@ public class GDriveMetadataCollector implements MetadataCollector {
                 .setFields("files(id,name,modifiedTime,md5Checksum,size,mimeType)")
                 .execute();
 
-        if(fileList.size()>0){
+        if(fileList.size() > 0){
             for (File f : fileList.getFiles()) {
                 metadata.setMd5sum(f.getMd5Checksum());
                 metadata.setUpdateTime(f.getModifiedTime().getValue());
                 metadata.setResourceSize(f.getSize().longValue());
             }
         }
-
 
         return metadata;
     }
@@ -118,7 +114,6 @@ public class GDriveMetadataCollector implements MetadataCollector {
 
         SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
         GDriveSecret gdriveSecret = secretClient.getGDriveSecret(GDriveSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
-
 
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
@@ -136,7 +131,7 @@ public class GDriveMetadataCollector implements MetadataCollector {
                 .setFields("files(id,name)")
                 .execute();
 
-        if(fileList.size()>0){
+        if(fileList.size() > 0){
             for (File f : fileList.getFiles()) {
                 id = f.getId();
                 if (id == null) {
@@ -145,7 +140,6 @@ public class GDriveMetadataCollector implements MetadataCollector {
                 return !drive.files().get(id).execute().isEmpty();
             }
         }
-
 
         return false;
     }
