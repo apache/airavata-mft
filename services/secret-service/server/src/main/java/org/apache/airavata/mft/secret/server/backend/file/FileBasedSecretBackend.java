@@ -17,6 +17,7 @@
 
 package org.apache.airavata.mft.secret.server.backend.file;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.airavata.mft.secret.server.backend.SecretBackend;
 import org.apache.airavata.mft.secret.service.*;
 import org.json.simple.JSONArray;
@@ -53,7 +54,7 @@ public class FileBasedSecretBackend implements SecretBackend {
     @Override
     public Optional<SCPSecret> getSCPSecret(SCPSecretGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
-        InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(secretFile);
+        InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(getSecretFile());
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
@@ -95,7 +96,7 @@ public class FileBasedSecretBackend implements SecretBackend {
     @Override
     public Optional<S3Secret> getS3Secret(S3SecretGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
-        InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(secretFile);
+        InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(getSecretFile());
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
@@ -136,7 +137,7 @@ public class FileBasedSecretBackend implements SecretBackend {
     @Override
     public Optional<BoxSecret> getBoxSecret(BoxSecretGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
-        InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(secretFile);
+        InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(getSecretFile());
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
@@ -177,7 +178,7 @@ public class FileBasedSecretBackend implements SecretBackend {
     @Override
     public Optional<AzureSecret> getAzureSecret(AzureSecretGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
-        InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(secretFile);
+        InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(getSecretFile());
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
@@ -217,7 +218,7 @@ public class FileBasedSecretBackend implements SecretBackend {
     @Override
     public Optional<GCSSecret> getGCSSecret(GCSSecretGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
-        InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(secretFile);
+        InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(getSecretFile());
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
@@ -256,7 +257,7 @@ public class FileBasedSecretBackend implements SecretBackend {
     @Override
     public Optional<DropboxSecret> getDropboxSecret(DropboxSecretGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
-        InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(secretFile);
+        InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(getSecretFile());
 
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
             Object obj = jsonParser.parse(reader);
@@ -292,5 +293,8 @@ public class FileBasedSecretBackend implements SecretBackend {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
-
+    @VisibleForTesting
+    protected String getSecretFile() {
+        return secretFile;
+    }
 }
