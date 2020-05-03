@@ -19,39 +19,37 @@ public class TestFileBasedResourceBackend {
         Mockito.doReturn("resources.json").when(fileBasedResourceBackend).getResourceFile();
     }
 
-//    @Test
-//    public void testGetFtpResource_WithProperResourceId() {
-//        FileBasedResourceBackend fileBasedResourceBackend = new FileBasedResourceBackend();
-//        String resourceId = "ftp-resource";
-//        FTPResourceGetRequest resourceGetRequest = Mockito.mock(FTPResourceGetRequest.class);
-//        Mockito.when(resourceGetRequest.getResourceId()).thenReturn(resourceId);
-//
-//        try {
-//            Optional<FTPResource> ftpResourceOptional = fileBasedResourceBackend.getFTPResource(resourceGetRequest);
-//            assertTrue(ftpResourceOptional.isPresent());
-//
-//            FTPResource ftpResource = ftpResourceOptional.get();
-//            assertEquals(resourceId, ftpResource.getResourceId());
-//            assertNotNull(ftpResource.getResourcePath());
-//            assertNotNull(ftpResource.getFtpStorage().getStorageId());
-//            assertNotNull(ftpResource.getFtpStorage().getHost());
-//        } catch (Exception e) {
-//            fail("Exception from connector: ", e);
-//        }
-//    }
-//
-//    @Test
-//    public void testGetFtpResource_WithWrongResourceId() {
-//        FileBasedResourceBackend fileBasedResourceBackend = new FileBasedResourceBackend();
-//        FTPResourceGetRequest resourceGetRequest = Mockito.mock(FTPResourceGetRequest.class);
-//        Mockito.when(resourceGetRequest.getResourceId()).thenReturn("WrongResourceId");
-//
-//        try {
-//            assertTrue(fileBasedResourceBackend.getFTPResource(resourceGetRequest).isEmpty());
-//        } catch (Exception e) {
-//            fail("Exception from connector: ", e);
-//        }
-//    }
+    @Test
+    public void testGetFtpResource_WithProperResourceId() {
+        String resourceId = "ftp-resource";
+        FTPResourceGetRequest resourceGetRequest = Mockito.mock(FTPResourceGetRequest.class);
+        Mockito.when(resourceGetRequest.getResourceId()).thenReturn(resourceId);
+
+        try {
+            Optional<FTPResource> ftpResourceOptional = fileBasedResourceBackend.getFTPResource(resourceGetRequest);
+            assertTrue(ftpResourceOptional.isPresent());
+
+            FTPResource ftpResource = ftpResourceOptional.get();
+            assertEquals(resourceId, ftpResource.getResourceId());
+            assertNotNull(ftpResource.getResourcePath());
+            assertNotNull(ftpResource.getFtpStorage().getStorageId());
+            assertNotNull(ftpResource.getFtpStorage().getHost());
+        } catch (Exception e) {
+            fail("Exception from connector: ", e);
+        }
+    }
+
+    @Test
+    public void testGetFtpResource_WithWrongResourceId() {
+        FTPResourceGetRequest resourceGetRequest = Mockito.mock(FTPResourceGetRequest.class);
+        Mockito.when(resourceGetRequest.getResourceId()).thenReturn("WrongResourceId");
+
+        try {
+            assertTrue(fileBasedResourceBackend.getFTPResource(resourceGetRequest).isEmpty());
+        } catch (Exception e) {
+            fail("Exception from connector: ", e);
+        }
+    }
 
     @Test
     public void testGetSCPResource_WithProperResourceId() {

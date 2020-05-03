@@ -244,7 +244,6 @@ public class TestConnectorResolver {
         }
     }
 
-    @Disabled("Writing for FTP in advance. This should start working when the code for FTP is merged with master")
     @Test
     public void testFTPIn() {
         try {
@@ -256,7 +255,6 @@ public class TestConnectorResolver {
         }
     }
 
-    @Disabled("Writing for FTP in advance. This should start working when the code for FTP is merged with master")
     @Test
     public void testFTPOut() {
         try {
@@ -268,7 +266,6 @@ public class TestConnectorResolver {
         }
     }
 
-    @Disabled("Writing for FTP in advance. This should start working when the code for FTP is merged with master")
     @Test
     public void testFTP_WrongDirection() {
         try {

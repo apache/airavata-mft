@@ -1,7 +1,6 @@
 package org.apache.airavata.mft.core.api;
 
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -96,7 +95,6 @@ public class TestMetadataCollectorResolver {
         }
     }
 
-    @Disabled("Writing for FTP in advance. This should start working when the code for FTP is merged with master")
     @Test
     public void testFTP() {
         try {
