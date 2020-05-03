@@ -67,6 +67,16 @@ public interface ResourceBackend {
     public boolean updateDropboxResource(DropboxResourceUpdateRequest request) throws Exception;
     public boolean deleteDropboxResource(DropboxResourceDeleteRequest request) throws Exception;
 
+    Optional<FTPStorage> getFTPStorage(FTPStorageGetRequest request) throws Exception;
+    FTPStorage createFTPStorage(FTPStorageCreateRequest request) throws Exception;
+    boolean updateFTPStorage(FTPStorageUpdateRequest request) throws Exception;
+    boolean deleteFTPStorage(FTPStorageDeleteRequest request) throws Exception;
+
+    Optional<FTPResource> getFTPResource(FTPResourceGetRequest request) throws Exception;
+    FTPResource createFTPResource(FTPResourceCreateRequest request) throws Exception;
+    boolean updateFTPResource(FTPResourceUpdateRequest request) throws Exception;
+    boolean deleteFTPResource(FTPResourceDeleteRequest request) throws Exception;
+
     public Optional<GDriveResource> getGDriveResource(GDriveResourceGetRequest request) throws Exception;
     public GDriveResource createGDriveResource(GDriveResourceCreateRequest request) throws Exception;
     public boolean updateGDriveResource(GDriveResourceUpdateRequest request) throws Exception;

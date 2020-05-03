@@ -181,6 +181,26 @@ public class AiravataSecretBackend implements SecretBackend {
     }
 
     @Override
+    public Optional<FTPSecret> getFTPSecret(FTPSecretGetRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public FTPSecret createFTPSecret(FTPSecretCreateRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateFTPSecret(FTPSecretUpdateRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteFTPSecret(FTPSecretDeleteRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<GDriveSecret> getGDriveSecret(GDriveSecretGetRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
@@ -199,6 +219,5 @@ public class AiravataSecretBackend implements SecretBackend {
     public boolean deleteGDriveSecret(GDriveSecretDeleteRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
-
 
 }

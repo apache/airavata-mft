@@ -236,6 +236,60 @@ message DropboxResourceDeleteRequest {
     string resourceId = 1;
 }
 
+// FTP Storage
+
+message FTPStorage {
+    string storageId = 1;
+    string host = 2;
+    int32 port = 3;
+}
+
+message FTPStorageGetRequest {
+    string storageId = 1;
+}
+
+message FTPStorageCreateRequest {
+    string host = 1;
+    int32 port = 2;
+}
+
+message FTPStorageUpdateRequest {
+    string storageId = 1;
+    string host = 2;
+    int32 port = 3;
+}
+
+message FTPStorageDeleteRequest {
+    string storageId = 1;
+}
+
+// FTP Resource
+
+message FTPResource {
+    string resourceId = 1;
+    FTPStorage ftpStorage = 2;
+    string resourcePath = 3;
+}
+
+message FTPResourceGetRequest {
+    string resourceId = 1;
+}
+
+message FTPResourceCreateRequest {
+    string ftpStorageId = 1;
+    string resourcePath = 2;
+}
+
+message FTPResourceUpdateRequest {
+    string resourceId = 1;
+    string FTPStorageId = 2;
+    string resourcePath = 3;
+}
+
+message FTPResourceDeleteRequest {
+    string resourceId = 1;
+}
+
 // GDrive resource
 message GDriveResource {
     string resourceId = 1;
@@ -464,6 +518,58 @@ service  ResourceService {
     rpc deleteDropboxResource (DropboxResourceDeleteRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
             delete: "/v1.0/resource/dropbox"
+        };
+    }
+
+    // FTP Storage
+
+    rpc getFTPStorage (FTPStorageGetRequest) returns (FTPStorage) {
+        option (google.api.http) = {
+           get: "/v1.0/resource/ftp/storage"
+        };
+    }
+
+    rpc createFTPStorage (FTPStorageCreateRequest) returns (FTPStorage) {
+        option (google.api.http) = {
+           post: "/v1.0/resource/ftp/storage"
+        };
+    }
+
+    rpc updateFTPStorage (FTPStorageUpdateRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+           put: "/v1.0/resource/ftp/storage"
+        };
+    }
+
+    rpc deleteFTPStorage (FTPStorageDeleteRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+           delete: "/v1.0/resource/ftp/storage"
+        };
+    }
+
+    // FTP Resource
+
+    rpc getFTPResource (FTPResourceGetRequest) returns (FTPResource) {
+        option (google.api.http) = {
+           get: "/v1.0/resource/ftp"
+        };
+    }
+
+    rpc createFTPResource (FTPResourceCreateRequest) returns (FTPResource) {
+        option (google.api.http) = {
+           post: "/v1.0/resource/ftp"
+        };
+    }
+
+    rpc updateFTPResource (FTPResourceUpdateRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+           put: "/v1.0/resource/ftp"
+        };
+    }
+
+    rpc deleteFTPResource (FTPResourceDeleteRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+           delete: "/v1.0/resource/ftp"
         };
     }
 

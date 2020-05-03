@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unchecked")
 public class FileBasedSecretBackend implements SecretBackend {
 
     private static final Logger logger = LoggerFactory.getLogger(FileBasedSecretBackend.class);
@@ -292,9 +293,50 @@ public class FileBasedSecretBackend implements SecretBackend {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
+    public Optional<FTPSecret> getFTPSecret(FTPSecretGetRequest request) throws Exception {
+        JSONParser jsonParser = new JSONParser();
+        InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(secretFile);
+
+        if (inputStream == null) {
+            throw new IOException("secrets file not found");
+        }
+
+        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            Object obj = jsonParser.parse(reader);
+            JSONArray resourceList = (JSONArray) obj;
+
+            List<FTPSecret> ftpSecrets = (List<FTPSecret>) resourceList.stream()
+                    .filter(resource -> "FTP".equals(((JSONObject) resource).get("type").toString()))
+                    .map(resource -> {
+                        JSONObject r = (JSONObject) resource;
+
+                        return FTPSecret.newBuilder()
+                                .setSecretId(r.get("secretId").toString())
+                                .setUserId(r.get("userId").toString())
+                                .setPassword(r.get("password").toString()).build();
+
+                    }).collect(Collectors.toList());
+            return ftpSecrets.stream().filter(r -> request.getSecretId().equals(r.getSecretId())).findFirst();
+        }
+    }
+
+    @Override
+    public FTPSecret createFTPSecret(FTPSecretCreateRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateFTPSecret(FTPSecretUpdateRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteFTPSecret(FTPSecretDeleteRequest request) {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
     @Override
     public Optional<GDriveSecret> getGDriveSecret(GDriveSecretGetRequest request) throws Exception {
-        //throw new UnsupportedOperationException("Operation is not supported in backend");
         JSONParser jsonParser = new JSONParser();
         InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(secretFile);
 
@@ -308,8 +350,7 @@ public class FileBasedSecretBackend implements SecretBackend {
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
 
-                        GDriveSecret gDriveSecret = GDriveSecret.newBuilder()
-                                .setSecretId(r.get("secretId").toString())
+                        GDriveSecret gDriveSecret = GDriveSecret.newBuilder().setSecretId(r.get("secretId").toString())
                                 .setCredentialsJson(r.get("credentialsJson").toString()).build();
 
                         return gDriveSecret;

@@ -56,6 +56,11 @@ public interface SecretBackend {
     public boolean updateDropboxSecret(DropboxSecretUpdateRequest request) throws Exception;
     public boolean deleteDropboxSecret(DropboxSecretDeleteRequest request) throws Exception;
 
+    Optional<FTPSecret> getFTPSecret(FTPSecretGetRequest request) throws Exception;
+    FTPSecret createFTPSecret(FTPSecretCreateRequest request) throws Exception;
+    boolean updateFTPSecret(FTPSecretUpdateRequest request) throws Exception;
+    boolean deleteFTPSecret(FTPSecretDeleteRequest request) throws Exception;
+
     public Optional<GDriveSecret> getGDriveSecret(GDriveSecretGetRequest request) throws Exception;
     public GDriveSecret createGDriveSecret(GDriveSecretCreateRequest request) throws Exception;
     public boolean updateGDriveSecret(GDriveSecretUpdateRequest request) throws Exception;

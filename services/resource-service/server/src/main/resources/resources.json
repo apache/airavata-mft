@@ -61,6 +61,16 @@
     "resourcePath": "/test.txt"
   },
   {
+    "type": "FTP",
+    "resourceId": "ftp-resource",
+    "resourcePath": "mft-1mb.txt",
+    "ftpStorage": {
+      "storageId": "ftp-resource",
+      "host": "ftp.dlptest.com",
+      "port": "21"
+    }
+  },
+  {
     "type": "GDRIVE",
     "resourceId": "gdrive-file",
     "resourcePath": "finalcheck.txt"

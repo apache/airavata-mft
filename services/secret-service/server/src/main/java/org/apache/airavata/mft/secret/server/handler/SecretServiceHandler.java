@@ -365,7 +365,61 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
         }
     }
 
-    //GDrive
+    @Override
+    public void getFTPSecret(FTPSecretGetRequest request, StreamObserver<FTPSecret> responseObserver) {
+        try {
+            this.backend.getFTPSecret(request).ifPresentOrElse(secret -> {
+                responseObserver.onNext(secret);
+                responseObserver.onCompleted();
+            }, () -> responseObserver.onError(Status.INTERNAL
+                    .withDescription("No FTP Secret with id " + request.getSecretId())
+                    .asRuntimeException()));
+
+        } catch (Exception e) {
+            logger.error("Error in retrieving FTP Secret with id " + request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in retrieving FTP Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void createFTPSecret(FTPSecretCreateRequest request, StreamObserver<FTPSecret> responseObserver) {
+        try {
+            this.backend.createFTPSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in creating FTP Secret", e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in creating FTP Secret")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void updateFTPSecret(FTPSecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.updateFTPSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in updating FTP Secret with id {}", request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in updating FTP Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void deleteFTPSecret(FTPSecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.deleteFTPSecret(request);
+        } catch (Exception e) {
+            logger.error("Error in deleting FTP Secret with id {}", request.getSecretId(), e);
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Error in deleting FTP Secret with id " + request.getSecretId())
+                    .asRuntimeException());
+        }
+    }
+
+    // GDrive
 
     @Override
     public void getGDriveSecret(GDriveSecretGetRequest request, StreamObserver<GDriveSecret> responseObserver) {
@@ -375,8 +429,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
                 responseObserver.onCompleted();
             }, () -> {
                 responseObserver.onError(Status.INTERNAL
-                        .withDescription("No GDRive Secret with id " + request.getSecretId())
-                        .asRuntimeException());
+                        .withDescription("No GDRive Secret with id " + request.getSecretId()).asRuntimeException());
             });
 
         } catch (Exception e) {
@@ -394,8 +447,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
             this.backend.createGDriveSecret(request);
         } catch (Exception e) {
             logger.error("Error in creating GDrive Secret", e);
-            responseObserver.onError(Status.INTERNAL.withCause(e)
-                    .withDescription("Error in creating GDrive Secret")
+            responseObserver.onError(Status.INTERNAL.withCause(e).withDescription("Error in creating GDrive Secret")
                     .asRuntimeException());
         }
     }
@@ -423,7 +475,5 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
                     .asRuntimeException());
         }
     }
-
-
 
 }

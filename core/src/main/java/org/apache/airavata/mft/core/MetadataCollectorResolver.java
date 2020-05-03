@@ -48,6 +48,9 @@ public final class MetadataCollectorResolver {
             case "DROPBOX":
                 className = "org.apache.airavata.mft.transport.dropbox.DropboxMetadataCollector";
                 break;
+            case "FTP":
+                className = "org.apache.airavata.mft.transport.ftp.FTPMetadataCollector";
+                break;
             case "GDRIVE":
                 className = "org.apache.airavata.mft.transport.gdrive.GDriveMetadataCollector";
                 break;
