@@ -17,6 +17,7 @@
 
 package org.apache.airavata.mft.secret.server.handler;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Empty;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
@@ -38,7 +39,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void getSCPSecret(SCPSecretGetRequest request, StreamObserver<SCPSecret> responseObserver) {
         try {
-            this.backend.getSCPSecret(request).ifPresentOrElse(secret -> {
+            this.getBackend().getSCPSecret(request).ifPresentOrElse(secret -> {
                 responseObserver.onNext(secret);
                 responseObserver.onCompleted();
             }, () -> {
@@ -57,19 +58,19 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
 
     @Override
     public void createSCPSecret(SCPSecretCreateRequest request, StreamObserver<SCPSecret> responseObserver) {
-        responseObserver.onNext(this.backend.createSCPSecret(request));
+        responseObserver.onNext(this.getBackend().createSCPSecret(request));
         responseObserver.onCompleted();
     }
 
     @Override
     public void updateSCPSecret(SCPSecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
-        this.backend.updateSCPSecret(request);
+        this.getBackend().updateSCPSecret(request);
         responseObserver.onCompleted();
     }
 
     @Override
     public void deleteSCPSecret(SCPSecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
-        boolean res = this.backend.deleteSCPSecret(request);
+        boolean res = this.getBackend().deleteSCPSecret(request);
         if (res) {
             responseObserver.onCompleted();
         } else {
@@ -82,7 +83,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void getS3Secret(S3SecretGetRequest request, StreamObserver<S3Secret> responseObserver) {
         try {
-            this.backend.getS3Secret(request).ifPresentOrElse(secret -> {
+            this.getBackend().getS3Secret(request).ifPresentOrElse(secret -> {
                 responseObserver.onNext(secret);
                 responseObserver.onCompleted();
             }, () -> {
@@ -102,7 +103,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void createS3Secret(S3SecretCreateRequest request, StreamObserver<S3Secret> responseObserver) {
         try {
-            this.backend.createS3Secret(request);
+            this.getBackend().createS3Secret(request);
         } catch (Exception e) {
             logger.error("Error in creating S3 Secret", e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -114,7 +115,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void updateS3Secret(S3SecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            this.backend.updateS3Secret(request);
+            this.getBackend().updateS3Secret(request);
         } catch (Exception e) {
             logger.error("Error in updating S3 Secret with id {}", request.getSecretId(), e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -126,7 +127,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void deleteS3Secret(S3SecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            this.backend.deleteS3Secret(request);
+            this.getBackend().deleteS3Secret(request);
         } catch (Exception e) {
             logger.error("Error in deleting S3 Secret with id {}", request.getSecretId(), e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -138,7 +139,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void getBoxSecret(BoxSecretGetRequest request, StreamObserver<BoxSecret> responseObserver) {
         try {
-            this.backend.getBoxSecret(request).ifPresentOrElse(secret -> {
+            this.getBackend().getBoxSecret(request).ifPresentOrElse(secret -> {
                 responseObserver.onNext(secret);
                 responseObserver.onCompleted();
             }, () -> {
@@ -159,7 +160,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void createBoxSecret(BoxSecretCreateRequest request, StreamObserver<BoxSecret> responseObserver) {
         try {
-            this.backend.createBoxSecret(request);
+            this.getBackend().createBoxSecret(request);
         } catch (Exception e) {
             logger.error("Error in creating Box Secret", e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -171,7 +172,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void updateBoxSecret(BoxSecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            this.backend.updateBoxSecret(request);
+            this.getBackend().updateBoxSecret(request);
         } catch (Exception e) {
             logger.error("Error in updating Box Secret with id {}", request.getSecretId(), e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -183,7 +184,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void deleteBoxSecret(BoxSecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            this.backend.deleteBoxSecret(request);
+            this.getBackend().deleteBoxSecret(request);
         } catch (Exception e) {
             logger.error("Error in deleting Box Secret with id {}", request.getSecretId(), e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -195,7 +196,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void getAzureSecret(AzureSecretGetRequest request, StreamObserver<AzureSecret> responseObserver) {
         try {
-            this.backend.getAzureSecret(request).ifPresentOrElse(secret -> {
+            this.getBackend().getAzureSecret(request).ifPresentOrElse(secret -> {
                 responseObserver.onNext(secret);
                 responseObserver.onCompleted();
             }, () -> {
@@ -216,7 +217,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void createAzureSecret(AzureSecretCreateRequest request, StreamObserver<AzureSecret> responseObserver) {
         try {
-            this.backend.createAzureSecret(request);
+            this.getBackend().createAzureSecret(request);
         } catch (Exception e) {
             logger.error("Error in creating Azure Secret", e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -228,7 +229,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void updateAzureSecret(AzureSecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            this.backend.updateAzureSecret(request);
+            this.getBackend().updateAzureSecret(request);
         } catch (Exception e) {
             logger.error("Error in updating Azure Secret with id {}", request.getSecretId(), e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -240,7 +241,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void deleteAzureSecret(AzureSecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            this.backend.deleteAzureSecret(request);
+            this.getBackend().deleteAzureSecret(request);
         } catch (Exception e) {
             logger.error("Error in deleting Azure Secret with id {}", request.getSecretId(), e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -254,7 +255,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void getGCSSecret(GCSSecretGetRequest request, StreamObserver<GCSSecret> responseObserver) {
         try {
-            this.backend.getGCSSecret(request).ifPresentOrElse(secret -> {
+            this.getBackend().getGCSSecret(request).ifPresentOrElse(secret -> {
                 responseObserver.onNext(secret);
                 responseObserver.onCompleted();
             }, () -> {
@@ -274,7 +275,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void createGCSSecret(GCSSecretCreateRequest request, StreamObserver<GCSSecret> responseObserver) {
         try {
-            this.backend.createGCSSecret(request);
+            this.getBackend().createGCSSecret(request);
         } catch (Exception e) {
             logger.error("Error in creating GCS Secret", e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -286,7 +287,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void updateGCSSecret(GCSSecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            this.backend.updateGCSSecret(request);
+            this.getBackend().updateGCSSecret(request);
         } catch (Exception e) {
             logger.error("Error in updating GCS Secret with id {}", request.getSecretId(), e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -298,7 +299,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void deleteGCSSecret(GCSSecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            this.backend.deleteGCSSecret(request);
+            this.getBackend().deleteGCSSecret(request);
         } catch (Exception e) {
             logger.error("Error in deleting GCS Secret with id {}", request.getSecretId(), e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -312,7 +313,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void getDropboxSecret(DropboxSecretGetRequest request, StreamObserver<DropboxSecret> responseObserver) {
         try {
-            this.backend.getDropboxSecret(request).ifPresentOrElse(secret -> {
+            this.getBackend().getDropboxSecret(request).ifPresentOrElse(secret -> {
                 responseObserver.onNext(secret);
                 responseObserver.onCompleted();
             }, () -> {
@@ -332,7 +333,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void createDropboxSecret(DropboxSecretCreateRequest request, StreamObserver<DropboxSecret> responseObserver) {
         try {
-            this.backend.createDropboxSecret(request);
+            this.getBackend().createDropboxSecret(request);
         } catch (Exception e) {
             logger.error("Error in creating Dropbox Secret", e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -344,7 +345,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void updateDropboxSecret(DropboxSecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            this.backend.updateDropboxSecret(request);
+            this.getBackend().updateDropboxSecret(request);
         } catch (Exception e) {
             logger.error("Error in updating Dropbox Secret with id {}", request.getSecretId(), e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -356,7 +357,7 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
     @Override
     public void deleteDropboxSecret(DropboxSecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            this.backend.deleteDropboxSecret(request);
+            this.getBackend().deleteDropboxSecret(request);
         } catch (Exception e) {
             logger.error("Error in deleting Dropbox Secret with id {}", request.getSecretId(), e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -365,5 +366,9 @@ public class SecretServiceHandler extends SecretServiceGrpc.SecretServiceImplBas
         }
     }
 
+    @VisibleForTesting
+    protected SecretBackend getBackend() {
+        return this.backend;
+    }
 
 }
