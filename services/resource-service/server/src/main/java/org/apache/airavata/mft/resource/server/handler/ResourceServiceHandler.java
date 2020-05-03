@@ -17,6 +17,7 @@
 
 package org.apache.airavata.mft.resource.server.handler;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Empty;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
@@ -40,7 +41,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void getSCPStorage(SCPStorageGetRequest request, StreamObserver<SCPStorage> responseObserver) {
         try {
-            this.backend.getSCPStorage(request).ifPresentOrElse(storage -> {
+            this.getBackend().getSCPStorage(request).ifPresentOrElse(storage -> {
                 responseObserver.onNext(storage);
                 responseObserver.onCompleted();
             }, () -> {
@@ -61,7 +62,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void createSCPStorage(SCPStorageCreateRequest request, StreamObserver<SCPStorage> responseObserver) {
         try {
-            responseObserver.onNext(this.backend.createSCPStorage(request));
+            responseObserver.onNext(this.getBackend().createSCPStorage(request));
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in creating the scp storage", e);
@@ -75,7 +76,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void updateSCPStorage(SCPStorageUpdateRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            this.backend.updateSCPStorage(request);
+            this.getBackend().updateSCPStorage(request);
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in updating the scp storage {}", request.getStorageId(), e);
@@ -91,7 +92,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     public void deleteSCPStorage(SCPStorageDeleteRequest request, StreamObserver<Empty> responseObserver) {
 
         try {
-            boolean res = this.backend.deleteSCPStorage(request);
+            boolean res = this.getBackend().deleteSCPStorage(request);
             if (res) {
                 responseObserver.onCompleted();
             } else {
@@ -113,7 +114,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void getSCPResource(SCPResourceGetRequest request, StreamObserver<SCPResource> responseObserver) {
         try {
-            this.backend.getSCPResource(request).ifPresentOrElse(resource -> {
+            this.getBackend().getSCPResource(request).ifPresentOrElse(resource -> {
                 responseObserver.onNext(resource);
                 responseObserver.onCompleted();
             }, () -> {
@@ -134,7 +135,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void createSCPResource(SCPResourceCreateRequest request, StreamObserver<SCPResource> responseObserver) {
         try {
-            responseObserver.onNext(this.backend.createSCPResource(request));
+            responseObserver.onNext(this.getBackend().createSCPResource(request));
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in creating the scp resource", e);
@@ -148,7 +149,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void updateSCPResource(SCPResourceUpdateRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            this.backend.updateSCPResource(request);
+            this.getBackend().updateSCPResource(request);
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in updating the scp resource {}", request.getResourceId(), e);
@@ -162,7 +163,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void deleteSCPResource(SCPResourceDeleteRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            boolean res = this.backend.deleteSCPResource(request);
+            boolean res = this.getBackend().deleteSCPResource(request);
             if (res) {
                 responseObserver.onCompleted();
             } else {
@@ -184,7 +185,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     public void getLocalResource(LocalResourceGetRequest request, StreamObserver<LocalResource> responseObserver) {
 
         try {
-            this.backend.getLocalResource(request).ifPresentOrElse(resource -> {
+            this.getBackend().getLocalResource(request).ifPresentOrElse(resource -> {
                 responseObserver.onNext(resource);
                 responseObserver.onCompleted();
             }, () -> {
@@ -204,7 +205,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void createLocalResource(LocalResourceCreateRequest request, StreamObserver<LocalResource> responseObserver) {
         try {
-            responseObserver.onNext(this.backend.createLocalResource(request));
+            responseObserver.onNext(this.getBackend().createLocalResource(request));
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in creating the local resource", e);
@@ -218,7 +219,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void updateLocalResource(LocalResourceUpdateRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            this.backend.updateLocalResource(request);
+            this.getBackend().updateLocalResource(request);
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in updating the local resource {}", request.getResourceId(), e);
@@ -232,7 +233,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void deleteLocalResource(LocalResourceDeleteRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            boolean res = this.backend.deleteLocalResource(request);
+            boolean res = this.getBackend().deleteLocalResource(request);
             if (res) {
                 responseObserver.onCompleted();
             } else {
@@ -250,7 +251,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void getS3Resource(S3ResourceGetRequest request, StreamObserver<S3Resource> responseObserver) {
         try {
-            this.backend.getS3Resource(request).ifPresentOrElse(resource -> {
+            this.getBackend().getS3Resource(request).ifPresentOrElse(resource -> {
                 responseObserver.onNext(resource);
                 responseObserver.onCompleted();
             }, () -> {
@@ -270,7 +271,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void createS3Resource(S3ResourceCreateRequest request, StreamObserver<S3Resource> responseObserver) {
         try {
-            responseObserver.onNext(this.backend.createS3Resource(request));
+            responseObserver.onNext(this.getBackend().createS3Resource(request));
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in creating the S3 resource", e);
@@ -284,7 +285,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void updateS3Resource(S3ResourceUpdateRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            this.backend.updateS3Resource(request);
+            this.getBackend().updateS3Resource(request);
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in updating the S3 resource {}", request.getResourceId(), e);
@@ -298,7 +299,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void deleteS3Resource(S3ResourceDeleteRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            boolean res = this.backend.deleteS3Resource(request);
+            boolean res = this.getBackend().deleteS3Resource(request);
             if (res) {
                 responseObserver.onCompleted();
             } else {
@@ -316,7 +317,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void getBoxResource(BoxResourceGetRequest request, StreamObserver<BoxResource> responseObserver) {
         try {
-            this.backend.getBoxResource(request).ifPresentOrElse(resource -> {
+            this.getBackend().getBoxResource(request).ifPresentOrElse(resource -> {
                 responseObserver.onNext(resource);
                 responseObserver.onCompleted();
             }, () -> {
@@ -336,7 +337,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void createBoxResource(BoxResourceCreateRequest request, StreamObserver<BoxResource> responseObserver) {
         try {
-            responseObserver.onNext(this.backend.createBoxResource(request));
+            responseObserver.onNext(this.getBackend().createBoxResource(request));
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in creating the Box resource", e);
@@ -349,7 +350,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void updateBoxResource(BoxResourceUpdateRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            this.backend.updateBoxResource(request);
+            this.getBackend().updateBoxResource(request);
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in updating the Box resource {}", request.getResourceId(), e);
@@ -362,7 +363,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void deleteBoxResource(BoxResourceDeleteRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            boolean res = this.backend.deleteBoxResource(request);
+            boolean res = this.getBackend().deleteBoxResource(request);
             if (res) {
                 responseObserver.onCompleted();
             } else {
@@ -379,7 +380,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void getAzureResource(AzureResourceGetRequest request, StreamObserver<AzureResource> responseObserver) {
         try {
-            this.backend.getAzureResource(request).ifPresentOrElse(resource -> {
+            this.getBackend().getAzureResource(request).ifPresentOrElse(resource -> {
                 responseObserver.onNext(resource);
                 responseObserver.onCompleted();
             }, () -> {
@@ -399,7 +400,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void createAzureResource(AzureResourceCreateRequest request, StreamObserver<AzureResource> responseObserver) {
         try {
-            responseObserver.onNext(this.backend.createAzureResource(request));
+            responseObserver.onNext(this.getBackend().createAzureResource(request));
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in creating the Azure resource", e);
@@ -413,7 +414,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void updateAzureResource(AzureResourceUpdateRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            this.backend.updateAzureResource(request);
+            this.getBackend().updateAzureResource(request);
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in updating the Azure resource {}", request.getResourceId(), e);
@@ -427,7 +428,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void deleteAzureResource(AzureResourceDeleteRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            boolean res = this.backend.deleteAzureResource(request);
+            boolean res = this.getBackend().deleteAzureResource(request);
             if (res) {
                 responseObserver.onCompleted();
             } else {
@@ -444,7 +445,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void getGCSResource(GCSResourceGetRequest request, StreamObserver<GCSResource> responseObserver) {
         try {
-            this.backend.getGCSResource(request).ifPresentOrElse(resource -> {
+            this.getBackend().getGCSResource(request).ifPresentOrElse(resource -> {
                 responseObserver.onNext(resource);
                 responseObserver.onCompleted();
             }, () -> {
@@ -464,7 +465,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void createGCSResource(GCSResourceCreateRequest request, StreamObserver<GCSResource> responseObserver) {
         try {
-            responseObserver.onNext(this.backend.createGCSResource(request));
+            responseObserver.onNext(this.getBackend().createGCSResource(request));
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in creating the GCS resource", e);
@@ -478,7 +479,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void updateGCSResource(GCSResourceUpdateRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            this.backend.updateGCSResource(request);
+            this.getBackend().updateGCSResource(request);
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in updating the GCS resource {}", request.getResourceId(), e);
@@ -492,7 +493,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void deleteGCSResource(GCSResourceDeleteRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            boolean res = this.backend.deleteGCSResource(request);
+            boolean res = this.getBackend().deleteGCSResource(request);
             if (res) {
                 responseObserver.onCompleted();
             } else {
@@ -509,7 +510,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void getDropboxResource(DropboxResourceGetRequest request, StreamObserver<DropboxResource> responseObserver) {
         try {
-            this.backend.getDropboxResource(request).ifPresentOrElse(resource -> {
+            this.getBackend().getDropboxResource(request).ifPresentOrElse(resource -> {
                 responseObserver.onNext(resource);
                 responseObserver.onCompleted();
             }, () -> {
@@ -529,7 +530,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void createDropboxResource(DropboxResourceCreateRequest request, StreamObserver<DropboxResource> responseObserver) {
         try {
-            responseObserver.onNext(this.backend.createDropboxResource(request));
+            responseObserver.onNext(this.getBackend().createDropboxResource(request));
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in creating the dropbox resource", e);
@@ -543,7 +544,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void updateDropboxResource(DropboxResourceUpdateRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            this.backend.updateDropboxResource(request);
+            this.getBackend().updateDropboxResource(request);
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in updating the dropbox resource {}", request.getResourceId(), e);
@@ -557,7 +558,7 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
     @Override
     public void deleteDropboxResource(DropboxResourceDeleteRequest request, StreamObserver<Empty> responseObserver) {
         try {
-            boolean res = this.backend.deleteDropboxResource(request);
+            boolean res = this.getBackend().deleteDropboxResource(request);
             if (res) {
                 responseObserver.onCompleted();
             } else {
@@ -570,5 +571,10 @@ public class ResourceServiceHandler extends ResourceServiceGrpc.ResourceServiceI
                     .withDescription("Failed in deleting the dropbox resource with id " + request.getResourceId())
                     .asRuntimeException());
         }
+    }
+
+    @VisibleForTesting
+    protected ResourceBackend getBackend() {
+        return backend;
     }
 }
