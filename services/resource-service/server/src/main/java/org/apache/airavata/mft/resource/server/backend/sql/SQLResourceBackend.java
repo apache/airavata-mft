@@ -17,6 +17,7 @@
 
 package org.apache.airavata.mft.resource.server.backend.sql;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
 import org.apache.airavata.mft.resource.server.backend.sql.entity.LocalResourceEntity;
 import org.apache.airavata.mft.resource.server.backend.sql.entity.SCPResourceEntity;
@@ -59,19 +60,19 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request) {
-        Optional<SCPStorageEntity> storageEty = scpStorageRepository.findByStorageId(request.getStorageId());
+        Optional<SCPStorageEntity> storageEty = getScpStorageRepository().findByStorageId(request.getStorageId());
         return storageEty.map(scpStorageEntity -> mapper.map(scpStorageEntity, SCPStorage.newBuilder().getClass()).build());
     }
 
     @Override
     public SCPStorage createSCPStorage(SCPStorageCreateRequest request) {
-        SCPStorageEntity savedEntity = scpStorageRepository.save(mapper.map(request, SCPStorageEntity.class));
+        SCPStorageEntity savedEntity = getScpStorageRepository().save(mapper.map(request, SCPStorageEntity.class));
         return mapper.map(savedEntity, SCPStorage.newBuilder().getClass()).build();
     }
 
     @Override
     public boolean updateSCPStorage(SCPStorageUpdateRequest request) {
-        SCPStorageEntity updatedEntity = scpStorageRepository.save(mapper.map(request, SCPStorageEntity.class));
+        SCPStorageEntity updatedEntity = getScpStorageRepository().save(mapper.map(request, SCPStorageEntity.class));
         return true;
     }
 
@@ -83,7 +84,7 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public Optional<SCPResource> getSCPResource(SCPResourceGetRequest request) {
-        Optional<SCPResourceEntity> resourceEntity = scpResourceRepository.findByResourceId(request.getResourceId());
+        Optional<SCPResourceEntity> resourceEntity = getScpResourceRepository().findByResourceId(request.getResourceId());
 
         return resourceEntity.map(scpResourceEntity -> mapper.map(scpResourceEntity, SCPResource.newBuilder().getClass())
                 .setScpStorage(mapper.map(scpResourceEntity.getScpStorage(), SCPStorage.newBuilder().getClass())).build());
@@ -92,43 +93,43 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public SCPResource createSCPResource(SCPResourceCreateRequest request) {
-        SCPResourceEntity savedEntity = scpResourceRepository.save(mapper.map(request, SCPResourceEntity.class));
+        SCPResourceEntity savedEntity = getScpResourceRepository().save(mapper.map(request, SCPResourceEntity.class));
         return getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(savedEntity.getResourceId()).build()).get();
     }
 
     @Override
     public boolean updateSCPResource(SCPResourceUpdateRequest request) {
-        SCPResourceEntity updatedEntity = scpResourceRepository.save(mapper.map(request, SCPResourceEntity.class));
+        SCPResourceEntity updatedEntity = getScpResourceRepository().save(mapper.map(request, SCPResourceEntity.class));
         return true;
     }
 
     @Override
     public boolean deleteSCPResource(SCPResourceDeleteRequest request) {
-        scpResourceRepository.deleteById(request.getResourceId());
+        getScpResourceRepository().deleteById(request.getResourceId());
         return true;
     }
 
     @Override
     public Optional<LocalResource> getLocalResource(LocalResourceGetRequest request) {
-        Optional<LocalResourceEntity> resourceEntity = localResourceRepository.findByResourceId(request.getResourceId());
+        Optional<LocalResourceEntity> resourceEntity = getLocalResourceRepository().findByResourceId(request.getResourceId());
         return resourceEntity.map(scpResourceEntity -> mapper.map(scpResourceEntity, LocalResource.newBuilder().getClass()).build());
     }
 
     @Override
     public LocalResource createLocalResource(LocalResourceCreateRequest request) {
-        LocalResourceEntity savedEntity = localResourceRepository.save(mapper.map(request, LocalResourceEntity.class));
+        LocalResourceEntity savedEntity = getLocalResourceRepository().save(mapper.map(request, LocalResourceEntity.class));
         return mapper.map(savedEntity, LocalResource.newBuilder().getClass()).build();
     }
 
     @Override
     public boolean updateLocalResource(LocalResourceUpdateRequest request) {
-        LocalResourceEntity updatedEntity = localResourceRepository.save(mapper.map(request, LocalResourceEntity.class));
+        LocalResourceEntity updatedEntity = getLocalResourceRepository().save(mapper.map(request, LocalResourceEntity.class));
         return true;
     }
 
     @Override
     public boolean deleteLocalResource(LocalResourceDeleteRequest request) {
-        localResourceRepository.deleteById(request.getResourceId());
+        getLocalResourceRepository().deleteById(request.getResourceId());
         return true;
     }
 
@@ -236,4 +237,18 @@ public class SQLResourceBackend implements ResourceBackend {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
+    @VisibleForTesting
+    protected SCPStorageRepository getScpStorageRepository() {
+        return scpStorageRepository;
+    }
+
+    @VisibleForTesting
+    protected SCPResourceRepository getScpResourceRepository() {
+        return scpResourceRepository;
+    }
+
+    @VisibleForTesting
+    protected LocalResourceRepository getLocalResourceRepository() {
+        return localResourceRepository;
+    }
 }
