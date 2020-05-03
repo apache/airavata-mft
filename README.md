@@ -74,7 +74,7 @@ public class SampleClient {
             try {
                 TransferStateApiResponse transferState = client.getTransferState(TransferStateApiRequest.newBuilder().setTransferId(transferApiResponse.getTransferId()).build());
                 System.out.println("Latest Transfer State " + transferState.getState());
-                if (transferState.getState().equals("COMPLETED")) {
+                if ("COMPLETED".equals(transferState.getState()) || "FAILED".equals(transferState.getState()) {
                     break;
                 }
 
