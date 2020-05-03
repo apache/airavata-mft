@@ -1,0 +1,8 @@
+setup.cfg
+setup.py
+clients/mft_api_client.py
+mft/MFTApi_pb2.py
+mft_python_sdk.egg-info/PKG-INFO
+mft_python_sdk.egg-info/SOURCES.txt
+mft_python_sdk.egg-info/dependency_links.txt
+mft_python_sdk.egg-info/top_level.txt
