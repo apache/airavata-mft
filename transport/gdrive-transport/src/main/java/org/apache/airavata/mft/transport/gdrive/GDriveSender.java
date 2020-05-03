@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.List;
 
 
 public class GDriveSender implements Connector {
@@ -100,18 +101,18 @@ public class GDriveSender implements Connector {
                 .setFields("files(id,name)")
                 .execute();
 
-        for (File f : fileList.getFiles()) {
-                id = f.getId();
-                File file = drive.files().get(id).execute();
-                drive.files().update(file.getId(), fileMetadata, contentStream).setFields("id").execute();
-                fileupdated = true;
-        }
-
-        if (fileupdated == false) {
+        List<File> filtered = fileList.getFiles();
+        if (filtered == null || filtered.length == 0) {
             File file = drive.files().create(fileMetadata, contentStream).setFields("id").execute();
             Permission userPermission = new Permission();
             userPermission.setType("user").setRole("writer").setEmailAddress(entityUser);
             drive.permissions().create(file.getId(), userPermission).execute();
+        } else if (filtered.length > 1) {
+            throw new Exception("More than one file found with name " + gdriveResource.getResourcePath());
+        } else {
+            id = filtered.get(0).getId();
+            File file = drive.files().get(id).execute();
+            drive.files().update(file.getId(), fileMetadata, contentStream).setFields("id").execute();
         }
 
         logger.info("Completed GDrive send for remote server for transfer {} ", context.getTransferId());
