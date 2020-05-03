@@ -102,12 +102,12 @@ public class GDriveSender implements Connector {
                 .execute();
 
         List<File> filtered = fileList.getFiles();
-        if (filtered == null || filtered.length == 0) {
+        if (filtered == null || filtered.size() == 0) {
             File file = drive.files().create(fileMetadata, contentStream).setFields("id").execute();
             Permission userPermission = new Permission();
             userPermission.setType("user").setRole("writer").setEmailAddress(entityUser);
             drive.permissions().create(file.getId(), userPermission).execute();
-        } else if (filtered.length > 1) {
+        } else if (filtered.size() > 1) {
             throw new Exception("More than one file found with name " + gdriveResource.getResourcePath());
         } else {
             id = filtered.get(0).getId();
