@@ -70,7 +70,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.airavata</groupId>
-            <artifactId>mft-gdrive-transport</artifactId>
+            <artifactId>mft-ftp-transport</artifactId>
             <version>0.01-SNAPSHOT</version>
         </dependency>
         <dependency>

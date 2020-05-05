@@ -17,14 +17,69 @@
 
 package org.apache.airavata.mft.resource.server.backend.sql;
 
+
+
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
+import org.apache.airavata.mft.resource.server.backend.sql.entity.FTPResourceEntity;
+import org.apache.airavata.mft.resource.server.backend.sql.entity.FTPStorageEntity;
 import org.apache.airavata.mft.resource.server.backend.sql.entity.LocalResourceEntity;
 import org.apache.airavata.mft.resource.server.backend.sql.entity.SCPResourceEntity;
 import org.apache.airavata.mft.resource.server.backend.sql.entity.SCPStorageEntity;
+import org.apache.airavata.mft.resource.server.backend.sql.repository.FTPResourceRepository;
+import org.apache.airavata.mft.resource.server.backend.sql.repository.FTPStorageRepository;
 import org.apache.airavata.mft.resource.server.backend.sql.repository.LocalResourceRepository;
 import org.apache.airavata.mft.resource.server.backend.sql.repository.SCPResourceRepository;
 import org.apache.airavata.mft.resource.server.backend.sql.repository.SCPStorageRepository;
-import org.apache.airavata.mft.resource.service.*;
+import org.apache.airavata.mft.resource.service.AzureResource;
+import org.apache.airavata.mft.resource.service.AzureResourceCreateRequest;
+import org.apache.airavata.mft.resource.service.AzureResourceDeleteRequest;
+import org.apache.airavata.mft.resource.service.AzureResourceGetRequest;
+import org.apache.airavata.mft.resource.service.AzureResourceUpdateRequest;
+import org.apache.airavata.mft.resource.service.BoxResource;
+import org.apache.airavata.mft.resource.service.BoxResourceCreateRequest;
+import org.apache.airavata.mft.resource.service.BoxResourceDeleteRequest;
+import org.apache.airavata.mft.resource.service.BoxResourceGetRequest;
+import org.apache.airavata.mft.resource.service.BoxResourceUpdateRequest;
+import org.apache.airavata.mft.resource.service.DropboxResource;
+import org.apache.airavata.mft.resource.service.DropboxResourceCreateRequest;
+import org.apache.airavata.mft.resource.service.DropboxResourceDeleteRequest;
+import org.apache.airavata.mft.resource.service.DropboxResourceGetRequest;
+import org.apache.airavata.mft.resource.service.DropboxResourceUpdateRequest;
+import org.apache.airavata.mft.resource.service.FTPResource;
+import org.apache.airavata.mft.resource.service.FTPResourceCreateRequest;
+import org.apache.airavata.mft.resource.service.FTPResourceDeleteRequest;
+import org.apache.airavata.mft.resource.service.FTPResourceGetRequest;
+import org.apache.airavata.mft.resource.service.FTPResourceUpdateRequest;
+import org.apache.airavata.mft.resource.service.FTPStorage;
+import org.apache.airavata.mft.resource.service.FTPStorageCreateRequest;
+import org.apache.airavata.mft.resource.service.FTPStorageDeleteRequest;
+import org.apache.airavata.mft.resource.service.FTPStorageGetRequest;
+import org.apache.airavata.mft.resource.service.FTPStorageUpdateRequest;
+import org.apache.airavata.mft.resource.service.GCSResource;
+import org.apache.airavata.mft.resource.service.GCSResourceCreateRequest;
+import org.apache.airavata.mft.resource.service.GCSResourceDeleteRequest;
+import org.apache.airavata.mft.resource.service.GCSResourceGetRequest;
+import org.apache.airavata.mft.resource.service.GCSResourceUpdateRequest;
+import org.apache.airavata.mft.resource.service.LocalResource;
+import org.apache.airavata.mft.resource.service.LocalResourceCreateRequest;
+import org.apache.airavata.mft.resource.service.LocalResourceDeleteRequest;
+import org.apache.airavata.mft.resource.service.LocalResourceGetRequest;
+import org.apache.airavata.mft.resource.service.LocalResourceUpdateRequest;
+import org.apache.airavata.mft.resource.service.S3Resource;
+import org.apache.airavata.mft.resource.service.S3ResourceCreateRequest;
+import org.apache.airavata.mft.resource.service.S3ResourceDeleteRequest;
+import org.apache.airavata.mft.resource.service.S3ResourceGetRequest;
+import org.apache.airavata.mft.resource.service.S3ResourceUpdateRequest;
+import org.apache.airavata.mft.resource.service.SCPResource;
+import org.apache.airavata.mft.resource.service.SCPResourceCreateRequest;
+import org.apache.airavata.mft.resource.service.SCPResourceDeleteRequest;
+import org.apache.airavata.mft.resource.service.SCPResourceGetRequest;
+import org.apache.airavata.mft.resource.service.SCPResourceUpdateRequest;
+import org.apache.airavata.mft.resource.service.SCPStorage;
+import org.apache.airavata.mft.resource.service.SCPStorageCreateRequest;
+import org.apache.airavata.mft.resource.service.SCPStorageDeleteRequest;
+import org.apache.airavata.mft.resource.service.SCPStorageGetRequest;
+import org.apache.airavata.mft.resource.service.SCPStorageUpdateRequest;
 import org.dozer.DozerBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +99,12 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Autowired
     private LocalResourceRepository localResourceRepository;
+
+    @Autowired
+    private FTPResourceRepository ftpResourceRepository;
+
+    @Autowired
+    private FTPStorageRepository ftpStorageRepository;
 
     private DozerBeanMapper mapper = new DozerBeanMapper();
 
@@ -234,6 +295,56 @@ public class SQLResourceBackend implements ResourceBackend {
     @Override
     public boolean deleteDropboxResource(DropboxResourceDeleteRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public Optional<FTPResource> getFTPResource(FTPResourceGetRequest request) {
+        Optional<FTPResourceEntity> resourceEntity = ftpResourceRepository.findByResourceId(request.getResourceId());
+
+        return resourceEntity.map(ftpResourceEntity -> mapper.map(ftpResourceEntity, FTPResource.newBuilder().getClass())
+                .setFtpStorage(mapper.map(ftpResourceEntity.getFtpStorage(), FTPStorage.newBuilder().getClass())).build());
+    }
+
+    @Override
+    public FTPResource createFTPResource(FTPResourceCreateRequest request) {
+        FTPResourceEntity savedEntity = ftpResourceRepository.save(mapper.map(request, FTPResourceEntity.class));
+        return getFTPResource(FTPResourceGetRequest.newBuilder().setResourceId(savedEntity.getResourceId()).build()).orElse(null);
+    }
+
+    @Override
+    public boolean updateFTPResource(FTPResourceUpdateRequest request) {
+        ftpResourceRepository.save(mapper.map(request, FTPResourceEntity.class));
+        return true;
+    }
+
+    @Override
+    public boolean deleteFTPResource(FTPResourceDeleteRequest request) {
+        ftpResourceRepository.deleteById(request.getResourceId());
+        return true;
+    }
+
+    @Override
+    public Optional<FTPStorage> getFTPStorage(FTPStorageGetRequest request) {
+        Optional<FTPStorageEntity> storageEty = ftpStorageRepository.findByStorageId(request.getStorageId());
+        return storageEty.map(ftpStorageEntity -> mapper.map(ftpStorageEntity, FTPStorage.newBuilder().getClass()).build());
+    }
+
+    @Override
+    public FTPStorage createFTPStorage(FTPStorageCreateRequest request) {
+        FTPStorageEntity savedEntity = ftpStorageRepository.save(mapper.map(request, FTPStorageEntity.class));
+        return mapper.map(savedEntity, FTPStorage.newBuilder().getClass()).build();
+    }
+
+    @Override
+    public boolean updateFTPStorage(FTPStorageUpdateRequest request) {
+        ftpStorageRepository.save(mapper.map(request, FTPStorageEntity.class));
+        return true;
+    }
+
+    @Override
+    public boolean deleteFTPStorage(FTPStorageDeleteRequest request) {
+        ftpResourceRepository.deleteById(request.getStorageId());
+        return true;
     }
 
 }
