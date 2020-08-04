@@ -85,6 +85,7 @@ message SCPResourceDeleteRequest {
 message LocalResource {
     string resourceId = 1;
     string resourcePath = 2;
+    string agentId = 3;
 }
 
 message LocalResourceGetRequest {
@@ -93,11 +94,13 @@ message LocalResourceGetRequest {
 
 message LocalResourceCreateRequest {
     string resourcePath = 1;
+    string agentId = 2;
 }
 
 message LocalResourceUpdateRequest {
     string resourceId = 1;
     string resourcePath = 2;
+    string agentId = 3;
 }
 
 message LocalResourceDeleteRequest {
