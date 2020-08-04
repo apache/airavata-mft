@@ -19,6 +19,7 @@ message TransferApiRequest {
     string destCredentialBackend = 10;
     bool affinityTransfer = 11;
     map<string, int32> targetAgents = 12;
+    string mftAuthorizationToken = 13;
 }
 
 message TransferApiResponse {
