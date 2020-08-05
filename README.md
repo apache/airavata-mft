@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/apache/airavata-mft.svg?branch=master)](https://travis-ci.org/apache/airavata-mft)
+
+
 Airavata Managed File Transfer Service and Clients
 
 ## Running from IDE
