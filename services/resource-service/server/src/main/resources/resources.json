@@ -69,5 +69,10 @@
       "host": "ftp.dlptest.com",
       "port": "21"
     }
+  },
+  {
+    "type": "GDRIVE",
+    "resourceId": "gdrive-file",
+    "resourcePath": "finalcheck.txt"
   }
 ]

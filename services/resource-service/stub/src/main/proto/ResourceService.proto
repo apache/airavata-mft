@@ -293,6 +293,29 @@ message FTPResourceDeleteRequest {
     string resourceId = 1;
 }
 
+// GDrive resource
+message GDriveResource {
+    string resourceId = 1;
+    string resourcePath = 2;
+}
+
+message GDriveResourceGetRequest {
+    string resourceId = 1;
+}
+
+message GDriveResourceCreateRequest {
+    string resourcePath = 1;
+}
+
+message GDriveResourceUpdateRequest {
+    string resourceId = 1;
+    string resourcePath = 2;
+}
+
+message GDriveResourceDeleteRequest {
+    string resourceId = 1;
+}
+
 service  ResourceService {
     // SCP Storage
 
@@ -550,6 +573,31 @@ service  ResourceService {
     rpc deleteFTPResource (FTPResourceDeleteRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
            delete: "/v1.0/resource/ftp"
+        };
+    }
+
+    //GDrive resources
+    rpc getGDriveResource (GDriveResourceGetRequest) returns (GDriveResource) {
+        option (google.api.http) = {
+            get: "/v1.0/resource/gdrive"
+        };
+    }
+
+    rpc createGDriveResource (GDriveResourceCreateRequest) returns (GDriveResource) {
+        option (google.api.http) = {
+            post: "/v1.0/resource/gdrive"
+        };
+    }
+
+    rpc updateGDriveResource (GDriveResourceUpdateRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            put: "/v1.0/resource/gdrive"
+        };
+    }
+
+    rpc deleteGDriveResource (GDriveResourceDeleteRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/v1.0/resource/gdrive"
         };
     }
 

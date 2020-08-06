@@ -60,4 +60,9 @@ public interface SecretBackend {
     FTPSecret createFTPSecret(FTPSecretCreateRequest request) throws Exception;
     boolean updateFTPSecret(FTPSecretUpdateRequest request) throws Exception;
     boolean deleteFTPSecret(FTPSecretDeleteRequest request) throws Exception;
+
+    public Optional<GDriveSecret> getGDriveSecret(GDriveSecretGetRequest request) throws Exception;
+    public GDriveSecret createGDriveSecret(GDriveSecretCreateRequest request) throws Exception;
+    public boolean updateGDriveSecret(GDriveSecretUpdateRequest request) throws Exception;
+    public boolean deleteGDriveSecret(GDriveSecretDeleteRequest request) throws Exception;
 }

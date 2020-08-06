@@ -335,4 +335,43 @@ public class FileBasedSecretBackend implements SecretBackend {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
+    @Override
+    public Optional<GDriveSecret> getGDriveSecret(GDriveSecretGetRequest request) throws Exception {
+        JSONParser jsonParser = new JSONParser();
+        InputStream inputStream = FileBasedSecretBackend.class.getClassLoader().getResourceAsStream(secretFile);
+
+        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            Object obj = jsonParser.parse(reader);
+
+            JSONArray resourceList = (JSONArray) obj;
+
+            List<GDriveSecret> gDriveSecrets = (List<GDriveSecret>) resourceList.stream()
+                    .filter(resource -> "GDRIVE".equals(((JSONObject) resource).get("type").toString()))
+                    .map(resource -> {
+                        JSONObject r = (JSONObject) resource;
+
+                        GDriveSecret gDriveSecret = GDriveSecret.newBuilder().setSecretId(r.get("secretId").toString())
+                                .setCredentialsJson(r.get("credentialsJson").toString()).build();
+
+                        return gDriveSecret;
+                    }).collect(Collectors.toList());
+            return gDriveSecrets.stream().filter(r -> request.getSecretId().equals(r.getSecretId())).findFirst();
+        }
+    }
+
+    @Override
+    public GDriveSecret createGDriveSecret(GDriveSecretCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateGDriveSecret(GDriveSecretUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteGDriveSecret(GDriveSecretDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
 }

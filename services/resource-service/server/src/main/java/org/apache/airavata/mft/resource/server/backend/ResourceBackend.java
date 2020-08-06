@@ -76,4 +76,9 @@ public interface ResourceBackend {
     FTPResource createFTPResource(FTPResourceCreateRequest request) throws Exception;
     boolean updateFTPResource(FTPResourceUpdateRequest request) throws Exception;
     boolean deleteFTPResource(FTPResourceDeleteRequest request) throws Exception;
+
+    public Optional<GDriveResource> getGDriveResource(GDriveResourceGetRequest request) throws Exception;
+    public GDriveResource createGDriveResource(GDriveResourceCreateRequest request) throws Exception;
+    public boolean updateGDriveResource(GDriveResourceUpdateRequest request) throws Exception;
+    public boolean deleteGDriveResource(GDriveResourceDeleteRequest request) throws Exception;
 }

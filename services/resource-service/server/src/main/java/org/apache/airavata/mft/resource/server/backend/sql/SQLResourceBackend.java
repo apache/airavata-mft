@@ -60,6 +60,11 @@ import org.apache.airavata.mft.resource.service.GCSResourceCreateRequest;
 import org.apache.airavata.mft.resource.service.GCSResourceDeleteRequest;
 import org.apache.airavata.mft.resource.service.GCSResourceGetRequest;
 import org.apache.airavata.mft.resource.service.GCSResourceUpdateRequest;
+import org.apache.airavata.mft.resource.service.GDriveResource;
+import org.apache.airavata.mft.resource.service.GDriveResourceCreateRequest;
+import org.apache.airavata.mft.resource.service.GDriveResourceDeleteRequest;
+import org.apache.airavata.mft.resource.service.GDriveResourceGetRequest;
+import org.apache.airavata.mft.resource.service.GDriveResourceUpdateRequest;
 import org.apache.airavata.mft.resource.service.LocalResource;
 import org.apache.airavata.mft.resource.service.LocalResourceCreateRequest;
 import org.apache.airavata.mft.resource.service.LocalResourceDeleteRequest;
@@ -347,4 +352,23 @@ public class SQLResourceBackend implements ResourceBackend {
         return true;
     }
 
+    @Override
+    public Optional<GDriveResource> getGDriveResource(GDriveResourceGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public GDriveResource createGDriveResource(GDriveResourceCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateGDriveResource(GDriveResourceUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteGDriveResource(GDriveResourceDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
 }

@@ -51,6 +51,9 @@ public final class MetadataCollectorResolver {
             case "FTP":
                 className = "org.apache.airavata.mft.transport.ftp.FTPMetadataCollector";
                 break;
+            case "GDRIVE":
+                className = "org.apache.airavata.mft.transport.gdrive.GDriveMetadataCollector";
+                break;
         }
 
         if (className != null) {
