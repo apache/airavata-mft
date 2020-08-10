@@ -20,9 +20,9 @@ package org.apache.airavata.mft.transport.local;
 import org.apache.airavata.mft.core.ResourceMetadata;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.service.LocalResource;
-import org.apache.airavata.mft.resource.service.LocalResourceGetRequest;
-import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
+import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.local.resource.LocalResource;
+import org.apache.airavata.mft.resource.stubs.local.resource.LocalResourceGetRequest;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -57,8 +57,8 @@ public class LocalMetadataCollector implements MetadataCollector {
     @Override
     public ResourceMetadata getGetResourceMetadata(String resourceId, String credentialToken) throws Exception {
 
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
-        LocalResource localResource = resourceClient.getLocalResource(LocalResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        LocalResource localResource = resourceClient.local().getLocalResource(LocalResourceGetRequest.newBuilder().setResourceId(resourceId).build());
         File resourceFile = new File(localResource.getResourcePath());
         if (resourceFile.exists()) {
 
@@ -91,8 +91,8 @@ public class LocalMetadataCollector implements MetadataCollector {
 
     @Override
     public Boolean isAvailable(String resourceId, String credentialToken) throws Exception {
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
-        LocalResource localResource = resourceClient.getLocalResource(LocalResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+       ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        LocalResource localResource = resourceClient.local().getLocalResource(LocalResourceGetRequest.newBuilder().setResourceId(resourceId).build());
         File resourceFile = new File(localResource.getResourcePath());
         return resourceFile.exists();
     }
