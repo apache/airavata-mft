@@ -17,7 +17,13 @@
 
 package org.apache.airavata.mft.secret.server.backend;
 
-import org.apache.airavata.mft.secret.service.*;
+import org.apache.airavata.mft.credential.stubs.azure.*;
+import org.apache.airavata.mft.credential.stubs.box.*;
+import org.apache.airavata.mft.credential.stubs.dropbox.*;
+import org.apache.airavata.mft.credential.stubs.ftp.*;
+import org.apache.airavata.mft.credential.stubs.gcs.*;
+import org.apache.airavata.mft.credential.stubs.s3.*;
+import org.apache.airavata.mft.credential.stubs.scp.*;
 
 import java.util.Optional;
 

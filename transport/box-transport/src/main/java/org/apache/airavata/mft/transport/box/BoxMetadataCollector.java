@@ -22,15 +22,14 @@ import com.box.sdk.BoxAPIConnection;
 import com.box.sdk.BoxFile;
 import org.apache.airavata.mft.core.ResourceMetadata;
 import org.apache.airavata.mft.core.api.MetadataCollector;
+import org.apache.airavata.mft.credential.stubs.box.BoxSecret;
+import org.apache.airavata.mft.credential.stubs.box.BoxSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.box.resource.BoxResource;
 import org.apache.airavata.mft.resource.stubs.box.resource.BoxResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.service.BoxSecret;
-import org.apache.airavata.mft.secret.service.BoxSecretGetRequest;
-import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
-
+import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
 public class BoxMetadataCollector implements MetadataCollector {
 
@@ -63,8 +62,8 @@ public class BoxMetadataCollector implements MetadataCollector {
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         BoxResource boxResource = resourceClient.box().getBoxResource(BoxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
-        BoxSecret boxSecret = secretClient.getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        BoxSecret boxSecret = secretClient.box().getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         BoxAPIConnection api = new BoxAPIConnection(boxSecret.getAccessToken());
         BoxFile boxFile = new BoxFile(api, boxResource.getBoxFileId());
@@ -90,8 +89,8 @@ public class BoxMetadataCollector implements MetadataCollector {
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         BoxResource boxResource = resourceClient.box().getBoxResource(BoxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
-        BoxSecret boxSecret = secretClient.getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        BoxSecret boxSecret = secretClient.box().getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         BoxAPIConnection api = new BoxAPIConnection(boxSecret.getAccessToken());
         BoxFile boxFile = new BoxFile(api, boxResource.getBoxFileId());

@@ -18,28 +18,56 @@
 package org.apache.airavata.mft.secret.client;
 
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
+import org.apache.airavata.mft.credential.service.azure.AzureSecretServiceGrpc;
+import org.apache.airavata.mft.credential.service.box.BoxSecretServiceGrpc;
+import org.apache.airavata.mft.credential.service.dropbox.DropboxSecretServiceGrpc;
+import org.apache.airavata.mft.credential.service.ftp.FTPSecretServiceGrpc;
+import org.apache.airavata.mft.credential.service.gcs.GCSSecretServiceGrpc;
+import org.apache.airavata.mft.credential.service.s3.S3SecretServiceGrpc;
+import org.apache.airavata.mft.credential.service.scp.SCPSecretServiceGrpc;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.io.Closeable;
+import java.io.IOException;
 
-public class SecretServiceClient {
+public class SecretServiceClient implements Closeable {
 
-    private static Map<String, Map<Integer, SecretServiceGrpc.SecretServiceBlockingStub>> stubCache = new ConcurrentHashMap<>();
+    private ManagedChannel channel;
 
-    public static SecretServiceGrpc.SecretServiceBlockingStub buildClient(String hostName, int port) {
+    SecretServiceClient(ManagedChannel channel) {
+        this.channel = channel;
+    }
 
-        if (stubCache.containsKey(hostName)) {
-            if (stubCache.get(hostName).containsKey(port)) {
-                return stubCache.get(hostName).get(port);
-            }
-        }
+    public SCPSecretServiceGrpc.SCPSecretServiceBlockingStub scp() {
+        return SCPSecretServiceGrpc.newBlockingStub(channel);
+    }
 
-        ManagedChannel channel = ManagedChannelBuilder.forAddress(hostName, port).usePlaintext().build();
-        SecretServiceGrpc.SecretServiceBlockingStub stub = SecretServiceGrpc.newBlockingStub(channel);
-        stubCache.put(hostName, Collections.singletonMap(port, stub));
-        return stub;
+    public S3SecretServiceGrpc.S3SecretServiceBlockingStub s3() {
+        return S3SecretServiceGrpc.newBlockingStub(channel);
+    }
+
+    public FTPSecretServiceGrpc.FTPSecretServiceBlockingStub ftp() {
+        return FTPSecretServiceGrpc.newBlockingStub(channel);
+    }
+
+    public AzureSecretServiceGrpc.AzureSecretServiceBlockingStub azure() {
+        return AzureSecretServiceGrpc.newBlockingStub(channel);
+    }
+
+    public GCSSecretServiceGrpc.GCSSecretServiceBlockingStub gcs() {
+        return GCSSecretServiceGrpc.newBlockingStub(channel);
+    }
+
+    public BoxSecretServiceGrpc.BoxSecretServiceBlockingStub box() {
+        return BoxSecretServiceGrpc.newBlockingStub(channel);
+    }
+
+    public DropboxSecretServiceGrpc.DropboxSecretServiceBlockingStub dropbox() {
+        return DropboxSecretServiceGrpc.newBlockingStub(channel);
+    }
+
+
+    @Override
+    public void close() throws IOException {
+        this.channel.shutdown();
     }
 }
