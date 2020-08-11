@@ -29,9 +29,10 @@ import org.apache.airavata.mft.admin.MFTConsulClientException;
 import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferCommand;
 import org.apache.airavata.mft.admin.models.TransferState;
+import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
+import org.apache.airavata.mft.admin.models.rpc.SyncRPCResponse;
 import org.apache.airavata.mft.core.ConnectorResolver;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
-import org.apache.airavata.mft.core.ResourceMetadata;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -81,8 +82,11 @@ public class MFTAgent implements CommandLineRunner {
 
     private final Semaphore mainHold = new Semaphore(0);
 
-    private KVCache messageCache;
-    private ConsulCache.Listener<String, Value> cacheListener;
+    private KVCache transferMessageCache;
+    private KVCache rpcMessageCache;
+
+    private ConsulCache.Listener<String, Value> transferCacheListener;
+    private ConsulCache.Listener<String, Value> rpcCacheListener;
 
     private final ScheduledExecutorService sessionRenewPool = Executors.newSingleThreadScheduledExecutor();
     private long sessionRenewSeconds = 4;
@@ -95,12 +99,39 @@ public class MFTAgent implements CommandLineRunner {
     private MFTConsulClient mftConsulClient;
 
     public void init() {
-        messageCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.AGENTS_MESSAGE_PATH + agentId );
+        transferMessageCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.AGENTS_TRANSFER_REQUEST_MESSAGE_PATH + agentId );
+        rpcMessageCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.AGENTS_RPC_REQUEST_MESSAGE_PATH + agentId );
     }
 
-    private void acceptRequests() {
+    private void acceptRPCRequests() {
+        rpcCacheListener = newValues -> {
+            newValues.values().forEach(value -> {
+                Optional<String> decodedValue = value.getValueAsString();
+                decodedValue.ifPresent(v -> {
+                    try {
+                        SyncRPCRequest rpcRequest = mapper.readValue(v, SyncRPCRequest.class);
+                        mftConsulClient.sendSyncRPCResponseFromAgent(rpcRequest.getReturnAddress(), processRPCRequest(rpcRequest));
+                    } catch (Throwable e) {
+                        logger.error("Error processing the RPC request {}", value.getKey(), e);
+                    } finally {
+                        mftConsulClient.getKvClient().deleteKey(value.getKey());
+                    }
+                });
+            });
+        };
 
-        cacheListener = newValues -> {
+        rpcMessageCache.addListener(rpcCacheListener);
+        rpcMessageCache.start();
+    }
+
+    private SyncRPCResponse processRPCRequest(SyncRPCRequest request) {
+        // TODO implement using the reflection
+        return null;
+    }
+
+    private void acceptTransferRequests() {
+
+        transferCacheListener = newValues -> {
             newValues.values().forEach(value -> {
                 Optional<String> decodedValue = value.getValueAsString();
                 decodedValue.ifPresent(v -> {
@@ -188,8 +219,8 @@ public class MFTAgent implements CommandLineRunner {
 
             });
         };
-        messageCache.addListener(cacheListener);
-        messageCache.start();
+        transferMessageCache.addListener(transferCacheListener);
+        transferMessageCache.start();
     }
 
     private boolean connectAgent() throws MFTConsulClientException {
@@ -252,8 +283,12 @@ public class MFTAgent implements CommandLineRunner {
 
     public void disconnectAgent() {
         sessionRenewPool.shutdown();
-        if (cacheListener != null) {
-            messageCache.removeListener(cacheListener);
+        if (transferCacheListener != null) {
+            transferMessageCache.removeListener(transferCacheListener);
+        }
+
+        if (rpcCacheListener != null) {
+            rpcMessageCache.removeListener(rpcCacheListener);
         }
     }
 
@@ -281,7 +316,8 @@ public class MFTAgent implements CommandLineRunner {
             }
         }
 
-        acceptRequests();
+        acceptTransferRequests();
+        acceptRPCRequests();
     }
 
     @Override
