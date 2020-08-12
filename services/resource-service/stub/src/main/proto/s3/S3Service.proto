@@ -23,8 +23,36 @@ package org.apache.airavata.mft.resource.service.s3;
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "s3/S3Resource.proto";
+import "s3/S3Storage.proto";
 
 service S3ResourceService {
+
+    // Storage
+    rpc getS3Storage (org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageGetRequest) returns (org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage) {
+        option (google.api.http) = {
+           get: "/v1.0/resource/s3/storage"
+        };
+    }
+
+    rpc createS3Storage (org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageCreateRequest) returns (org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage) {
+        option (google.api.http) = {
+           post: "/v1.0/resource/s3/storage"
+        };
+    }
+
+    rpc updateS3Storage (org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageUpdateRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+           put: "/v1.0/resource/s3/storage"
+        };
+    }
+
+    rpc deleteS3Storage (org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageDeleteRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+           delete: "/v1.0/resource/s3/storage"
+        };
+    }
+    
+    // Resource
     rpc getS3Resource (org.apache.airavata.mft.resource.stubs.s3.resource.S3ResourceGetRequest) returns
                                                 (org.apache.airavata.mft.resource.stubs.s3.resource.S3Resource) {
         option (google.api.http) = {

@@ -18,29 +18,31 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-package org.apache.airavata.mft.resource.stubs.ftp.storage;
+package org.apache.airavata.mft.resource.stubs.s3.storage;
 
-message FTPStorage {
+message S3Storage {
     string storageId = 1;
-    string host = 2;
-    int32 port = 3;
+    string bucketName = 2;
+    string region = 3;
 }
 
-message FTPStorageGetRequest {
-    string storageId = 1;
-}
-
-message FTPStorageCreateRequest {
-    string host = 1;
-    int32 port = 2;
-}
-
-message FTPStorageUpdateRequest {
-    string storageId = 1;
-    string host = 2;
-    int32 port = 3;
-}
-
-message FTPStorageDeleteRequest {
+message S3StorageGetRequest {
     string storageId = 1;
 }
+
+message S3StorageCreateRequest {
+    string bucketName = 1;
+    string region = 2;
+}
+
+message S3StorageUpdateRequest {
+    string storageId = 1;
+    string bucketName = 2;
+    string region = 3;
+}
+
+message S3StorageDeleteRequest {
+    string storageId = 1;
+}
+
+

@@ -73,7 +73,8 @@ public class AzureMetadataCollector implements MetadataCollector {
 
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(azureSecret.getConnectionString()).buildClient();
 
-        BlobClient blobClient = blobServiceClient.getBlobContainerClient(azureResource.getContainer()).getBlobClient(azureResource.getFile().getResourcePath());
+        BlobClient blobClient = blobServiceClient.getBlobContainerClient(azureResource.getAzureStorage().getContainer())
+                                                .getBlobClient(azureResource.getFile().getResourcePath());
 
         BlobProperties properties = blobClient.getBlockBlobClient().getProperties();
         ResourceMetadata metadata = new ResourceMetadata();
@@ -103,7 +104,7 @@ public class AzureMetadataCollector implements MetadataCollector {
         AzureSecret azureSecret = secretClient.azure().getAzureSecret(AzureSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(azureSecret.getConnectionString()).buildClient();
-        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(azureResource.getContainer());
+        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(azureResource.getAzureStorage().getContainer());
         boolean containerExists = containerClient.exists();
         if (!containerExists) {
             return false;

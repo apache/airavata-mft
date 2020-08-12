@@ -71,11 +71,11 @@ public class S3MetadataCollector implements MetadataCollector {
 
         AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                .withRegion(s3Resource.getRegion())
+                .withRegion(s3Resource.getS3Storage().getRegion())
                 .build();
 
         ResourceMetadata metadata = new ResourceMetadata();
-        ObjectMetadata s3Metadata = s3Client.getObjectMetadata(s3Resource.getBucketName(), s3Resource.getFile().getResourcePath());
+        ObjectMetadata s3Metadata = s3Client.getObjectMetadata(s3Resource.getS3Storage().getBucketName(), s3Resource.getFile().getResourcePath());
         metadata.setResourceSize(s3Metadata.getContentLength());
         metadata.setMd5sum(s3Metadata.getETag());
         metadata.setUpdateTime(s3Metadata.getLastModified().getTime());
@@ -97,14 +97,14 @@ public class S3MetadataCollector implements MetadataCollector {
 
         AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                .withRegion(s3Resource.getRegion())
+                .withRegion(s3Resource.getS3Storage().getRegion())
                 .build();
 
         switch (s3Resource.getResourceCase().name()){
             case ResourceTypes.FILE:
-                return s3Client.doesObjectExist(s3Resource.getBucketName(), s3Resource.getFile().getResourcePath());
+                return s3Client.doesObjectExist(s3Resource.getS3Storage().getBucketName(), s3Resource.getFile().getResourcePath());
             case ResourceTypes.DIRECTORY:
-                return s3Client.doesObjectExist(s3Resource.getBucketName(), s3Resource.getDirectory().getResourcePath());
+                return s3Client.doesObjectExist(s3Resource.getS3Storage().getBucketName(), s3Resource.getDirectory().getResourcePath());
         }
         return false;
     }

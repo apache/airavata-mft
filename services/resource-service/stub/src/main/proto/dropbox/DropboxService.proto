@@ -23,8 +23,40 @@ package org.apache.airavata.mft.resource.service.dropbox;
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "dropbox/DropboxResource.proto";
+import "dropbox/DropboxStorage.proto";
 
 service DropboxService {
+
+    // Storage
+
+    rpc getDropboxStorage (org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageGetRequest) returns
+                                                    (org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorage) {
+        option (google.api.http) = {
+           get: "/v1.0/resource/dropbox/storage"
+        };
+    }
+
+    rpc createDropboxStorage (org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageCreateRequest) returns
+                                                    (org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorage) {
+        option (google.api.http) = {
+           post: "/v1.0/resource/dropbox/storage"
+        };
+    }
+
+    rpc updateDropboxStorage (org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageUpdateRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+           put: "/v1.0/resource/dropbox/storage"
+        };
+    }
+
+    rpc deleteDropboxStorage (org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageDeleteRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+           delete: "/v1.0/resource/dropbox/storage"
+        };
+    }
+
+    // Resource
+
     rpc getDropboxResource (org.apache.airavata.mft.resource.stubs.dropbox.resource.DropboxResourceGetRequest) returns
                                             (org.apache.airavata.mft.resource.stubs.dropbox.resource.DropboxResource) {
         option (google.api.http) = {

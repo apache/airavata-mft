@@ -21,10 +21,11 @@ option java_multiple_files = true;
 package org.apache.airavata.mft.resource.stubs.local.resource;
 
 import "common/common.proto";
+import "local/LocalStorage.proto";
 
 message LocalResource {
     string resourceId = 1;
-    string agentId = 2;
+    org.apache.airavata.mft.resource.stubs.local.storage.LocalStorage localStorage = 2;
     oneof resource {
         org.apache.airavata.mft.resource.stubs.common.FileResource file = 3;
         org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 4;
@@ -36,14 +37,20 @@ message LocalResourceGetRequest {
 }
 
 message LocalResourceCreateRequest {
-    string resourcePath = 1;
-    string agentId = 2;
+    string storageId = 1;
+    oneof resource {
+        org.apache.airavata.mft.resource.stubs.common.FileResource file = 2;
+        org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 3;
+    }
 }
 
 message LocalResourceUpdateRequest {
     string resourceId = 1;
-    string resourcePath = 2;
-    string agentId = 3;
+    string storageId = 2;
+    oneof resource {
+        org.apache.airavata.mft.resource.stubs.common.FileResource file = 3;
+        org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 4;
+    }
 }
 
 message LocalResourceDeleteRequest {

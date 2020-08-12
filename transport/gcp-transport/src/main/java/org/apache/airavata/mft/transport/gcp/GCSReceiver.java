@@ -80,7 +80,7 @@ public class GCSReceiver implements Connector {
         logger.info("Starting GCS Receiver stream for transfer {}", context.getTransferId());
 
         if (ResourceTypes.FILE.equals(this.gcsResource.getResourceCase().name())) {
-            InputStream inputStream = storage.objects().get(this.gcsResource.getBucketName(),
+            InputStream inputStream = storage.objects().get(this.gcsResource.getGcsStorage().getBucketName(),
                                         this.gcsResource.getFile().getResourcePath()).executeMediaAsInputStream();
             OutputStream os = context.getStreamBuffer().getOutputStream();
             int read;

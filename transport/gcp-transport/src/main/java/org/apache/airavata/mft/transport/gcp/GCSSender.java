@@ -101,7 +101,7 @@ public class GCSSender implements Connector {
                     // Set the access control list to publicly read-only
                     .setAcl(Arrays.asList(new ObjectAccessControl().setEntity("user-" + entityUser).setRole("OWNER")));
 
-            Insert insertRequest = storage.objects().insert(this.gcsResource.getBucketName(), objectMetadata, contentStream);
+            Insert insertRequest = storage.objects().insert(this.gcsResource.getGcsStorage().getBucketName(), objectMetadata, contentStream);
 
             insertRequest.execute();
 

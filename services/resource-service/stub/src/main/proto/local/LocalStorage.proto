@@ -18,29 +18,28 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-package org.apache.airavata.mft.resource.stubs.ftp.storage;
+package org.apache.airavata.mft.resource.stubs.local.storage;
 
-message FTPStorage {
+message LocalStorage {
     string storageId = 1;
-    string host = 2;
-    int32 port = 3;
+    string agentId = 2;
 }
 
-message FTPStorageGetRequest {
-    string storageId = 1;
-}
-
-message FTPStorageCreateRequest {
-    string host = 1;
-    int32 port = 2;
-}
-
-message FTPStorageUpdateRequest {
-    string storageId = 1;
-    string host = 2;
-    int32 port = 3;
-}
-
-message FTPStorageDeleteRequest {
+message LocalStorageGetRequest {
     string storageId = 1;
 }
+
+message LocalStorageCreateRequest {
+    string agentId = 1;
+}
+
+message LocalStorageUpdateRequest {
+    string storageId = 1;
+    string agentId = 2;
+}
+
+message LocalStorageDeleteRequest {
+    string storageId = 1;
+}
+
+

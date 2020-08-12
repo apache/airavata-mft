@@ -18,29 +18,26 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-package org.apache.airavata.mft.resource.stubs.ftp.storage;
+package org.apache.airavata.mft.resource.stubs.azure.storage;
 
-message FTPStorage {
+message AzureStorage {
     string storageId = 1;
-    string host = 2;
-    int32 port = 3;
+    string container = 2;
 }
 
-message FTPStorageGetRequest {
+message AzureStorageGetRequest {
     string storageId = 1;
 }
 
-message FTPStorageCreateRequest {
-    string host = 1;
-    int32 port = 2;
+message AzureStorageCreateRequest {
+    string container = 1;
 }
 
-message FTPStorageUpdateRequest {
+message AzureStorageUpdateRequest {
     string storageId = 1;
-    string host = 2;
-    int32 port = 3;
+    string container = 2;
 }
 
-message FTPStorageDeleteRequest {
+message AzureStorageDeleteRequest {
     string storageId = 1;
 }

@@ -19,15 +19,21 @@
 
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
 import org.apache.airavata.mft.resource.stubs.azure.resource.*;
+import org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage;
 import org.apache.airavata.mft.resource.stubs.box.resource.*;
+import org.apache.airavata.mft.resource.stubs.box.storage.BoxStorage;
 import org.apache.airavata.mft.resource.stubs.common.DirectoryResource;
 import org.apache.airavata.mft.resource.stubs.common.FileResource;
 import org.apache.airavata.mft.resource.stubs.dropbox.resource.*;
+import org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorage;
 import org.apache.airavata.mft.resource.stubs.ftp.resource.*;
 import org.apache.airavata.mft.resource.stubs.ftp.storage.*;
 import org.apache.airavata.mft.resource.stubs.gcs.resource.*;
+import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorage;
 import org.apache.airavata.mft.resource.stubs.local.resource.*;
+import org.apache.airavata.mft.resource.stubs.local.storage.LocalStorage;
 import org.apache.airavata.mft.resource.stubs.s3.resource.*;
+import org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage;
 import org.apache.airavata.mft.resource.stubs.scp.resource.*;
 import org.apache.airavata.mft.resource.stubs.scp.storage.*;
 import org.json.simple.JSONArray;
@@ -164,7 +170,14 @@ public class FileBasedResourceBackend implements ResourceBackend {
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
 
-                        LocalResource.Builder builder = LocalResource.newBuilder().setResourceId(r.get("resourceId").toString());
+                        LocalStorage storage = LocalStorage.newBuilder()
+                                .setStorageId(((JSONObject)r.get("localStorage")).get("storageId").toString())
+                                .setAgentId(((JSONObject)r.get("localStorage")).get("agentId").toString())
+                                .build();
+
+                        LocalResource.Builder builder = LocalResource.newBuilder()
+                                .setLocalStorage(storage)
+                                .setResourceId(r.get("resourceId").toString());
 
                         switch (r.get("resourceMode").toString()) {
                             case "FILE":
@@ -215,10 +228,15 @@ public class FileBasedResourceBackend implements ResourceBackend {
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
 
+                        S3Storage storage = S3Storage.newBuilder()
+                                .setStorageId(((JSONObject)r.get("s3Storage")).get("storageId").toString())
+                                .setRegion(((JSONObject)r.get("s3Storage")).get("region").toString())
+                                .setRegion(((JSONObject)r.get("s3Storage")).get("bucketName").toString())
+                                .build();
+
                         S3Resource.Builder builder = S3Resource.newBuilder()
                                 .setResourceId(r.get("resourceId").toString())
-                                .setBucketName(r.get("bucketName").toString())
-                                .setRegion(r.get("region").toString());
+                                .setS3Storage(storage);
 
                         switch (r.get("resourceMode").toString()) {
                             case "FILE":
@@ -271,7 +289,12 @@ public class FileBasedResourceBackend implements ResourceBackend {
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
 
+                        BoxStorage storage = BoxStorage.newBuilder()
+                                .setStorageId(((JSONObject)r.get("boxStorage")).get("storageId").toString())
+                                .build();
+
                         BoxResource.Builder builder = BoxResource.newBuilder()
+                                .setBoxStorage(storage)
                                 .setResourceId(r.get("resourceId").toString());
 
                         switch (r.get("resourceMode").toString()) {
@@ -321,8 +344,13 @@ public class FileBasedResourceBackend implements ResourceBackend {
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
 
+                        AzureStorage storage = AzureStorage.newBuilder()
+                                .setStorageId(((JSONObject)r.get("azureStorage")).get("storageId").toString())
+                                .setContainer(((JSONObject)r.get("azureStorage")).get("container").toString())
+                                .build();
+
                         AzureResource.Builder builder = AzureResource.newBuilder()
-                                .setContainer(r.get("container").toString())
+                                .setAzureStorage(storage)
                                 .setResourceId(r.get("resourceId").toString());
 
                         switch (r.get("resourceMode").toString()) {
@@ -372,8 +400,13 @@ public class FileBasedResourceBackend implements ResourceBackend {
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
 
+                        GCSStorage storage = GCSStorage.newBuilder()
+                                .setStorageId(((JSONObject)r.get("gcsStorage")).get("storageId").toString())
+                                .setBucketName(((JSONObject)r.get("gcsStorage")).get("bucketName").toString())
+                                .build();
+
                         GCSResource.Builder builder = GCSResource.newBuilder()
-                                .setBucketName(r.get("bucketName").toString())
+                                .setGcsStorage(storage)
                                 .setResourceId(r.get("resourceId").toString());
 
                         switch (r.get("resourceMode").toString()) {
@@ -423,8 +456,14 @@ public class FileBasedResourceBackend implements ResourceBackend {
                         JSONObject r = (JSONObject) resource;
                         String resourcePath = r.get("resourcePath").toString();
                         resourcePath = resourcePath.startsWith("/") ? resourcePath : "/" + resourcePath;
+
+                        DropboxStorage storage = DropboxStorage.newBuilder()
+                                .setStorageId(((JSONObject)r.get("dropboxStorage")).get("storageId").toString())
+                                .build();
+
                         DropboxResource.Builder builder = DropboxResource.newBuilder()
-                                .setResourceId(r.get("resourceId").toString());
+                                .setResourceId(r.get("resourceId").toString())
+                                .setDropboxStorage(storage);
 
                         switch (r.get("resourceMode").toString()) {
                             case "FILE":

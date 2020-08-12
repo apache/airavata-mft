@@ -87,7 +87,8 @@ public class GCSMetadataCollector implements MetadataCollector {
         Storage storage = new Storage.Builder(transport, jsonFactory, credential).build();
 
         ResourceMetadata metadata = new ResourceMetadata();
-        StorageObject gcsMetadata = storage.objects().get(gcsResource.getBucketName(), gcsResource.getFile().getResourcePath()).execute();
+        StorageObject gcsMetadata = storage.objects().get(gcsResource.getGcsStorage().getBucketName(),
+                                                            gcsResource.getFile().getResourcePath()).execute();
         metadata.setResourceSize(gcsMetadata.getSize().longValue());
         String md5Sum = String.format("%032x", new BigInteger(1, Base64.getDecoder().decode(gcsMetadata.getMd5Hash())));
         metadata.setMd5sum(md5Sum);
@@ -117,9 +118,11 @@ public class GCSMetadataCollector implements MetadataCollector {
         Storage storage = new Storage.Builder(transport, jsonFactory, credential).build();
         switch (gcsResource.getResourceCase().name()){
             case ResourceTypes.FILE:
-                return !storage.objects().get(gcsResource.getBucketName(), gcsResource.getFile().getResourcePath()).execute().isEmpty();
+                return !storage.objects().get(gcsResource.getGcsStorage().getBucketName(), gcsResource.getFile().getResourcePath())
+                                            .execute().isEmpty();
             case ResourceTypes.DIRECTORY:
-                return !storage.objects().get(gcsResource.getBucketName(), gcsResource.getDirectory().getResourcePath()).execute().isEmpty();
+                return !storage.objects().get(gcsResource.getGcsStorage().getBucketName(), gcsResource.getDirectory().getResourcePath())
+                                            .execute().isEmpty();
         }
         return false;
     }

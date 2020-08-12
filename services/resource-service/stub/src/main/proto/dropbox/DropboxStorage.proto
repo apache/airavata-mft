@@ -18,29 +18,25 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-package org.apache.airavata.mft.resource.stubs.ftp.storage;
+package org.apache.airavata.mft.resource.stubs.dropbox.storage;
 
-message FTPStorage {
-    string storageId = 1;
-    string host = 2;
-    int32 port = 3;
-}
-
-message FTPStorageGetRequest {
+message DropboxStorage {
     string storageId = 1;
 }
 
-message FTPStorageCreateRequest {
-    string host = 1;
-    int32 port = 2;
-}
-
-message FTPStorageUpdateRequest {
-    string storageId = 1;
-    string host = 2;
-    int32 port = 3;
-}
-
-message FTPStorageDeleteRequest {
+message DropboxStorageGetRequest {
     string storageId = 1;
 }
+
+message DropboxStorageCreateRequest {
+}
+
+message DropboxStorageUpdateRequest {
+    string storageId = 1;
+}
+
+message DropboxStorageDeleteRequest {
+    string storageId = 1;
+}
+
+

@@ -21,14 +21,14 @@ option java_multiple_files = true;
 package org.apache.airavata.mft.resource.stubs.s3.resource;
 
 import "common/common.proto";
+import "s3/S3Storage.proto";
 
 message S3Resource {
     string resourceId = 1;
-    string bucketName = 2;
-    string region = 3;
+    org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage s3Storage = 2;
     oneof resource {
-        org.apache.airavata.mft.resource.stubs.common.FileResource file = 4;
-        org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 5;
+        org.apache.airavata.mft.resource.stubs.common.FileResource file = 3;
+        org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 4;
     }
 }
 
@@ -37,16 +37,20 @@ message S3ResourceGetRequest {
 }
 
 message S3ResourceCreateRequest {
-    string bucketName = 1;
-    string region = 2;
-    string resourcePath = 3;
+    string storageId = 1;
+    oneof resource {
+        org.apache.airavata.mft.resource.stubs.common.FileResource file = 2;
+        org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 3;
+    }
 }
 
 message S3ResourceUpdateRequest {
     string resourceId = 1;
-    string bucketName = 2;
-    string region = 3;
-    string resourcePath = 4;
+    string storageId = 2;
+    oneof resource {
+        org.apache.airavata.mft.resource.stubs.common.FileResource file = 3;
+        org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 4;
+    }
 }
 
 message S3ResourceDeleteRequest {

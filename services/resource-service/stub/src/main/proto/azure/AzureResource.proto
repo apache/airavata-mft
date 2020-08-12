@@ -21,10 +21,11 @@ option java_multiple_files = true;
 package org.apache.airavata.mft.resource.stubs.azure.resource;
 
 import "common/common.proto";
+import "azure/AzureStorage.proto";
 
 message AzureResource {
     string resourceId = 1;
-    string container = 2;
+    org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage azureStorage = 2;
     oneof resource {
         org.apache.airavata.mft.resource.stubs.common.FileResource file = 3;
         org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 4;
@@ -36,14 +37,20 @@ message AzureResourceGetRequest {
 }
 
 message AzureResourceCreateRequest {
-    string container = 1;
-    string blobName = 2;
+    string storageId = 1;
+    oneof resource {
+        org.apache.airavata.mft.resource.stubs.common.FileResource file = 3;
+        org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 4;
+    }
 }
 
 message AzureResourceUpdateRequest {
     string resourceId = 1;
-    string container = 2;
-    string blobName = 3;
+    string storageId = 2;
+    oneof resource {
+        org.apache.airavata.mft.resource.stubs.common.FileResource file = 3;
+        org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 4;
+    }
 }
 
 message AzureResourceDeleteRequest {

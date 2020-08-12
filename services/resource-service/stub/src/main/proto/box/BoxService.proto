@@ -23,8 +23,40 @@ package org.apache.airavata.mft.resource.service.box;
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "box/BoxResource.proto";
+import "box/BoxStorage.proto";
 
 service BoxResourceService {
+
+    // Storage
+
+    rpc getBoxStorage (org.apache.airavata.mft.resource.stubs.box.storage.BoxStorageGetRequest) returns
+    (org.apache.airavata.mft.resource.stubs.box.storage.BoxStorage) {
+        option (google.api.http) = {
+           get: "/v1.0/resource/box/storage"
+        };
+    }
+
+    rpc createBoxStorage (org.apache.airavata.mft.resource.stubs.box.storage.BoxStorageCreateRequest) returns
+    (org.apache.airavata.mft.resource.stubs.box.storage.BoxStorage) {
+        option (google.api.http) = {
+           post: "/v1.0/resource/box/storage"
+        };
+    }
+
+    rpc updateBoxStorage (org.apache.airavata.mft.resource.stubs.box.storage.BoxStorageUpdateRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+           put: "/v1.0/resource/box/storage"
+        };
+    }
+
+    rpc deleteBoxStorage (org.apache.airavata.mft.resource.stubs.box.storage.BoxStorageDeleteRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+           delete: "/v1.0/resource/box/storage"
+        };
+    }
+
+    // Resource
+
     rpc getBoxResource (org.apache.airavata.mft.resource.stubs.box.resource.BoxResourceGetRequest) returns
                                             (org.apache.airavata.mft.resource.stubs.box.resource.BoxResource) {
         option (google.api.http) = {

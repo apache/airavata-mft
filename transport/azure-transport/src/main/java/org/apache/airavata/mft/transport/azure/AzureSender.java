@@ -54,7 +54,7 @@ public class AzureSender implements Connector {
         AzureSecret azureSecret = secretClient.azure().getAzureSecret(AzureSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(azureSecret.getConnectionString()).buildClient();
-        this.containerClient = blobServiceClient.getBlobContainerClient(azureResource.getContainer());
+        this.containerClient = blobServiceClient.getBlobContainerClient(azureResource.getAzureStorage().getContainer());
     }
 
     @Override

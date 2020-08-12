@@ -55,7 +55,7 @@ public class S3Sender implements Connector {
 
         s3Client = AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                .withRegion(s3Resource.getRegion())
+                .withRegion(s3Resource.getS3Storage().getRegion())
                 .build();
     }
 
@@ -73,7 +73,7 @@ public class S3Sender implements Connector {
         metadata.setContentLength(context.getMetadata().getResourceSize());
 
         if (ResourceTypes.FILE.equals(this.s3Resource.getResourceCase().name())) {
-            s3Client.putObject(this.s3Resource.getBucketName(), this.s3Resource.getFile().getResourcePath(),
+            s3Client.putObject(this.s3Resource.getS3Storage().getBucketName(), this.s3Resource.getFile().getResourcePath(),
                                                         context.getStreamBuffer().getInputStream(), metadata);
             logger.info("Completed S3 Sender stream for transfer {}", context.getTransferId());
         } else {

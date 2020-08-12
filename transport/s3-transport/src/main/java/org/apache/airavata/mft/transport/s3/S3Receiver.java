@@ -59,7 +59,7 @@ public class S3Receiver implements Connector {
 
         s3Client = AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                .withRegion(s3Resource.getRegion())
+                .withRegion(s3Resource.getS3Storage().getRegion())
                 .build();
     }
 
@@ -74,7 +74,7 @@ public class S3Receiver implements Connector {
         if (ResourceTypes.FILE.equals(this.s3Resource.getResourceCase().name())) {
             logger.info("Starting S3 Receiver stream for transfer {}", context.getTransferId());
 
-            S3Object s3object = s3Client.getObject(s3Resource.getBucketName(), s3Resource.getFile().getResourcePath());
+            S3Object s3object = s3Client.getObject(s3Resource.getS3Storage().getBucketName(), s3Resource.getFile().getResourcePath());
             S3ObjectInputStream inputStream = s3object.getObjectContent();
 
             OutputStream os = context.getStreamBuffer().getOutputStream();

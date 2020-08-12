@@ -38,13 +38,19 @@ message SCPResourceGetRequest {
 
 message SCPResourceCreateRequest {
     string scpStorageId = 1;
-    string resourcePath = 2;
+    oneof resource {
+        org.apache.airavata.mft.resource.stubs.common.FileResource file = 2;
+        org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 3;
+    }
 }
 
 message SCPResourceUpdateRequest {
     string resourceId = 1;
     string scpStorageId = 2;
-    string resourcePath = 3;
+    oneof resource {
+        org.apache.airavata.mft.resource.stubs.common.FileResource file = 3;
+        org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 4;
+    }
 }
 
 message SCPResourceDeleteRequest {

@@ -18,29 +18,28 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-package org.apache.airavata.mft.resource.stubs.ftp.storage;
+package org.apache.airavata.mft.resource.stubs.gcs.storage;
 
-message FTPStorage {
+message GCSStorage {
     string storageId = 1;
-    string host = 2;
-    int32 port = 3;
+    string bucketName = 2;
 }
 
-message FTPStorageGetRequest {
-    string storageId = 1;
-}
-
-message FTPStorageCreateRequest {
-    string host = 1;
-    int32 port = 2;
-}
-
-message FTPStorageUpdateRequest {
-    string storageId = 1;
-    string host = 2;
-    int32 port = 3;
-}
-
-message FTPStorageDeleteRequest {
+message GCSStorageGetRequest {
     string storageId = 1;
 }
+
+message GCSStorageCreateRequest {
+    string bucketName = 1;
+}
+
+message GCSStorageUpdateRequest {
+    string storageId = 1;
+    string bucketName = 2;
+}
+
+message GCSStorageDeleteRequest {
+    string storageId = 1;
+}
+
+
