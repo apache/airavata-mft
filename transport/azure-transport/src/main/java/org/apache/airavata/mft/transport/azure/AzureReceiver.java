@@ -23,6 +23,7 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.specialized.BlobInputStream;
 import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.azure.AzureSecret;
 import org.apache.airavata.mft.credential.stubs.azure.AzureSecretGetRequest;
@@ -74,37 +75,46 @@ public class AzureReceiver implements Connector {
     public void startStream(ConnectorContext context) throws Exception {
         logger.info("Starting azure receive for remote server for transfer {}", context.getTransferId());
         checkInitialized();
-        BlobClient blobClient = containerClient.getBlobClient(azureResource.getBlobName());
-        BlobInputStream blobInputStream = blobClient.openInputStream();
 
-        OutputStream streamOs = context.getStreamBuffer().getOutputStream();
+        if (ResourceTypes.FILE.equals(this.azureResource.getResourceCase().name())) {
+            BlobClient blobClient = containerClient.getBlobClient(azureResource.getFile().getResourcePath());
+            BlobInputStream blobInputStream = blobClient.openInputStream();
 
-        long fileSize = context.getMetadata().getResourceSize();
+            OutputStream streamOs = context.getStreamBuffer().getOutputStream();
 
-        byte[] buf = new byte[1024];
-        while (true) {
-            int bufSize = 0;
+            long fileSize = context.getMetadata().getResourceSize();
 
-            if (buf.length < fileSize) {
-                bufSize = buf.length;
-            } else {
-                bufSize = (int) fileSize;
+            byte[] buf = new byte[1024];
+            while (true) {
+                int bufSize = 0;
+
+                if (buf.length < fileSize) {
+                    bufSize = buf.length;
+                } else {
+                    bufSize = (int) fileSize;
+                }
+                bufSize = blobInputStream.read(buf, 0, bufSize);
+
+                if (bufSize < 0) {
+                    break;
+                }
+
+                streamOs.write(buf, 0, bufSize);
+                streamOs.flush();
+
+                fileSize -= bufSize;
+                if (fileSize == 0L)
+                    break;
             }
-            bufSize = blobInputStream.read(buf, 0, bufSize);
 
-            if (bufSize < 0) {
-                break;
-            }
+            streamOs.close();
+            logger.info("Completed azure receive for remote server for transfer {}", context.getTransferId());
 
-            streamOs.write(buf, 0, bufSize);
-            streamOs.flush();
-
-            fileSize -= bufSize;
-            if (fileSize == 0L)
-                break;
+        } else {
+            logger.error("Resource {} should be a FILE type. Found a {}",
+                    this.azureResource.getResourceId(), this.azureResource.getResourceCase().name());
+            throw new Exception("Resource " + this.azureResource.getResourceId() + " should be a FILE type. Found a " +
+                    this.azureResource.getResourceCase().name());
         }
-
-        streamOs.close();
-        logger.info("Completed azure receive for remote server for transfer {}", context.getTransferId());
     }
 }

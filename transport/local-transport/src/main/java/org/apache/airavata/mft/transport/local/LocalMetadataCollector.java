@@ -18,6 +18,7 @@
 package org.apache.airavata.mft.transport.local;
 
 import org.apache.airavata.mft.core.ResourceMetadata;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
@@ -59,17 +60,17 @@ public class LocalMetadataCollector implements MetadataCollector {
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         LocalResource localResource = resourceClient.local().getLocalResource(LocalResourceGetRequest.newBuilder().setResourceId(resourceId).build());
-        File resourceFile = new File(localResource.getResourcePath());
+        File resourceFile = new File(localResource.getFile().getResourcePath());
         if (resourceFile.exists()) {
 
-            BasicFileAttributes basicFileAttributes = Files.readAttributes(Path.of(localResource.getResourcePath()), BasicFileAttributes.class);
+            BasicFileAttributes basicFileAttributes = Files.readAttributes(Path.of(localResource.getFile().getResourcePath()), BasicFileAttributes.class);
             ResourceMetadata metadata = new ResourceMetadata();
             metadata.setCreatedTime(basicFileAttributes.creationTime().toMillis());
             metadata.setUpdateTime(basicFileAttributes.lastModifiedTime().toMillis());
             metadata.setResourceSize(basicFileAttributes.size());
 
             MessageDigest digest = MessageDigest.getInstance("MD5");
-            FileInputStream fis = new FileInputStream(localResource.getResourcePath());
+            FileInputStream fis = new FileInputStream(localResource.getFile().getResourcePath());
             byte[] byteArray = new byte[1024];
             int bytesCount = 0;
             while ((bytesCount = fis.read(byteArray)) != -1) {
@@ -85,7 +86,7 @@ public class LocalMetadataCollector implements MetadataCollector {
 
             return metadata;
         } else {
-            throw new Exception("Resource with id " + resourceId + " in path " + localResource.getResourcePath() + " does not exist");
+            throw new Exception("Resource with id " + resourceId + " in path " + localResource.getFile().getResourcePath() + " does not exist");
         }
     }
 
@@ -93,7 +94,13 @@ public class LocalMetadataCollector implements MetadataCollector {
     public Boolean isAvailable(String resourceId, String credentialToken) throws Exception {
        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         LocalResource localResource = resourceClient.local().getLocalResource(LocalResourceGetRequest.newBuilder().setResourceId(resourceId).build());
-        File resourceFile = new File(localResource.getResourcePath());
-        return resourceFile.exists();
+
+        switch (localResource.getResourceCase().name()){
+            case ResourceTypes.FILE:
+                return new File(localResource.getFile().getResourcePath()).exists();
+            case ResourceTypes.DIRECTORY:
+                return new File(localResource.getDirectory().getResourcePath()).exists();
+        }
+        return false;
     }
 }

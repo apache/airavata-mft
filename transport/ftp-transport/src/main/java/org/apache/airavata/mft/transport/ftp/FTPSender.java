@@ -18,6 +18,7 @@
 package org.apache.airavata.mft.transport.ftp;
 
 import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.ftp.FTPSecret;
 import org.apache.airavata.mft.credential.stubs.ftp.FTPSecretGetRequest;
@@ -66,38 +67,45 @@ public class FTPSender implements Connector {
         logger.info("Starting FTP sender stream for transfer {}", context.getTransferId());
 
         checkInitialized();
-        InputStream in = context.getStreamBuffer().getInputStream();
-        long fileSize = context.getMetadata().getResourceSize();
-        OutputStream outputStream = ftpClient.storeFileStream(resource.getResourcePath());
-
-        byte[] buf = new byte[1024];
-        while (true) {
-            int bufSize;
-
-            if (buf.length < fileSize) {
-                bufSize = buf.length;
-            } else {
-                bufSize = (int) fileSize;
-            }
-            bufSize = in.read(buf, 0, bufSize);
-
-            if (bufSize < 0) {
-                break;
-            }
-
-            outputStream.write(buf, 0, bufSize);
-            outputStream.flush();
-
-            fileSize -= bufSize;
-            if (fileSize == 0L)
-                break;
-        }
-
-        in.close();
-        outputStream.close();
 
         logger.info("Completed FTP sender stream for transfer {}", context.getTransferId());
 
+        if (ResourceTypes.FILE.equals(this.resource.getResourceCase().name())) {
+            InputStream in = context.getStreamBuffer().getInputStream();
+            long fileSize = context.getMetadata().getResourceSize();
+            OutputStream outputStream = ftpClient.storeFileStream(resource.getFile().getResourcePath());
+
+            byte[] buf = new byte[1024];
+            while (true) {
+                int bufSize;
+
+                if (buf.length < fileSize) {
+                    bufSize = buf.length;
+                } else {
+                    bufSize = (int) fileSize;
+                }
+                bufSize = in.read(buf, 0, bufSize);
+
+                if (bufSize < 0) {
+                    break;
+                }
+
+                outputStream.write(buf, 0, bufSize);
+                outputStream.flush();
+
+                fileSize -= bufSize;
+                if (fileSize == 0L)
+                    break;
+            }
+
+            in.close();
+            outputStream.close();
+        } else {
+            logger.error("Resource {} should be a FILE type. Found a {}",
+                    this.resource.getResourceId(), this.resource.getResourceCase().name());
+            throw new Exception("Resource " + this.resource.getResourceId() + " should be a FILE type. Found a " +
+                    this.resource.getResourceCase().name());
+        }
     }
 
     private void checkInitialized() {

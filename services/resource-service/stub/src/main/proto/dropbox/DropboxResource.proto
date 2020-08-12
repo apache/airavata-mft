@@ -20,9 +20,14 @@ syntax = "proto3";
 option java_multiple_files = true;
 package org.apache.airavata.mft.resource.stubs.dropbox.resource;
 
+import "common/common.proto";
+
 message DropboxResource {
     string resourceId = 1;
-    string resourcePath = 2;
+    oneof resource {
+        org.apache.airavata.mft.resource.stubs.common.FileResource file = 2;
+        org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 3;
+    }
 }
 
 message DropboxResourceGetRequest {

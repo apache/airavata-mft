@@ -21,11 +21,15 @@ option java_multiple_files = true;
 package org.apache.airavata.mft.resource.stubs.scp.resource;
 
 import "scp/SCPStorage.proto";
+import "common/common.proto";
 
 message SCPResource {
     string resourceId = 1;
     org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorage scpStorage = 2;
-    string resourcePath = 3;
+    oneof resource {
+        org.apache.airavata.mft.resource.stubs.common.FileResource file = 3;
+        org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 4;
+    }
 }
 
 message SCPResourceGetRequest {

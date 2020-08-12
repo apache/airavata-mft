@@ -28,6 +28,7 @@ import net.schmizz.sshj.userauth.method.AuthPublickey;
 import net.schmizz.sshj.userauth.method.ChallengeResponseProvider;
 import net.schmizz.sshj.userauth.password.Resource;
 import org.apache.airavata.mft.core.ResourceMetadata;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.credential.stubs.scp.SCPSecret;
 import org.apache.airavata.mft.credential.stubs.scp.SCPSecretGetRequest;
@@ -82,10 +83,10 @@ public class SCPMetadataCollector implements MetadataCollector {
 
         try (SSHClient sshClient = getSSHClient(scpResource, scpSecret)) {
 
-            logger.info("Fetching metadata for resource {} in {}", scpResource.getResourcePath(), scpResource.getScpStorage().getHost());
+            logger.info("Fetching metadata for resource {} in {}", scpResource.getFile().getResourcePath(), scpResource.getScpStorage().getHost());
 
             try (SFTPClient sftpClient = sshClient.newSFTPClient()) {
-                FileAttributes lstat = sftpClient.lstat(scpResource.getResourcePath());
+                FileAttributes lstat = sftpClient.lstat(scpResource.getFile().getResourcePath());
                 sftpClient.close();
 
                 ResourceMetadata metadata = new ResourceMetadata();
@@ -96,7 +97,7 @@ public class SCPMetadataCollector implements MetadataCollector {
                 try {
                     // TODO calculate md5 using the binary based on the OS platform. Eg: MacOS has md5. Linux has md5sum
                     // This only works for linux SCP resources. Improve to work in mac and windows resources
-                    Session.Command md5Command = sshClient.startSession().exec("md5sum " + scpResource.getResourcePath());
+                    Session.Command md5Command = sshClient.startSession().exec("md5sum " + scpResource.getFile().getResourcePath());
                     StringWriter outWriter = new StringWriter();
                     StringWriter errorWriter = new StringWriter();
 
@@ -129,9 +130,15 @@ public class SCPMetadataCollector implements MetadataCollector {
         SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         try (SSHClient sshClient = getSSHClient(scpResource, scpSecret)) {
-            logger.info("Checking the availability of file {}", scpResource.getResourcePath());
+            logger.info("Checking the availability of file {}", scpResource.getFile().getResourcePath());
             try (SFTPClient sftpClient = sshClient.newSFTPClient()) {
-                return sftpClient.statExistence(scpResource.getResourcePath()) != null;
+                switch (scpResource.getResourceCase().name()){
+                    case ResourceTypes.FILE:
+                        return sftpClient.statExistence(scpResource.getFile().getResourcePath()) != null;
+                    case ResourceTypes.DIRECTORY:
+                        return sftpClient.statExistence(scpResource.getDirectory().getResourcePath()) != null;
+                }
+                return false;
             }
         }
     }

@@ -20,10 +20,15 @@ syntax = "proto3";
 option java_multiple_files = true;
 package org.apache.airavata.mft.resource.stubs.local.resource;
 
+import "common/common.proto";
+
 message LocalResource {
     string resourceId = 1;
-    string resourcePath = 2;
-    string agentId = 3;
+    string agentId = 2;
+    oneof resource {
+        org.apache.airavata.mft.resource.stubs.common.FileResource file = 3;
+        org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 4;
+    }
 }
 
 message LocalResourceGetRequest {

@@ -26,6 +26,7 @@ import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
 import com.google.api.services.storage.model.StorageObject;
 import org.apache.airavata.mft.core.ResourceMetadata;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.credential.stubs.gcs.GCSSecret;
 import org.apache.airavata.mft.credential.stubs.gcs.GCSSecretGetRequest;
@@ -86,7 +87,7 @@ public class GCSMetadataCollector implements MetadataCollector {
         Storage storage = new Storage.Builder(transport, jsonFactory, credential).build();
 
         ResourceMetadata metadata = new ResourceMetadata();
-        StorageObject gcsMetadata = storage.objects().get(gcsResource.getBucketName(), gcsResource.getResourcePath()).execute();
+        StorageObject gcsMetadata = storage.objects().get(gcsResource.getBucketName(), gcsResource.getFile().getResourcePath()).execute();
         metadata.setResourceSize(gcsMetadata.getSize().longValue());
         String md5Sum = String.format("%032x", new BigInteger(1, Base64.getDecoder().decode(gcsMetadata.getMd5Hash())));
         metadata.setMd5sum(md5Sum);
@@ -114,6 +115,12 @@ public class GCSMetadataCollector implements MetadataCollector {
         }
 
         Storage storage = new Storage.Builder(transport, jsonFactory, credential).build();
-        return !storage.objects().get(gcsResource.getBucketName(), gcsResource.getResourcePath()).execute().isEmpty();
+        switch (gcsResource.getResourceCase().name()){
+            case ResourceTypes.FILE:
+                return !storage.objects().get(gcsResource.getBucketName(), gcsResource.getFile().getResourcePath()).execute().isEmpty();
+            case ResourceTypes.DIRECTORY:
+                return !storage.objects().get(gcsResource.getBucketName(), gcsResource.getDirectory().getResourcePath()).execute().isEmpty();
+        }
+        return false;
     }
 }

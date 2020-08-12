@@ -20,6 +20,8 @@
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
 import org.apache.airavata.mft.resource.stubs.azure.resource.*;
 import org.apache.airavata.mft.resource.stubs.box.resource.*;
+import org.apache.airavata.mft.resource.stubs.common.DirectoryResource;
+import org.apache.airavata.mft.resource.stubs.common.FileResource;
 import org.apache.airavata.mft.resource.stubs.dropbox.resource.*;
 import org.apache.airavata.mft.resource.stubs.ftp.resource.*;
 import org.apache.airavata.mft.resource.stubs.ftp.storage.*;
@@ -106,12 +108,22 @@ public class FileBasedResourceBackend implements ResourceBackend {
                                 .setUser(((JSONObject)r.get("scpStorage")).get("user").toString())
                                 .setPort(Integer.parseInt(((JSONObject)r.get("scpStorage")).get("port").toString())).build();
 
-                        SCPResource scpResource = SCPResource.newBuilder()
-                                .setResourcePath(r.get("resourcePath").toString())
+                        SCPResource.Builder builder = SCPResource.newBuilder()
                                 .setResourceId(r.get("resourceId").toString())
-                                .setScpStorage(storage).build();
+                                .setScpStorage(storage);
 
-                        return scpResource;
+                        switch (r.get("resourceMode").toString()) {
+                            case "FILE":
+                                FileResource fileResource = FileResource.newBuilder().setResourcePath(r.get("resourcePath").toString()).build();
+                                builder = builder.setFile(fileResource);
+                                break;
+                            case "DIRECTORY":
+                                DirectoryResource directoryResource = DirectoryResource.newBuilder().setResourcePath(r.get("resourcePath").toString()).build();
+                                builder = builder.setDirectory(directoryResource);
+                                break;
+                        }
+                        return builder.build();
+
                     }).collect(Collectors.toList());
 
             return scpResources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
@@ -152,11 +164,19 @@ public class FileBasedResourceBackend implements ResourceBackend {
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
 
-                        LocalResource localResource = LocalResource.newBuilder()
-                                .setResourcePath(r.get("resourcePath").toString())
-                                .setResourceId(r.get("resourceId").toString()).build();
+                        LocalResource.Builder builder = LocalResource.newBuilder().setResourceId(r.get("resourceId").toString());
 
-                        return localResource;
+                        switch (r.get("resourceMode").toString()) {
+                            case "FILE":
+                                FileResource fileResource = FileResource.newBuilder().setResourcePath(r.get("resourcePath").toString()).build();
+                                builder = builder.setFile(fileResource);
+                                break;
+                            case "DIRECTORY":
+                                DirectoryResource directoryResource = DirectoryResource.newBuilder().setResourcePath(r.get("resourcePath").toString()).build();
+                                builder = builder.setDirectory(directoryResource);
+                                break;
+                        }
+                        return builder.build();
                     }).collect(Collectors.toList());
             return localResources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
         }
@@ -195,14 +215,22 @@ public class FileBasedResourceBackend implements ResourceBackend {
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
 
-                        S3Resource s3Resource = S3Resource.newBuilder()
-                                .setResourcePath(r.get("resourcePath").toString())
+                        S3Resource.Builder builder = S3Resource.newBuilder()
                                 .setResourceId(r.get("resourceId").toString())
                                 .setBucketName(r.get("bucketName").toString())
-                                .setRegion(r.get("region").toString())
-                                .build();
+                                .setRegion(r.get("region").toString());
 
-                        return s3Resource;
+                        switch (r.get("resourceMode").toString()) {
+                            case "FILE":
+                                FileResource fileResource = FileResource.newBuilder().setResourcePath(r.get("resourcePath").toString()).build();
+                                builder = builder.setFile(fileResource);
+                                break;
+                            case "DIRECTORY":
+                                DirectoryResource directoryResource = DirectoryResource.newBuilder().setResourcePath(r.get("resourcePath").toString()).build();
+                                builder = builder.setDirectory(directoryResource);
+                                break;
+                        }
+                        return builder.build();
                     }).collect(Collectors.toList());
             return s3Resources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
         }
@@ -243,12 +271,20 @@ public class FileBasedResourceBackend implements ResourceBackend {
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
 
-                        BoxResource boxResource = BoxResource.newBuilder()
-                                .setResourceId(r.get("resourceId").toString())
-                                .setBoxFileId(r.get("boxFileId").toString())
-                                .build();
+                        BoxResource.Builder builder = BoxResource.newBuilder()
+                                .setResourceId(r.get("resourceId").toString());
 
-                        return boxResource;
+                        switch (r.get("resourceMode").toString()) {
+                            case "FILE":
+                                FileResource fileResource = FileResource.newBuilder().setResourcePath(r.get("resourcePath").toString()).build();
+                                builder = builder.setFile(fileResource);
+                                break;
+                            case "DIRECTORY":
+                                DirectoryResource directoryResource = DirectoryResource.newBuilder().setResourcePath(r.get("resourcePath").toString()).build();
+                                builder = builder.setDirectory(directoryResource);
+                                break;
+                        }
+                        return builder.build();
                     }).collect(Collectors.toList());
             return boxResources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
         }
@@ -285,13 +321,22 @@ public class FileBasedResourceBackend implements ResourceBackend {
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
 
-                        AzureResource azureResource = AzureResource.newBuilder()
-                                .setBlobName(r.get("blobName").toString())
+                        AzureResource.Builder builder = AzureResource.newBuilder()
                                 .setContainer(r.get("container").toString())
-                                .setResourceId(r.get("resourceId").toString())
-                                .build();
+                                .setResourceId(r.get("resourceId").toString());
 
-                        return azureResource;
+                        switch (r.get("resourceMode").toString()) {
+                            case "FILE":
+                                FileResource fileResource = FileResource.newBuilder().setResourcePath(r.get("resourcePath").toString()).build();
+                                builder = builder.setFile(fileResource);
+                                break;
+                            case "DIRECTORY":
+                                DirectoryResource directoryResource = DirectoryResource.newBuilder().setResourcePath(r.get("resourcePath").toString()).build();
+                                builder = builder.setDirectory(directoryResource);
+                                break;
+                        }
+                        return builder.build();
+
                     }).collect(Collectors.toList());
             return azureResources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
         }
@@ -327,13 +372,22 @@ public class FileBasedResourceBackend implements ResourceBackend {
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
 
-                        GCSResource gcsResource = GCSResource.newBuilder()
+                        GCSResource.Builder builder = GCSResource.newBuilder()
                                 .setBucketName(r.get("bucketName").toString())
-                                .setResourceId(r.get("resourceId").toString())
-                                .setResourcePath(r.get("resourcePath").toString())
-                                .build();
+                                .setResourceId(r.get("resourceId").toString());
 
-                        return gcsResource;
+                        switch (r.get("resourceMode").toString()) {
+                            case "FILE":
+                                FileResource fileResource = FileResource.newBuilder().setResourcePath(r.get("resourcePath").toString()).build();
+                                builder = builder.setFile(fileResource);
+                                break;
+                            case "DIRECTORY":
+                                DirectoryResource directoryResource = DirectoryResource.newBuilder().setResourcePath(r.get("resourcePath").toString()).build();
+                                builder = builder.setDirectory(directoryResource);
+                                break;
+                        }
+                        return builder.build();
+
                     }).collect(Collectors.toList());
             return gcsResources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
         }
@@ -369,12 +423,21 @@ public class FileBasedResourceBackend implements ResourceBackend {
                         JSONObject r = (JSONObject) resource;
                         String resourcePath = r.get("resourcePath").toString();
                         resourcePath = resourcePath.startsWith("/") ? resourcePath : "/" + resourcePath;
-                        DropboxResource dropboxResource = DropboxResource.newBuilder()
-                                .setResourceId(r.get("resourceId").toString())
-                                .setResourcePath(resourcePath)
-                                .build();
+                        DropboxResource.Builder builder = DropboxResource.newBuilder()
+                                .setResourceId(r.get("resourceId").toString());
 
-                        return dropboxResource;
+                        switch (r.get("resourceMode").toString()) {
+                            case "FILE":
+                                FileResource fileResource = FileResource.newBuilder().setResourcePath(r.get("resourcePath").toString()).build();
+                                builder = builder.setFile(fileResource);
+                                break;
+                            case "DIRECTORY":
+                                DirectoryResource directoryResource = DirectoryResource.newBuilder().setResourcePath(r.get("resourcePath").toString()).build();
+                                builder = builder.setDirectory(directoryResource);
+                                break;
+                        }
+                        return builder.build();
+
                     }).collect(Collectors.toList());
             return dropboxResources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();
         }
@@ -421,10 +484,22 @@ public class FileBasedResourceBackend implements ResourceBackend {
                                 .setHost(((JSONObject)r.get("ftpStorage")).get("host").toString())
                                 .setPort(Integer.parseInt(((JSONObject)r.get("ftpStorage")).get("port").toString())).build();
 
-                        return FTPResource.newBuilder()
-                                .setResourcePath(r.get("resourcePath").toString())
+                        FTPResource.Builder builder = FTPResource.newBuilder()
                                 .setResourceId(r.get("resourceId").toString())
-                                .setFtpStorage(storage).build();
+                                .setFtpStorage(storage);
+
+                        switch (r.get("resourceMode").toString()) {
+                            case "FILE":
+                                FileResource fileResource = FileResource.newBuilder().setResourcePath(r.get("resourcePath").toString()).build();
+                                builder = builder.setFile(fileResource);
+                                break;
+                            case "DIRECTORY":
+                                DirectoryResource directoryResource = DirectoryResource.newBuilder().setResourcePath(r.get("resourcePath").toString()).build();
+                                builder = builder.setDirectory(directoryResource);
+                                break;
+                        }
+                        return builder.build();
+
                     }).collect(Collectors.toList());
 
             return ftpResources.stream().filter(r -> request.getResourceId().equals(r.getResourceId())).findFirst();

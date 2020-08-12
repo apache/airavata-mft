@@ -20,6 +20,7 @@ package org.apache.airavata.mft.resource.server.backend.airavata;
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
 import org.apache.airavata.mft.resource.stubs.azure.resource.*;
 import org.apache.airavata.mft.resource.stubs.box.resource.*;
+import org.apache.airavata.mft.resource.stubs.common.FileResource;
 import org.apache.airavata.mft.resource.stubs.dropbox.resource.*;
 import org.apache.airavata.mft.resource.stubs.ftp.resource.*;
 import org.apache.airavata.mft.resource.stubs.ftp.storage.*;
@@ -129,7 +130,7 @@ public class AiravataResourceBackend implements ResourceBackend {
 
         SCPResource scpResource = SCPResource.newBuilder()
                 .setResourceId(resourceId)
-                .setResourcePath(path)
+                .setFile(FileResource.newBuilder().setResourcePath(path).build())
                 .setScpStorage(getSCPStorage(SCPStorageGetRequest.newBuilder().setStorageId(resourceId).build()).get())
                 .build();
         return Optional.of(scpResource);

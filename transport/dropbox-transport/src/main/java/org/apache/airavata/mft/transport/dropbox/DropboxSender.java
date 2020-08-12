@@ -22,6 +22,7 @@ import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.WriteMode;
 import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecret;
 import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretGetRequest;
@@ -64,10 +65,20 @@ public class DropboxSender implements Connector {
         logger.info("Starting Dropbox Sender stream for transfer {}", context.getTransferId());
         logger.info("Content length for transfer {} {}", context.getTransferId(), context.getMetadata().getResourceSize());
 
-        FileMetadata metadata = dbxClientV2.files().uploadBuilder(dropboxResource.getResourcePath())
-                .withMode(WriteMode.OVERWRITE)
-                .uploadAndFinish(context.getStreamBuffer().getInputStream());
 
-        logger.info("Completed Dropbox Sender stream for transfer {}", context.getTransferId());
+
+        if (ResourceTypes.FILE.equals(this.dropboxResource.getResourceCase().name())) {
+            FileMetadata metadata = dbxClientV2.files().uploadBuilder(dropboxResource.getFile().getResourcePath())
+                    .withMode(WriteMode.OVERWRITE)
+                    .uploadAndFinish(context.getStreamBuffer().getInputStream());
+            logger.info("Completed Dropbox Sender stream for transfer {}", context.getTransferId());
+
+        } else {
+            logger.error("Resource {} should be a FILE type. Found a {}",
+                    this.dropboxResource.getResourceId(), this.dropboxResource.getResourceCase().name());
+            throw new Exception("Resource " + this.dropboxResource.getResourceId() + " should be a FILE type. Found a " +
+                    this.dropboxResource.getResourceCase().name());
+        }
+
     }
 }

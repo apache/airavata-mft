@@ -20,11 +20,16 @@ syntax = "proto3";
 option java_multiple_files = true;
 package org.apache.airavata.mft.resource.stubs.s3.resource;
 
+import "common/common.proto";
+
 message S3Resource {
     string resourceId = 1;
     string bucketName = 2;
     string region = 3;
-    string resourcePath = 4;
+    oneof resource {
+        org.apache.airavata.mft.resource.stubs.common.FileResource file = 4;
+        org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 5;
+    }
 }
 
 message S3ResourceGetRequest {

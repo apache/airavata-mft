@@ -22,6 +22,7 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.specialized.BlockBlobClient;
 import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.azure.AzureSecret;
 import org.apache.airavata.mft.credential.stubs.azure.AzureSecretGetRequest;
@@ -71,9 +72,17 @@ public class AzureSender implements Connector {
     public void startStream(ConnectorContext context) throws Exception {
         logger.info("Starting Azure send for remote server for transfer {}", context.getTransferId());
         checkInitialized();
-        BlockBlobClient blockBlobClient = containerClient.getBlobClient(azureResource.getBlobName()).getBlockBlobClient();
-        blockBlobClient.upload(context.getStreamBuffer().getInputStream(), context.getMetadata().getResourceSize(), true);
-        logger.info("Completed Azure send for remote server for transfer {}", context.getTransferId());
+
+        if (ResourceTypes.FILE.equals(this.azureResource.getResourceCase().name())) {
+            BlockBlobClient blockBlobClient = containerClient.getBlobClient(azureResource.getFile().getResourcePath()).getBlockBlobClient();
+            blockBlobClient.upload(context.getStreamBuffer().getInputStream(), context.getMetadata().getResourceSize(), true);
+            logger.info("Completed Azure send for remote server for transfer {}", context.getTransferId());
+        } else {
+            logger.error("Resource {} should be a FILE type. Found a {}",
+                    this.azureResource.getResourceId(), this.azureResource.getResourceCase().name());
+            throw new Exception("Resource " + this.azureResource.getResourceId() + " should be a FILE type. Found a " +
+                    this.azureResource.getResourceCase().name());
+        }
 
     }
 }

@@ -20,6 +20,7 @@ package org.apache.airavata.mft.transport.dropbox;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.v2.DbxClientV2;
 import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecret;
 import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretGetRequest;
@@ -61,38 +62,47 @@ public class DropboxReceiver implements Connector {
 
     @Override
     public void startStream(ConnectorContext context) throws Exception {
-        logger.info("Starting Dropbox Receiver stream for transfer {}", context.getTransferId());
 
-        InputStream inputStream = dbxClientV2.files().download(this.dropboxResource.getResourcePath()).getInputStream();
-        OutputStream os = context.getStreamBuffer().getOutputStream();
-        int read;
-        long bytes = 0;
-        long fileSize = context.getMetadata().getResourceSize();
-        byte[] buf = new byte[1024];
-        while (true) {
-            int bufSize = 0;
+        if (ResourceTypes.FILE.equals(this.dropboxResource.getResourceCase().name())) {
+            logger.info("Starting Dropbox Receiver stream for transfer {}", context.getTransferId());
 
-            if (buf.length < fileSize) {
-                bufSize = buf.length;
-            } else {
-                bufSize = (int) fileSize;
+            InputStream inputStream = dbxClientV2.files().download(this.dropboxResource.getFile().getResourcePath()).getInputStream();
+            OutputStream os = context.getStreamBuffer().getOutputStream();
+            int read;
+            long bytes = 0;
+            long fileSize = context.getMetadata().getResourceSize();
+            byte[] buf = new byte[1024];
+            while (true) {
+                int bufSize = 0;
+
+                if (buf.length < fileSize) {
+                    bufSize = buf.length;
+                } else {
+                    bufSize = (int) fileSize;
+                }
+                bufSize = inputStream.read(buf, 0, bufSize);
+
+                if (bufSize < 0) {
+                    break;
+                }
+
+                os.write(buf, 0, bufSize);
+                os.flush();
+
+                fileSize -= bufSize;
+                if (fileSize == 0L)
+                    break;
             }
-            bufSize = inputStream.read(buf, 0, bufSize);
 
-            if (bufSize < 0) {
-                break;
-            }
+            os.close();
 
-            os.write(buf, 0, bufSize);
-            os.flush();
+            logger.info("Completed Dropbox Receiver stream for transfer {}", context.getTransferId());
 
-            fileSize -= bufSize;
-            if (fileSize == 0L)
-                break;
+        } else {
+            logger.error("Resource {} should be a FILE type. Found a {}",
+                    this.dropboxResource.getResourceId(), this.dropboxResource.getResourceCase().name());
+            throw new Exception("Resource " + this.dropboxResource.getResourceId() + " should be a FILE type. Found a " +
+                    this.dropboxResource.getResourceCase().name());
         }
-
-        os.close();
-
-        logger.info("Completed Dropbox Receiver stream for transfer {}", context.getTransferId());
     }
 }

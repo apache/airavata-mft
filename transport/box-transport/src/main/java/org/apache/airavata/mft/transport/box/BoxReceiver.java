@@ -21,6 +21,7 @@ package org.apache.airavata.mft.transport.box;
 import com.box.sdk.BoxAPIConnection;
 import com.box.sdk.BoxFile;
 import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.box.BoxSecret;
 import org.apache.airavata.mft.credential.stubs.box.BoxSecretGetRequest;
@@ -65,15 +66,23 @@ public class BoxReceiver implements Connector {
     @Override
     public void startStream(ConnectorContext context) throws Exception {
 
-        logger.info("Starting Box Receiver stream for transfer {}", context.getTransferId());
+        if (ResourceTypes.FILE.equals(this.boxResource.getResourceCase().name())) {
+            logger.info("Starting Box Receiver stream for transfer {}", context.getTransferId());
 
-        BoxFile file = new BoxFile(this.boxClient, this.boxResource.getBoxFileId());
+            BoxFile file = new BoxFile(this.boxClient, this.boxResource.getFile().getResourcePath());
 
-        OutputStream os = context.getStreamBuffer().getOutputStream();
-        file.download(os);
-        os.flush();
-        os.close();
+            OutputStream os = context.getStreamBuffer().getOutputStream();
+            file.download(os);
+            os.flush();
+            os.close();
 
-        logger.info("Completed Box Receiver stream for transfer {}", context.getTransferId());
+            logger.info("Completed Box Receiver stream for transfer {}", context.getTransferId());
+
+        } else {
+            logger.error("Resource {} should be a FILE type. Found a {}",
+                    this.boxResource.getResourceId(), this.boxResource.getResourceCase().name());
+            throw new Exception("Resource " + this.boxResource.getResourceId() + " should be a FILE type. Found a " +
+                    this.boxResource.getResourceCase().name());
+        }
     }
 }

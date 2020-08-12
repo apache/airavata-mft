@@ -21,6 +21,7 @@ package org.apache.airavata.mft.transport.box;
 import com.box.sdk.BoxAPIConnection;
 import com.box.sdk.BoxFile;
 import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.box.BoxSecret;
 import org.apache.airavata.mft.credential.stubs.box.BoxSecretGetRequest;
@@ -62,18 +63,26 @@ public class BoxSender implements Connector {
     public void startStream(ConnectorContext context) throws Exception {
 
         logger.info("Starting Box Sender stream for transfer {}", context.getTransferId());
-        logger.info("Content length for transfer {} {}", context.getTransferId(), context.getMetadata().getResourceSize());
+        logger.debug("Content length for transfer {} {}", context.getTransferId(), context.getMetadata().getResourceSize());
 
-        BoxFile file = new BoxFile(this.boxClient, this.boxResource.getBoxFileId());
+        if (ResourceTypes.FILE.equals(this.boxResource.getResourceCase().name())) {
+            BoxFile file = new BoxFile(this.boxClient, this.boxResource.getFile().getResourcePath());
 
-        // Upload chunks only if the file size is > 20mb
-        // Ref: https://developer.box.com/guides/uploads/chunked/
-        if (context.getMetadata().getResourceSize() > 20971520) {
-            file.uploadLargeFile(context.getStreamBuffer().getInputStream(), context.getMetadata().getResourceSize());
+            // Upload chunks only if the file size is > 20mb
+            // Ref: https://developer.box.com/guides/uploads/chunked/
+            if (context.getMetadata().getResourceSize() > 20971520) {
+                file.uploadLargeFile(context.getStreamBuffer().getInputStream(), context.getMetadata().getResourceSize());
+            } else {
+                file.uploadNewVersion(context.getStreamBuffer().getInputStream());
+            }
+
+            logger.info("Completed Box Sender stream for transfer {}", context.getTransferId());
+
         } else {
-            file.uploadNewVersion(context.getStreamBuffer().getInputStream());
+            logger.error("Resource {} should be a FILE type. Found a {}",
+                    this.boxResource.getResourceId(), this.boxResource.getResourceCase().name());
+            throw new Exception("Resource " + this.boxResource.getResourceId() + " should be a FILE type. Found a " +
+                    this.boxResource.getResourceCase().name());
         }
-
-        logger.info("Completed Box Sender stream for transfer {}", context.getTransferId());
     }
 }

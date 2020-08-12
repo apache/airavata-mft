@@ -18,6 +18,7 @@
 package org.apache.airavata.mft.transport.ftp;
 
 import org.apache.airavata.mft.core.ResourceMetadata;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.credential.stubs.ftp.FTPSecret;
 import org.apache.airavata.mft.credential.stubs.ftp.FTPSecretGetRequest;
@@ -73,14 +74,14 @@ public class FTPMetadataCollector implements MetadataCollector {
         FTPClient ftpClient = null;
         try {
             ftpClient = FTPTransportUtil.getFTPClient(ftpResource, ftpSecret);
-            logger.info("Fetching metadata for resource {} in {}", ftpResource.getResourcePath(), ftpResource.getFtpStorage().getHost());
+            logger.info("Fetching metadata for resource {} in {}", ftpResource.getFile().getResourcePath(), ftpResource.getFtpStorage().getHost());
 
-            FTPFile ftpFile = ftpClient.mlistFile(ftpResource.getResourcePath());
+            FTPFile ftpFile = ftpClient.mlistFile(ftpResource.getFile().getResourcePath());
 
             if (ftpFile != null) {
                 resourceMetadata.setResourceSize(ftpFile.getSize());
                 resourceMetadata.setUpdateTime(ftpFile.getTimestamp().getTimeInMillis());
-                if (ftpClient.hasFeature("MD5") && FTPReply.isPositiveCompletion(ftpClient.sendCommand("MD5 " + ftpResource.getResourcePath()))) {
+                if (ftpClient.hasFeature("MD5") && FTPReply.isPositiveCompletion(ftpClient.sendCommand("MD5 " + ftpResource.getFile().getResourcePath()))) {
                     String[] replies = ftpClient.getReplyStrings();
                     resourceMetadata.setMd5sum(replies[0]);
                 } else {
@@ -109,8 +110,14 @@ public class FTPMetadataCollector implements MetadataCollector {
         FTPClient ftpClient = null;
         try {
             ftpClient = FTPTransportUtil.getFTPClient(ftpResource, ftpSecret);
-            InputStream inputStream = ftpClient.retrieveFileStream(ftpResource.getResourcePath());
+            InputStream inputStream = null;
 
+            switch (ftpResource.getResourceCase().name()){
+                case ResourceTypes.FILE:
+                    inputStream = ftpClient.retrieveFileStream(ftpResource.getFile().getResourcePath());
+                case ResourceTypes.DIRECTORY:
+                    inputStream = ftpClient.retrieveFileStream(ftpResource.getDirectory().getResourcePath());
+            }
             return !(inputStream == null || ftpClient.getReplyCode() == 550);
         } catch (Exception e) {
             logger.error("FTP client initialization failed ", e);

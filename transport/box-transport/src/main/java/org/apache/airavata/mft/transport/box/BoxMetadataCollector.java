@@ -21,6 +21,7 @@ package org.apache.airavata.mft.transport.box;
 import com.box.sdk.BoxAPIConnection;
 import com.box.sdk.BoxFile;
 import org.apache.airavata.mft.core.ResourceMetadata;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.credential.stubs.box.BoxSecret;
 import org.apache.airavata.mft.credential.stubs.box.BoxSecretGetRequest;
@@ -66,7 +67,7 @@ public class BoxMetadataCollector implements MetadataCollector {
         BoxSecret boxSecret = secretClient.box().getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         BoxAPIConnection api = new BoxAPIConnection(boxSecret.getAccessToken());
-        BoxFile boxFile = new BoxFile(api, boxResource.getBoxFileId());
+        BoxFile boxFile = new BoxFile(api, boxResource.getFile().getResourcePath());
         BoxFile.Info boxFileInfo = boxFile.getInfo();
 
         ResourceMetadata metadata = new ResourceMetadata();
@@ -93,8 +94,14 @@ public class BoxMetadataCollector implements MetadataCollector {
         BoxSecret boxSecret = secretClient.box().getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         BoxAPIConnection api = new BoxAPIConnection(boxSecret.getAccessToken());
-        BoxFile boxFile = new BoxFile(api, boxResource.getBoxFileId());
 
+        BoxFile boxFile;
+        switch (boxResource.getResourceCase().name()){
+            case ResourceTypes.FILE:
+                boxFile = new BoxFile(api, boxResource.getFile().getResourcePath());
+            case ResourceTypes.DIRECTORY:
+                boxFile = new BoxFile(api, boxResource.getDirectory().getResourcePath());
+        }
         return true;
     }
 }

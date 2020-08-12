@@ -23,6 +23,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.s3.S3Secret;
 import org.apache.airavata.mft.credential.stubs.s3.S3SecretGetRequest;
@@ -70,8 +71,17 @@ public class S3Sender implements Connector {
         logger.info("Content length for transfer {} {}", context.getTransferId(), context.getMetadata().getResourceSize());
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(context.getMetadata().getResourceSize());
-        s3Client.putObject(this.s3Resource.getBucketName(), this.s3Resource.getResourcePath(), context.getStreamBuffer().getInputStream(), metadata);
 
-        logger.info("Completed S3 Sender stream for transfer {}", context.getTransferId());
+        if (ResourceTypes.FILE.equals(this.s3Resource.getResourceCase().name())) {
+            s3Client.putObject(this.s3Resource.getBucketName(), this.s3Resource.getFile().getResourcePath(),
+                                                        context.getStreamBuffer().getInputStream(), metadata);
+            logger.info("Completed S3 Sender stream for transfer {}", context.getTransferId());
+        } else {
+            logger.error("Resource {} should be a FILE type. Found a {}",
+                    this.s3Resource.getResourceId(), this.s3Resource.getResourceCase().name());
+            throw new Exception("Resource " + this.s3Resource.getResourceId() + " should be a FILE type. Found a " +
+                    this.s3Resource.getResourceCase().name());
+        }
+
     }
 }

@@ -25,6 +25,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
 import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.gcs.GCSSecret;
 import org.apache.airavata.mft.credential.stubs.gcs.GCSSecretGetRequest;
@@ -78,36 +79,45 @@ public class GCSReceiver implements Connector {
     public void startStream(ConnectorContext context) throws Exception {
         logger.info("Starting GCS Receiver stream for transfer {}", context.getTransferId());
 
-        InputStream inputStream = storage.objects().get(this.gcsResource.getBucketName(), this.gcsResource.getResourcePath()).executeMediaAsInputStream();
-        OutputStream os = context.getStreamBuffer().getOutputStream();
-        int read;
-        long bytes = 0;
-        long fileSize = context.getMetadata().getResourceSize();
-        byte[] buf = new byte[1024];
-        while (true) {
-            int bufSize = 0;
+        if (ResourceTypes.FILE.equals(this.gcsResource.getResourceCase().name())) {
+            InputStream inputStream = storage.objects().get(this.gcsResource.getBucketName(),
+                                        this.gcsResource.getFile().getResourcePath()).executeMediaAsInputStream();
+            OutputStream os = context.getStreamBuffer().getOutputStream();
+            int read;
+            long bytes = 0;
+            long fileSize = context.getMetadata().getResourceSize();
+            byte[] buf = new byte[1024];
+            while (true) {
+                int bufSize = 0;
 
-            if (buf.length < fileSize) {
-                bufSize = buf.length;
-            } else {
-                bufSize = (int) fileSize;
+                if (buf.length < fileSize) {
+                    bufSize = buf.length;
+                } else {
+                    bufSize = (int) fileSize;
+                }
+                bufSize = inputStream.read(buf, 0, bufSize);
+
+                if (bufSize < 0) {
+                    break;
+                }
+
+                os.write(buf, 0, bufSize);
+                os.flush();
+
+                fileSize -= bufSize;
+                if (fileSize == 0L)
+                    break;
             }
-            bufSize = inputStream.read(buf, 0, bufSize);
 
-            if (bufSize < 0) {
-                break;
-            }
+            os.close();
 
-            os.write(buf, 0, bufSize);
-            os.flush();
+            logger.info("Completed GCS Receiver stream for transfer {}", context.getTransferId());
 
-            fileSize -= bufSize;
-            if (fileSize == 0L)
-                break;
+        } else {
+            logger.error("Resource {} should be a FILE type. Found a {}",
+                    this.gcsResource.getResourceId(), this.gcsResource.getResourceCase().name());
+            throw new Exception("Resource " + this.gcsResource.getResourceId() + " should be a FILE type. Found a " +
+                    this.gcsResource.getResourceCase().name());
         }
-
-        os.close();
-
-        logger.info("Completed GCS Receiver stream for transfer {}", context.getTransferId());
     }
 }

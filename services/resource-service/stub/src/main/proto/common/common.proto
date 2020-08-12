@@ -18,34 +18,14 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-package org.apache.airavata.mft.resource.stubs.azure.resource;
+package org.apache.airavata.mft.resource.stubs.common;
 
-import "common/common.proto";
-
-message AzureResource {
-    string resourceId = 1;
-    string container = 2;
-    oneof resource {
-        org.apache.airavata.mft.resource.stubs.common.FileResource file = 3;
-        org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 4;
-    }
+message FileResource {
+    string resourcePath = 1;
 }
 
-message AzureResourceGetRequest {
-    string resourceId = 1;
-}
-
-message AzureResourceCreateRequest {
-    string container = 1;
-    string blobName = 2;
-}
-
-message AzureResourceUpdateRequest {
-    string resourceId = 1;
-    string container = 2;
-    string blobName = 3;
-}
-
-message AzureResourceDeleteRequest {
-    string resourceId = 1;
+message DirectoryResource {
+    string resourcePath = 1;
+    repeated FileResource files = 2;
+    repeated DirectoryResource directories = 3;
 }

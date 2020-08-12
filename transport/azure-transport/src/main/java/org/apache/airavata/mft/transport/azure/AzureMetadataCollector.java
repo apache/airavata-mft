@@ -23,6 +23,7 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.models.BlobProperties;
 import org.apache.airavata.mft.core.ResourceMetadata;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.credential.stubs.azure.AzureSecret;
 import org.apache.airavata.mft.credential.stubs.azure.AzureSecretGetRequest;
@@ -72,7 +73,7 @@ public class AzureMetadataCollector implements MetadataCollector {
 
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(azureSecret.getConnectionString()).buildClient();
 
-        BlobClient blobClient = blobServiceClient.getBlobContainerClient(azureResource.getContainer()).getBlobClient(azureResource.getBlobName());
+        BlobClient blobClient = blobServiceClient.getBlobContainerClient(azureResource.getContainer()).getBlobClient(azureResource.getFile().getResourcePath());
 
         BlobProperties properties = blobClient.getBlockBlobClient().getProperties();
         ResourceMetadata metadata = new ResourceMetadata();
@@ -107,6 +108,12 @@ public class AzureMetadataCollector implements MetadataCollector {
         if (!containerExists) {
             return false;
         }
-        return containerClient.getBlobClient(azureResource.getBlobName()).exists();
+        switch (azureResource.getResourceCase().name()){
+            case ResourceTypes.FILE:
+                return containerClient.getBlobClient(azureResource.getFile().getResourcePath()).exists();
+            case ResourceTypes.DIRECTORY:
+                return containerClient.getBlobClient(azureResource.getDirectory().getResourcePath()).exists();
+        }
+        return false;
     }
 }

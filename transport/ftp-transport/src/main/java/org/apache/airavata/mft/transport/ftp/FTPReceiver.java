@@ -18,6 +18,7 @@
 package org.apache.airavata.mft.transport.ftp;
 
 import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.ftp.FTPSecret;
 import org.apache.airavata.mft.credential.stubs.ftp.FTPSecretGetRequest;
@@ -62,40 +63,49 @@ public class FTPReceiver implements Connector {
 
     @Override
     public void startStream(ConnectorContext context) throws Exception {
-        logger.info("Starting FTP receiver stream for transfer {}", context.getTransferId());
 
-        checkInitialized();
-        OutputStream streamOs = context.getStreamBuffer().getOutputStream();
-        InputStream inputStream = ftpClient.retrieveFileStream(resource.getResourcePath());
+        if (ResourceTypes.FILE.equals(this.resource.getResourceCase().name())) {
+            logger.info("Starting FTP receiver stream for transfer {}", context.getTransferId());
 
-        long fileSize = context.getMetadata().getResourceSize();
+            checkInitialized();
+            OutputStream streamOs = context.getStreamBuffer().getOutputStream();
+            InputStream inputStream = ftpClient.retrieveFileStream(resource.getFile().getResourcePath());
 
-        byte[] buf = new byte[1024];
-        while (true) {
-            int bufSize;
+            long fileSize = context.getMetadata().getResourceSize();
 
-            if (buf.length < fileSize) {
-                bufSize = buf.length;
-            } else {
-                bufSize = (int) fileSize;
+            byte[] buf = new byte[1024];
+            while (true) {
+                int bufSize;
+
+                if (buf.length < fileSize) {
+                    bufSize = buf.length;
+                } else {
+                    bufSize = (int) fileSize;
+                }
+                bufSize = inputStream.read(buf, 0, bufSize);
+
+                if (bufSize < 0) {
+                    break;
+                }
+
+                streamOs.write(buf, 0, bufSize);
+                streamOs.flush();
+
+                fileSize -= bufSize;
+                if (fileSize == 0L)
+                    break;
             }
-            bufSize = inputStream.read(buf, 0, bufSize);
 
-            if (bufSize < 0) {
-                break;
-            }
+            inputStream.close();
+            streamOs.close();
+            logger.info("Completed FTP receiver stream for transfer {}", context.getTransferId());
 
-            streamOs.write(buf, 0, bufSize);
-            streamOs.flush();
-
-            fileSize -= bufSize;
-            if (fileSize == 0L)
-                break;
+        } else {
+            logger.error("Resource {} should be a FILE type. Found a {}",
+                    this.resource.getResourceId(), this.resource.getResourceCase().name());
+            throw new Exception("Resource " + this.resource.getResourceId() + " should be a FILE type. Found a " +
+                    this.resource.getResourceCase().name());
         }
-
-        inputStream.close();
-        streamOs.close();
-        logger.info("Completed FTP receiver stream for transfer {}", context.getTransferId());
     }
 
     private void checkInitialized() {

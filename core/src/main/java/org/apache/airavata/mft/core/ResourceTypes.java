@@ -15,37 +15,9 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
+package org.apache.airavata.mft.core;
 
-option java_multiple_files = true;
-package org.apache.airavata.mft.resource.stubs.azure.resource;
-
-import "common/common.proto";
-
-message AzureResource {
-    string resourceId = 1;
-    string container = 2;
-    oneof resource {
-        org.apache.airavata.mft.resource.stubs.common.FileResource file = 3;
-        org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 4;
-    }
-}
-
-message AzureResourceGetRequest {
-    string resourceId = 1;
-}
-
-message AzureResourceCreateRequest {
-    string container = 1;
-    string blobName = 2;
-}
-
-message AzureResourceUpdateRequest {
-    string resourceId = 1;
-    string container = 2;
-    string blobName = 3;
-}
-
-message AzureResourceDeleteRequest {
-    string resourceId = 1;
+public final class ResourceTypes {
+    public static final String FILE = "FILE";
+    public static final String DIRECTORY = "DIRECTORY";
 }

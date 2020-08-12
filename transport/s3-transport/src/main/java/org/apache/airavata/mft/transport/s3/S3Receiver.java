@@ -24,6 +24,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.s3.S3Secret;
 import org.apache.airavata.mft.credential.stubs.s3.S3SecretGetRequest;
@@ -70,21 +71,29 @@ public class S3Receiver implements Connector {
     @Override
     public void startStream(ConnectorContext context) throws Exception {
 
-        logger.info("Starting S3 Receiver stream for transfer {}", context.getTransferId());
+        if (ResourceTypes.FILE.equals(this.s3Resource.getResourceCase().name())) {
+            logger.info("Starting S3 Receiver stream for transfer {}", context.getTransferId());
 
-        S3Object s3object = s3Client.getObject(s3Resource.getBucketName(), s3Resource.getResourcePath());
-        S3ObjectInputStream inputStream = s3object.getObjectContent();
+            S3Object s3object = s3Client.getObject(s3Resource.getBucketName(), s3Resource.getFile().getResourcePath());
+            S3ObjectInputStream inputStream = s3object.getObjectContent();
 
-        OutputStream os = context.getStreamBuffer().getOutputStream();
-        int read;
-        long bytes = 0;
-        while ((read = inputStream.read()) != -1) {
-            bytes++;
-            os.write(read);
+            OutputStream os = context.getStreamBuffer().getOutputStream();
+            int read;
+            long bytes = 0;
+            while ((read = inputStream.read()) != -1) {
+                bytes++;
+                os.write(read);
+            }
+            os.flush();
+            os.close();
+
+            logger.info("Completed S3 Receiver stream for transfer {}", context.getTransferId());
+
+        } else {
+            logger.error("Resource {} should be a FILE type. Found a {}",
+                    this.s3Resource.getResourceId(), this.s3Resource.getResourceCase().name());
+            throw new Exception("Resource " + this.s3Resource.getResourceId() + " should be a FILE type. Found a " +
+                    this.s3Resource.getResourceCase().name());
         }
-        os.flush();
-        os.close();
-
-        logger.info("Completed S3 Receiver stream for transfer {}", context.getTransferId());
     }
 }

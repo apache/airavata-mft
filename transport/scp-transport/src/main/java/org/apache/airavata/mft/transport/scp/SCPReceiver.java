@@ -21,6 +21,7 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.DoubleStreamingBuffer;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.scp.SCPSecret;
 import org.apache.airavata.mft.credential.stubs.scp.SCPSecretGetRequest;
@@ -77,12 +78,20 @@ public class SCPReceiver implements Connector {
     public void startStream(ConnectorContext context) throws Exception {
         checkInitialized();
         if (session == null) {
-            System.out.println("Session can not be null. Make sure that SCP Receiver is properly initialized");
+            logger.error("Session can not be null. Make sure that SCP Receiver is properly initialized");
             throw new Exception("Session can not be null. Make sure that SCP Receiver is properly initialized");
         }
 
-        transferRemoteToStream(session, this.scpResource.getResourcePath(), context.getStreamBuffer());
-        logger.info("SCP Receive completed. Transfer {}", context.getTransferId());
+        if (ResourceTypes.FILE.equals(this.scpResource.getResourceCase().name())) {
+            transferRemoteToStream(session, this.scpResource.getFile().getResourcePath(), context.getStreamBuffer());
+            logger.info("SCP Receive completed. Transfer {}", context.getTransferId());
+
+        } else {
+            logger.error("Resource {} should be a FILE type. Found a {}",
+                                            this.scpResource.getResourceId(), this.scpResource.getResourceCase().name());
+            throw new Exception("Resource " + this.scpResource.getResourceId() + " should be a FILE type. Found a " +
+                                                                            this.scpResource.getResourceCase().name());
+        }
     }
 
     private void transferRemoteToStream(Session session, String from, DoubleStreamingBuffer streamBuffer) throws Exception {

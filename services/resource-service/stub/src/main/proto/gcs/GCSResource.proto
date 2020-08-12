@@ -20,10 +20,15 @@ syntax = "proto3";
 option java_multiple_files = true;
 package org.apache.airavata.mft.resource.stubs.gcs.resource;
 
+import "common/common.proto";
+
 message GCSResource {
     string resourceId = 1;
     string bucketName = 2;
-    string resourcePath = 3;
+    oneof resource {
+        org.apache.airavata.mft.resource.stubs.common.FileResource file = 3;
+        org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 4;
+    }
 }
 
 message GCSResourceGetRequest {

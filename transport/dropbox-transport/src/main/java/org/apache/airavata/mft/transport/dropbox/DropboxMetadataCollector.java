@@ -21,6 +21,7 @@ import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
 import org.apache.airavata.mft.core.ResourceMetadata;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecret;
 import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretGetRequest;
@@ -68,7 +69,7 @@ public class DropboxMetadataCollector implements MetadataCollector {
         DbxClientV2 dbxClientV2 = new DbxClientV2(config, dropboxSecret.getAccessToken());
 
         ResourceMetadata metadata = new ResourceMetadata();
-        FileMetadata fileMetadata = (FileMetadata) dbxClientV2.files().getMetadata(dropboxResource.getResourcePath());
+        FileMetadata fileMetadata = (FileMetadata) dbxClientV2.files().getMetadata(dropboxResource.getFile().getResourcePath());
         metadata.setResourceSize(fileMetadata.getSize());
         metadata.setMd5sum(null);
         metadata.setUpdateTime(fileMetadata.getServerModified().getTime());
@@ -88,6 +89,12 @@ public class DropboxMetadataCollector implements MetadataCollector {
         DbxRequestConfig config = DbxRequestConfig.newBuilder("mftdropbox/v1").build();
         DbxClientV2 dbxClientV2 = new DbxClientV2(config, dropboxSecret.getAccessToken());
 
-        return !dbxClientV2.files().searchV2(dropboxResource.getResourcePath()).getMatches().isEmpty();
+        switch (dropboxResource.getResourceCase().name()){
+            case ResourceTypes.FILE:
+                return !dbxClientV2.files().searchV2(dropboxResource.getFile().getResourcePath()).getMatches().isEmpty();
+            case ResourceTypes.DIRECTORY:
+                return !dbxClientV2.files().searchV2(dropboxResource.getDirectory().getResourcePath()).getMatches().isEmpty();
+        }
+        return false;
     }
 }
