@@ -22,7 +22,8 @@ import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.models.BlobProperties;
-import org.apache.airavata.mft.core.ResourceMetadata;
+import org.apache.airavata.mft.core.DirectoryResourceMetadata;
+import org.apache.airavata.mft.core.FileResourceMetadata;
 import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.credential.stubs.azure.AzureSecret;
@@ -58,7 +59,7 @@ public class AzureMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public ResourceMetadata getGetResourceMetadata(String resourceId, String credentialToken) throws Exception {
+    public FileResourceMetadata getFileResourceMetadata(String resourceId, String credentialToken) throws Exception {
         checkInitialized();
 
         if (!isAvailable(resourceId, credentialToken)) {
@@ -77,7 +78,7 @@ public class AzureMetadataCollector implements MetadataCollector {
                                                 .getBlobClient(azureResource.getFile().getResourcePath());
 
         BlobProperties properties = blobClient.getBlockBlobClient().getProperties();
-        ResourceMetadata metadata = new ResourceMetadata();
+        FileResourceMetadata metadata = new FileResourceMetadata();
         metadata.setResourceSize(properties.getBlobSize());
         metadata.setCreatedTime(properties.getCreationTime().toEpochSecond());
         metadata.setUpdateTime(properties.getCreationTime().toEpochSecond());
@@ -91,6 +92,20 @@ public class AzureMetadataCollector implements MetadataCollector {
         metadata.setMd5sum(md5sb.toString());
 
         return metadata;
+    }
+
+    @Override
+    public FileResourceMetadata getFileResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented");
+    }
+
+    @Override
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String resourceId, String credentialToken) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented");    }
+
+    @Override
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented");
     }
 
     @Override

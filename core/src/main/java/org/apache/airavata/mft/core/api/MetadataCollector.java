@@ -17,10 +17,74 @@
 
 package org.apache.airavata.mft.core.api;
 
-import org.apache.airavata.mft.core.ResourceMetadata;
+import org.apache.airavata.mft.core.DirectoryResourceMetadata;
+import org.apache.airavata.mft.core.FileResourceMetadata;
 
 public interface MetadataCollector {
+
+    /**
+     * Initializes the {@link MetadataCollector}
+     *
+     * @param resourceServiceHost hostname of the resource service
+     * @param resourceServicePort port of the resource service
+     * @param secretServiceHost hostname of the secret service
+     * @param secretServicePort port of the secret service
+     */
     public void init(String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort);
-    public ResourceMetadata getGetResourceMetadata(String resourceId, String credentialToken) throws Exception;
+
+    /**
+     * Fetches a metadata of given File Resource
+     *
+     * @param resourceId id of the resource
+     * @param credentialToken credential token for the resource
+     * @return an object of {@link FileResourceMetadata}
+     * @throws Exception if the resource id is not a File Resource type or the resource can't be fetched from the resource service
+     */
+    public FileResourceMetadata getFileResourceMetadata(String resourceId, String credentialToken) throws Exception;
+
+    /**
+     * Fetches a metadata of given File Resource inside a registered directory resource. Target file might be living in
+     * multiple level below the parent directory
+     *
+     * @param parentResourceId parent directory resource id
+     * @param resourcePath path of the target resource. This should be a child path of the parent resource
+     * @param credentialToken credential token for the resource
+     * @return an object of {@link FileResourceMetadata}
+     * @throws Exception if the parent resource is not a Directory resource or the target resource is not a File Resource type
+     * or the resource can't be fetched from the resource service
+     */
+    public FileResourceMetadata getFileResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception;
+
+    /**
+     * Fetches a metadata of given Directory Resource
+     *
+     * @param resourceId id of the resource
+     * @param credentialToken credential token for the resource
+     * @return an object of {@link DirectoryResourceMetadata}
+     * @throws Exception if the resource id is not a Directory Resource type or the resource can't be fetched from the resource service
+     */
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String resourceId, String credentialToken) throws Exception;
+
+    /**
+     * Fetches a metadata of given Directory Resource inside a registered directory resource. Target directory might be living in
+     * multiple level below the parent directory
+     *
+     * @param parentResourceId parent directory resource id
+     * @param resourcePath path of the target resource. This should be a child path of the parent resource
+     * @param credentialToken credential token for the resource
+     * @return an object of {@link DirectoryResourceMetadata}
+     * @throws Exception if the parent resource is not a Directory resource or the target resource is not a Directory Resource type
+     * or the resource can't be fetched from the resource service
+     */
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception;
+
+    /**
+     * Check whether the resource is available in the actual storage
+     *
+     * @param resourceId id of the resource
+     * @param credentialToken credential token for the resource
+     * @return true of the resource is available false otherwise
+     * @throws Exception if the resource details can not be fetched from the resource service
+     */
     public Boolean isAvailable(String resourceId, String credentialToken) throws Exception;
 }
