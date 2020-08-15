@@ -17,6 +17,7 @@
 
  package org.apache.airavata.mft.admin.models.rpc;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class SyncRPCRequest {
@@ -69,5 +70,55 @@ public class SyncRPCRequest {
     public SyncRPCRequest setMessageId(String messageId) {
         this.messageId = messageId;
         return this;
+    }
+
+    public static final class SyncRPCRequestBuilder {
+        private String agentId;
+        private String method;
+        private Map<String, String> parameters = new HashMap<>();
+        private String returnAddress;
+        private String messageId;
+
+        private SyncRPCRequestBuilder() {
+        }
+
+        public static SyncRPCRequestBuilder builder() {
+            return new SyncRPCRequestBuilder();
+        }
+
+        public SyncRPCRequestBuilder withAgentId(String agentId) {
+            this.agentId = agentId;
+            return this;
+        }
+
+        public SyncRPCRequestBuilder withMethod(String method) {
+            this.method = method;
+            return this;
+        }
+
+        public SyncRPCRequestBuilder withParameter(String key, String value) {
+            this.parameters.put(key, value);
+            return this;
+        }
+
+        public SyncRPCRequestBuilder withReturnAddress(String returnAddress) {
+            this.returnAddress = returnAddress;
+            return this;
+        }
+
+        public SyncRPCRequestBuilder withMessageId(String messageId) {
+            this.messageId = messageId;
+            return this;
+        }
+
+        public SyncRPCRequest build() {
+            SyncRPCRequest syncRPCRequest = new SyncRPCRequest();
+            syncRPCRequest.setAgentId(agentId);
+            syncRPCRequest.setMethod(method);
+            syncRPCRequest.setParameters(parameters);
+            syncRPCRequest.setReturnAddress(returnAddress);
+            syncRPCRequest.setMessageId(messageId);
+            return syncRPCRequest;
+        }
     }
 }

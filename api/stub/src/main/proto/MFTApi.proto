@@ -28,6 +28,7 @@ message TransferApiResponse {
 
 message TransferStateApiRequest {
     string transferId = 1;
+    string mftAuthorizationToken = 2;
 }
 
 message TransferStateApiResponse {
@@ -43,10 +44,44 @@ message ResourceAvailabilityRequest {
     string resourceToken = 3;
     string resourceBackend = 4;
     string resourceCredentialBackend = 5;
+    string mftAuthorizationToken = 6;
 }
 
 message ResourceAvailabilityResponse {
     bool available = 1;
+}
+
+message FileMetadataResponse {
+    string friendlyName = 1;
+    int64 resourceSize = 2;
+    int64 createdTime = 3;
+    int64 updateTime = 4;
+    string md5sum = 5;
+    string resourcePath = 6;
+    string parentResourceId = 7;
+    string parentResourceType = 8;
+}
+
+message DirectoryMetadataResponse {
+    string friendlyName = 1;
+    int64 createdTime = 2;
+    int64 updateTime = 3;
+    string resourcePath = 4;
+    string parentResourceId = 5;
+    string parentResourceType = 6;
+    repeated DirectoryMetadataResponse directories = 7;
+    repeated FileMetadataResponse files = 8;
+    bool lazyInitialized = 9;
+}
+
+message FetchResourceMetadataRequest {
+    string resourceId = 1;
+    string resourceType = 2;
+    string resourceToken = 3;
+    string resourceBackend = 4;
+    string resourceCredentialBackend = 5;
+    string targetAgentId = 7;
+    string mftAuthorizationToken = 8;
 }
 
 service  MFTApiService {
@@ -70,4 +105,16 @@ service  MFTApiService {
     }
 
     rpc getResourceAvailability(ResourceAvailabilityRequest) returns (ResourceAvailabilityResponse) {}
+
+    rpc getFileResourceMetadata(FetchResourceMetadataRequest) returns (FileMetadataResponse) {
+        option (google.api.http) = {
+           get: "/v1.0/api/resource/metadata/file"
+        };
+    }
+
+    rpc getDirectoryResourceMetadata(FetchResourceMetadataRequest) returns (DirectoryMetadataResponse) {
+        option (google.api.http) = {
+           get: "/v1.0/api/resource/metadata/directory"
+        };
+    }
 }

@@ -30,7 +30,7 @@ import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferCommand;
 import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
-import org.apache.airavata.mft.admin.models.rpc.SyncRPCResponse;
+import org.apache.airavata.mft.agent.rpc.RPCParser;
 import org.apache.airavata.mft.core.ConnectorResolver;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
 import org.apache.airavata.mft.core.api.Connector;
@@ -96,6 +96,9 @@ public class MFTAgent implements CommandLineRunner {
     private ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
+    private RPCParser rpcParser;
+
+    @Autowired
     private MFTConsulClient mftConsulClient;
 
     public void init() {
@@ -110,7 +113,7 @@ public class MFTAgent implements CommandLineRunner {
                 decodedValue.ifPresent(v -> {
                     try {
                         SyncRPCRequest rpcRequest = mapper.readValue(v, SyncRPCRequest.class);
-                        mftConsulClient.sendSyncRPCResponseFromAgent(rpcRequest.getReturnAddress(), processRPCRequest(rpcRequest));
+                        mftConsulClient.sendSyncRPCResponseFromAgent(rpcRequest.getReturnAddress(), rpcParser.processRPCRequest(rpcRequest));
                     } catch (Throwable e) {
                         logger.error("Error processing the RPC request {}", value.getKey(), e);
                     } finally {
@@ -122,11 +125,6 @@ public class MFTAgent implements CommandLineRunner {
 
         rpcMessageCache.addListener(rpcCacheListener);
         rpcMessageCache.start();
-    }
-
-    private SyncRPCResponse processRPCRequest(SyncRPCRequest request) {
-        // TODO implement using the reflection
-        return null;
     }
 
     private void acceptTransferRequests() {

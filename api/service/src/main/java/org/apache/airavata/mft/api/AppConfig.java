@@ -18,6 +18,7 @@
 package org.apache.airavata.mft.api;
 
 import org.apache.airavata.mft.admin.MFTConsulClient;
+import org.apache.airavata.mft.admin.SyncRPCClient;
 import org.apache.airavata.mft.admin.models.TransferRequest;
 import org.apache.airavata.mft.api.service.TransferApiRequest;
 import org.dozer.DozerBeanMapper;
@@ -34,9 +35,19 @@ public class AppConfig {
     @org.springframework.beans.factory.annotation.Value("${consul.port}")
     public Integer consulPort;
 
+    @org.springframework.beans.factory.annotation.Value("${api.id}")
+    public String apiId;
+
     @Bean
     public MFTConsulClient mftConsulClient() {
         return new MFTConsulClient(consulHost, consulPort);
+    }
+
+    @Bean
+    public SyncRPCClient agentRPCClient() {
+        SyncRPCClient client = new SyncRPCClient("api-server-" + apiId, mftConsulClient());
+        client.init();
+        return client;
     }
 
     @Bean

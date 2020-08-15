@@ -26,6 +26,4 @@ message FileResource {
 
 message DirectoryResource {
     string resourcePath = 1;
-    repeated FileResource files = 2;
-    repeated DirectoryResource directories = 3;
 }

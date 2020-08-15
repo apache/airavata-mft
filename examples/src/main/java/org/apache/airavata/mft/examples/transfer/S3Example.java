@@ -15,21 +15,21 @@
  * limitations under the License.
  */
 
- package org.apache.airavata.mft.examples;
+package org.apache.airavata.mft.examples.transfer;
 
 import org.apache.airavata.mft.api.client.MFTApiClient;
 import org.apache.airavata.mft.api.service.*;
 
 import java.util.Iterator;
 
-public class SCPExample {
+public class S3Example {
     public static void main(String args[]) throws Exception {
         MFTApiServiceGrpc.MFTApiServiceBlockingStub client = MFTApiClient.buildClient("localhost", 7004);
 
         String sourceId = "remote-ssh-resource2";
         String sourceToken = "local-ssh-cred";
-        String destId = "remote-ssh-resource";
-        String destToken = "local-ssh-cred";
+        String destId = "s3-file";
+        String destToken = "s3-cred";
         String mftAuthorizationToken = "43ff79ac-e4f2-473c-9ea1-04eee9509a53";
 
         TransferApiRequest request = TransferApiRequest.newBuilder()
@@ -39,7 +39,7 @@ public class SCPExample {
                 .setSourceType("SCP")
                 .setDestinationId(destId)
                 .setDestinationToken(destToken)
-                .setDestinationType("SCP")
+                .setDestinationType("S3")
                 .setAffinityTransfer(false).build();
 
         TransferApiResponse transferApiResponse = client.submitTransfer(request);

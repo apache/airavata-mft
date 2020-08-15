@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.examples;
+package org.apache.airavata.mft.examples.transfer;
 
-public class DriveExample {
+public class BoxExample {
 }

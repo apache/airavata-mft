@@ -39,5 +39,10 @@
             <groupId>org.apache.airavata</groupId>
             <version>0.01-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+            <version>${log4j.over.slf4j}</version>
+        </dependency>
     </dependencies>
 </project>
