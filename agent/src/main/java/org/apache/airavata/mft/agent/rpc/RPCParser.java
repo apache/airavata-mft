@@ -20,6 +20,7 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCResponse;
+import org.apache.airavata.mft.core.DirectoryResourceMetadata;
 import org.apache.airavata.mft.core.FileResourceMetadata;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
 import org.apache.airavata.mft.core.api.MetadataCollector;
@@ -61,6 +62,20 @@ public class RPCParser {
                     metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
                     FileResourceMetadata fileResourceMetadata = metadataCollector.getFileResourceMetadata(resourceId, resourceToken);
                     return mapper.writeValueAsString(fileResourceMetadata);
+                }
+                break;
+            case "getDirectoryResourceMetadata":
+                resourceId = request.getParameters().get("resourceId");
+                resourceType = request.getParameters().get("resourceType");
+                resourceToken = request.getParameters().get("resourceToken");
+                mftAuthorizationToken = request.getParameters().get("mftAuthorizationToken");
+
+                metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(resourceType);
+                if (metadataCollectorOp.isPresent()) {
+                    MetadataCollector metadataCollector = metadataCollectorOp.get();
+                    metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
+                    DirectoryResourceMetadata dirResourceMetadata = metadataCollector.getDirectoryResourceMetadata(resourceId, resourceToken);
+                    return mapper.writeValueAsString(dirResourceMetadata);
                 }
                 break;
         }

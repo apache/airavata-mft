@@ -26,6 +26,7 @@ import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCResponse;
 import org.apache.airavata.mft.api.service.*;
+import org.apache.airavata.mft.core.DirectoryResourceMetadata;
 import org.apache.airavata.mft.core.FileResourceMetadata;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
 import org.apache.airavata.mft.core.api.MetadataCollector;
@@ -172,13 +173,55 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
                                                             rpcResponse.getErrorAsStr()));
             }
         } catch (Exception e) {
-            logger.error("Error while fetching resource metadata for resource " + request.getResourceId(), e);
-            responseObserver.onError(new Exception("Failed to fetch resource metadata", e));
+            logger.error("Error while fetching resource metadata for file resource " + request.getResourceId(), e);
+            responseObserver.onError(new Exception("Failed to fetch file resource metadata", e));
         }
     }
 
     @Override
     public void getDirectoryResourceMetadata(FetchResourceMetadataRequest request, StreamObserver<DirectoryMetadataResponse> responseObserver) {
-        super.getDirectoryResourceMetadata(request, responseObserver);
+        try {
+            SyncRPCResponse rpcResponse = agentRPCClient.sendSyncRequest(SyncRPCRequest.SyncRPCRequestBuilder.builder()
+                    .withAgentId(request.getTargetAgentId())
+                    .withMessageId(UUID.randomUUID().toString())
+                    .withMethod("getDirectoryResourceMetadata")
+                    .withParameter("resourceId", request.getResourceId())
+                    .withParameter("resourceType", request.getResourceType())
+                    .withParameter("resourceToken", request.getResourceToken())
+                    .withParameter("mftAuthorizationToken", request.getMftAuthorizationToken())
+                    .build());
+
+            switch (rpcResponse.getResponseStatus()) {
+                case SUCCESS:
+                    DirectoryResourceMetadata dirResourceMetadata = jsonMapper.readValue(rpcResponse.getResponseAsStr(), DirectoryResourceMetadata.class);
+                    DirectoryMetadataResponse.Builder responseBuilder = DirectoryMetadataResponse.newBuilder();
+                    dozerBeanMapper.map(dirResourceMetadata, responseBuilder);
+
+                    // As dozer mapper can't map collections in protobuf, do it manually for directories and files
+                    for (DirectoryResourceMetadata dm : dirResourceMetadata.getDirectories()) {
+                        DirectoryMetadataResponse.Builder db = DirectoryMetadataResponse.newBuilder();
+                        dozerBeanMapper.map(dm, db);
+                        responseBuilder.addDirectories(db);
+                    }
+
+                    for (FileResourceMetadata fm : dirResourceMetadata.getFiles()) {
+                        FileMetadataResponse.Builder fb = FileMetadataResponse.newBuilder();
+                        dozerBeanMapper.map(fm, fb);
+                        responseBuilder.addFiles(fb);
+                    }
+
+                    responseObserver.onNext(responseBuilder.build());
+                    responseObserver.onCompleted();
+                    return;
+                case FAIL:
+                    logger.error("Errored while processing the fetch directory metadata response for resource id {}. Error msg : {}",
+                            request.getResourceId(), rpcResponse.getErrorAsStr());
+                    responseObserver.onError(new Exception("Errored while processing the the fetch directory metadata response. Error msg : " +
+                            rpcResponse.getErrorAsStr()));
+            }
+        } catch (Exception e) {
+            logger.error("Error while fetching directory resource metadata for resource " + request.getResourceId(), e);
+            responseObserver.onError(new Exception("Failed to fetch directory resource metadata", e));
+        }
     }
 }
