@@ -76,7 +76,6 @@ public class SyncRPCRequest {
         private String agentId;
         private String method;
         private Map<String, String> parameters = new HashMap<>();
-        private String returnAddress;
         private String messageId;
 
         private SyncRPCRequestBuilder() {
@@ -101,11 +100,6 @@ public class SyncRPCRequest {
             return this;
         }
 
-        public SyncRPCRequestBuilder withReturnAddress(String returnAddress) {
-            this.returnAddress = returnAddress;
-            return this;
-        }
-
         public SyncRPCRequestBuilder withMessageId(String messageId) {
             this.messageId = messageId;
             return this;
@@ -116,7 +110,6 @@ public class SyncRPCRequest {
             syncRPCRequest.setAgentId(agentId);
             syncRPCRequest.setMethod(method);
             syncRPCRequest.setParameters(parameters);
-            syncRPCRequest.setReturnAddress(returnAddress);
             syncRPCRequest.setMessageId(messageId);
             return syncRPCRequest;
         }

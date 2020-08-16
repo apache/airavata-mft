@@ -144,19 +144,33 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
         }
     }
 
+    /**
+     * Fetches metadata for a specified file resource.  This has 2 modes
+     * 1. Fetch the metadata of the exact file pointed in the resourceId. This assumes resourceId is an id of a file resource
+     * 2. Fetch the metadata of a child directory in the parent directory. To do this, childPath should be provided explicitly
+     * and resourceId is the parent resource id. Here resource id should be an id of directory resource
+     */
     @Override
     public void getFileResourceMetadata(FetchResourceMetadataRequest request, StreamObserver<FileMetadataResponse> responseObserver) {
 
         try {
-            SyncRPCResponse rpcResponse = agentRPCClient.sendSyncRequest(SyncRPCRequest.SyncRPCRequestBuilder.builder()
+            SyncRPCRequest.SyncRPCRequestBuilder requestBuilder = SyncRPCRequest.SyncRPCRequestBuilder.builder()
                     .withAgentId(request.getTargetAgentId())
                     .withMessageId(UUID.randomUUID().toString())
-                    .withMethod("getFileResourceMetadata")
                     .withParameter("resourceId", request.getResourceId())
                     .withParameter("resourceType", request.getResourceType())
                     .withParameter("resourceToken", request.getResourceToken())
-                    .withParameter("mftAuthorizationToken", request.getMftAuthorizationToken())
-                    .build());
+                    .withParameter("mftAuthorizationToken", request.getMftAuthorizationToken());
+
+            if (request.getChildPath().isEmpty()) {
+                requestBuilder.withMethod("getFileResourceMetadata");
+            } else {
+                // If a childPath is specified, look for child directories in the given parent resource id
+                requestBuilder.withMethod("getChildFileResourceMetadata");
+                requestBuilder.withParameter("childPath", request.getChildPath());
+            }
+
+            SyncRPCResponse rpcResponse = agentRPCClient.sendSyncRequest(requestBuilder.build());
 
             switch (rpcResponse.getResponseStatus()) {
                 case SUCCESS:
@@ -178,18 +192,33 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
         }
     }
 
+    /**
+     * Fetches metadata for a specified directory resource. This method assumes that the resourceId is an id of
+     * a directory resource. This has 2 modes
+     * 1. Fetch the metadata of the exact directory pointed in the resourceId
+     * 2. Fetch the metadata of a child directory in the parent directory. To do this, childPath should be provided explicitly
+     * and resourceId is the parent resource id.
+     */
     @Override
     public void getDirectoryResourceMetadata(FetchResourceMetadataRequest request, StreamObserver<DirectoryMetadataResponse> responseObserver) {
         try {
-            SyncRPCResponse rpcResponse = agentRPCClient.sendSyncRequest(SyncRPCRequest.SyncRPCRequestBuilder.builder()
+            SyncRPCRequest.SyncRPCRequestBuilder requestBuilder = SyncRPCRequest.SyncRPCRequestBuilder.builder()
                     .withAgentId(request.getTargetAgentId())
                     .withMessageId(UUID.randomUUID().toString())
-                    .withMethod("getDirectoryResourceMetadata")
                     .withParameter("resourceId", request.getResourceId())
                     .withParameter("resourceType", request.getResourceType())
                     .withParameter("resourceToken", request.getResourceToken())
-                    .withParameter("mftAuthorizationToken", request.getMftAuthorizationToken())
-                    .build());
+                    .withParameter("mftAuthorizationToken", request.getMftAuthorizationToken());
+
+            if (request.getChildPath().isEmpty()) {
+                requestBuilder.withMethod("getDirectoryResourceMetadata");
+            } else {
+                // If a childPath is specified, look for child directories in the given parent resource id
+                requestBuilder.withMethod("getChildDirectoryResourceMetadata");
+                requestBuilder.withParameter("childPath", request.getChildPath());
+            }
+
+            SyncRPCResponse rpcResponse = agentRPCClient.sendSyncRequest(requestBuilder.build());
 
             switch (rpcResponse.getResponseStatus()) {
                 case SUCCESS:

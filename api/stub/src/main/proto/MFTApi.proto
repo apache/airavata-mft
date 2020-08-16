@@ -81,7 +81,8 @@ message FetchResourceMetadataRequest {
     string resourceBackend = 4;
     string resourceCredentialBackend = 5;
     string targetAgentId = 7;
-    string mftAuthorizationToken = 8;
+    string childPath = 8; // if the child entities of the parent resource are required, set this field
+    string mftAuthorizationToken = 9;
 }
 
 service  MFTApiService {

@@ -64,6 +64,21 @@ public class RPCParser {
                     return mapper.writeValueAsString(fileResourceMetadata);
                 }
                 break;
+            case "getChildFileResourceMetadata":
+                resourceId = request.getParameters().get("resourceId");
+                resourceType = request.getParameters().get("resourceType");
+                resourceToken = request.getParameters().get("resourceToken");
+                String childPath = request.getParameters().get("childPath");
+                mftAuthorizationToken = request.getParameters().get("mftAuthorizationToken");
+
+                metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(resourceType);
+                if (metadataCollectorOp.isPresent()) {
+                    MetadataCollector metadataCollector = metadataCollectorOp.get();
+                    metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
+                    FileResourceMetadata fileResourceMetadata = metadataCollector.getFileResourceMetadata(resourceId, childPath, resourceToken);
+                    return mapper.writeValueAsString(fileResourceMetadata);
+                }
+                break;
             case "getDirectoryResourceMetadata":
                 resourceId = request.getParameters().get("resourceId");
                 resourceType = request.getParameters().get("resourceType");
@@ -75,6 +90,21 @@ public class RPCParser {
                     MetadataCollector metadataCollector = metadataCollectorOp.get();
                     metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
                     DirectoryResourceMetadata dirResourceMetadata = metadataCollector.getDirectoryResourceMetadata(resourceId, resourceToken);
+                    return mapper.writeValueAsString(dirResourceMetadata);
+                }
+                break;
+            case "getChildDirectoryResourceMetadata":
+                resourceId = request.getParameters().get("resourceId");
+                resourceType = request.getParameters().get("resourceType");
+                resourceToken = request.getParameters().get("resourceToken");
+                childPath = request.getParameters().get("childPath");
+                mftAuthorizationToken = request.getParameters().get("mftAuthorizationToken");
+
+                metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(resourceType);
+                if (metadataCollectorOp.isPresent()) {
+                    MetadataCollector metadataCollector = metadataCollectorOp.get();
+                    metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
+                    DirectoryResourceMetadata dirResourceMetadata = metadataCollector.getDirectoryResourceMetadata(resourceId, childPath, resourceToken);
                     return mapper.writeValueAsString(dirResourceMetadata);
                 }
                 break;
