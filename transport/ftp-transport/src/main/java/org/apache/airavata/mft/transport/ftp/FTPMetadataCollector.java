@@ -17,16 +17,18 @@
 
 package org.apache.airavata.mft.transport.ftp;
 
-import org.apache.airavata.mft.core.ResourceMetadata;
+import org.apache.airavata.mft.core.DirectoryResourceMetadata;
+import org.apache.airavata.mft.core.FileResourceMetadata;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.MetadataCollector;
+import org.apache.airavata.mft.credential.stubs.ftp.FTPSecret;
+import org.apache.airavata.mft.credential.stubs.ftp.FTPSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.service.FTPResource;
-import org.apache.airavata.mft.resource.service.FTPResourceGetRequest;
-import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
+import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.ftp.resource.FTPResource;
+import org.apache.airavata.mft.resource.stubs.ftp.resource.FTPResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.service.FTPSecret;
-import org.apache.airavata.mft.secret.service.FTPSecretGetRequest;
-import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
+import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
@@ -61,26 +63,26 @@ public class FTPMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public ResourceMetadata getGetResourceMetadata(String resourceId, String credentialToken) {
+    public FileResourceMetadata getFileResourceMetadata(String resourceId, String credentialToken) {
 
         checkInitialized();
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
-        FTPResource ftpResource = resourceClient.getFTPResource(FTPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
-        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
-        FTPSecret ftpSecret = secretClient.getFTPSecret(FTPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        FTPResource ftpResource = resourceClient.ftp().getFTPResource(FTPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        FTPSecret ftpSecret = secretClient.ftp().getFTPSecret(FTPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
-        ResourceMetadata resourceMetadata = new ResourceMetadata();
+        FileResourceMetadata resourceMetadata = new FileResourceMetadata();
         FTPClient ftpClient = null;
         try {
             ftpClient = FTPTransportUtil.getFTPClient(ftpResource, ftpSecret);
-            logger.info("Fetching metadata for resource {} in {}", ftpResource.getResourcePath(), ftpResource.getFtpStorage().getHost());
+            logger.info("Fetching metadata for resource {} in {}", ftpResource.getFile().getResourcePath(), ftpResource.getFtpStorage().getHost());
 
-            FTPFile ftpFile = ftpClient.mlistFile(ftpResource.getResourcePath());
+            FTPFile ftpFile = ftpClient.mlistFile(ftpResource.getFile().getResourcePath());
 
             if (ftpFile != null) {
                 resourceMetadata.setResourceSize(ftpFile.getSize());
                 resourceMetadata.setUpdateTime(ftpFile.getTimestamp().getTimeInMillis());
-                if (ftpClient.hasFeature("MD5") && FTPReply.isPositiveCompletion(ftpClient.sendCommand("MD5 " + ftpResource.getResourcePath()))) {
+                if (ftpClient.hasFeature("MD5") && FTPReply.isPositiveCompletion(ftpClient.sendCommand("MD5 " + ftpResource.getFile().getResourcePath()))) {
                     String[] replies = ftpClient.getReplyStrings();
                     resourceMetadata.setMd5sum(replies[0]);
                 } else {
@@ -97,20 +99,40 @@ public class FTPMetadataCollector implements MetadataCollector {
     }
 
     @Override
+    public FileResourceMetadata getFileResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented");
+    }
+
+    @Override
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String resourceId, String credentialToken) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented");    }
+
+    @Override
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented");
+    }
+
+    @Override
     public Boolean isAvailable(String resourceId, String credentialToken) {
 
         checkInitialized();
 
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
-        FTPResource ftpResource = resourceClient.getFTPResource(FTPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
-        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
-        FTPSecret ftpSecret = secretClient.getFTPSecret(FTPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        FTPResource ftpResource = resourceClient.ftp().getFTPResource(FTPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        FTPSecret ftpSecret = secretClient.ftp().getFTPSecret(FTPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         FTPClient ftpClient = null;
         try {
             ftpClient = FTPTransportUtil.getFTPClient(ftpResource, ftpSecret);
-            InputStream inputStream = ftpClient.retrieveFileStream(ftpResource.getResourcePath());
+            InputStream inputStream = null;
 
+            switch (ftpResource.getResourceCase().name()){
+                case ResourceTypes.FILE:
+                    inputStream = ftpClient.retrieveFileStream(ftpResource.getFile().getResourcePath());
+                case ResourceTypes.DIRECTORY:
+                    inputStream = ftpClient.retrieveFileStream(ftpResource.getDirectory().getResourcePath());
+            }
             return !(inputStream == null || ftpClient.getReplyCode() == 550);
         } catch (Exception e) {
             logger.error("FTP client initialization failed ", e);

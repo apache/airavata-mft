@@ -1,7 +1,20 @@
 [
   {
     "type": "SCP",
+    "resourceId":  "remote-ssh-dir-resource",
+    "resourceMode": "DIRECTORY",
+    "resourcePath": "/tmp",
+    "scpStorage" : {
+      "storageId": "remote-ssh-storage",
+      "host": "149.165.156.124",
+      "port": 22,
+      "user": "root"
+    }
+  },
+  {
+    "type": "SCP",
     "resourceId":  "remote-ssh-resource",
+    "resourceMode": "FILE",
     "resourcePath": "/tmp/1mb.txt",
     "scpStorage" : {
       "storageId": "remote-ssh-storage",
@@ -13,6 +26,7 @@
   {
     "type": "SCP",
     "resourceId":  "remote-ssh-resource2",
+    "resourceMode": "FILE",
     "resourcePath": "/tmp/10mb.txt",
     "scpStorage" : {
       "storageId": "remote-ssh-storage",
@@ -24,45 +38,75 @@
   {
     "type": "LOCAL",
     "resourceId":  "10mb-file",
-    "resourcePath": "/tmp/1mb.txt"
+    "resourceMode": "FILE",
+    "resourcePath": "/tmp/10mb.txt",
+    "localStorage": {
+      "storageId": "local-storage-1",
+      "agentId": "agent-0"
+    }
   },
   {
     "type": "S3",
     "resourceId": "s3-file",
-    "resourcePath": "new-file.txt",
-    "region": "us-east-2",
-    "bucketName": "s3-bucket"
+    "resourceMode": "FILE",
+    "resourcePath": "10mb-s3.txt",
+    "s3Storage": {
+      "storageId": "s3-storage-1",
+      "region": "us-east-2",
+      "bucketName": "airavata-s3"
+    }
   },
   {
     "type": "BOX",
     "resourceId": "box-file-abcd",
-    "boxFileId": "655108198452"
+    "resourceMode": "FILE",
+    "resourcePath": "655108198452",
+    "boxStorage" : {
+      "storageId": "box-storage-1"
+    }
   },
   {
     "type": "BOX",
     "resourceId": "box-file-efgh",
-    "boxFileId": "655450661536"
+    "resourceMode": "FILE",
+    "resourcePath": "655450661536",
+    "boxStorage" : {
+      "storageId": "box-storage-1"
+    }
   },
   {
     "type": "AZURE",
     "resourceId": "azure-blob",
-    "container": "sample-container",
-    "blobName": "sample.blob"
+    "resourceMode": "FILE",
+    "resourcePath": "sample.blob",
+    "azureStorage" : {
+      "storageId": "azure-storage-1",
+      "container": "sample-container"
+    }
   },
   {
     "type": "GCS",
     "resourceId": "gcs-bucket",
-    "bucketName": "pika-pika-bucket",
-    "resourcePath": "PikaPikaTest.txt"
+    "resourceMode": "FILE",
+    "resourcePath": "PikaPikaTest.txt",
+    "gcsStorage": {
+      "storageId": "gcs-storage-1",
+      "bucketName": "pika-pika-bucket"
+    }
   },
   {
     "type": "DROPBOX",
     "resourceId": "dropbox-file",
-    "resourcePath": "/test.txt"
+    "resourceMode": "FILE",
+    "resourcePath": "/test.txt",
+    "dropboxStorage": {
+      "storageId": "dropbox-storage-1"
+    }
   },
   {
     "type": "FTP",
     "resourceId": "ftp-resource",
+    "resourceMode": "FILE",
     "resourcePath": "mft-1mb.txt",
     "ftpStorage": {
       "storageId": "ftp-resource",

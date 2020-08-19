@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/apache/airavata-mft.svg?branch=master)](https://travis-ci.org/apache/airavata-mft)
+
+
 Airavata Managed File Transfer Service and Clients
 
 ## Running from IDE
@@ -7,6 +10,7 @@ Airavata Managed File Transfer Service and Clients
 * Start SecretServiceApplication
 * Start MftController
 * Start ApiServiceApplication
+* Start the agent
 
 ## Building from the script
 
@@ -73,6 +77,9 @@ public class SampleClient {
             try {
                 TransferStateApiResponse transferState = client.getTransferState(TransferStateApiRequest.newBuilder().setTransferId(transferApiResponse.getTransferId()).build());
                 System.out.println("Latest Transfer State " + transferState.getState());
+                if ("COMPLETED".equals(transferState.getState()) || "FAILED".equals(transferState.getState()) {
+                    break;
+                }
 
             } catch (Exception e) {
                 System.out.println("Errored " + e.getMessage());

@@ -19,8 +19,14 @@ package org.apache.airavata.mft.secret.server.backend.airavata;
 
 import org.apache.airavata.credential.store.client.CredentialStoreClientFactory;
 import org.apache.airavata.credential.store.cpi.CredentialStoreService;
+import org.apache.airavata.mft.credential.stubs.azure.*;
+import org.apache.airavata.mft.credential.stubs.box.*;
+import org.apache.airavata.mft.credential.stubs.dropbox.*;
+import org.apache.airavata.mft.credential.stubs.ftp.*;
+import org.apache.airavata.mft.credential.stubs.gcs.*;
+import org.apache.airavata.mft.credential.stubs.s3.*;
+import org.apache.airavata.mft.credential.stubs.scp.*;
 import org.apache.airavata.mft.secret.server.backend.SecretBackend;
-import org.apache.airavata.mft.secret.service.*;
 import org.apache.airavata.model.credential.store.SSHCredential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

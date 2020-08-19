@@ -17,8 +17,16 @@
 
 package org.apache.airavata.mft.resource.server.backend;
 
-import org.apache.airavata.mft.resource.service.*;
-import org.apache.airavata.registry.api.exception.RegistryServiceException;
+import org.apache.airavata.mft.resource.stubs.azure.resource.*;
+import org.apache.airavata.mft.resource.stubs.box.resource.*;
+import org.apache.airavata.mft.resource.stubs.dropbox.resource.*;
+import org.apache.airavata.mft.resource.stubs.ftp.resource.*;
+import org.apache.airavata.mft.resource.stubs.ftp.storage.*;
+import org.apache.airavata.mft.resource.stubs.gcs.resource.*;
+import org.apache.airavata.mft.resource.stubs.local.resource.*;
+import org.apache.airavata.mft.resource.stubs.s3.resource.*;
+import org.apache.airavata.mft.resource.stubs.scp.resource.*;
+import org.apache.airavata.mft.resource.stubs.scp.storage.*;
 
 import java.util.Optional;
 

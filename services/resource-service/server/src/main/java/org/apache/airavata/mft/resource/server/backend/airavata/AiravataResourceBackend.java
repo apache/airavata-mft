@@ -18,7 +18,17 @@
 package org.apache.airavata.mft.resource.server.backend.airavata;
 
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
-import org.apache.airavata.mft.resource.service.*;
+import org.apache.airavata.mft.resource.stubs.azure.resource.*;
+import org.apache.airavata.mft.resource.stubs.box.resource.*;
+import org.apache.airavata.mft.resource.stubs.common.FileResource;
+import org.apache.airavata.mft.resource.stubs.dropbox.resource.*;
+import org.apache.airavata.mft.resource.stubs.ftp.resource.*;
+import org.apache.airavata.mft.resource.stubs.ftp.storage.*;
+import org.apache.airavata.mft.resource.stubs.gcs.resource.*;
+import org.apache.airavata.mft.resource.stubs.local.resource.*;
+import org.apache.airavata.mft.resource.stubs.s3.resource.*;
+import org.apache.airavata.mft.resource.stubs.scp.resource.*;
+import org.apache.airavata.mft.resource.stubs.scp.storage.*;
 import org.apache.airavata.model.appcatalog.computeresource.ComputeResourceDescription;
 import org.apache.airavata.model.appcatalog.storageresource.StorageResourceDescription;
 import org.apache.airavata.model.data.movement.DataMovementInterface;
@@ -120,7 +130,7 @@ public class AiravataResourceBackend implements ResourceBackend {
 
         SCPResource scpResource = SCPResource.newBuilder()
                 .setResourceId(resourceId)
-                .setResourcePath(path)
+                .setFile(FileResource.newBuilder().setResourcePath(path).build())
                 .setScpStorage(getSCPStorage(SCPStorageGetRequest.newBuilder().setStorageId(resourceId).build()).get())
                 .build();
         return Optional.of(scpResource);

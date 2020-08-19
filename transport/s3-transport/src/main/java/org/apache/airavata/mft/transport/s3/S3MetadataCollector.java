@@ -22,16 +22,18 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import org.apache.airavata.mft.core.ResourceMetadata;
+import org.apache.airavata.mft.core.DirectoryResourceMetadata;
+import org.apache.airavata.mft.core.FileResourceMetadata;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.MetadataCollector;
+import org.apache.airavata.mft.credential.stubs.s3.S3Secret;
+import org.apache.airavata.mft.credential.stubs.s3.S3SecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
-import org.apache.airavata.mft.resource.service.S3Resource;
-import org.apache.airavata.mft.resource.service.S3ResourceGetRequest;
+import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.s3.resource.S3Resource;
+import org.apache.airavata.mft.resource.stubs.s3.resource.S3ResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.service.S3Secret;
-import org.apache.airavata.mft.secret.service.S3SecretGetRequest;
-import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
+import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
 public class S3MetadataCollector implements MetadataCollector {
 
@@ -57,24 +59,24 @@ public class S3MetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public ResourceMetadata getGetResourceMetadata(String resourceId, String credentialToken) throws Exception {
+    public FileResourceMetadata getFileResourceMetadata(String resourceId, String credentialToken) throws Exception {
 
         checkInitialized();
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
-        S3Resource s3Resource = resourceClient.getS3Resource(S3ResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        S3Resource s3Resource = resourceClient.s3().getS3Resource(S3ResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
-        S3Secret s3Secret = secretClient.getS3Secret(S3SecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        S3Secret s3Secret = secretClient.s3().getS3Secret(S3SecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         BasicAWSCredentials awsCreds = new BasicAWSCredentials(s3Secret.getAccessKey(), s3Secret.getSecretKey());
 
         AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                .withRegion(s3Resource.getRegion())
+                .withRegion(s3Resource.getS3Storage().getRegion())
                 .build();
 
-        ResourceMetadata metadata = new ResourceMetadata();
-        ObjectMetadata s3Metadata = s3Client.getObjectMetadata(s3Resource.getBucketName(), s3Resource.getResourcePath());
+        FileResourceMetadata metadata = new FileResourceMetadata();
+        ObjectMetadata s3Metadata = s3Client.getObjectMetadata(s3Resource.getS3Storage().getBucketName(), s3Resource.getFile().getResourcePath());
         metadata.setResourceSize(s3Metadata.getContentLength());
         metadata.setMd5sum(s3Metadata.getETag());
         metadata.setUpdateTime(s3Metadata.getLastModified().getTime());
@@ -83,22 +85,42 @@ public class S3MetadataCollector implements MetadataCollector {
     }
 
     @Override
+    public FileResourceMetadata getFileResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented");
+    }
+
+    @Override
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String resourceId, String credentialToken) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented");    }
+
+    @Override
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented");
+    }
+
+    @Override
     public Boolean isAvailable(String resourceId, String credentialToken) throws Exception {
 
         checkInitialized();
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
-        S3Resource s3Resource = resourceClient.getS3Resource(S3ResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        S3Resource s3Resource = resourceClient.s3().getS3Resource(S3ResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
-        S3Secret s3Secret = secretClient.getS3Secret(S3SecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        S3Secret s3Secret = secretClient.s3().getS3Secret(S3SecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         BasicAWSCredentials awsCreds = new BasicAWSCredentials(s3Secret.getAccessKey(), s3Secret.getSecretKey());
 
         AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                .withRegion(s3Resource.getRegion())
+                .withRegion(s3Resource.getS3Storage().getRegion())
                 .build();
 
-        return  s3Client.doesObjectExist(s3Resource.getBucketName(), s3Resource.getResourcePath());
+        switch (s3Resource.getResourceCase().name()){
+            case ResourceTypes.FILE:
+                return s3Client.doesObjectExist(s3Resource.getS3Storage().getBucketName(), s3Resource.getFile().getResourcePath());
+            case ResourceTypes.DIRECTORY:
+                return s3Client.doesObjectExist(s3Resource.getS3Storage().getBucketName(), s3Resource.getDirectory().getResourcePath());
+        }
+        return false;
     }
 }

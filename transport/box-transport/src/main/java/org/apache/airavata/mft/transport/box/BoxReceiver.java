@@ -21,15 +21,16 @@ package org.apache.airavata.mft.transport.box;
 import com.box.sdk.BoxAPIConnection;
 import com.box.sdk.BoxFile;
 import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
+import org.apache.airavata.mft.credential.stubs.box.BoxSecret;
+import org.apache.airavata.mft.credential.stubs.box.BoxSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.service.BoxResource;
-import org.apache.airavata.mft.resource.service.BoxResourceGetRequest;
-import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
+import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.box.resource.BoxResource;
+import org.apache.airavata.mft.resource.stubs.box.resource.BoxResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.service.BoxSecret;
-import org.apache.airavata.mft.secret.service.BoxSecretGetRequest;
-import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
+import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,11 +49,11 @@ public class BoxReceiver implements Connector {
     public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort,
                      String secretServiceHost, int secretServicePort) throws Exception {
 
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
-        boxResource = resourceClient.getBoxResource(BoxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        boxResource = resourceClient.box().getBoxResource(BoxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
-        boxSecret = secretClient.getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        boxSecret = secretClient.box().getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         boxClient = new BoxAPIConnection(boxSecret.getAccessToken());
     }
@@ -65,15 +66,23 @@ public class BoxReceiver implements Connector {
     @Override
     public void startStream(ConnectorContext context) throws Exception {
 
-        logger.info("Starting Box Receiver stream for transfer {}", context.getTransferId());
+        if (ResourceTypes.FILE.equals(this.boxResource.getResourceCase().name())) {
+            logger.info("Starting Box Receiver stream for transfer {}", context.getTransferId());
 
-        BoxFile file = new BoxFile(this.boxClient, this.boxResource.getBoxFileId());
+            BoxFile file = new BoxFile(this.boxClient, this.boxResource.getFile().getResourcePath());
 
-        OutputStream os = context.getStreamBuffer().getOutputStream();
-        file.download(os);
-        os.flush();
-        os.close();
+            OutputStream os = context.getStreamBuffer().getOutputStream();
+            file.download(os);
+            os.flush();
+            os.close();
 
-        logger.info("Completed Box Receiver stream for transfer {}", context.getTransferId());
+            logger.info("Completed Box Receiver stream for transfer {}", context.getTransferId());
+
+        } else {
+            logger.error("Resource {} should be a FILE type. Found a {}",
+                    this.boxResource.getResourceId(), this.boxResource.getResourceCase().name());
+            throw new Exception("Resource " + this.boxResource.getResourceId() + " should be a FILE type. Found a " +
+                    this.boxResource.getResourceCase().name());
+        }
     }
 }

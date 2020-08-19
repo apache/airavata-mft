@@ -20,13 +20,16 @@ package org.apache.airavata.mft.transport.dropbox;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.v2.DbxClientV2;
 import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
+import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecret;
+import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
-import org.apache.airavata.mft.resource.service.DropboxResource;
-import org.apache.airavata.mft.resource.service.DropboxResourceGetRequest;
+import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.dropbox.resource.DropboxResource;
+import org.apache.airavata.mft.resource.stubs.dropbox.resource.DropboxResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.service.*;
+import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,11 +45,11 @@ public class DropboxReceiver implements Connector {
 
     @Override
     public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
-        this.dropboxResource = resourceClient.getDropboxResource(DropboxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        this.dropboxResource = resourceClient.dropbox().getDropboxResource(DropboxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
-        DropboxSecret dropboxSecret = secretClient.getDropboxSecret(DropboxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        DropboxSecret dropboxSecret = secretClient.dropbox().getDropboxSecret(DropboxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         DbxRequestConfig config = DbxRequestConfig.newBuilder("mftdropbox/v1").build();
         dbxClientV2 = new DbxClientV2(config, dropboxSecret.getAccessToken());
@@ -59,38 +62,47 @@ public class DropboxReceiver implements Connector {
 
     @Override
     public void startStream(ConnectorContext context) throws Exception {
-        logger.info("Starting Dropbox Receiver stream for transfer {}", context.getTransferId());
 
-        InputStream inputStream = dbxClientV2.files().download(this.dropboxResource.getResourcePath()).getInputStream();
-        OutputStream os = context.getStreamBuffer().getOutputStream();
-        int read;
-        long bytes = 0;
-        long fileSize = context.getMetadata().getResourceSize();
-        byte[] buf = new byte[1024];
-        while (true) {
-            int bufSize = 0;
+        if (ResourceTypes.FILE.equals(this.dropboxResource.getResourceCase().name())) {
+            logger.info("Starting Dropbox Receiver stream for transfer {}", context.getTransferId());
 
-            if (buf.length < fileSize) {
-                bufSize = buf.length;
-            } else {
-                bufSize = (int) fileSize;
+            InputStream inputStream = dbxClientV2.files().download(this.dropboxResource.getFile().getResourcePath()).getInputStream();
+            OutputStream os = context.getStreamBuffer().getOutputStream();
+            int read;
+            long bytes = 0;
+            long fileSize = context.getMetadata().getResourceSize();
+            byte[] buf = new byte[1024];
+            while (true) {
+                int bufSize = 0;
+
+                if (buf.length < fileSize) {
+                    bufSize = buf.length;
+                } else {
+                    bufSize = (int) fileSize;
+                }
+                bufSize = inputStream.read(buf, 0, bufSize);
+
+                if (bufSize < 0) {
+                    break;
+                }
+
+                os.write(buf, 0, bufSize);
+                os.flush();
+
+                fileSize -= bufSize;
+                if (fileSize == 0L)
+                    break;
             }
-            bufSize = inputStream.read(buf, 0, bufSize);
 
-            if (bufSize < 0) {
-                break;
-            }
+            os.close();
 
-            os.write(buf, 0, bufSize);
-            os.flush();
+            logger.info("Completed Dropbox Receiver stream for transfer {}", context.getTransferId());
 
-            fileSize -= bufSize;
-            if (fileSize == 0L)
-                break;
+        } else {
+            logger.error("Resource {} should be a FILE type. Found a {}",
+                    this.dropboxResource.getResourceId(), this.dropboxResource.getResourceCase().name());
+            throw new Exception("Resource " + this.dropboxResource.getResourceId() + " should be a FILE type. Found a " +
+                    this.dropboxResource.getResourceCase().name());
         }
-
-        os.close();
-
-        logger.info("Completed Dropbox Receiver stream for transfer {}", context.getTransferId());
     }
 }

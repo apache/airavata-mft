@@ -24,15 +24,16 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
+import org.apache.airavata.mft.credential.stubs.s3.S3Secret;
+import org.apache.airavata.mft.credential.stubs.s3.S3SecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
-import org.apache.airavata.mft.resource.service.S3Resource;
-import org.apache.airavata.mft.resource.service.S3ResourceGetRequest;
+import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.s3.resource.S3Resource;
+import org.apache.airavata.mft.resource.stubs.s3.resource.S3ResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.service.S3Secret;
-import org.apache.airavata.mft.secret.service.S3SecretGetRequest;
-import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
+import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,16 +50,16 @@ public class S3Receiver implements Connector {
     public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort,
                                                     String secretServiceHost, int secretServicePort) throws Exception {
 
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
-        this.s3Resource = resourceClient.getS3Resource(S3ResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        this.s3Resource = resourceClient.s3().getS3Resource(S3ResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
-        S3Secret s3Secret = secretClient.getS3Secret(S3SecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        S3Secret s3Secret = secretClient.s3().getS3Secret(S3SecretGetRequest.newBuilder().setSecretId(credentialToken).build());
         BasicAWSCredentials awsCreds = new BasicAWSCredentials(s3Secret.getAccessKey(), s3Secret.getSecretKey());
 
         s3Client = AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                .withRegion(s3Resource.getRegion())
+                .withRegion(s3Resource.getS3Storage().getRegion())
                 .build();
     }
 
@@ -70,21 +71,29 @@ public class S3Receiver implements Connector {
     @Override
     public void startStream(ConnectorContext context) throws Exception {
 
-        logger.info("Starting S3 Receiver stream for transfer {}", context.getTransferId());
+        if (ResourceTypes.FILE.equals(this.s3Resource.getResourceCase().name())) {
+            logger.info("Starting S3 Receiver stream for transfer {}", context.getTransferId());
 
-        S3Object s3object = s3Client.getObject(s3Resource.getBucketName(), s3Resource.getResourcePath());
-        S3ObjectInputStream inputStream = s3object.getObjectContent();
+            S3Object s3object = s3Client.getObject(s3Resource.getS3Storage().getBucketName(), s3Resource.getFile().getResourcePath());
+            S3ObjectInputStream inputStream = s3object.getObjectContent();
 
-        OutputStream os = context.getStreamBuffer().getOutputStream();
-        int read;
-        long bytes = 0;
-        while ((read = inputStream.read()) != -1) {
-            bytes++;
-            os.write(read);
+            OutputStream os = context.getStreamBuffer().getOutputStream();
+            int read;
+            long bytes = 0;
+            while ((read = inputStream.read()) != -1) {
+                bytes++;
+                os.write(read);
+            }
+            os.flush();
+            os.close();
+
+            logger.info("Completed S3 Receiver stream for transfer {}", context.getTransferId());
+
+        } else {
+            logger.error("Resource {} should be a FILE type. Found a {}",
+                    this.s3Resource.getResourceId(), this.s3Resource.getResourceCase().name());
+            throw new Exception("Resource " + this.s3Resource.getResourceId() + " should be a FILE type. Found a " +
+                    this.s3Resource.getResourceCase().name());
         }
-        os.flush();
-        os.close();
-
-        logger.info("Completed S3 Receiver stream for transfer {}", context.getTransferId());
     }
 }

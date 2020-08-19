@@ -17,8 +17,8 @@
 
 package org.apache.airavata.mft.transport.ftp;
 
-import org.apache.airavata.mft.resource.service.FTPResource;
-import org.apache.airavata.mft.secret.service.FTPSecret;
+import org.apache.airavata.mft.credential.stubs.ftp.FTPSecret;
+import org.apache.airavata.mft.resource.stubs.ftp.resource.FTPResource;
 import org.apache.commons.net.ftp.FTPClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

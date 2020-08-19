@@ -20,7 +20,7 @@ package org.apache.airavata.mft.core;
 public class ConnectorContext {
 
     private DoubleStreamingBuffer streamBuffer;
-    private ResourceMetadata metadata;
+    private FileResourceMetadata metadata;
     private String transferId;
 
     public DoubleStreamingBuffer getStreamBuffer() {
@@ -31,11 +31,11 @@ public class ConnectorContext {
         this.streamBuffer = streamBuffer;
     }
 
-    public ResourceMetadata getMetadata() {
+    public FileResourceMetadata getMetadata() {
         return metadata;
     }
 
-    public void setMetadata(ResourceMetadata metadata) {
+    public void setMetadata(FileResourceMetadata metadata) {
         this.metadata = metadata;
     }
 

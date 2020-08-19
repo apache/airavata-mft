@@ -25,10 +25,9 @@ import com.orbitz.consul.ConsulException;
 import com.orbitz.consul.KeyValueClient;
 import com.orbitz.consul.SessionClient;
 import com.orbitz.consul.model.kv.Value;
-import org.apache.airavata.mft.admin.models.AgentInfo;
-import org.apache.airavata.mft.admin.models.TransferCommand;
-import org.apache.airavata.mft.admin.models.TransferRequest;
-import org.apache.airavata.mft.admin.models.TransferState;
+import org.apache.airavata.mft.admin.models.*;
+import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
+import org.apache.airavata.mft.admin.models.rpc.SyncRPCResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +56,8 @@ public class MFTConsulClient {
     public static final String TRANSFER_STATE_PATH = "mft/transfer/state/";
     public static final String CONTROLLER_TRANSFER_MESSAGE_PATH = "mft/controller/messages/transfers/";
     public static final String CONTROLLER_STATE_MESSAGE_PATH = "mft/controller/messages/states/";
-    public static final String AGENTS_MESSAGE_PATH = "mft/agents/messages/";
+    public static final String AGENTS_TRANSFER_REQUEST_MESSAGE_PATH = "mft/agents/transfermessages/";
+    public static final String AGENTS_RPC_REQUEST_MESSAGE_PATH = "mft/agents/rpcmessages/";
     public static final String AGENTS_SCHEDULED_PATH = "mft/agents/scheduled/";
     public static final String AGENTS_INFO_PATH = "mft/agents/info/";
     public static final String LIVE_AGENTS_PATH = "mft/agent/live/";
@@ -106,10 +106,28 @@ public class MFTConsulClient {
             .setPublisher("controller")
             .setDescription("Initializing the transfer"));
             String asString = mapper.writeValueAsString(transferCommand);
-            kvClient.putValue(AGENTS_MESSAGE_PATH  + agentId + "/" + transferCommand.getTransferId(), asString);
+            kvClient.putValue(AGENTS_TRANSFER_REQUEST_MESSAGE_PATH + agentId + "/" + transferCommand.getTransferId(), asString);
 
         } catch (JsonProcessingException e) {
             throw new MFTConsulClientException("Error in serializing transfer request", e);
+        }
+    }
+
+    public void sendSyncRPCToAgent(String agentId, SyncRPCRequest rpcRequest) throws MFTConsulClientException {
+        try {
+            String asString = mapper.writeValueAsString(rpcRequest);
+            kvClient.putValue(AGENTS_RPC_REQUEST_MESSAGE_PATH + agentId + "/" + rpcRequest.getMessageId(), asString);
+        } catch (JsonProcessingException e) {
+            throw new MFTConsulClientException("Error in serializing rpc request", e);
+        }
+    }
+
+    public void sendSyncRPCResponseFromAgent(String returnAddress, SyncRPCResponse rpcResponse) throws MFTConsulClientException {
+        try {
+            String asString = mapper.writeValueAsString(rpcResponse);
+            kvClient.putValue(returnAddress, asString);
+        } catch (JsonProcessingException e) {
+            throw new MFTConsulClientException("Error in serializing rpc response", e);
         }
     }
 

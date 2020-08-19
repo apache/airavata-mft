@@ -22,16 +22,18 @@ import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.models.BlobProperties;
-import org.apache.airavata.mft.core.ResourceMetadata;
+import org.apache.airavata.mft.core.DirectoryResourceMetadata;
+import org.apache.airavata.mft.core.FileResourceMetadata;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.MetadataCollector;
+import org.apache.airavata.mft.credential.stubs.azure.AzureSecret;
+import org.apache.airavata.mft.credential.stubs.azure.AzureSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.service.AzureResource;
-import org.apache.airavata.mft.resource.service.AzureResourceGetRequest;
-import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
+import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.azure.resource.AzureResource;
+import org.apache.airavata.mft.resource.stubs.azure.resource.AzureResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.service.AzureSecret;
-import org.apache.airavata.mft.secret.service.AzureSecretGetRequest;
-import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
+import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
 public class AzureMetadataCollector implements MetadataCollector {
 
@@ -57,25 +59,26 @@ public class AzureMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public ResourceMetadata getGetResourceMetadata(String resourceId, String credentialToken) throws Exception {
+    public FileResourceMetadata getFileResourceMetadata(String resourceId, String credentialToken) throws Exception {
         checkInitialized();
 
         if (!isAvailable(resourceId, credentialToken)) {
             throw new Exception("Azure blob can not find for resource id " + resourceId);
         }
 
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
-        AzureResource azureResource = resourceClient.getAzureResource(AzureResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        AzureResource azureResource = resourceClient.azure().getAzureResource(AzureResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
-        AzureSecret azureSecret = secretClient.getAzureSecret(AzureSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        AzureSecret azureSecret = secretClient.azure().getAzureSecret(AzureSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(azureSecret.getConnectionString()).buildClient();
 
-        BlobClient blobClient = blobServiceClient.getBlobContainerClient(azureResource.getContainer()).getBlobClient(azureResource.getBlobName());
+        BlobClient blobClient = blobServiceClient.getBlobContainerClient(azureResource.getAzureStorage().getContainer())
+                                                .getBlobClient(azureResource.getFile().getResourcePath());
 
         BlobProperties properties = blobClient.getBlockBlobClient().getProperties();
-        ResourceMetadata metadata = new ResourceMetadata();
+        FileResourceMetadata metadata = new FileResourceMetadata();
         metadata.setResourceSize(properties.getBlobSize());
         metadata.setCreatedTime(properties.getCreationTime().toEpochSecond());
         metadata.setUpdateTime(properties.getCreationTime().toEpochSecond());
@@ -92,21 +95,41 @@ public class AzureMetadataCollector implements MetadataCollector {
     }
 
     @Override
+    public FileResourceMetadata getFileResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented");
+    }
+
+    @Override
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String resourceId, String credentialToken) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented");    }
+
+    @Override
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented");
+    }
+
+    @Override
     public Boolean isAvailable(String resourceId, String credentialToken) throws Exception {
         checkInitialized();
 
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
-        AzureResource azureResource = resourceClient.getAzureResource(AzureResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        AzureResource azureResource = resourceClient.azure().getAzureResource(AzureResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
-        AzureSecret azureSecret = secretClient.getAzureSecret(AzureSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        AzureSecret azureSecret = secretClient.azure().getAzureSecret(AzureSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(azureSecret.getConnectionString()).buildClient();
-        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(azureResource.getContainer());
+        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(azureResource.getAzureStorage().getContainer());
         boolean containerExists = containerClient.exists();
         if (!containerExists) {
             return false;
         }
-        return containerClient.getBlobClient(azureResource.getBlobName()).exists();
+        switch (azureResource.getResourceCase().name()){
+            case ResourceTypes.FILE:
+                return containerClient.getBlobClient(azureResource.getFile().getResourcePath()).exists();
+            case ResourceTypes.DIRECTORY:
+                return containerClient.getBlobClient(azureResource.getDirectory().getResourcePath()).exists();
+        }
+        return false;
     }
 }

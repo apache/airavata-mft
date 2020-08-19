@@ -20,16 +20,18 @@ package org.apache.airavata.mft.transport.dropbox;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
-import org.apache.airavata.mft.core.ResourceMetadata;
+import org.apache.airavata.mft.core.DirectoryResourceMetadata;
+import org.apache.airavata.mft.core.FileResourceMetadata;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.MetadataCollector;
+import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecret;
+import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
-import org.apache.airavata.mft.resource.service.DropboxResource;
-import org.apache.airavata.mft.resource.service.DropboxResourceGetRequest;
+import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.dropbox.resource.DropboxResource;
+import org.apache.airavata.mft.resource.stubs.dropbox.resource.DropboxResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.service.DropboxSecret;
-import org.apache.airavata.mft.secret.service.DropboxSecretGetRequest;
-import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
+import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
 public class DropboxMetadataCollector implements MetadataCollector {
 
@@ -54,21 +56,20 @@ public class DropboxMetadataCollector implements MetadataCollector {
         }
     }
 
-
     @Override
-    public ResourceMetadata getGetResourceMetadata(String resourceId, String credentialToken) throws Exception {
+    public FileResourceMetadata getFileResourceMetadata(String resourceId, String credentialToken) throws Exception {
         checkInitialized();
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
-        DropboxResource dropboxResource = resourceClient.getDropboxResource(DropboxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        DropboxResource dropboxResource = resourceClient.dropbox().getDropboxResource(DropboxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
-        DropboxSecret dropboxSecret = secretClient.getDropboxSecret(DropboxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        DropboxSecret dropboxSecret = secretClient.dropbox().getDropboxSecret(DropboxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         DbxRequestConfig config = DbxRequestConfig.newBuilder("mftdropbox/v1").build();
         DbxClientV2 dbxClientV2 = new DbxClientV2(config, dropboxSecret.getAccessToken());
 
-        ResourceMetadata metadata = new ResourceMetadata();
-        FileMetadata fileMetadata = (FileMetadata) dbxClientV2.files().getMetadata(dropboxResource.getResourcePath());
+        FileResourceMetadata metadata = new FileResourceMetadata();
+        FileMetadata fileMetadata = (FileMetadata) dbxClientV2.files().getMetadata(dropboxResource.getFile().getResourcePath());
         metadata.setResourceSize(fileMetadata.getSize());
         metadata.setMd5sum(null);
         metadata.setUpdateTime(fileMetadata.getServerModified().getTime());
@@ -77,17 +78,37 @@ public class DropboxMetadataCollector implements MetadataCollector {
     }
 
     @Override
+    public FileResourceMetadata getFileResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented");
+    }
+
+    @Override
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String resourceId, String credentialToken) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented");    }
+
+    @Override
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented");
+    }
+
+    @Override
     public Boolean isAvailable(String resourceId, String credentialToken) throws Exception {
         checkInitialized();
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
-        DropboxResource dropboxResource = resourceClient.getDropboxResource(DropboxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        DropboxResource dropboxResource = resourceClient.dropbox().getDropboxResource(DropboxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
-        DropboxSecret dropboxSecret = secretClient.getDropboxSecret(DropboxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        DropboxSecret dropboxSecret = secretClient.dropbox().getDropboxSecret(DropboxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         DbxRequestConfig config = DbxRequestConfig.newBuilder("mftdropbox/v1").build();
         DbxClientV2 dbxClientV2 = new DbxClientV2(config, dropboxSecret.getAccessToken());
 
-        return !dbxClientV2.files().searchV2(dropboxResource.getResourcePath()).getMatches().isEmpty();
+        switch (dropboxResource.getResourceCase().name()){
+            case ResourceTypes.FILE:
+                return !dbxClientV2.files().searchV2(dropboxResource.getFile().getResourcePath()).getMatches().isEmpty();
+            case ResourceTypes.DIRECTORY:
+                return !dbxClientV2.files().searchV2(dropboxResource.getDirectory().getResourcePath()).getMatches().isEmpty();
+        }
+        return false;
     }
 }

@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
@@ -53,7 +52,7 @@ public class TransportMediator {
                            MetadataCollector destMetadataCollector, BiConsumer<String, TransferState> onStatusCallback,
                            BiConsumer<String, Boolean> exitingCallback) throws Exception {
 
-        ResourceMetadata srcMetadata = srcMetadataCollector.getGetResourceMetadata(command.getSourceId(), command.getSourceToken());
+        FileResourceMetadata srcMetadata = srcMetadataCollector.getFileResourceMetadata(command.getSourceId(), command.getSourceToken());
 
         final long resourceSize = srcMetadata.getResourceSize();
         logger.debug("Source file size {}. MD5 {}", resourceSize, srcMetadata.getMd5sum());
@@ -129,7 +128,7 @@ public class TransportMediator {
                             throw new Exception("Transfer completed but resource is not available in destination");
                         }
 
-                        ResourceMetadata destMetadata = destMetadataCollector.getGetResourceMetadata(command.getDestinationId(),
+                        FileResourceMetadata destMetadata = destMetadataCollector.getFileResourceMetadata(command.getDestinationId(),
                                 command.getDestinationToken());
 
                         boolean doIntegrityVerify = true;

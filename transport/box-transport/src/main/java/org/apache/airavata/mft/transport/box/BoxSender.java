@@ -21,15 +21,16 @@ package org.apache.airavata.mft.transport.box;
 import com.box.sdk.BoxAPIConnection;
 import com.box.sdk.BoxFile;
 import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
+import org.apache.airavata.mft.credential.stubs.box.BoxSecret;
+import org.apache.airavata.mft.credential.stubs.box.BoxSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.service.BoxResource;
-import org.apache.airavata.mft.resource.service.BoxResourceGetRequest;
-import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
+import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.box.resource.BoxResource;
+import org.apache.airavata.mft.resource.stubs.box.resource.BoxResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.service.BoxSecret;
-import org.apache.airavata.mft.secret.service.BoxSecretGetRequest;
-import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
+import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,11 +45,11 @@ public class BoxSender implements Connector {
     @Override
     public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
 
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
-        boxResource = resourceClient.getBoxResource(BoxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        boxResource = resourceClient.box().getBoxResource(BoxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
-        boxSecret = secretClient.getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        boxSecret = secretClient.box().getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         boxClient = new BoxAPIConnection(boxSecret.getAccessToken());
     }
@@ -62,18 +63,26 @@ public class BoxSender implements Connector {
     public void startStream(ConnectorContext context) throws Exception {
 
         logger.info("Starting Box Sender stream for transfer {}", context.getTransferId());
-        logger.info("Content length for transfer {} {}", context.getTransferId(), context.getMetadata().getResourceSize());
+        logger.debug("Content length for transfer {} {}", context.getTransferId(), context.getMetadata().getResourceSize());
 
-        BoxFile file = new BoxFile(this.boxClient, this.boxResource.getBoxFileId());
+        if (ResourceTypes.FILE.equals(this.boxResource.getResourceCase().name())) {
+            BoxFile file = new BoxFile(this.boxClient, this.boxResource.getFile().getResourcePath());
 
-        // Upload chunks only if the file size is > 20mb
-        // Ref: https://developer.box.com/guides/uploads/chunked/
-        if (context.getMetadata().getResourceSize() > 20971520) {
-            file.uploadLargeFile(context.getStreamBuffer().getInputStream(), context.getMetadata().getResourceSize());
+            // Upload chunks only if the file size is > 20mb
+            // Ref: https://developer.box.com/guides/uploads/chunked/
+            if (context.getMetadata().getResourceSize() > 20971520) {
+                file.uploadLargeFile(context.getStreamBuffer().getInputStream(), context.getMetadata().getResourceSize());
+            } else {
+                file.uploadNewVersion(context.getStreamBuffer().getInputStream());
+            }
+
+            logger.info("Completed Box Sender stream for transfer {}", context.getTransferId());
+
         } else {
-            file.uploadNewVersion(context.getStreamBuffer().getInputStream());
+            logger.error("Resource {} should be a FILE type. Found a {}",
+                    this.boxResource.getResourceId(), this.boxResource.getResourceCase().name());
+            throw new Exception("Resource " + this.boxResource.getResourceId() + " should be a FILE type. Found a " +
+                    this.boxResource.getResourceCase().name());
         }
-
-        logger.info("Completed Box Sender stream for transfer {}", context.getTransferId());
     }
 }

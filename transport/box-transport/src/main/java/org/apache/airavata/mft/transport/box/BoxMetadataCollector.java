@@ -20,18 +20,18 @@ package org.apache.airavata.mft.transport.box;
 
 import com.box.sdk.BoxAPIConnection;
 import com.box.sdk.BoxFile;
-import com.box.sdk.Metadata;
-import org.apache.airavata.mft.core.ResourceMetadata;
+import org.apache.airavata.mft.core.DirectoryResourceMetadata;
+import org.apache.airavata.mft.core.FileResourceMetadata;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.MetadataCollector;
+import org.apache.airavata.mft.credential.stubs.box.BoxSecret;
+import org.apache.airavata.mft.credential.stubs.box.BoxSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.service.BoxResource;
-import org.apache.airavata.mft.resource.service.BoxResourceGetRequest;
-import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
+import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.box.resource.BoxResource;
+import org.apache.airavata.mft.resource.stubs.box.resource.BoxResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.service.BoxSecret;
-import org.apache.airavata.mft.secret.service.BoxSecretGetRequest;
-import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
-
+import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
 public class BoxMetadataCollector implements MetadataCollector {
 
@@ -57,21 +57,21 @@ public class BoxMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public ResourceMetadata getGetResourceMetadata(String resourceId, String credentialToken) throws Exception {
+    public FileResourceMetadata getFileResourceMetadata(String resourceId, String credentialToken) throws Exception {
 
         checkInitialized();
 
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
-        BoxResource boxResource = resourceClient.getBoxResource(BoxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        BoxResource boxResource = resourceClient.box().getBoxResource(BoxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
-        BoxSecret boxSecret = secretClient.getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        BoxSecret boxSecret = secretClient.box().getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         BoxAPIConnection api = new BoxAPIConnection(boxSecret.getAccessToken());
-        BoxFile boxFile = new BoxFile(api, boxResource.getBoxFileId());
+        BoxFile boxFile = new BoxFile(api, boxResource.getFile().getResourcePath());
         BoxFile.Info boxFileInfo = boxFile.getInfo();
 
-        ResourceMetadata metadata = new ResourceMetadata();
+        FileResourceMetadata metadata = new FileResourceMetadata();
         metadata.setResourceSize(boxFileInfo.getSize());
 
         // TODO
@@ -84,19 +84,39 @@ public class BoxMetadataCollector implements MetadataCollector {
     }
 
     @Override
+    public FileResourceMetadata getFileResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented");
+    }
+
+    @Override
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String resourceId, String credentialToken) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented");    }
+
+    @Override
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented");
+    }
+
+    @Override
     public Boolean isAvailable(String resourceId, String credentialToken) throws Exception {
 
         checkInitialized();
 
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
-        BoxResource boxResource = resourceClient.getBoxResource(BoxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        BoxResource boxResource = resourceClient.box().getBoxResource(BoxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
-        BoxSecret boxSecret = secretClient.getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        BoxSecret boxSecret = secretClient.box().getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         BoxAPIConnection api = new BoxAPIConnection(boxSecret.getAccessToken());
-        BoxFile boxFile = new BoxFile(api, boxResource.getBoxFileId());
 
+        BoxFile boxFile;
+        switch (boxResource.getResourceCase().name()){
+            case ResourceTypes.FILE:
+                boxFile = new BoxFile(api, boxResource.getFile().getResourcePath());
+            case ResourceTypes.DIRECTORY:
+                boxFile = new BoxFile(api, boxResource.getDirectory().getResourcePath());
+        }
         return true;
     }
 }

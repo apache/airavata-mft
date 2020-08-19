@@ -18,15 +18,16 @@
 package org.apache.airavata.mft.transport.ftp;
 
 import org.apache.airavata.mft.core.ConnectorContext;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
+import org.apache.airavata.mft.credential.stubs.ftp.FTPSecret;
+import org.apache.airavata.mft.credential.stubs.ftp.FTPSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.service.FTPResource;
-import org.apache.airavata.mft.resource.service.FTPResourceGetRequest;
-import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
+import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.ftp.resource.FTPResource;
+import org.apache.airavata.mft.resource.stubs.ftp.resource.FTPResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.service.FTPSecret;
-import org.apache.airavata.mft.secret.service.FTPSecretGetRequest;
-import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
+import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.apache.commons.net.ftp.FTPClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,11 +47,11 @@ public class FTPReceiver implements Connector {
     public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
         this.initialized = true;
 
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
-        this.resource = resourceClient.getFTPResource(FTPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        this.resource = resourceClient.ftp().getFTPResource(FTPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
-        FTPSecret ftpSecret = secretClient.getFTPSecret(FTPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        FTPSecret ftpSecret = secretClient.ftp().getFTPSecret(FTPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         this.ftpClient = FTPTransportUtil.getFTPClient(this.resource, ftpSecret);
     }
@@ -62,40 +63,49 @@ public class FTPReceiver implements Connector {
 
     @Override
     public void startStream(ConnectorContext context) throws Exception {
-        logger.info("Starting FTP receiver stream for transfer {}", context.getTransferId());
 
-        checkInitialized();
-        OutputStream streamOs = context.getStreamBuffer().getOutputStream();
-        InputStream inputStream = ftpClient.retrieveFileStream(resource.getResourcePath());
+        if (ResourceTypes.FILE.equals(this.resource.getResourceCase().name())) {
+            logger.info("Starting FTP receiver stream for transfer {}", context.getTransferId());
 
-        long fileSize = context.getMetadata().getResourceSize();
+            checkInitialized();
+            OutputStream streamOs = context.getStreamBuffer().getOutputStream();
+            InputStream inputStream = ftpClient.retrieveFileStream(resource.getFile().getResourcePath());
 
-        byte[] buf = new byte[1024];
-        while (true) {
-            int bufSize;
+            long fileSize = context.getMetadata().getResourceSize();
 
-            if (buf.length < fileSize) {
-                bufSize = buf.length;
-            } else {
-                bufSize = (int) fileSize;
+            byte[] buf = new byte[1024];
+            while (true) {
+                int bufSize;
+
+                if (buf.length < fileSize) {
+                    bufSize = buf.length;
+                } else {
+                    bufSize = (int) fileSize;
+                }
+                bufSize = inputStream.read(buf, 0, bufSize);
+
+                if (bufSize < 0) {
+                    break;
+                }
+
+                streamOs.write(buf, 0, bufSize);
+                streamOs.flush();
+
+                fileSize -= bufSize;
+                if (fileSize == 0L)
+                    break;
             }
-            bufSize = inputStream.read(buf, 0, bufSize);
 
-            if (bufSize < 0) {
-                break;
-            }
+            inputStream.close();
+            streamOs.close();
+            logger.info("Completed FTP receiver stream for transfer {}", context.getTransferId());
 
-            streamOs.write(buf, 0, bufSize);
-            streamOs.flush();
-
-            fileSize -= bufSize;
-            if (fileSize == 0L)
-                break;
+        } else {
+            logger.error("Resource {} should be a FILE type. Found a {}",
+                    this.resource.getResourceId(), this.resource.getResourceCase().name());
+            throw new Exception("Resource " + this.resource.getResourceId() + " should be a FILE type. Found a " +
+                    this.resource.getResourceCase().name());
         }
-
-        inputStream.close();
-        streamOs.close();
-        logger.info("Completed FTP receiver stream for transfer {}", context.getTransferId());
     }
 
     private void checkInitialized() {

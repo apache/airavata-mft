@@ -18,28 +18,59 @@
 package org.apache.airavata.mft.resource.client;
 
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
+import org.apache.airavata.mft.resource.service.azure.AzureResourceServiceGrpc;
+import org.apache.airavata.mft.resource.service.box.BoxResourceServiceGrpc;
+import org.apache.airavata.mft.resource.service.dropbox.DropboxServiceGrpc;
+import org.apache.airavata.mft.resource.service.ftp.FTPResourceServiceGrpc;
+import org.apache.airavata.mft.resource.service.gcs.GCSResourceServiceGrpc;
+import org.apache.airavata.mft.resource.service.local.LocalResourceServiceGrpc;
+import org.apache.airavata.mft.resource.service.s3.S3ResourceServiceGrpc;
+import org.apache.airavata.mft.resource.service.scp.SCPResourceServiceGrpc;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.io.Closeable;
+import java.io.IOException;
 
-public class ResourceServiceClient {
+public class ResourceServiceClient implements Closeable {
+    private ManagedChannel channel;
 
-    private static Map<String, Map<Integer, ResourceServiceGrpc.ResourceServiceBlockingStub>> stubCache = new ConcurrentHashMap<>();
+    ResourceServiceClient(ManagedChannel channel) {
+        this.channel = channel;
+    }
 
-    public static ResourceServiceGrpc.ResourceServiceBlockingStub buildClient(String hostName, int port) {
+    public SCPResourceServiceGrpc.SCPResourceServiceBlockingStub scp() {
+        return SCPResourceServiceGrpc.newBlockingStub(channel);
+    }
 
-        if (stubCache.containsKey(hostName)) {
-            if (stubCache.get(hostName).containsKey(port)) {
-                return stubCache.get(hostName).get(port);
-            }
-        }
+    public LocalResourceServiceGrpc.LocalResourceServiceBlockingStub local() {
+        return LocalResourceServiceGrpc.newBlockingStub(channel);
+    }
 
-        ManagedChannel channel = ManagedChannelBuilder.forAddress(hostName, port).usePlaintext().build();
-        ResourceServiceGrpc.ResourceServiceBlockingStub stub = ResourceServiceGrpc.newBlockingStub(channel);
-        stubCache.put(hostName, Collections.singletonMap(port, stub));
-        return stub;
+    public S3ResourceServiceGrpc.S3ResourceServiceBlockingStub s3() {
+        return S3ResourceServiceGrpc.newBlockingStub(channel);
+    }
+
+    public FTPResourceServiceGrpc.FTPResourceServiceBlockingStub ftp() {
+        return FTPResourceServiceGrpc.newBlockingStub(channel);
+    }
+
+    public AzureResourceServiceGrpc.AzureResourceServiceBlockingStub azure() {
+        return AzureResourceServiceGrpc.newBlockingStub(channel);
+    }
+
+    public GCSResourceServiceGrpc.GCSResourceServiceBlockingStub gcs() {
+        return GCSResourceServiceGrpc.newBlockingStub(channel);
+    }
+
+    public BoxResourceServiceGrpc.BoxResourceServiceBlockingStub box() {
+        return BoxResourceServiceGrpc.newBlockingStub(channel);
+    }
+
+    public DropboxServiceGrpc.DropboxServiceBlockingStub dropbox() {
+        return DropboxServiceGrpc.newBlockingStub(channel);
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.channel.shutdown();
     }
 }

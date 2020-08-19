@@ -22,15 +22,16 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.DoubleStreamingBuffer;
+import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
+import org.apache.airavata.mft.credential.stubs.scp.SCPSecret;
+import org.apache.airavata.mft.credential.stubs.scp.SCPSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.service.ResourceServiceGrpc;
-import org.apache.airavata.mft.resource.service.SCPResource;
-import org.apache.airavata.mft.resource.service.SCPResourceGetRequest;
+import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.scp.resource.SCPResource;
+import org.apache.airavata.mft.resource.stubs.scp.resource.SCPResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.service.SCPSecret;
-import org.apache.airavata.mft.secret.service.SCPSecretGetRequest;
-import org.apache.airavata.mft.secret.service.SecretServiceGrpc;
+import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,11 +51,11 @@ public class SCPSender implements Connector {
 
         this.initialized = true;
 
-        ResourceServiceGrpc.ResourceServiceBlockingStub resourceClient = ResourceServiceClient.buildClient(resourceServiceHost, resourceServicePort);
-        this.scpResource = resourceClient.getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        this.scpResource = resourceClient.scp().getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        SecretServiceGrpc.SecretServiceBlockingStub secretClient = SecretServiceClient.buildClient(secretServiceHost, secretServicePort);
-        SCPSecret scpSecret = secretClient.getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         logger.info("Creating a ssh session for {}@{}:{}",
                 scpResource.getScpStorage().getUser(), scpResource.getScpStorage().getHost(),
@@ -92,8 +93,17 @@ public class SCPSender implements Connector {
             throw new Exception("Session can not be null. Make sure that SCP Sender is properly initialized");
         }
         try {
-            copyLocalToRemote(this.session, this.scpResource.getResourcePath(), context.getStreamBuffer(), context.getMetadata().getResourceSize());
-            logger.info("SCP send to transfer {} completed", context.getTransferId());
+            if (ResourceTypes.FILE.equals(this.scpResource.getResourceCase().name())) {
+                copyLocalToRemote(this.session, this.scpResource.getFile().getResourcePath(), context.getStreamBuffer(), context.getMetadata().getResourceSize());
+                logger.info("SCP send to transfer {} completed", context.getTransferId());
+
+            } else {
+                logger.error("Resource {} should be a FILE type. Found a {}",
+                        this.scpResource.getResourceId(), this.scpResource.getResourceCase().name());
+                throw new Exception("Resource " + this.scpResource.getResourceId() + " should be a FILE type. Found a " +
+                        this.scpResource.getResourceCase().name());
+            }
+
         } catch (Exception e) {
             logger.error("Errored while streaming to remote scp server. Transfer {}", context.getTransferId() , e);
             throw e;

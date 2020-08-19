@@ -18,6 +18,7 @@
 package org.apache.airavata.mft.agent;
 
 import org.apache.airavata.mft.admin.MFTConsulClient;
+import org.apache.airavata.mft.agent.rpc.RPCParser;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -34,5 +35,10 @@ public class AppConfig {
     @Bean
     public MFTConsulClient mftConsulClient() {
         return new MFTConsulClient(consulHost, consulPort);
+    }
+
+    @Bean
+    public RPCParser rpcParser() {
+        return new RPCParser();
     }
 }
