@@ -16,7 +16,7 @@ Airavata Managed File Transfer Service and Clients
 
 * Go to scripts directory
 * Run ```/bin/bash build.sh```
-* This will build the whole project and unzip distributions of each service to the build direcotry of the root of the project
+* This will build the whole project and unzip distributions of each service to the build directory of the root of the project
 
 #### Defaults for Resource and Secret Service
 * The Backends for Secret and Resource services are by default set to File based backend so you can find sample config json 
