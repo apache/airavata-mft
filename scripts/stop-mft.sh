@@ -18,7 +18,7 @@
 # under the License.
 
 ./../build/API-Service-0.01/bin/api-service-daemon.sh stop
-./../build/MFT-Controller-0.01/bin/controller-daemon.sh stop
+./../build/Controller-Service-0.01/bin/controller-service-daemon.sh stop
 ./../build/Resource-Service-0.01/bin/resource-service-daemon.sh stop
 ./../build/Secret-Service-0.01/bin/secret-service-daemon.sh stop
 ./../build/MFT-Agent-0.01/bin/agent-daemon.sh stop

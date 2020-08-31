@@ -15,27 +15,63 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.admin.models;
+package org.apache.airavata.mft.controller.sql.entity;
 
-public class TransferCommand {
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
+@Entity
+public class TransferRequestEntity {
+
+    @Id
+    @Column(name = "TRANSFER_ID")
     private String transferId;
+
+    @Column(name = "SOURCE_ID")
     private String sourceId;
+
+    @Column(name = "SOURCE_TYPE")
     private String sourceType;
+
+    @Column(name = "SOURCE_TOKEN")
     private String sourceToken;
+
+    @Column(name = "SOURCE_RESOURCE_BACKEND")
     private String sourceResourceBackend;
+
+    @Column(name = "SOURCE_CREDENTIAL_BACKEND")
     private String sourceCredentialBackend;
+
+    @Column(name = "DESTINATION_ID")
     private String destinationId;
+
+    @Column(name = "DESTINATION_TYPE")
     private String destinationType;
+
+    @Column(name = "DESTINATION_TOKEN")
     private String destinationToken;
+
+    @Column(name = "DESTINATION_RESOURCE_BACKEND")
     private String destResourceBackend;
+
+    @Column(name = "DESTINATION_CREDENTIAL_BACKEND")
     private String destCredentialBackend;
+
+    @Column(name = "TRANSFER_STATUS")
+    private String status;
+
+    @Column(name = "INITIAL_EPOCH_TIME")
+    private Long initialEpochTimeInMillis;
+
+    @Column(name = "CURRENT_EPOCH_TIME")
+    private Long currentEpochTimeInMillis;
 
     public String getTransferId() {
         return transferId;
     }
 
-    public TransferCommand setTransferId(String transferId) {
+    public TransferRequestEntity setTransferId(String transferId) {
         this.transferId = transferId;
         return this;
     }
@@ -44,7 +80,7 @@ public class TransferCommand {
         return sourceId;
     }
 
-    public TransferCommand setSourceId(String sourceId) {
+    public TransferRequestEntity setSourceId(String sourceId) {
         this.sourceId = sourceId;
         return this;
     }
@@ -53,7 +89,7 @@ public class TransferCommand {
         return sourceType;
     }
 
-    public TransferCommand setSourceType(String sourceType) {
+    public TransferRequestEntity setSourceType(String sourceType) {
         this.sourceType = sourceType;
         return this;
     }
@@ -62,7 +98,7 @@ public class TransferCommand {
         return sourceToken;
     }
 
-    public TransferCommand setSourceToken(String sourceToken) {
+    public TransferRequestEntity setSourceToken(String sourceToken) {
         this.sourceToken = sourceToken;
         return this;
     }
@@ -71,7 +107,7 @@ public class TransferCommand {
         return sourceResourceBackend;
     }
 
-    public TransferCommand setSourceResourceBackend(String sourceResourceBackend) {
+    public TransferRequestEntity setSourceResourceBackend(String sourceResourceBackend) {
         this.sourceResourceBackend = sourceResourceBackend;
         return this;
     }
@@ -80,7 +116,7 @@ public class TransferCommand {
         return sourceCredentialBackend;
     }
 
-    public TransferCommand setSourceCredentialBackend(String sourceCredentialBackend) {
+    public TransferRequestEntity setSourceCredentialBackend(String sourceCredentialBackend) {
         this.sourceCredentialBackend = sourceCredentialBackend;
         return this;
     }
@@ -89,7 +125,7 @@ public class TransferCommand {
         return destinationId;
     }
 
-    public TransferCommand setDestinationId(String destinationId) {
+    public TransferRequestEntity setDestinationId(String destinationId) {
         this.destinationId = destinationId;
         return this;
     }
@@ -98,7 +134,7 @@ public class TransferCommand {
         return destinationType;
     }
 
-    public TransferCommand setDestinationType(String destinationType) {
+    public TransferRequestEntity setDestinationType(String destinationType) {
         this.destinationType = destinationType;
         return this;
     }
@@ -107,7 +143,7 @@ public class TransferCommand {
         return destinationToken;
     }
 
-    public TransferCommand setDestinationToken(String destinationToken) {
+    public TransferRequestEntity setDestinationToken(String destinationToken) {
         this.destinationToken = destinationToken;
         return this;
     }
@@ -116,7 +152,7 @@ public class TransferCommand {
         return destResourceBackend;
     }
 
-    public TransferCommand setDestResourceBackend(String destResourceBackend) {
+    public TransferRequestEntity setDestResourceBackend(String destResourceBackend) {
         this.destResourceBackend = destResourceBackend;
         return this;
     }
@@ -125,8 +161,35 @@ public class TransferCommand {
         return destCredentialBackend;
     }
 
-    public TransferCommand setDestCredentialBackend(String destCredentialBackend) {
+    public TransferRequestEntity setDestCredentialBackend(String destCredentialBackend) {
         this.destCredentialBackend = destCredentialBackend;
+        return this;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public TransferRequestEntity setStatus(String status) {
+        this.status = status;
+        return this;
+    }
+
+    public Long getInitialEpochTimeInMillis() {
+        return initialEpochTimeInMillis;
+    }
+
+    public TransferRequestEntity setInitialEpochTimeInMillis(Long epochTimeInMillis) {
+        this.initialEpochTimeInMillis = epochTimeInMillis;
+        return this;
+    }
+
+    public Long getCurrentEpochTimeInMillis() {
+        return currentEpochTimeInMillis;
+    }
+
+    public TransferRequestEntity setCurrentEpochTimeInMillis(Long epochTimeInMillis) {
+        this.currentEpochTimeInMillis = epochTimeInMillis;
         return this;
     }
 }

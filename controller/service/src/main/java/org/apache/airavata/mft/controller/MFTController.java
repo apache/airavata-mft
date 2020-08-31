@@ -27,6 +27,8 @@ import org.apache.airavata.mft.admin.MFTConsulClientException;
 import org.apache.airavata.mft.admin.models.TransferCommand;
 import org.apache.airavata.mft.admin.models.TransferRequest;
 import org.apache.airavata.mft.admin.models.TransferState;
+import org.apache.airavata.mft.controller.sql.entity.TransferRequestEntity;
+import org.apache.airavata.mft.controller.sql.repository.TransferRequestRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
@@ -46,8 +49,10 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication()
+//FIXME: Application runs without any of the below annotations
 @ComponentScan(basePackages = {"org.apache.airavata.mft"})
-@EntityScan("org.apache.airavata.mft.api.db.entities")
+@EntityScan(basePackages = {"org.apache.airavata.mft.api.db.entities", "org.apache.airavata.mft.controller.sql"})
+@EnableJpaRepositories(basePackages = {"org.apache.airavata.mft.controller.sql"})
 public class MFTController implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(MFTController.class);
@@ -62,6 +67,9 @@ public class MFTController implements CommandLineRunner {
 
     @Autowired
     private MFTConsulClient mftConsulClient;
+
+    @Autowired
+    private TransferRequestRepository transferRequestRepository;
 
     private ObjectMapper jsonMapper = new ObjectMapper();
 
@@ -110,6 +118,10 @@ public class MFTController implements CommandLineRunner {
 
                 try {
                     markAsPending(transferId, transferRequest);
+                    TransferRequestEntity transferRequestEntity = convertRequestToEntity(transferId, transferRequest);
+                    //TODO: Better way to do this is to have a TransferStatus enum in admin service and use it in MFTAgent and MFTController
+                    transferRequestEntity.setStatus("PENDING").setInitialEpochTimeInMillis(System.currentTimeMillis());
+                    transferRequestRepository.save(transferRequestEntity);
                     logger.info("Marked transfer {} as pending", transferId);
 
                 } catch (Exception e) {
@@ -132,7 +144,7 @@ public class MFTController implements CommandLineRunner {
                     String valAsStr = value.getValueAsString().get();
                     logger.info("Received state Key {} val {}", key, valAsStr);
 
-                    String parts[] = key.split("/");
+                    String[] parts = key.split("/");
                     if (parts.length != 3) {
                         logger.error("Invalid status key {}", key);
                     }
@@ -143,6 +155,10 @@ public class MFTController implements CommandLineRunner {
 
                     TransferState transferState = mapper.readValue(valAsStr, TransferState.class);
                     mftConsulClient.saveTransferState(transferId, transferState);
+                    transferRequestRepository.findByTransferId(transferId).ifPresent(v -> {
+                        v.setStatus(transferState.getState()).setCurrentEpochTimeInMillis(System.currentTimeMillis());
+                        transferRequestRepository.save(v);
+                    });
 
                 }
             } catch (Exception e) {
@@ -235,6 +251,22 @@ public class MFTController implements CommandLineRunner {
         return transferCommand;
     }
 
+    private TransferRequestEntity convertRequestToEntity(String transferId, TransferRequest transferRequest) {
+        TransferRequestEntity transferRequestEntity = new TransferRequestEntity();
+        transferRequestEntity.setSourceId(transferRequest.getSourceId())
+                .setSourceToken(transferRequest.getSourceToken())
+                .setSourceType(transferRequest.getSourceType())
+                .setSourceResourceBackend(transferRequest.getSourceResourceBackend())
+                .setSourceCredentialBackend(transferRequest.getSourceCredentialBackend())
+                .setDestinationId(transferRequest.getDestinationId())
+                .setDestinationToken(transferRequest.getDestinationToken())
+                .setDestinationType(transferRequest.getDestinationType())
+                .setDestResourceBackend(transferRequest.getDestResourceBackend())
+                .setDestCredentialBackend(transferRequest.getDestCredentialBackend())
+                .setTransferId(transferId);
+        return transferRequestEntity;
+    }
+
     private Optional<String> selectAgent(String transferId, TransferRequest transferRequest) throws MFTConsulClientException {
 
         List<String> liveAgentIds = mftConsulClient.getLiveAgentIds();
@@ -310,7 +342,7 @@ public class MFTController implements CommandLineRunner {
         mainHold.acquire();
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         SpringApplication.run(MFTController.class);
     }
 }

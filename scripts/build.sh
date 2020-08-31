@@ -21,13 +21,13 @@ cd ../
 mvn clean install
 mkdir -p build
 cp agent/target/MFT-Agent-0.01-bin.zip build/
-cp controller/target/MFT-Controller-0.01-bin.zip build/
+cp controller/service/target/Controller-Service-0.01-bin.zip build/
 cp services/resource-service/server/target/Resource-Service-0.01-bin.zip build/
 cp services/secret-service/server/target/Secret-Service-0.01-bin.zip build/
 cp api/service/target/API-Service-0.01-bin.zip build/
 
 unzip -o build/MFT-Agent-0.01-bin.zip -d build/
-unzip -o build/MFT-Controller-0.01-bin.zip -d build/
+unzip -o build/Controller-Service-0.01-bin.zip -d build/
 unzip -o build/Resource-Service-0.01-bin.zip -d build/
 unzip -o build/Secret-Service-0.01-bin.zip -d build/
 unzip -o build/API-Service-0.01-bin.zip -d build/

@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+package org.apache.airavata.mft.controller.service;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+message TransferStatusRequest {
+  string transferId = 1;
+}
+
+message TransferStatusResponse {
+  string transferId = 1;
+  string sourceId = 2;
+  string sourceType = 3;
+  string sourceToken = 4;
+  string sourceResourceBackend = 5;
+  string sourceCredentialBackend = 6;
+  string destinationId = 7;
+  string destinationType = 8;
+  string destinationToken = 9;
+  string destResourceBackend = 10;
+  string destCredentialBackend = 11;
+  string status = 12;
+  google.protobuf.Timestamp initialDate = 13;
+  google.protobuf.Timestamp finalDate = 14;
+}
+
+service MFTControllerService {
+
+  rpc getAllTransferDetails(google.protobuf.Empty) returns (stream TransferStatusResponse) {
+    option (google.api.http) = {
+      get: "/v1.0/controller/transfers"
+    };
+  }
+
+  rpc getTransferDetails(TransferStatusRequest) returns (TransferStatusResponse) {
+    option (google.api.http) = {
+      get: "v1.0/controller/transfer"
+    };
+  }
+}
