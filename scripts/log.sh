@@ -31,7 +31,7 @@ case $1 in
         tail -100f ../build/API-Service-0.01/logs/airavata.log
     ;;
     controller)
-        tail -100f ../build/MFT-Controller-0.01/logs/airavata.log
+        tail -100f ../build/Controller-Service-0.01/logs/airavata.log
     ;;
     consul)
         tail -100f ../build/consul/consul.log
