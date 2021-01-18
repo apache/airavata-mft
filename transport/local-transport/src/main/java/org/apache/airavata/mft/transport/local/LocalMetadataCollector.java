@@ -23,8 +23,11 @@ import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.common.FileResource;
 import org.apache.airavata.mft.resource.stubs.local.resource.LocalResource;
 import org.apache.airavata.mft.resource.stubs.local.resource.LocalResourceGetRequest;
+import org.apache.airavata.mft.resource.stubs.local.storage.LocalStorage;
+import org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageGetRequest;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -92,7 +95,7 @@ public class LocalMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+    public FileResourceMetadata getFileResourceMetadata(String storageId, String resourcePath, String credentialToken) throws Exception {
         throw new UnsupportedOperationException("Method not implemented");
     }
 
@@ -101,15 +104,29 @@ public class LocalMetadataCollector implements MetadataCollector {
         throw new UnsupportedOperationException("Method not implemented");    }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String storageId, String resourcePath, String credentialToken) throws Exception {
         throw new UnsupportedOperationException("Method not implemented");
     }
 
     @Override
     public Boolean isAvailable(String resourceId, String credentialToken) throws Exception {
-       ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         LocalResource localResource = resourceClient.local().getLocalResource(LocalResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        return isAvailable(localResource, credentialToken);
+    }
 
+    @Override
+    public Boolean isAvailable(String storageId, String resourcePath, String credentialToken) throws Exception {
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        LocalStorage localStorage = resourceClient.local().getLocalStorage(LocalStorageGetRequest.newBuilder().setStorageId(storageId).build());
+
+        LocalResource localResource = LocalResource.newBuilder()
+                .setFile(FileResource.newBuilder().setResourcePath(resourcePath).build())
+                .setLocalStorage(localStorage).build();
+        return isAvailable(localResource, credentialToken);
+    }
+
+    public Boolean isAvailable(LocalResource localResource, String credentialToken) throws Exception {
         switch (localResource.getResourceCase().name()){
             case ResourceTypes.FILE:
                 return new File(localResource.getFile().getResourcePath()).exists();

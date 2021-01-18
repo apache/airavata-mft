@@ -30,6 +30,9 @@ import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.box.resource.BoxResource;
 import org.apache.airavata.mft.resource.stubs.box.resource.BoxResourceGetRequest;
+import org.apache.airavata.mft.resource.stubs.box.storage.BoxStorage;
+import org.apache.airavata.mft.resource.stubs.box.storage.BoxStorageGetRequest;
+import org.apache.airavata.mft.resource.stubs.common.FileResource;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
@@ -84,7 +87,7 @@ public class BoxMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+    public FileResourceMetadata getFileResourceMetadata(String storageId, String resourcePath, String credentialToken) throws Exception {
         throw new UnsupportedOperationException("Method not implemented");
     }
 
@@ -93,7 +96,7 @@ public class BoxMetadataCollector implements MetadataCollector {
         throw new UnsupportedOperationException("Method not implemented");    }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String storageId, String resourcePath, String credentialToken) throws Exception {
         throw new UnsupportedOperationException("Method not implemented");
     }
 
@@ -104,7 +107,22 @@ public class BoxMetadataCollector implements MetadataCollector {
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         BoxResource boxResource = resourceClient.box().getBoxResource(BoxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        return isAvailable(boxResource, credentialToken);
+    }
 
+    @Override
+    public Boolean isAvailable(String storageId, String resourcePath, String credentialToken) throws Exception {
+        checkInitialized();
+
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        BoxStorage boxStorage = resourceClient.box().getBoxStorage(BoxStorageGetRequest.newBuilder().setStorageId(storageId).build());
+
+        BoxResource boxResource = BoxResource.newBuilder().setFile(FileResource.newBuilder().setResourcePath(resourcePath).build()).setBoxStorage(boxStorage).build();
+
+        return isAvailable(boxResource, credentialToken);
+    }
+
+    private Boolean isAvailable(BoxResource boxResource, String credentialToken) throws Exception {
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         BoxSecret boxSecret = secretClient.box().getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 

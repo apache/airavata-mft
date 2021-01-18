@@ -20,12 +20,18 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCResponse;
+import org.apache.airavata.mft.agent.http.ConnectorParams;
+import org.apache.airavata.mft.agent.http.HttpTransferRequest;
+import org.apache.airavata.mft.agent.http.HttpTransferRequestsStore;
+import org.apache.airavata.mft.core.ConnectorResolver;
 import org.apache.airavata.mft.core.DirectoryResourceMetadata;
 import org.apache.airavata.mft.core.FileResourceMetadata;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
+import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
@@ -44,6 +50,9 @@ public class RPCParser {
 
     @org.springframework.beans.factory.annotation.Value("${secret.service.port}")
     private int secretServicePort;
+
+    @Autowired
+    private HttpTransferRequestsStore httpTransferRequestsStore;
 
     public String resolveRPCRequest(SyncRPCRequest request) throws Exception {
         // TODO implement using the reflection
@@ -64,6 +73,7 @@ public class RPCParser {
                     return mapper.writeValueAsString(fileResourceMetadata);
                 }
                 break;
+
             case "getChildFileResourceMetadata":
                 resourceId = request.getParameters().get("resourceId");
                 resourceType = request.getParameters().get("resourceType");
@@ -79,6 +89,7 @@ public class RPCParser {
                     return mapper.writeValueAsString(fileResourceMetadata);
                 }
                 break;
+
             case "getDirectoryResourceMetadata":
                 resourceId = request.getParameters().get("resourceId");
                 resourceType = request.getParameters().get("resourceType");
@@ -93,6 +104,7 @@ public class RPCParser {
                     return mapper.writeValueAsString(dirResourceMetadata);
                 }
                 break;
+
             case "getChildDirectoryResourceMetadata":
                 resourceId = request.getParameters().get("resourceId");
                 resourceType = request.getParameters().get("resourceType");
@@ -106,6 +118,32 @@ public class RPCParser {
                     metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
                     DirectoryResourceMetadata dirResourceMetadata = metadataCollector.getDirectoryResourceMetadata(resourceId, childPath, resourceToken);
                     return mapper.writeValueAsString(dirResourceMetadata);
+                }
+                break;
+
+            case "submitHttpDownload":
+                String storeId = request.getParameters().get("storeId");
+                String sourcePath = request.getParameters().get("sourcePath");
+                String sourceToken = request.getParameters().get("sourceToken");
+                String storeType = request.getParameters().get("storeType");
+                mftAuthorizationToken = request.getParameters().get("mftAuthorizationToken");
+
+                metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(storeType);
+                Optional<Connector> connectorOp = ConnectorResolver.resolveConnector(storeType, "IN");
+
+                if (metadataCollectorOp.isPresent() && connectorOp.isPresent()) {
+                    HttpTransferRequest transferRequest = new HttpTransferRequest();
+                    transferRequest.setConnectorParams(new ConnectorParams()
+                            .setResourceServiceHost(resourceServiceHost)
+                            .setResourceServicePort(resourceServicePort)
+                            .setSecretServiceHost(secretServiceHost)
+                            .setSecretServicePort(secretServicePort)
+                            .setStorageId(storeId).setCredentialToken(sourceToken));
+                    transferRequest.setTargetResourcePath(sourcePath);
+                    transferRequest.setOtherMetadataCollector(metadataCollectorOp.get());
+                    transferRequest.setOtherConnector(connectorOp.get());
+                    String url = httpTransferRequestsStore.addDownloadRequest(transferRequest);
+                    return url;
                 }
                 break;
         }

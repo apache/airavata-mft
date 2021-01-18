@@ -25,8 +25,6 @@ public class FileResourceMetadata {
     private long updateTime;
     private String md5sum;
     private String resourcePath;
-    private String parentResourceId;
-    private String parentResourceType;
 
     public String getFriendlyName() {
         return friendlyName;
@@ -82,24 +80,6 @@ public class FileResourceMetadata {
         return this;
     }
 
-    public String getParentResourceId() {
-        return parentResourceId;
-    }
-
-    public FileResourceMetadata setParentResourceId(String parentResourceId) {
-        this.parentResourceId = parentResourceId;
-        return this;
-    }
-
-    public String getParentResourceType() {
-        return parentResourceType;
-    }
-
-    public FileResourceMetadata setParentResourceType(String parentResourceType) {
-        this.parentResourceType = parentResourceType;
-        return this;
-    }
-
     public static final class Builder {
         private String friendlyName;
         private long resourceSize;
@@ -107,8 +87,6 @@ public class FileResourceMetadata {
         private long updateTime;
         private String md5sum;
         private String resourcePath;
-        private String parentResourceId;
-        private String parentResourceType;
 
         private Builder() {
         }
@@ -147,15 +125,6 @@ public class FileResourceMetadata {
             return this;
         }
 
-        public Builder withParentResourceId(String parentResourceId) {
-            this.parentResourceId = parentResourceId;
-            return this;
-        }
-
-        public Builder withParentResourceType(String parentResourceType) {
-            this.parentResourceType = parentResourceType;
-            return this;
-        }
 
         public FileResourceMetadata build() {
             FileResourceMetadata fileResourceMetadata = new FileResourceMetadata();
@@ -165,8 +134,6 @@ public class FileResourceMetadata {
             fileResourceMetadata.setUpdateTime(updateTime);
             fileResourceMetadata.setMd5sum(md5sum);
             fileResourceMetadata.setResourcePath(resourcePath);
-            fileResourceMetadata.setParentResourceId(parentResourceId);
-            fileResourceMetadata.setParentResourceType(parentResourceType);
             return fileResourceMetadata;
         }
     }

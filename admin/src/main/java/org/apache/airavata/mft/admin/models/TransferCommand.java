@@ -22,12 +22,14 @@ import java.util.List;
 public class TransferCommand {
 
     private String transferId;
-    private String sourceId;
+    private String sourceStorageId;
+    private String sourcePath;
     private String sourceType;
     private String sourceToken;
     private String sourceResourceBackend;
     private String sourceCredentialBackend;
-    private String destinationId;
+    private String destinationStorageId;
+    private String destinationPath;
     private String destinationType;
     private String destinationToken;
     private String destResourceBackend;
@@ -42,12 +44,21 @@ public class TransferCommand {
         return this;
     }
 
-    public String getSourceId() {
-        return sourceId;
+    public String getSourceStorageId() {
+        return sourceStorageId;
     }
 
-    public TransferCommand setSourceId(String sourceId) {
-        this.sourceId = sourceId;
+    public TransferCommand setSourceStorageId(String sourceStorageId) {
+        this.sourceStorageId = sourceStorageId;
+        return this;
+    }
+
+    public String getSourcePath() {
+        return sourcePath;
+    }
+
+    public TransferCommand setSourcePath(String sourcePath) {
+        this.sourcePath = sourcePath;
         return this;
     }
 
@@ -87,12 +98,21 @@ public class TransferCommand {
         return this;
     }
 
-    public String getDestinationId() {
-        return destinationId;
+    public String getDestinationStorageId() {
+        return destinationStorageId;
     }
 
-    public TransferCommand setDestinationId(String destinationId) {
-        this.destinationId = destinationId;
+    public TransferCommand setDestinationStorageId(String destinationStorageId) {
+        this.destinationStorageId = destinationStorageId;
+        return this;
+    }
+
+    public String getDestinationPath() {
+        return destinationPath;
+    }
+
+    public TransferCommand setDestinationPath(String destinationPath) {
+        this.destinationPath = destinationPath;
         return this;
     }
 

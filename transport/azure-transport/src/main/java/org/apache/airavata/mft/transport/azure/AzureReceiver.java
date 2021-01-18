@@ -29,8 +29,8 @@ import org.apache.airavata.mft.credential.stubs.azure.AzureSecret;
 import org.apache.airavata.mft.credential.stubs.azure.AzureSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.azure.resource.AzureResource;
-import org.apache.airavata.mft.resource.stubs.azure.resource.AzureResourceGetRequest;
+import org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage;
+import org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
@@ -43,21 +43,20 @@ public class AzureReceiver implements Connector {
     private static final Logger logger = LoggerFactory.getLogger(AzureReceiver.class);
 
     private boolean initialized = false;
-    private AzureResource azureResource;
     BlobContainerClient containerClient;
 
     @Override
-    public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
+    public void init(String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
         this.initialized = true;
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        this.azureResource = resourceClient.azure().getAzureResource(AzureResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        AzureStorage azureStorage = resourceClient.azure().getAzureStorage(AzureStorageGetRequest.newBuilder().setStorageId(storageId).build());
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         AzureSecret azureSecret = secretClient.azure().getAzureSecret(AzureSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(azureSecret.getConnectionString()).buildClient();
-        this.containerClient = blobServiceClient.getBlobContainerClient(azureResource.getAzureStorage().getContainer());
+        this.containerClient = blobServiceClient.getBlobContainerClient(azureStorage.getContainer());
     }
 
     @Override
@@ -72,49 +71,41 @@ public class AzureReceiver implements Connector {
     }
 
     @Override
-    public void startStream(ConnectorContext context) throws Exception {
+    public void startStream(String targetPath, ConnectorContext context) throws Exception {
         logger.info("Starting azure receive for remote server for transfer {}", context.getTransferId());
         checkInitialized();
 
-        if (ResourceTypes.FILE.equals(this.azureResource.getResourceCase().name())) {
-            BlobClient blobClient = containerClient.getBlobClient(azureResource.getFile().getResourcePath());
-            BlobInputStream blobInputStream = blobClient.openInputStream();
+        BlobClient blobClient = containerClient.getBlobClient(targetPath);
+        BlobInputStream blobInputStream = blobClient.openInputStream();
 
-            OutputStream streamOs = context.getStreamBuffer().getOutputStream();
+        OutputStream streamOs = context.getStreamBuffer().getOutputStream();
 
-            long fileSize = context.getMetadata().getResourceSize();
+        long fileSize = context.getMetadata().getResourceSize();
 
-            byte[] buf = new byte[1024];
-            while (true) {
-                int bufSize = 0;
+        byte[] buf = new byte[1024];
+        while (true) {
+            int bufSize = 0;
 
-                if (buf.length < fileSize) {
-                    bufSize = buf.length;
-                } else {
-                    bufSize = (int) fileSize;
-                }
-                bufSize = blobInputStream.read(buf, 0, bufSize);
+            if (buf.length < fileSize) {
+                bufSize = buf.length;
+            } else {
+                bufSize = (int) fileSize;
+            }
+            bufSize = blobInputStream.read(buf, 0, bufSize);
 
-                if (bufSize < 0) {
-                    break;
-                }
-
-                streamOs.write(buf, 0, bufSize);
-                streamOs.flush();
-
-                fileSize -= bufSize;
-                if (fileSize == 0L)
-                    break;
+            if (bufSize < 0) {
+                break;
             }
 
-            streamOs.close();
-            logger.info("Completed azure receive for remote server for transfer {}", context.getTransferId());
+            streamOs.write(buf, 0, bufSize);
+            streamOs.flush();
 
-        } else {
-            logger.error("Resource {} should be a FILE type. Found a {}",
-                    this.azureResource.getResourceId(), this.azureResource.getResourceCase().name());
-            throw new Exception("Resource " + this.azureResource.getResourceId() + " should be a FILE type. Found a " +
-                    this.azureResource.getResourceCase().name());
+            fileSize -= bufSize;
+            if (fileSize == 0L)
+                break;
         }
+
+        streamOs.close();
+        logger.info("Completed azure receive for remote server for transfer {}", context.getTransferId());
     }
 }

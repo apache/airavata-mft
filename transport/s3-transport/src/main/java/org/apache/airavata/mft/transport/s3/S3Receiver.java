@@ -32,6 +32,8 @@ import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.s3.resource.S3Resource;
 import org.apache.airavata.mft.resource.stubs.s3.resource.S3ResourceGetRequest;
+import org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage;
+import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
@@ -43,15 +45,15 @@ public class S3Receiver implements Connector {
 
     private static final Logger logger = LoggerFactory.getLogger(S3Receiver.class);
 
-    private S3Resource s3Resource;
     private AmazonS3 s3Client;
+    private S3Storage s3Storage;
 
     @Override
-    public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort,
-                                                    String secretServiceHost, int secretServicePort) throws Exception {
+    public void init(String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort,
+                     String secretServiceHost, int secretServicePort) throws Exception {
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        this.s3Resource = resourceClient.s3().getS3Resource(S3ResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        this.s3Storage = resourceClient.s3().getS3Storage(S3StorageGetRequest.newBuilder().setStorageId(storageId).build());
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         S3Secret s3Secret = secretClient.s3().getS3Secret(S3SecretGetRequest.newBuilder().setSecretId(credentialToken).build());
@@ -59,7 +61,7 @@ public class S3Receiver implements Connector {
 
         s3Client = AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                .withRegion(s3Resource.getS3Storage().getRegion())
+                .withRegion(s3Storage.getRegion())
                 .build();
     }
 
@@ -69,31 +71,23 @@ public class S3Receiver implements Connector {
     }
 
     @Override
-    public void startStream(ConnectorContext context) throws Exception {
+    public void startStream(String targetPath, ConnectorContext context) throws Exception {
 
-        if (ResourceTypes.FILE.equals(this.s3Resource.getResourceCase().name())) {
-            logger.info("Starting S3 Receiver stream for transfer {}", context.getTransferId());
+        logger.info("Starting S3 Receiver stream for transfer {}", context.getTransferId());
 
-            S3Object s3object = s3Client.getObject(s3Resource.getS3Storage().getBucketName(), s3Resource.getFile().getResourcePath());
-            S3ObjectInputStream inputStream = s3object.getObjectContent();
+        S3Object s3object = s3Client.getObject(this.s3Storage.getBucketName(), targetPath);
+        S3ObjectInputStream inputStream = s3object.getObjectContent();
 
-            OutputStream os = context.getStreamBuffer().getOutputStream();
-            int read;
-            long bytes = 0;
-            while ((read = inputStream.read()) != -1) {
-                bytes++;
-                os.write(read);
-            }
-            os.flush();
-            os.close();
-
-            logger.info("Completed S3 Receiver stream for transfer {}", context.getTransferId());
-
-        } else {
-            logger.error("Resource {} should be a FILE type. Found a {}",
-                    this.s3Resource.getResourceId(), this.s3Resource.getResourceCase().name());
-            throw new Exception("Resource " + this.s3Resource.getResourceId() + " should be a FILE type. Found a " +
-                    this.s3Resource.getResourceCase().name());
+        OutputStream os = context.getStreamBuffer().getOutputStream();
+        int read;
+        long bytes = 0;
+        while ((read = inputStream.read()) != -1) {
+            bytes++;
+            os.write(read);
         }
+        os.flush();
+        os.close();
+
+        logger.info("Completed S3 Receiver stream for transfer {}", context.getTransferId());
     }
 }

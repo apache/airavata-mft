@@ -40,13 +40,10 @@ public class DropboxSender implements Connector {
 
     private static final Logger logger = LoggerFactory.getLogger(DropboxSender.class);
 
-    private DropboxResource dropboxResource;
     private DbxClientV2 dbxClientV2;
 
     @Override
-    public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        this.dropboxResource = resourceClient.dropbox().getDropboxResource(DropboxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+    public void init(String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         DropboxSecret dropboxSecret = secretClient.dropbox().getDropboxSecret(DropboxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
@@ -61,24 +58,15 @@ public class DropboxSender implements Connector {
     }
 
     @Override
-    public void startStream(ConnectorContext context) throws Exception {
+    public void startStream(String targetPath, ConnectorContext context) throws Exception {
         logger.info("Starting Dropbox Sender stream for transfer {}", context.getTransferId());
         logger.info("Content length for transfer {} {}", context.getTransferId(), context.getMetadata().getResourceSize());
 
+        FileMetadata metadata = dbxClientV2.files().uploadBuilder(targetPath)
+                .withMode(WriteMode.OVERWRITE)
+                .uploadAndFinish(context.getStreamBuffer().getInputStream());
+        logger.info("Completed Dropbox Sender stream for transfer {}", context.getTransferId());
 
-
-        if (ResourceTypes.FILE.equals(this.dropboxResource.getResourceCase().name())) {
-            FileMetadata metadata = dbxClientV2.files().uploadBuilder(dropboxResource.getFile().getResourcePath())
-                    .withMode(WriteMode.OVERWRITE)
-                    .uploadAndFinish(context.getStreamBuffer().getInputStream());
-            logger.info("Completed Dropbox Sender stream for transfer {}", context.getTransferId());
-
-        } else {
-            logger.error("Resource {} should be a FILE type. Found a {}",
-                    this.dropboxResource.getResourceId(), this.dropboxResource.getResourceCase().name());
-            throw new Exception("Resource " + this.dropboxResource.getResourceId() + " should be a FILE type. Found a " +
-                    this.dropboxResource.getResourceCase().name());
-        }
 
     }
 }

@@ -26,8 +26,6 @@ public class DirectoryResourceMetadata {
     private long createdTime;
     private long updateTime;
     private String resourcePath;
-    private String parentResourceId;
-    private String parentResourceType;
     private List<DirectoryResourceMetadata> directories = new ArrayList<>();
     private List<FileResourceMetadata> files = new ArrayList<>();
     private boolean lazyInitialized = true;
@@ -68,24 +66,6 @@ public class DirectoryResourceMetadata {
         return this;
     }
 
-    public String getParentResourceId() {
-        return parentResourceId;
-    }
-
-    public DirectoryResourceMetadata setParentResourceId(String parentResourceId) {
-        this.parentResourceId = parentResourceId;
-        return this;
-    }
-
-    public String getParentResourceType() {
-        return parentResourceType;
-    }
-
-    public DirectoryResourceMetadata setParentResourceType(String parentResourceType) {
-        this.parentResourceType = parentResourceType;
-        return this;
-    }
-
     public List<DirectoryResourceMetadata> getDirectories() {
         return directories;
     }
@@ -119,8 +99,6 @@ public class DirectoryResourceMetadata {
         private long createdTime;
         private long updateTime;
         private String resourcePath;
-        private String parentResourceId;
-        private String parentResourceType;
         private List<DirectoryResourceMetadata> directories = new ArrayList<>();
         private List<FileResourceMetadata> files = new ArrayList<>();
         private boolean lazyInitialized = true;
@@ -149,16 +127,6 @@ public class DirectoryResourceMetadata {
 
         public Builder withResourcePath(String resourcePath) {
             this.resourcePath = resourcePath;
-            return this;
-        }
-
-        public Builder withParentResourceId(String parentResourceId) {
-            this.parentResourceId = parentResourceId;
-            return this;
-        }
-
-        public Builder withParentResourceType(String parentResourceType) {
-            this.parentResourceType = parentResourceType;
             return this;
         }
 
@@ -193,8 +161,6 @@ public class DirectoryResourceMetadata {
             directoryResourceMetadata.setCreatedTime(createdTime);
             directoryResourceMetadata.setUpdateTime(updateTime);
             directoryResourceMetadata.setResourcePath(resourcePath);
-            directoryResourceMetadata.setParentResourceId(parentResourceId);
-            directoryResourceMetadata.setParentResourceType(parentResourceType);
             directoryResourceMetadata.setDirectories(directories);
             directoryResourceMetadata.setFiles(files);
             directoryResourceMetadata.setLazyInitialized(lazyInitialized);

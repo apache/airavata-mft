@@ -21,12 +21,14 @@ import java.util.Map;
 
 public class TransferRequest {
 
-    private String sourceId;
+    private String sourceStorageId;
+    private String sourcePath;
     private String sourceType;
     private String sourceToken;
     private String sourceResourceBackend;
     private String sourceCredentialBackend;
-    private String destinationId;
+    private String destinationStorageId;
+    private String destinationPath;
     private String destinationType;
     private String destinationToken;
     private String destResourceBackend;
@@ -34,12 +36,21 @@ public class TransferRequest {
     private boolean affinityTransfer;
     private Map<String, Integer> targetAgents;
 
-    public String getSourceId() {
-        return sourceId;
+    public String getSourceStorageId() {
+        return sourceStorageId;
     }
 
-    public TransferRequest setSourceId(String sourceId) {
-        this.sourceId = sourceId;
+    public TransferRequest setSourceStorageId(String sourceStorageId) {
+        this.sourceStorageId = sourceStorageId;
+        return this;
+    }
+
+    public String getSourcePath() {
+        return sourcePath;
+    }
+
+    public TransferRequest setSourcePath(String sourcePath) {
+        this.sourcePath = sourcePath;
         return this;
     }
 
@@ -79,12 +90,21 @@ public class TransferRequest {
         return this;
     }
 
-    public String getDestinationId() {
-        return destinationId;
+    public String getDestinationStorageId() {
+        return destinationStorageId;
     }
 
-    public TransferRequest setDestinationId(String destinationId) {
-        this.destinationId = destinationId;
+    public TransferRequest setDestinationStorageId(String destinationStorageId) {
+        this.destinationStorageId = destinationStorageId;
+        return this;
+    }
+
+    public String getDestinationPath() {
+        return destinationPath;
+    }
+
+    public TransferRequest setDestinationPath(String destinationPath) {
+        this.destinationPath = destinationPath;
         return this;
     }
 

@@ -92,6 +92,51 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
     }
 
     @Override
+    public void submitHttpUpload(HttpUploadApiRequest request, StreamObserver<HttpUploadApiResponse> responseObserver) {
+        super.submitHttpUpload(request, responseObserver);
+    }
+
+    @Override
+    public void submitHttpDownload(HttpDownloadApiRequest request, StreamObserver<HttpDownloadApiResponse> responseObserver) {
+        try {
+
+            // TODO : Automatically derive agent if the target agent is empty
+            SyncRPCRequest.SyncRPCRequestBuilder requestBuilder = SyncRPCRequest.SyncRPCRequestBuilder.builder()
+                    .withAgentId(request.getTargetAgent())
+                    .withMessageId(UUID.randomUUID().toString())
+                    .withMethod("submitHttpDownload")
+                    .withParameter("storeId", request.getSourceStoreId())
+                    .withParameter("sourcePath", request.getSourcePath())
+                    .withParameter("sourceToken", request.getSourceToken())
+                    .withParameter("storeType", request.getSourceType())
+                    .withParameter("mftAuthorizationToken", request.getMftAuthorizationToken());
+
+            SyncRPCResponse rpcResponse = agentRPCClient.sendSyncRequest(requestBuilder.build());
+
+            switch (rpcResponse.getResponseStatus()) {
+                case SUCCESS:
+                    String url = rpcResponse.getResponseAsStr();
+                    HttpDownloadApiResponse downloadResponse = HttpDownloadApiResponse.newBuilder()
+                            .setUrl(url)
+                            .setTargetAgent(request.getTargetAgent()).build();
+                    responseObserver.onNext(downloadResponse);
+                    responseObserver.onCompleted();
+                    return;
+                case FAIL:
+                    logger.error("Errored while processing the download request to resource {} in store {}. Error msg : {}",
+                            request.getSourcePath(), request.getSourceStoreId(), rpcResponse.getErrorAsStr());
+                    responseObserver.onError(new Exception("Errored while processing the the fetch file metadata response. Error msg : " +
+                            rpcResponse.getErrorAsStr()));
+            }
+
+        } catch (Exception e) {
+            logger.error("Error while submitting http download request to path {} in store {}",
+                                                request.getSourcePath(), request.getSourceStoreId() , e);
+            responseObserver.onError(new Exception("Failed to submit http download request", e));
+        }
+    }
+
+    @Override
     public void getTransferStates(TransferStateApiRequest request, StreamObserver<TransferStateApiResponse> responseObserver) {
         try {
             List<TransferState> states = mftConsulClient.getTransferStates(request.getTransferId());

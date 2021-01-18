@@ -30,6 +30,8 @@ import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferCommand;
 import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
+import org.apache.airavata.mft.agent.http.HttpServer;
+import org.apache.airavata.mft.agent.http.HttpTransferRequestsStore;
 import org.apache.airavata.mft.agent.rpc.RPCParser;
 import org.apache.airavata.mft.core.ConnectorResolver;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
@@ -101,6 +103,9 @@ public class MFTAgent implements CommandLineRunner {
     @Autowired
     private MFTConsulClient mftConsulClient;
 
+    @Autowired
+    private HttpTransferRequestsStore transferRequestsStore;
+
     public void init() {
         transferMessageCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.AGENTS_TRANSFER_REQUEST_MESSAGE_PATH + agentId );
         rpcMessageCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.AGENTS_RPC_REQUEST_MESSAGE_PATH + agentId );
@@ -147,11 +152,11 @@ public class MFTAgent implements CommandLineRunner {
 
                         Optional<Connector> inConnectorOpt = ConnectorResolver.resolveConnector(request.getSourceType(), "IN");
                         Connector inConnector = inConnectorOpt.orElseThrow(() -> new Exception("Could not find an in connector for given input"));
-                        inConnector.init(request.getSourceId(), request.getSourceToken(), resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
+                        inConnector.init(request.getSourceStorageId(), request.getSourceToken(), resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
 
                         Optional<Connector> outConnectorOpt = ConnectorResolver.resolveConnector(request.getDestinationType(), "OUT");
                         Connector outConnector = outConnectorOpt.orElseThrow(() -> new Exception("Could not find an out connector for given input"));
-                        outConnector.init(request.getDestinationId(), request.getDestinationToken(), resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
+                        outConnector.init(request.getDestinationStorageId(), request.getDestinationToken(), resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
 
                         Optional<MetadataCollector> srcMetadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(request.getSourceType());
                         MetadataCollector srcMetadataCollector = srcMetadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for source"));
@@ -219,6 +224,19 @@ public class MFTAgent implements CommandLineRunner {
         };
         transferMessageCache.addListener(transferCacheListener);
         transferMessageCache.start();
+    }
+
+    private void acceptHTTPRequests() {
+        logger.info("Starting the HTTP front end");
+
+        new Thread(() -> {
+            HttpServer httpServer = new HttpServer(3333, false, transferRequestsStore);
+            try {
+                httpServer.run();
+            } catch (Exception e) {
+                logger.error("Http frontend server start failed", e);
+            }
+        }).start();
     }
 
     private boolean connectAgent() throws MFTConsulClientException {
@@ -316,6 +334,7 @@ public class MFTAgent implements CommandLineRunner {
 
         acceptTransferRequests();
         acceptRPCRequests();
+        acceptHTTPRequests();
     }
 
     @Override

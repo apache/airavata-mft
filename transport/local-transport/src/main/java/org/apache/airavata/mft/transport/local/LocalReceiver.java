@@ -18,12 +18,7 @@
 package org.apache.airavata.mft.transport.local;
 
 import org.apache.airavata.mft.core.ConnectorContext;
-import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
-import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.local.resource.LocalResource;
-import org.apache.airavata.mft.resource.stubs.local.resource.LocalResourceGetRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,16 +28,12 @@ public class LocalReceiver implements Connector {
 
     private static final Logger logger = LoggerFactory.getLogger(LocalReceiver.class);
 
-    private LocalResource resource;
     private boolean initialized;
 
     @Override
-    public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort,
+    public void init(String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort,
                      String secretServiceHost, int secretServicePort) throws Exception {
         this.initialized = true;
-
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        this.resource = resourceClient.local().getLocalResource(LocalResourceGetRequest.newBuilder().setResourceId(resourceId).build());
     }
 
     @Override
@@ -57,50 +48,41 @@ public class LocalReceiver implements Connector {
     }
 
     @Override
-    public void startStream(ConnectorContext context) throws Exception {
+    public void startStream(String targetPath, ConnectorContext context) throws Exception {
         logger.info("Starting local receiver stream for transfer {}", context.getTransferId());
 
         checkInitialized();
 
+        OutputStream streamOs = context.getStreamBuffer().getOutputStream();
+        FileInputStream fis = new FileInputStream(new File(targetPath));
 
-        if (ResourceTypes.FILE.equals(this.resource.getResourceCase().name())) {
-            OutputStream streamOs = context.getStreamBuffer().getOutputStream();
-            FileInputStream fis = new FileInputStream(new File(resource.getFile().getResourcePath()));
+        long fileSize = context.getMetadata().getResourceSize();
 
-            long fileSize = context.getMetadata().getResourceSize();
+        byte[] buf = new byte[1024];
+        while (true) {
+            int bufSize = 0;
 
-            byte[] buf = new byte[1024];
-            while (true) {
-                int bufSize = 0;
+            if (buf.length < fileSize) {
+                bufSize = buf.length;
+            } else {
+                bufSize = (int) fileSize;
+            }
+            bufSize = fis.read(buf, 0, bufSize);
 
-                if (buf.length < fileSize) {
-                    bufSize = buf.length;
-                } else {
-                    bufSize = (int) fileSize;
-                }
-                bufSize = fis.read(buf, 0, bufSize);
-
-                if (bufSize < 0) {
-                    break;
-                }
-
-                streamOs.write(buf, 0, bufSize);
-                streamOs.flush();
-
-                fileSize -= bufSize;
-                if (fileSize == 0L)
-                    break;
+            if (bufSize < 0) {
+                break;
             }
 
-            fis.close();
-            streamOs.close();
-            logger.info("Completed local receiver stream for transfer {}", context.getTransferId());
+            streamOs.write(buf, 0, bufSize);
+            streamOs.flush();
 
-        } else {
-            logger.error("Resource {} should be a FILE type. Found a {}",
-                    this.resource.getResourceId(), this.resource.getResourceCase().name());
-            throw new Exception("Resource " + this.resource.getResourceId() + " should be a FILE type. Found a " +
-                    this.resource.getResourceCase().name());
+            fileSize -= bufSize;
+            if (fileSize == 0L)
+                break;
         }
+
+        fis.close();
+        streamOs.close();
+        logger.info("Completed local receiver stream for transfer {}", context.getTransferId());
     }
 }

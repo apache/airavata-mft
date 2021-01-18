@@ -18,12 +18,7 @@
 package org.apache.airavata.mft.transport.local;
 
 import org.apache.airavata.mft.core.ConnectorContext;
-import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
-import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.local.resource.LocalResource;
-import org.apache.airavata.mft.resource.stubs.local.resource.LocalResourceGetRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,16 +28,12 @@ public class LocalSender implements Connector {
 
     private static final Logger logger = LoggerFactory.getLogger(LocalSender.class);
 
-    private LocalResource resource;
     private boolean initialized;
     @Override
-    public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort,
+    public void init(String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort,
                      String secretServiceHost, int secretServicePort) throws Exception {
 
         this.initialized = true;
-
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        this.resource = resourceClient.local().getLocalResource(LocalResourceGetRequest.newBuilder().setResourceId(resourceId).build());
     }
 
     @Override
@@ -57,49 +48,42 @@ public class LocalSender implements Connector {
     }
 
     @Override
-    public void startStream(ConnectorContext context) throws Exception {
+    public void startStream(String targetPath, ConnectorContext context) throws Exception {
 
         logger.info("Starting local sender stream for transfer {}", context.getTransferId());
 
         checkInitialized();
 
-        if (ResourceTypes.FILE.equals(this.resource.getResourceCase().name())) {
-            InputStream in = context.getStreamBuffer().getInputStream();
-            long fileSize = context.getMetadata().getResourceSize();
-            OutputStream fos = new FileOutputStream(resource.getFile().getResourcePath());
+        InputStream in = context.getStreamBuffer().getInputStream();
+        long fileSize = context.getMetadata().getResourceSize();
+        OutputStream fos = new FileOutputStream(targetPath);
 
-            byte[] buf = new byte[1024];
-            while (true) {
-                int bufSize = 0;
+        byte[] buf = new byte[1024];
+        while (true) {
+            int bufSize = 0;
 
-                if (buf.length < fileSize) {
-                    bufSize = buf.length;
-                } else {
-                    bufSize = (int) fileSize;
-                }
-                bufSize = in.read(buf, 0, bufSize);
+            if (buf.length < fileSize) {
+                bufSize = buf.length;
+            } else {
+                bufSize = (int) fileSize;
+            }
+            bufSize = in.read(buf, 0, bufSize);
 
-                if (bufSize < 0) {
-                    break;
-                }
-
-                fos.write(buf, 0, bufSize);
-                fos.flush();
-
-                fileSize -= bufSize;
-                if (fileSize == 0L)
-                    break;
+            if (bufSize < 0) {
+                break;
             }
 
-            in.close();
-            fos.close();
+            fos.write(buf, 0, bufSize);
+            fos.flush();
 
-            logger.info("Completed local sender stream for transfer {}", context.getTransferId());
-        } else {
-            logger.error("Resource {} should be a FILE type. Found a {}",
-                    this.resource.getResourceId(), this.resource.getResourceCase().name());
-            throw new Exception("Resource " + this.resource.getResourceId() + " should be a FILE type. Found a " +
-                    this.resource.getResourceCase().name());
+            fileSize -= bufSize;
+            if (fileSize == 0L)
+                break;
         }
+
+        in.close();
+        fos.close();
+
+        logger.info("Completed local sender stream for transfer {}", context.getTransferId());
     }
 }

@@ -33,8 +33,11 @@ import org.apache.airavata.mft.credential.stubs.gcs.GCSSecret;
 import org.apache.airavata.mft.credential.stubs.gcs.GCSSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.common.FileResource;
 import org.apache.airavata.mft.resource.stubs.gcs.resource.GCSResource;
 import org.apache.airavata.mft.resource.stubs.gcs.resource.GCSResourceGetRequest;
+import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorage;
+import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
@@ -99,7 +102,7 @@ public class GCSMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+    public FileResourceMetadata getFileResourceMetadata(String storageId, String resourcePath, String credentialToken) throws Exception {
         throw new UnsupportedOperationException("Method not implemented");
     }
 
@@ -108,7 +111,7 @@ public class GCSMetadataCollector implements MetadataCollector {
         throw new UnsupportedOperationException("Method not implemented");    }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String storageId, String resourcePath, String credentialToken) throws Exception {
         throw new UnsupportedOperationException("Method not implemented");
     }
 
@@ -117,6 +120,24 @@ public class GCSMetadataCollector implements MetadataCollector {
         checkInitialized();
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         GCSResource gcsResource = resourceClient.gcs().getGCSResource(GCSResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+
+        return isAvailable(gcsResource, credentialToken);
+    }
+
+    @Override
+    public Boolean isAvailable(String storageId, String resourcePath, String credentialToken) throws Exception {
+        checkInitialized();
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        GCSStorage gcsStorage = resourceClient.gcs().getGCSStorage(GCSStorageGetRequest.newBuilder().setStorageId(storageId).build());
+
+        GCSResource gcsResource = GCSResource.newBuilder()
+                .setFile(FileResource.newBuilder().setResourcePath(resourcePath).build())
+                .setGcsStorage(gcsStorage).build();
+
+        return isAvailable(gcsResource, credentialToken);
+    }
+
+    private Boolean isAvailable(GCSResource gcsResource, String credentialToken) throws Exception {
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         GCSSecret gcsSecret = secretClient.gcs().getGCSSecret(GCSSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
@@ -134,10 +155,10 @@ public class GCSMetadataCollector implements MetadataCollector {
         switch (gcsResource.getResourceCase().name()){
             case ResourceTypes.FILE:
                 return !storage.objects().get(gcsResource.getGcsStorage().getBucketName(), gcsResource.getFile().getResourcePath())
-                                            .execute().isEmpty();
+                        .execute().isEmpty();
             case ResourceTypes.DIRECTORY:
                 return !storage.objects().get(gcsResource.getGcsStorage().getBucketName(), gcsResource.getDirectory().getResourcePath())
-                                            .execute().isEmpty();
+                        .execute().isEmpty();
         }
         return false;
     }

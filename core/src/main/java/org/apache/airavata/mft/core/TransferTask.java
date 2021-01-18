@@ -17,7 +17,6 @@
 
 package org.apache.airavata.mft.core;
 
-import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
 
 import java.util.concurrent.Callable;
@@ -26,15 +25,17 @@ public class TransferTask implements Callable<Integer> {
 
     private Connector connector;
     private ConnectorContext context;
+    private String resourcePath;
 
-    public TransferTask(Connector connector, ConnectorContext context) {
+    public TransferTask(Connector connector, ConnectorContext context, String resourcePath) {
         this.connector = connector;
         this.context = context;
+        this.resourcePath = resourcePath;
     }
 
     @Override
     public Integer call() throws Exception {
-        this.connector.startStream(context);
+        this.connector.startStream(resourcePath, context);
         return 0;
     }
 }

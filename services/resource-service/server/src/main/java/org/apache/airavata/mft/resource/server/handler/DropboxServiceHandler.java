@@ -23,6 +23,7 @@ import io.grpc.stub.StreamObserver;
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
 import org.apache.airavata.mft.resource.service.dropbox.DropboxServiceGrpc;
 import org.apache.airavata.mft.resource.stubs.dropbox.resource.*;
+import org.apache.airavata.mft.resource.stubs.dropbox.storage.*;
 import org.lognet.springboot.grpc.GRpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,6 +99,72 @@ public class DropboxServiceHandler extends DropboxServiceGrpc.DropboxServiceImpl
 
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed in deleting the dropbox resource with id " + request.getResourceId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void getDropboxStorage(DropboxStorageGetRequest request, StreamObserver<DropboxStorage> responseObserver) {
+        try {
+            this.backend.getDropboxStorage(request).ifPresentOrElse(resource -> {
+                responseObserver.onNext(resource);
+                responseObserver.onCompleted();
+            }, () -> {
+                responseObserver.onError(Status.INTERNAL
+                        .withDescription("No dropbox storage with id " + request.getStorageId())
+                        .asRuntimeException());
+            });
+        } catch (Exception e) {
+            logger.error("Failed in retrieving dropbox storage with id {}", request.getStorageId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in retrieving dropbox storage with id " + request.getStorageId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void createDropboxStorage(DropboxStorageCreateRequest request, StreamObserver<DropboxStorage> responseObserver) {
+        try {
+            responseObserver.onNext(this.backend.createDropboxStorage(request));
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in creating the dropbox storage", e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in creating the dropbox storage")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void updateDropboxStorage(DropboxStorageUpdateRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.updateDropboxStorage(request);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in updating the dropbox storage {}", request.getStorageId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in updating the dropbox storage with id " + request.getStorageId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void deleteDropboxStorage(DropboxStorageDeleteRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            boolean res = this.backend.deleteDropboxStorage(request);
+            if (res) {
+                responseObserver.onCompleted();
+            } else {
+                responseObserver.onError(new Exception("Failed to delete dropbox storage with id " + request.getStorageId()));
+            }
+        } catch (Exception e) {
+            logger.error("Failed in deleting the dropbox storage {}", request.getStorageId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in deleting the dropbox storage with id " + request.getStorageId())
                     .asRuntimeException());
         }
     }

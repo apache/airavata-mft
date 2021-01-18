@@ -43,17 +43,15 @@ public interface MetadataCollector {
     public FileResourceMetadata getFileResourceMetadata(String resourceId, String credentialToken) throws Exception;
 
     /**
-     * Fetches a metadata of given File Resource inside a registered directory resource. Target file might be living in
-     * multiple level below the parent directory
+     * Fetches a metadata of given File Resource
      *
-     * @param parentResourceId parent directory resource id
-     * @param resourcePath path of the target resource. This should be a child path of the parent resource
+     * @param storageId id of the storage resource
+     * @param resourcePath resource path
      * @param credentialToken credential token for the resource
      * @return an object of {@link FileResourceMetadata}
-     * @throws Exception if the parent resource is not a Directory resource or the target resource is not a File Resource type
-     * or the resource can't be fetched from the resource service
+     * @throws Exception if the resource id is not a File Resource type or the resource can't be fetched from the resource service
      */
-    public FileResourceMetadata getFileResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception;
+    public FileResourceMetadata getFileResourceMetadata(String storageId, String resourcePath, String credentialToken) throws Exception;
 
     /**
      * Fetches a metadata of given Directory Resource
@@ -66,17 +64,14 @@ public interface MetadataCollector {
     public DirectoryResourceMetadata getDirectoryResourceMetadata(String resourceId, String credentialToken) throws Exception;
 
     /**
-     * Fetches a metadata of given Directory Resource inside a registered directory resource. Target directory might be living in
-     * multiple level below the parent directory
+     * Fetches a metadata of given Directory Resource
      *
-     * @param parentResourceId parent directory resource id
-     * @param resourcePath path of the target resource. This should be a child path of the parent resource
-     * @param credentialToken credential token for the resource
+     * @param storageId id of the storage resource
+     * @param resourcePath resource path
      * @return an object of {@link DirectoryResourceMetadata}
-     * @throws Exception if the parent resource is not a Directory resource or the target resource is not a Directory Resource type
-     * or the resource can't be fetched from the resource service
+     * @throws Exception if the resource id is not a Directory Resource type or the resource can't be fetched from the resource service
      */
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception;
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String storageId, String resourcePath, String credentialToken) throws Exception;
 
     /**
      * Check whether the resource is available in the actual storage
@@ -87,4 +82,15 @@ public interface MetadataCollector {
      * @throws Exception if the resource details can not be fetched from the resource service
      */
     public Boolean isAvailable(String resourceId, String credentialToken) throws Exception;
+
+    /**
+     * Check whether the resource is available in the actual storage
+     *
+     * @param storageId id of the storage
+     * @param resourcePath resource path
+     * @param credentialToken credential token for the resource
+     * @return true of the resource is available false otherwise
+     * @throws Exception if the resource details can not be fetched from the resource service
+     */
+    public Boolean isAvailable(String storageId, String resourcePath, String credentialToken) throws Exception;
 }

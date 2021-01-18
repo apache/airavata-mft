@@ -21,14 +21,13 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.DoubleStreamingBuffer;
-import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.scp.SCPSecret;
 import org.apache.airavata.mft.credential.stubs.scp.SCPSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.scp.resource.SCPResource;
-import org.apache.airavata.mft.resource.stubs.scp.resource.SCPResourceGetRequest;
+import org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorage;
+import org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
@@ -43,30 +42,37 @@ public class SCPReceiver implements Connector {
     boolean initialized = false;
 
     private Session session;
-    private SCPResource scpResource;
 
-    public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort,
+    public void init(String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort,
                      String secretServiceHost, int secretServicePort) throws Exception {
+
+        if (initialized) {
+            destroy();
+        }
 
         this.initialized = true;
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        this.scpResource = resourceClient.scp().getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        SCPStorage scpStorage = resourceClient.scp().getSCPStorage(SCPStorageGetRequest.newBuilder().setStorageId(storageId).build());
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         this.session = SCPTransportUtil.createSession(
-                scpResource.getScpStorage().getUser(),
-                scpResource.getScpStorage().getHost(),
-                scpResource.getScpStorage().getPort(),
+                scpStorage.getUser(),
+                scpStorage.getHost(),
+                scpStorage.getPort(),
                 scpSecret.getPrivateKey().getBytes(),
                 scpSecret.getPublicKey().getBytes(),
                 scpSecret.getPassphrase().equals("")? null : scpSecret.getPassphrase().getBytes());
     }
 
     public void destroy() {
-
+        try {
+            this.session.disconnect();
+        } catch (Exception e) {
+            logger.error("Errored while disconnecting session", e);
+        }
     }
 
     private void checkInitialized() {
@@ -75,23 +81,16 @@ public class SCPReceiver implements Connector {
         }
     }
 
-    public void startStream(ConnectorContext context) throws Exception {
+    public void startStream(String targetPath, ConnectorContext context) throws Exception {
         checkInitialized();
         if (session == null) {
             logger.error("Session can not be null. Make sure that SCP Receiver is properly initialized");
             throw new Exception("Session can not be null. Make sure that SCP Receiver is properly initialized");
         }
 
-        if (ResourceTypes.FILE.equals(this.scpResource.getResourceCase().name())) {
-            transferRemoteToStream(session, this.scpResource.getFile().getResourcePath(), context.getStreamBuffer());
-            logger.info("SCP Receive completed. Transfer {}", context.getTransferId());
+        transferRemoteToStream(session, targetPath, context.getStreamBuffer());
+        logger.info("SCP Receive completed. Transfer {}", context.getTransferId());
 
-        } else {
-            logger.error("Resource {} should be a FILE type. Found a {}",
-                                            this.scpResource.getResourceId(), this.scpResource.getResourceCase().name());
-            throw new Exception("Resource " + this.scpResource.getResourceId() + " should be a FILE type. Found a " +
-                                                                            this.scpResource.getResourceCase().name());
-        }
     }
 
     private void transferRemoteToStream(Session session, String from, DoubleStreamingBuffer streamBuffer) throws Exception {

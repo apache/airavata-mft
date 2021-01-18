@@ -40,6 +40,9 @@ import org.apache.airavata.mft.resource.stubs.common.DirectoryResource;
 import org.apache.airavata.mft.resource.stubs.common.FileResource;
 import org.apache.airavata.mft.resource.stubs.scp.resource.SCPResource;
 import org.apache.airavata.mft.resource.stubs.scp.resource.SCPResourceGetRequest;
+import org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorage;
+import org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageCreateRequest;
+import org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.apache.commons.io.IOUtils;
@@ -76,7 +79,7 @@ public class SCPMetadataCollector implements MetadataCollector {
         }
     }
 
-    private FileResourceMetadata getFileResourceMetadata(SCPResource scpResource, SCPSecret scpSecret, String parentResourceId) throws Exception {
+    private FileResourceMetadata getFileResourceMetadata(SCPResource scpResource, SCPSecret scpSecret) throws Exception {
         try (SSHClient sshClient = getSSHClient(scpResource, scpSecret)) {
 
             logger.info("Fetching metadata for resource {} in {}", scpResource.getFile().getResourcePath(), scpResource.getScpStorage().getHost());
@@ -89,8 +92,6 @@ public class SCPMetadataCollector implements MetadataCollector {
                 metadata.setResourceSize(lstat.getSize());
                 metadata.setCreatedTime(lstat.getAtime());
                 metadata.setUpdateTime(lstat.getMtime());
-                metadata.setParentResourceId(parentResourceId);
-                metadata.setParentResourceType("SCP");
                 metadata.setFriendlyName(new File(scpResource.getFile().getResourcePath()).getName());
                 metadata.setResourcePath(scpResource.getFile().getResourcePath());
 
@@ -127,28 +128,26 @@ public class SCPMetadataCollector implements MetadataCollector {
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
-        return getFileResourceMetadata(scpResource, scpSecret, resourceId);
+        return getFileResourceMetadata(scpResource, scpSecret);
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+    public FileResourceMetadata getFileResourceMetadata(String storageId, String resourcePath, String credentialToken) throws Exception {
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        SCPResource parentSCPResource = resourceClient.scp().getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(parentResourceId).build());
+        SCPStorage scpStorage = resourceClient.scp().getSCPStorage(SCPStorageGetRequest.newBuilder().setStorageId(storageId).build());
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
-        validateParent(parentSCPResource, resourcePath);
-
         SCPResource scpResource = SCPResource.newBuilder()
                                         .setFile(FileResource.newBuilder()
                                         .setResourcePath(resourcePath).build())
-                                        .setScpStorage(parentSCPResource.getScpStorage()).build();
+                                        .setScpStorage(scpStorage).build();
 
-        return getFileResourceMetadata(scpResource, scpSecret, parentResourceId);
+        return getFileResourceMetadata(scpResource, scpSecret);
     }
 
-    private DirectoryResourceMetadata getDirectoryResourceMetadata(SCPResource scpResource, SCPSecret scpSecret, String parentResourceId) throws Exception {
+    private DirectoryResourceMetadata getDirectoryResourceMetadata(SCPResource scpResource, SCPSecret scpSecret) throws Exception {
         try (SSHClient sshClient = getSSHClient(scpResource, scpSecret)) {
 
             logger.info("Fetching metadata for resource {} in {}", scpResource.getFile().getResourcePath(), scpResource.getScpStorage().getHost());
@@ -167,9 +166,7 @@ public class SCPMetadataCollector implements MetadataCollector {
                                         .withFriendlyName(rri.getName())
                                         .withResourcePath(rri.getPath())
                                         .withCreatedTime(rri.getAttributes().getAtime())
-                                        .withUpdateTime(rri.getAttributes().getMtime())
-                                        .withParentResourceId(parentResourceId)
-                                        .withParentResourceType("SCP");
+                                        .withUpdateTime(rri.getAttributes().getMtime());
                         dirMetadataBuilder = dirMetadataBuilder.withDirectory(childDirBuilder.build());
                     }
 
@@ -178,20 +175,16 @@ public class SCPMetadataCollector implements MetadataCollector {
                                         .withFriendlyName(rri.getName())
                                         .withResourcePath(rri.getPath())
                                         .withCreatedTime(rri.getAttributes().getAtime())
-                                        .withUpdateTime(rri.getAttributes().getMtime())
-                                        .withParentResourceId(parentResourceId)
-                                        .withParentResourceType("SCP");
+                                        .withUpdateTime(rri.getAttributes().getMtime());
 
                         dirMetadataBuilder = dirMetadataBuilder.withFile(childFileBuilder.build());
                     }
                 }
 
                 dirMetadataBuilder = dirMetadataBuilder.withFriendlyName(new File(scpResource.getDirectory().getResourcePath()).getName())
-                        .withResourcePath(parentResourceId)
+                        .withResourcePath(scpResource.getDirectory().getResourcePath())
                         .withCreatedTime(lsStat.getAtime())
-                        .withUpdateTime(lsStat.getMtime())
-                        .withParentResourceId(parentResourceId)
-                        .withParentResourceType("SCP");
+                        .withUpdateTime(lsStat.getMtime());
                 return dirMetadataBuilder.build();
             }
         }
@@ -206,24 +199,23 @@ public class SCPMetadataCollector implements MetadataCollector {
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
-        return getDirectoryResourceMetadata(scpPResource, scpSecret, resourceId);
+        return getDirectoryResourceMetadata(scpPResource, scpSecret);
     }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String storageId, String resourcePath, String credentialToken) throws Exception {
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        SCPResource parentSCPPResource = resourceClient.scp().getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(parentResourceId).build());
+        SCPStorage scpStorage = resourceClient.scp().getSCPStorage(SCPStorageGetRequest.newBuilder().setStorageId(storageId).build());
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
-        validateParent(parentSCPPResource, resourcePath);
 
-        SCPResource scpResource = SCPResource.newBuilder().setScpStorage(parentSCPPResource.getScpStorage())
+        SCPResource scpResource = SCPResource.newBuilder().setScpStorage(scpStorage)
                         .setDirectory(DirectoryResource.newBuilder()
                         .setResourcePath(resourcePath).build()).build();
 
-        return getDirectoryResourceMetadata(scpResource, scpSecret, parentResourceId);
+        return getDirectoryResourceMetadata(scpResource, scpSecret);
     }
 
     @Override
@@ -232,6 +224,23 @@ public class SCPMetadataCollector implements MetadataCollector {
         checkInitialized();
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         SCPResource scpResource = resourceClient.scp().getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+
+        return isAvailable(scpResource, credentialToken);
+    }
+
+    @Override
+    public Boolean isAvailable(String storageId, String resourcePath, String credentialToken) throws Exception {
+        checkInitialized();
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        SCPStorage scpStorage = resourceClient.scp().getSCPStorage(SCPStorageGetRequest.newBuilder().setStorageId(storageId).build());
+        SCPResource scpResource = SCPResource.newBuilder()
+                .setFile(FileResource.newBuilder().setResourcePath(resourcePath).build())
+                .setScpStorage(scpStorage).build();
+
+        return isAvailable(scpResource, credentialToken);
+    }
+
+    public Boolean isAvailable(SCPResource scpResource, String credentialToken) throws Exception {
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());

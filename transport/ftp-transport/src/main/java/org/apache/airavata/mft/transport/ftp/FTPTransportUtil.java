@@ -18,7 +18,7 @@
 package org.apache.airavata.mft.transport.ftp;
 
 import org.apache.airavata.mft.credential.stubs.ftp.FTPSecret;
-import org.apache.airavata.mft.resource.stubs.ftp.resource.FTPResource;
+import org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorage;
 import org.apache.commons.net.ftp.FTPClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +29,10 @@ class FTPTransportUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(FTPTransportUtil.class);
 
-    static FTPClient getFTPClient(FTPResource ftpResource, FTPSecret ftpSecret) throws IOException {
+    static FTPClient getFTPClient(FTPStorage ftpStorage, FTPSecret ftpSecret) throws IOException {
 
         FTPClient ftpClient = new FTPClient();
-        ftpClient.connect(ftpResource.getFtpStorage().getHost(), ftpResource.getFtpStorage().getPort());
+        ftpClient.connect(ftpStorage.getHost(), ftpStorage.getPort());
         ftpClient.enterLocalActiveMode();
         ftpClient.login(ftpSecret.getUserId(), ftpSecret.getPassword());
 

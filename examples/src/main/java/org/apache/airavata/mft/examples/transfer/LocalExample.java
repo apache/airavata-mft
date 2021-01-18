@@ -26,18 +26,22 @@ public class LocalExample {
     public static void main(String args[]) throws Exception {
         MFTApiServiceGrpc.MFTApiServiceBlockingStub client = MFTApiClient.buildClient("localhost", 7004);
 
-        String sourceId = "remote-ssh-resource2";
+        String sourceStorageId = "remote-ssh-storage";
+        String sourceResourcePath = "/tmp/1mb.txt";
         String sourceToken = "local-ssh-cred";
-        String destId = "10mb-file";
+        String destStorageId = "local-storage-1";
+        String destResourcePath = "/tmp/1mb-copy.txt";
         String destToken = "";
         String mftAuthorizationToken = "43ff79ac-e4f2-473c-9ea1-04eee9509a53";
 
         TransferApiRequest request = TransferApiRequest.newBuilder()
                 .setMftAuthorizationToken(mftAuthorizationToken)
-                .setSourceId(sourceId)
+                .setSourceStorageId(sourceStorageId)
+                .setSourcePath(sourceResourcePath)
                 .setSourceToken(sourceToken)
                 .setSourceType("SCP")
-                .setDestinationId(destId)
+                .setDestinationStorageId(destStorageId)
+                .setDestinationPath(destResourcePath)
                 .setDestinationToken(destToken)
                 .setDestinationType("LOCAL")
                 .setAffinityTransfer(false).build();

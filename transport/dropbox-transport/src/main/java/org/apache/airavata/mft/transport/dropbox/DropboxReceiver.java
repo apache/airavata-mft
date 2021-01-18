@@ -40,14 +40,10 @@ public class DropboxReceiver implements Connector {
 
     private static final Logger logger = LoggerFactory.getLogger(DropboxReceiver.class);
 
-    private DropboxResource dropboxResource;
     private DbxClientV2 dbxClientV2;
 
     @Override
-    public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        this.dropboxResource = resourceClient.dropbox().getDropboxResource(DropboxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
-
+    public void init(String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         DropboxSecret dropboxSecret = secretClient.dropbox().getDropboxSecret(DropboxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
@@ -61,48 +57,41 @@ public class DropboxReceiver implements Connector {
     }
 
     @Override
-    public void startStream(ConnectorContext context) throws Exception {
+    public void startStream(String targetPath, ConnectorContext context) throws Exception {
 
-        if (ResourceTypes.FILE.equals(this.dropboxResource.getResourceCase().name())) {
-            logger.info("Starting Dropbox Receiver stream for transfer {}", context.getTransferId());
+        logger.info("Starting Dropbox Receiver stream for transfer {}", context.getTransferId());
 
-            InputStream inputStream = dbxClientV2.files().download(this.dropboxResource.getFile().getResourcePath()).getInputStream();
-            OutputStream os = context.getStreamBuffer().getOutputStream();
-            int read;
-            long bytes = 0;
-            long fileSize = context.getMetadata().getResourceSize();
-            byte[] buf = new byte[1024];
-            while (true) {
-                int bufSize = 0;
+        InputStream inputStream = dbxClientV2.files().download(targetPath).getInputStream();
+        OutputStream os = context.getStreamBuffer().getOutputStream();
+        int read;
+        long bytes = 0;
+        long fileSize = context.getMetadata().getResourceSize();
+        byte[] buf = new byte[1024];
+        while (true) {
+            int bufSize = 0;
 
-                if (buf.length < fileSize) {
-                    bufSize = buf.length;
-                } else {
-                    bufSize = (int) fileSize;
-                }
-                bufSize = inputStream.read(buf, 0, bufSize);
+            if (buf.length < fileSize) {
+                bufSize = buf.length;
+            } else {
+                bufSize = (int) fileSize;
+            }
+            bufSize = inputStream.read(buf, 0, bufSize);
 
-                if (bufSize < 0) {
-                    break;
-                }
-
-                os.write(buf, 0, bufSize);
-                os.flush();
-
-                fileSize -= bufSize;
-                if (fileSize == 0L)
-                    break;
+            if (bufSize < 0) {
+                break;
             }
 
-            os.close();
+            os.write(buf, 0, bufSize);
+            os.flush();
 
-            logger.info("Completed Dropbox Receiver stream for transfer {}", context.getTransferId());
-
-        } else {
-            logger.error("Resource {} should be a FILE type. Found a {}",
-                    this.dropboxResource.getResourceId(), this.dropboxResource.getResourceCase().name());
-            throw new Exception("Resource " + this.dropboxResource.getResourceId() + " should be a FILE type. Found a " +
-                    this.dropboxResource.getResourceCase().name());
+            fileSize -= bufSize;
+            if (fileSize == 0L)
+                break;
         }
+
+        os.close();
+
+        logger.info("Completed Dropbox Receiver stream for transfer {}", context.getTransferId());
+
     }
 }

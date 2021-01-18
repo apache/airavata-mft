@@ -17,18 +17,23 @@
 
 package org.apache.airavata.mft.resource.server.backend.sql;
 
-
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
 import org.apache.airavata.mft.resource.server.backend.sql.entity.*;
 import org.apache.airavata.mft.resource.server.backend.sql.repository.*;
 import org.apache.airavata.mft.resource.stubs.azure.resource.*;
+import org.apache.airavata.mft.resource.stubs.azure.storage.*;
 import org.apache.airavata.mft.resource.stubs.box.resource.*;
+import org.apache.airavata.mft.resource.stubs.box.storage.*;
 import org.apache.airavata.mft.resource.stubs.dropbox.resource.*;
+import org.apache.airavata.mft.resource.stubs.dropbox.storage.*;
 import org.apache.airavata.mft.resource.stubs.ftp.resource.*;
 import org.apache.airavata.mft.resource.stubs.ftp.storage.*;
 import org.apache.airavata.mft.resource.stubs.gcs.resource.*;
+import org.apache.airavata.mft.resource.stubs.gcs.storage.*;
 import org.apache.airavata.mft.resource.stubs.local.resource.*;
+import org.apache.airavata.mft.resource.stubs.local.storage.*;
 import org.apache.airavata.mft.resource.stubs.s3.resource.*;
+import org.apache.airavata.mft.resource.stubs.s3.storage.*;
 import org.apache.airavata.mft.resource.stubs.scp.resource.*;
 import org.apache.airavata.mft.resource.stubs.scp.storage.*;
 import org.dozer.DozerBeanMapper;
@@ -121,6 +126,26 @@ public class SQLResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public Optional<LocalStorage> getLocalStorage(LocalStorageGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public LocalStorage createLocalStorage(LocalStorageCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateLocalStorage(LocalStorageUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteLocalStorage(LocalStorageDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<LocalResource> getLocalResource(LocalResourceGetRequest request) {
         Optional<LocalResourceEntity> resourceEntity = localResourceRepository.findByResourceId(request.getResourceId());
         return resourceEntity.map(scpResourceEntity -> mapper.map(scpResourceEntity, LocalResource.newBuilder().getClass()).build());
@@ -142,6 +167,26 @@ public class SQLResourceBackend implements ResourceBackend {
     public boolean deleteLocalResource(LocalResourceDeleteRequest request) {
         localResourceRepository.deleteById(request.getResourceId());
         return true;
+    }
+
+    @Override
+    public Optional<S3Storage> getS3Storage(S3StorageGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public S3Storage createS3Storage(S3StorageCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateS3Storage(S3StorageUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteS3Storage(S3StorageDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
@@ -169,6 +214,26 @@ public class SQLResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public Optional<BoxStorage> getBoxStorage(BoxStorageGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public BoxStorage createBoxStorage(BoxStorageCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateBoxStorage(BoxStorageUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteBoxStorage(BoxStorageDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<BoxResource> getBoxResource(BoxResourceGetRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
@@ -185,6 +250,26 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public boolean deleteBoxResource(BoxResourceDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public Optional<AzureStorage> getAzureStorage(AzureStorageGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public AzureStorage createAzureStorage(AzureStorageCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateAzureStorage(AzureStorageUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteAzureStorage(AzureStorageDeleteRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
@@ -209,6 +294,26 @@ public class SQLResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public Optional<GCSStorage> getGCSStorage(GCSStorageGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public GCSStorage createGCSStorage(GCSStorageCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateGCSStorage(GCSStorageUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteGCSStorage(GCSStorageDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<GCSResource> getGCSResource(GCSResourceGetRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
@@ -225,6 +330,26 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public boolean deleteGCSResource(GCSResourceDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public Optional<DropboxStorage> getDropboxStorage(DropboxStorageGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public DropboxStorage createDropboxStorage(DropboxStorageCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateDropboxStorage(DropboxStorageUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteDropboxStorage(DropboxStorageDeleteRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 

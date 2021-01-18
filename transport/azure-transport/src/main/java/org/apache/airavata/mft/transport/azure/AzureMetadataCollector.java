@@ -32,6 +32,9 @@ import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.azure.resource.AzureResource;
 import org.apache.airavata.mft.resource.stubs.azure.resource.AzureResourceGetRequest;
+import org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage;
+import org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageGetRequest;
+import org.apache.airavata.mft.resource.stubs.common.FileResource;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
@@ -95,7 +98,7 @@ public class AzureMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+    public FileResourceMetadata getFileResourceMetadata(String storageId, String resourcePath, String credentialToken) throws Exception {
         throw new UnsupportedOperationException("Method not implemented");
     }
 
@@ -104,7 +107,7 @@ public class AzureMetadataCollector implements MetadataCollector {
         throw new UnsupportedOperationException("Method not implemented");    }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String storageId, String resourcePath, String credentialToken) throws Exception {
         throw new UnsupportedOperationException("Method not implemented");
     }
 
@@ -114,6 +117,20 @@ public class AzureMetadataCollector implements MetadataCollector {
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         AzureResource azureResource = resourceClient.azure().getAzureResource(AzureResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+
+        return isAvailable(azureResource, credentialToken);
+    }
+
+    @Override
+    public Boolean isAvailable(String storageId, String resourcePath, String credentialToken) throws Exception {
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        AzureStorage azureStorage = resourceClient.azure().getAzureStorage(AzureStorageGetRequest.newBuilder().setStorageId(storageId).build());
+
+        AzureResource azureResource = AzureResource.newBuilder().setFile(FileResource.newBuilder().setResourcePath(resourcePath).build()).setAzureStorage(azureStorage).build();
+        return isAvailable(azureResource, credentialToken);
+    }
+
+    public Boolean isAvailable(AzureResource azureResource, String credentialToken) throws Exception {
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         AzureSecret azureSecret = secretClient.azure().getAzureSecret(AzureSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
@@ -132,4 +149,5 @@ public class AzureMetadataCollector implements MetadataCollector {
         }
         return false;
     }
+
 }
