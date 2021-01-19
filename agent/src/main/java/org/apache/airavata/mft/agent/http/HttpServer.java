@@ -27,14 +27,20 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpServer {
 
+    private static final Logger logger = LoggerFactory.getLogger(HttpServer.class);
+
+    private final String host;
     private final int port;
     private final boolean enableSSL;
     private HttpTransferRequestsStore transferRequestsStore;
 
-    public HttpServer(int port, boolean enableSSL, HttpTransferRequestsStore transferRequestsStore) {
+    public HttpServer(String host, int port, boolean enableSSL, HttpTransferRequestsStore transferRequestsStore) {
+        this.host = host;
         this.port = port;
         this.enableSSL = enableSSL;
         this.transferRequestsStore = transferRequestsStore;
@@ -59,10 +65,9 @@ public class HttpServer {
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new HttpServerInitializer(sslCtx, transferRequestsStore));
 
-            Channel ch = b.bind(port).sync().channel();
+            Channel ch = b.bind(host, port).sync().channel();
 
-            System.err.println("Open your web browser and navigate to " +
-                    (enableSSL? "https" : "http") + "://127.0.0.1:" + port + '/');
+            logger.info("Http endpoint is open on {}://{}:{}", (enableSSL? "https" : "http"), host, port);
 
             ch.closeFuture().sync();
         } finally {

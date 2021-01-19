@@ -63,10 +63,19 @@ public class MFTAgent implements CommandLineRunner {
 
     @org.springframework.beans.factory.annotation.Value("${agent.id}")
     private String agentId;
+
     @org.springframework.beans.factory.annotation.Value("${agent.host}")
     private String agentHost;
+
     @org.springframework.beans.factory.annotation.Value("${agent.user}")
     private String agentUser;
+
+    @org.springframework.beans.factory.annotation.Value("${agent.http.port}")
+    private Integer agentHttpPort;
+
+    @org.springframework.beans.factory.annotation.Value("${agent.https.enabled}")
+    private boolean agentHttpsEnabled;
+
     @org.springframework.beans.factory.annotation.Value("${agent.supported.protocols}")
     private String supportedProtocols;
 
@@ -230,7 +239,7 @@ public class MFTAgent implements CommandLineRunner {
         logger.info("Starting the HTTP front end");
 
         new Thread(() -> {
-            HttpServer httpServer = new HttpServer(3333, false, transferRequestsStore);
+            HttpServer httpServer = new HttpServer(agentHost, agentHttpPort, agentHttpsEnabled, transferRequestsStore);
             try {
                 httpServer.run();
             } catch (Exception e) {

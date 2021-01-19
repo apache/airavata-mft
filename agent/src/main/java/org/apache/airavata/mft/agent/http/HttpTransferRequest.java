@@ -25,6 +25,7 @@ public class HttpTransferRequest {
     private MetadataCollector otherMetadataCollector;
     private ConnectorParams connectorParams;
     private String targetResourcePath;
+    private long createdTime = System.currentTimeMillis();
 
     public Connector getOtherConnector() {
         return otherConnector;
@@ -59,6 +60,15 @@ public class HttpTransferRequest {
 
     public HttpTransferRequest setConnectorParams(ConnectorParams connectorParams) {
         this.connectorParams = connectorParams;
+        return this;
+    }
+
+    public long getCreatedTime() {
+        return createdTime;
+    }
+
+    public HttpTransferRequest setCreatedTime(long createdTime) {
+        this.createdTime = createdTime;
         return this;
     }
 }

@@ -17,14 +17,44 @@
 
 package org.apache.airavata.mft.agent.http;
 
-import java.util.HashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class HttpTransferRequestsStore {
 
-    final private Map<String, HttpTransferRequest> downloadRequestStore = new HashMap<>();
-    final private Map<String, HttpTransferRequest> uploadRequestStore = new HashMap<>();
+    private static final Logger logger = LoggerFactory.getLogger(HttpTransferRequestsStore.class);
+
+    final private Map<String, HttpTransferRequest> downloadRequestStore = new ConcurrentHashMap<>();
+    final private Map<String, HttpTransferRequest> uploadRequestStore = new ConcurrentHashMap<>();
+
+    final private ScheduledExecutorService monitor = Executors.newSingleThreadScheduledExecutor();
+    private long entryExpiryTimeMS = 300 * 1000;
+
+    public HttpTransferRequestsStore() {
+        monitor.scheduleWithFixedDelay(()-> {
+            logger.debug("Cleaning up the request store..");
+            downloadRequestStore.keySet().forEach(key -> {
+                if ((System.currentTimeMillis() - downloadRequestStore.get(key).getCreatedTime()) > entryExpiryTimeMS) {
+                    downloadRequestStore.remove(key);
+                    logger.info("Removed url {} from download cache", key);
+                }
+            });
+
+            uploadRequestStore.keySet().forEach(key -> {
+                if ((System.currentTimeMillis() - uploadRequestStore.get(key).getCreatedTime()) > entryExpiryTimeMS) {
+                    uploadRequestStore.remove(key);
+                    logger.info("Removed url {} from upload cache", key);
+                }
+            });
+        }, 2, 10, TimeUnit.SECONDS);
+    }
 
     public String addDownloadRequest(HttpTransferRequest request) {
         String randomUrl = UUID.randomUUID().toString();

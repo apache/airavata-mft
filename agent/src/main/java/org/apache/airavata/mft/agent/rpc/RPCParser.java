@@ -51,6 +51,15 @@ public class RPCParser {
     @org.springframework.beans.factory.annotation.Value("${secret.service.port}")
     private int secretServicePort;
 
+    @org.springframework.beans.factory.annotation.Value("${agent.host}")
+    private String agentHost;
+
+    @org.springframework.beans.factory.annotation.Value("${agent.http.port}")
+    private Integer agentHttpPort;
+
+    @org.springframework.beans.factory.annotation.Value("${agent.https.enabled}")
+    private boolean agentHttpsEnabled;
+
     @Autowired
     private HttpTransferRequestsStore httpTransferRequestsStore;
 
@@ -143,7 +152,7 @@ public class RPCParser {
                     transferRequest.setOtherMetadataCollector(metadataCollectorOp.get());
                     transferRequest.setOtherConnector(connectorOp.get());
                     String url = httpTransferRequestsStore.addDownloadRequest(transferRequest);
-                    return url;
+                    return (agentHttpsEnabled? "https": "http") + "://" + agentHost + ":" + agentHttpPort + "/" + url;
                 }
                 break;
         }
