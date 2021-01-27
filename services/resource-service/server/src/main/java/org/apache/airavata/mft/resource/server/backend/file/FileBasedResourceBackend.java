@@ -137,21 +137,36 @@ public class FileBasedResourceBackend implements ResourceBackend {
                     .map(resource -> {
                         JSONObject r = (JSONObject) resource;
 
-                        SCPResource.Builder builder = SCPResource.newBuilder()
-                                .setResourceId(r.get("resourceId").toString())
-                                .setScpStorage(SCPStorage.newBuilder().setStorageId(r.get("storageId").toString()).getDefaultInstanceForType());
+                        Optional<SCPStorage> storage = Optional.of(SCPStorage.getDefaultInstance());
+                        String storageId = r.get("storageId").toString();
 
-                        switch (r.get("resourceMode").toString()) {
-                            case "FILE":
-                                FileResource fileResource = FileResource.newBuilder().setResourcePath(r.get("resourcePath").toString()).build();
-                                builder = builder.setFile(fileResource);
-                                break;
-                            case "DIRECTORY":
-                                DirectoryResource directoryResource = DirectoryResource.newBuilder().setResourcePath(r.get("resourcePath").toString()).build();
-                                builder = builder.setDirectory(directoryResource);
-                                break;
+                        try {
+                            storage = getSCPStorage(SCPStorageGetRequest.newBuilder().setStorageId(storageId).build());
+                        } catch (Exception e) {
+                            logger.error("Errored while fetching storage with id {}", storageId, e);
+                            return null;
                         }
-                        return builder.build();
+
+                        if (storage.isPresent()) {
+                            SCPResource.Builder builder = SCPResource.newBuilder()
+                                    .setResourceId(r.get("resourceId").toString())
+                                    .setScpStorage(storage.get());
+
+                            switch (r.get("resourceMode").toString()) {
+                                case "FILE":
+                                    FileResource fileResource = FileResource.newBuilder().setResourcePath(r.get("resourcePath").toString()).build();
+                                    builder = builder.setFile(fileResource);
+                                    break;
+                                case "DIRECTORY":
+                                    DirectoryResource directoryResource = DirectoryResource.newBuilder().setResourcePath(r.get("resourcePath").toString()).build();
+                                    builder = builder.setDirectory(directoryResource);
+                                    break;
+                            }
+                            return builder.build();
+                        } else {
+                            logger.error("Coudn't find an storage with id {}", storageId);
+                            return null;
+                        }
 
                     }).collect(Collectors.toList());
 
