@@ -50,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -203,17 +204,17 @@ public class SCPMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(String storageId, String resourcePath, String credentialToken) throws Exception {
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String resourceId, String resourcePath, String credentialToken) throws Exception {
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        SCPStorage scpStorage = resourceClient.scp().getSCPStorage(SCPStorageGetRequest.newBuilder().setStorageId(storageId).build());
+        SCPResource scpPResource = resourceClient.scp().getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
-
-        SCPResource scpResource = SCPResource.newBuilder().setScpStorage(scpStorage)
-                        .setDirectory(DirectoryResource.newBuilder()
-                        .setResourcePath(resourcePath).build()).build();
+        String childPath = Paths.get(scpPResource.getDirectory().getResourcePath(), resourcePath).toString();
+        SCPResource scpResource = SCPResource.newBuilder()
+                .setDirectory(DirectoryResource.newBuilder().setResourcePath(childPath).build())
+                .setScpStorage(scpPResource.getScpStorage()).build();
 
         return getDirectoryResourceMetadata(scpResource, scpSecret);
     }
