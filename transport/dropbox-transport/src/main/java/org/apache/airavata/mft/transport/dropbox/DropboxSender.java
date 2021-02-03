@@ -21,6 +21,7 @@ import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.WriteMode;
+import org.apache.airavata.mft.core.AuthZToken;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
@@ -44,7 +45,7 @@ public class DropboxSender implements Connector {
     private DbxClientV2 dbxClientV2;
 
     @Override
-    public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
+    public void init(AuthZToken authZToken, String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         this.dropboxResource = resourceClient.dropbox().getDropboxResource(DropboxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
@@ -54,6 +55,7 @@ public class DropboxSender implements Connector {
         DbxRequestConfig config = DbxRequestConfig.newBuilder("mftdropbox/v1").build();
         dbxClientV2 = new DbxClientV2(config, dropboxSecret.getAccessToken());
     }
+
 
     @Override
     public void destroy() {

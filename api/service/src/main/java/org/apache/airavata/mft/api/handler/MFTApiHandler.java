@@ -26,6 +26,7 @@ import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCResponse;
 import org.apache.airavata.mft.api.service.*;
+import org.apache.airavata.mft.core.AuthZToken;
 import org.apache.airavata.mft.core.DirectoryResourceMetadata;
 import org.apache.airavata.mft.core.FileResourceMetadata;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
@@ -76,6 +77,8 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
 
             String transferId = mftConsulClient.submitTransfer(transferRequest);
             logger.info("Submitted the transfer request {}", transferId);
+            logger.info("User token " + request.getMftAuthorizationToken());
+            logger.info("User token " + transferRequest.getMftAuthorizationToken());
 
             mftConsulClient.saveTransferState(transferId, new TransferState()
                     .setUpdateTimeMils(System.currentTimeMillis())
@@ -113,7 +116,7 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
 
             if (stateOp.isPresent()) {
                 TransferStateApiResponse s = dozerBeanMapper.map(stateOp.get(),
-                    TransferStateApiResponse.newBuilder().getClass()).build();
+                        TransferStateApiResponse.newBuilder().getClass()).build();
                 responseObserver.onNext(s);
             } else {
                 responseObserver.onNext(TransferStateApiResponse.getDefaultInstance());
@@ -133,8 +136,8 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
                     () -> new Exception("Could not find a metadata collector for resource " + request.getResourceId()));
 
             metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
-
-            Boolean available = metadataCollector.isAvailable(request.getResourceId(), request.getResourceToken());
+            AuthZToken authZToken = new AuthZToken(request.getMftAuthorizationToken());
+            Boolean available = metadataCollector.isAvailable(authZToken, request.getResourceId(), request.getResourceToken());
             responseObserver.onNext(ResourceAvailabilityResponse.newBuilder().setAvailable(available).build());
             responseObserver.onCompleted();
 
@@ -182,9 +185,9 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
                     return;
                 case FAIL:
                     logger.error("Errored while processing the fetch file metadata response for resource id {}. Error msg : {}",
-                                                            request.getResourceId(), rpcResponse.getErrorAsStr());
+                            request.getResourceId(), rpcResponse.getErrorAsStr());
                     responseObserver.onError(new Exception("Errored while processing the the fetch file metadata response. Error msg : " +
-                                                            rpcResponse.getErrorAsStr()));
+                            rpcResponse.getErrorAsStr()));
             }
         } catch (Exception e) {
             logger.error("Error while fetching resource metadata for file resource " + request.getResourceId(), e);

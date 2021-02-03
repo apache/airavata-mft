@@ -20,6 +20,7 @@ package org.apache.airavata.mft.transport.box;
 
 import com.box.sdk.BoxAPIConnection;
 import com.box.sdk.BoxFile;
+import org.apache.airavata.mft.core.AuthZToken;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
@@ -46,7 +47,7 @@ public class BoxReceiver implements Connector {
 
 
     @Override
-    public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort,
+    public void init(AuthZToken authZToken, String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort,
                      String secretServiceHost, int secretServicePort) throws Exception {
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
@@ -57,6 +58,7 @@ public class BoxReceiver implements Connector {
 
         boxClient = new BoxAPIConnection(boxSecret.getAccessToken());
     }
+
 
     @Override
     public void destroy() {

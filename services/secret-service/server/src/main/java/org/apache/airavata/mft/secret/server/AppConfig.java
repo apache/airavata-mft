@@ -17,14 +17,40 @@
 
 package org.apache.airavata.mft.secret.server;
 
-import org.apache.airavata.mft.secret.server.backend.SecretBackend;
-import org.apache.airavata.mft.secret.server.backend.airavata.AiravataSecretBackend;
-import org.apache.airavata.mft.secret.server.backend.sql.SQLSecretBackend;
+import org.apache.airavata.mft.secret.server.backend.custos.auth.AgentAuthenticationHandler;
+import org.apache.custos.clients.CustosClientProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 public class AppConfig {
+
+
+    @Value("${custos.host}")
+    private String custosHost;
+
+    @Value("${custos.port}")
+    private int custosPort;
+
+    @Value("${custos.id}")
+    private String custosId;
+
+    @Value("${custos.secret}")
+    private String custosSecret;
+
+    @Bean
+    public CustosClientProvider custosClientProvider() {
+        return new CustosClientProvider.Builder().setServerHost(custosHost)
+                .setServerPort(custosPort)
+                .setClientId(custosId)
+                .setClientSec(custosSecret).build();
+    }
+
+    @Bean
+    public AgentAuthenticationHandler agentAuthenticationHandler() {
+        return new AgentAuthenticationHandler(this.custosId);
+    }
+
 
 }

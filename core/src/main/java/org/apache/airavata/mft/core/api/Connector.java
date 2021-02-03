@@ -17,11 +17,15 @@
 
 package org.apache.airavata.mft.core.api;
 
+import org.apache.airavata.mft.core.AuthZToken;
 import org.apache.airavata.mft.core.ConnectorContext;
 
 public interface Connector {
-    public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort,
-        String secretServiceHost, int secretServicePort) throws Exception;
+    public void init(AuthZToken authZToken, String resourceId, String credentialToken, String resourceServiceHost,
+                     int resourceServicePort,
+                     String secretServiceHost, int secretServicePort) throws Exception;
+
     public void destroy();
+
     void startStream(ConnectorContext context) throws Exception;
 }

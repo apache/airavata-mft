@@ -19,10 +19,12 @@ package org.apache.airavata.mft.transport.scp;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
+import org.apache.airavata.mft.core.AuthZToken;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.DoubleStreamingBuffer;
 import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
+import org.apache.airavata.mft.credential.stubs.common.AuthToken;
 import org.apache.airavata.mft.credential.stubs.scp.SCPSecret;
 import org.apache.airavata.mft.credential.stubs.scp.SCPSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
@@ -34,7 +36,9 @@ import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class SCPReceiver implements Connector {
 
@@ -45,16 +49,24 @@ public class SCPReceiver implements Connector {
     private Session session;
     private SCPResource scpResource;
 
-    public void init(String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort,
-                     String secretServiceHost, int secretServicePort) throws Exception {
 
+    @Override
+    public void init(AuthZToken authZToken, String resourceId, String credentialToken,
+                     String resourceServiceHost,
+                     int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
         this.initialized = true;
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         this.scpResource = resourceClient.scp().getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
-        SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        AuthToken authToken = AuthToken.newBuilder()
+                .setToken(authZToken.getMftAuthorizationToken()).setAgentId(authZToken.getAgentId())
+                .setAgentSecret(authZToken.getAgentSecret())
+                .build();
+        SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest
+                .newBuilder()
+                .setAuthzToken(authToken).setSecretId(credentialToken).build());
 
         this.session = SCPTransportUtil.createSession(
                 scpResource.getScpStorage().getUser(),
@@ -62,8 +74,10 @@ public class SCPReceiver implements Connector {
                 scpResource.getScpStorage().getPort(),
                 scpSecret.getPrivateKey().getBytes(),
                 scpSecret.getPublicKey().getBytes(),
-                scpSecret.getPassphrase().equals("")? null : scpSecret.getPassphrase().getBytes());
+                scpSecret.getPassphrase().equals("") ? null : scpSecret.getPassphrase().getBytes());
+
     }
+
 
     public void destroy() {
 
@@ -88,9 +102,9 @@ public class SCPReceiver implements Connector {
 
         } else {
             logger.error("Resource {} should be a FILE type. Found a {}",
-                                            this.scpResource.getResourceId(), this.scpResource.getResourceCase().name());
+                    this.scpResource.getResourceId(), this.scpResource.getResourceCase().name());
             throw new Exception("Resource " + this.scpResource.getResourceId() + " should be a FILE type. Found a " +
-                                                                            this.scpResource.getResourceCase().name());
+                    this.scpResource.getResourceCase().name());
         }
     }
 

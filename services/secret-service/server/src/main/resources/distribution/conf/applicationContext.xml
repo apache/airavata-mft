@@ -6,7 +6,9 @@
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <bean id="resourceBackend" class="org.apache.airavata.mft.secret.server.backend.file.FileBasedSecretBackend"
+<!--    <bean id="resourceBackend" class="org.apache.airavata.mft.secret.server.backend.file.FileBasedSecretBackend"-->
+<!--          init-method="init" destroy-method="destroy"></bean>-->
+    <bean id="resourceBackend" class="org.apache.airavata.mft.secret.server.backend.custos.CustosSecretBackend"
           init-method="init" destroy-method="destroy"></bean>
 
 </beans>

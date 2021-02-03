@@ -48,11 +48,11 @@ public class TransportMediator {
         executor.shutdown();
     }
 
-    public String transfer(TransferCommand command, Connector inConnector, Connector outConnector, MetadataCollector srcMetadataCollector,
+    public String transfer(AuthZToken authZToken, TransferCommand command, Connector inConnector, Connector outConnector, MetadataCollector srcMetadataCollector,
                            MetadataCollector destMetadataCollector, BiConsumer<String, TransferState> onStatusCallback,
                            BiConsumer<String, Boolean> exitingCallback) throws Exception {
 
-        FileResourceMetadata srcMetadata = srcMetadataCollector.getFileResourceMetadata(command.getSourceId(), command.getSourceToken());
+        FileResourceMetadata srcMetadata = srcMetadataCollector.getFileResourceMetadata(authZToken, command.getSourceId(), command.getSourceToken());
 
         final long resourceSize = srcMetadata.getResourceSize();
         logger.debug("Source file size {}. MD5 {}", resourceSize, srcMetadata.getMd5sum());
@@ -121,14 +121,14 @@ public class TransportMediator {
                     }
 
                     if (!transferErrored) {
-                        Boolean transferred = destMetadataCollector.isAvailable(command.getDestinationId(), command.getDestinationToken());
+                        Boolean transferred = destMetadataCollector.isAvailable(authZToken,command.getDestinationId(), command.getDestinationToken());
 
                         if (!transferred) {
                             logger.error("Transfer completed but resource is not available in destination");
                             throw new Exception("Transfer completed but resource is not available in destination");
                         }
 
-                        FileResourceMetadata destMetadata = destMetadataCollector.getFileResourceMetadata(command.getDestinationId(),
+                        FileResourceMetadata destMetadata = destMetadataCollector.getFileResourceMetadata(authZToken, command.getDestinationId(),
                                 command.getDestinationToken());
 
                         boolean doIntegrityVerify = true;

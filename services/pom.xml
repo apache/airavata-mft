@@ -44,6 +44,11 @@
             <version>${protobuf.java}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.custos</groupId>
+            <artifactId>custos-java-sdk</artifactId>
+            <version>${custos.clients.version}</version>
+        </dependency>
+        <dependency>
             <groupId>io.github.lognet</groupId>
             <artifactId>grpc-spring-boot-starter</artifactId>
             <version>${grpc.spring.boot}</version>

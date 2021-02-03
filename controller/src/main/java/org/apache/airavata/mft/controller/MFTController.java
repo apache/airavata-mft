@@ -231,7 +231,8 @@ public class MFTController implements CommandLineRunner {
                 .setDestinationType(transferRequest.getDestinationType())
                 .setDestResourceBackend(transferRequest.getDestResourceBackend())
                 .setDestCredentialBackend(transferRequest.getDestCredentialBackend())
-                .setTransferId(transferId);
+                .setTransferId(transferId)
+                .setMftAuthorizationToken(transferRequest.getMftAuthorizationToken());
         return transferCommand;
     }
 
