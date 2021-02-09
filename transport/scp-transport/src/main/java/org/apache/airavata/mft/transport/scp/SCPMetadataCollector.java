@@ -211,9 +211,8 @@ public class SCPMetadataCollector implements MetadataCollector {
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
-        String childPath = Paths.get(scpPResource.getDirectory().getResourcePath(), resourcePath).toString();
         SCPResource scpResource = SCPResource.newBuilder()
-                .setDirectory(DirectoryResource.newBuilder().setResourcePath(childPath).build())
+                .setDirectory(DirectoryResource.newBuilder().setResourcePath(resourcePath).build())
                 .setScpStorage(scpPResource.getScpStorage()).build();
 
         return getDirectoryResourceMetadata(scpResource, scpSecret);
