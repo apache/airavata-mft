@@ -135,17 +135,17 @@ public class SCPMetadataCollector implements MetadataCollector {
     @Override
     public FileResourceMetadata getFileResourceMetadata(String storageId, String resourcePath, String credentialToken) throws Exception {
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        SCPStorage scpStorage = resourceClient.scp().getSCPStorage(SCPStorageGetRequest.newBuilder().setStorageId(storageId).build());
+        SCPResource scpResource = resourceClient.scp().getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(storageId).build());
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
-        SCPResource scpResource = SCPResource.newBuilder()
+        SCPResource scpResource2 = SCPResource.newBuilder()
                                         .setFile(FileResource.newBuilder()
                                         .setResourcePath(resourcePath).build())
-                                        .setScpStorage(scpStorage).build();
+                                        .setScpStorage(scpResource.getScpStorage()).build();
 
-        return getFileResourceMetadata(scpResource, scpSecret);
+        return getFileResourceMetadata(scpResource2, scpSecret);
     }
 
     private DirectoryResourceMetadata getDirectoryResourceMetadata(SCPResource scpResource, SCPSecret scpSecret) throws Exception {
