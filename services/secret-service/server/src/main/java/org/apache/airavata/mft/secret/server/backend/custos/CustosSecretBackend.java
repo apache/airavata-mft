@@ -14,12 +14,15 @@ import org.apache.custos.clients.CustosClientProvider;
 import org.apache.custos.identity.management.client.IdentityManagementClient;
 import org.apache.custos.resource.secret.management.client.ResourceSecretManagementAgentClient;
 import org.apache.custos.resource.secret.management.client.ResourceSecretManagementClient;
+import org.apache.custos.resource.secret.service.CredentialMap;
+import org.apache.custos.resource.secret.service.PasswordCredential;
 import org.apache.custos.resource.secret.service.SSHCredential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -78,7 +81,6 @@ public class CustosSecretBackend implements SecretBackend {
                     .setPublicKey(sshCredential.getPublicKey())
                     .setPassphrase(sshCredential.getPassphrase())
                     .setPrivateKey(sshCredential.getPrivateKey()).build();
-            LOGGER.info("Public key " + sshCredential.getPublicKey());
             return Optional.of(scpSecret);
 
         } else if (!request.getAuthzToken().getToken().isEmpty()) {
@@ -89,7 +91,6 @@ public class CustosSecretBackend implements SecretBackend {
                         .setPublicKey(sshCredential.getPublicKey())
                         .setPassphrase(sshCredential.getPassphrase())
                         .setPrivateKey(sshCredential.getPrivateKey()).build();
-                LOGGER.info("Public key " + sshCredential.getPublicKey());
                 return Optional.of(scpSecret);
             }
         }
@@ -113,6 +114,31 @@ public class CustosSecretBackend implements SecretBackend {
 
     @Override
     public Optional<S3Secret> getS3Secret(S3SecretGetRequest request) throws Exception {
+        String agentId = request.getAuthzToken().getAgentId();
+        String secret = request.getAuthzToken().getAgentSecret();
+        Optional<AuthConfig> optionalAuthConfig = handler.authenticate(agentId, secret);
+        if (optionalAuthConfig.isPresent()) {
+            AuthConfig authConfig = optionalAuthConfig.get();
+            CredentialMap credentialMap = csAgentClient.getCredentialMap(request.getAuthzToken().getToken(),
+                    authConfig.getAccessToken(), custosId, request.getSecretId());
+            Map<String, String> secretValues = credentialMap.getCredentialMapMap();
+            S3Secret s3Secret = S3Secret.newBuilder()
+                    .setSecretId(secretValues.get("secretId"))
+                    .setAccessKey(secretValues.get("accessKey"))
+                    .setSecretKey(secretValues.get("secretKey")).build();
+            return Optional.of(s3Secret);
+
+        } else if (!request.getAuthzToken().getToken().isEmpty()) {
+            if (identityClient.isAuthenticated(request.getAuthzToken().getToken())) {
+                CredentialMap credentialMap = csClient.getCredentialMap(custosId, request.getAuthzToken().getToken());
+                Map<String, String> secretValues = credentialMap.getCredentialMapMap();
+                S3Secret s3Secret = S3Secret.newBuilder()
+                        .setSecretId(secretValues.get("secretId"))
+                        .setAccessKey(secretValues.get("accessKey"))
+                        .setSecretKey(secretValues.get("secretKey")).build();
+                return Optional.of(s3Secret);
+            }
+        }
         return Optional.empty();
     }
 
@@ -133,6 +159,29 @@ public class CustosSecretBackend implements SecretBackend {
 
     @Override
     public Optional<BoxSecret> getBoxSecret(BoxSecretGetRequest request) throws Exception {
+        String agentId = request.getAuthzToken().getAgentId();
+        String secret = request.getAuthzToken().getAgentSecret();
+        Optional<AuthConfig> optionalAuthConfig = handler.authenticate(agentId, secret);
+        if (optionalAuthConfig.isPresent()) {
+            AuthConfig authConfig = optionalAuthConfig.get();
+            CredentialMap credentialMap = csAgentClient.getCredentialMap(request.getAuthzToken().getToken(),
+                    authConfig.getAccessToken(), custosId, request.getSecretId());
+            Map<String, String> secretValues = credentialMap.getCredentialMapMap();
+            BoxSecret boxSecret = BoxSecret.newBuilder()
+                    .setSecretId(secretValues.get("secretId"))
+                    .setAccessToken(secretValues.get("accessToken")).build();
+            return Optional.of(boxSecret);
+
+        } else if (!request.getAuthzToken().getToken().isEmpty()) {
+            if (identityClient.isAuthenticated(request.getAuthzToken().getToken())) {
+                CredentialMap credentialMap = csClient.getCredentialMap(custosId, request.getAuthzToken().getToken());
+                Map<String, String> secretValues = credentialMap.getCredentialMapMap();
+                BoxSecret boxSecret = BoxSecret.newBuilder()
+                        .setSecretId(secretValues.get("secretId"))
+                        .setAccessToken(secretValues.get("accessToken")).build();
+                return Optional.of(boxSecret);
+            }
+        }
         return Optional.empty();
     }
 
@@ -153,6 +202,31 @@ public class CustosSecretBackend implements SecretBackend {
 
     @Override
     public Optional<AzureSecret> getAzureSecret(AzureSecretGetRequest request) throws Exception {
+        String agentId = request.getAuthzToken().getAgentId();
+        String secret = request.getAuthzToken().getAgentSecret();
+        Optional<AuthConfig> optionalAuthConfig = handler.authenticate(agentId, secret);
+        if (optionalAuthConfig.isPresent()) {
+            AuthConfig authConfig = optionalAuthConfig.get();
+            CredentialMap credentialMap = csAgentClient.getCredentialMap(request.getAuthzToken().getToken(),
+                    authConfig.getAccessToken(), custosId, request.getSecretId());
+            Map<String, String> secretValues = credentialMap.getCredentialMapMap();
+            AzureSecret azureSecret = AzureSecret.newBuilder()
+                    .setSecretId(secretValues.get("secretId"))
+                    .setConnectionString(secretValues.get("connectionString")).build();
+
+            return Optional.of(azureSecret);
+
+        } else if (!request.getAuthzToken().getToken().isEmpty()) {
+            if (identityClient.isAuthenticated(request.getAuthzToken().getToken())) {
+                CredentialMap credentialMap = csClient.getCredentialMap(custosId, request.getAuthzToken().getToken());
+                Map<String, String> secretValues = credentialMap.getCredentialMapMap();
+                AzureSecret azureSecret = AzureSecret.newBuilder()
+                        .setSecretId(secretValues.get("secretId"))
+                        .setConnectionString(secretValues.get("connectionString")).build();
+
+                return Optional.of(azureSecret);
+            }
+        }
         return Optional.empty();
     }
 
@@ -173,6 +247,31 @@ public class CustosSecretBackend implements SecretBackend {
 
     @Override
     public Optional<GCSSecret> getGCSSecret(GCSSecretGetRequest request) throws Exception {
+        String agentId = request.getAuthzToken().getAgentId();
+        String secret = request.getAuthzToken().getAgentSecret();
+        Optional<AuthConfig> optionalAuthConfig = handler.authenticate(agentId, secret);
+        if (optionalAuthConfig.isPresent()) {
+            AuthConfig authConfig = optionalAuthConfig.get();
+            CredentialMap credentialMap = csAgentClient.getCredentialMap(request.getAuthzToken().getToken(),
+                    authConfig.getAccessToken(), custosId, request.getSecretId());
+            Map<String, String> secretValues = credentialMap.getCredentialMapMap();
+            GCSSecret gcsSecret = GCSSecret.newBuilder()
+                    .setSecretId(secretValues.get("secretId"))
+                    .setCredentialsJson(secretValues.get("credentialsJson")).build();
+
+            return Optional.of(gcsSecret);
+
+        } else if (!request.getAuthzToken().getToken().isEmpty()) {
+            if (identityClient.isAuthenticated(request.getAuthzToken().getToken())) {
+                CredentialMap credentialMap = csClient.getCredentialMap(custosId, request.getAuthzToken().getToken());
+                Map<String, String> secretValues = credentialMap.getCredentialMapMap();
+                GCSSecret gcsSecret = GCSSecret.newBuilder()
+                        .setSecretId(secretValues.get("secretId"))
+                        .setCredentialsJson(secretValues.get("credentialsJson")).build();
+
+                return Optional.of(gcsSecret);
+            }
+        }
         return Optional.empty();
     }
 
@@ -193,6 +292,31 @@ public class CustosSecretBackend implements SecretBackend {
 
     @Override
     public Optional<DropboxSecret> getDropboxSecret(DropboxSecretGetRequest request) throws Exception {
+        String agentId = request.getAuthzToken().getAgentId();
+        String secret = request.getAuthzToken().getAgentSecret();
+        Optional<AuthConfig> optionalAuthConfig = handler.authenticate(agentId, secret);
+        if (optionalAuthConfig.isPresent()) {
+            AuthConfig authConfig = optionalAuthConfig.get();
+            CredentialMap credentialMap = csAgentClient.getCredentialMap(request.getAuthzToken().getToken(),
+                    authConfig.getAccessToken(), custosId, request.getSecretId());
+            Map<String, String> secretValues = credentialMap.getCredentialMapMap();
+            DropboxSecret dropboxSecret = DropboxSecret.newBuilder()
+                    .setSecretId(secretValues.get("secretId"))
+                    .setAccessToken(secretValues.get("accessToken")).build();
+
+            return Optional.of(dropboxSecret);
+
+        } else if (!request.getAuthzToken().getToken().isEmpty()) {
+            if (identityClient.isAuthenticated(request.getAuthzToken().getToken())) {
+                CredentialMap credentialMap = csClient.getCredentialMap(custosId, request.getAuthzToken().getToken());
+                Map<String, String> secretValues = credentialMap.getCredentialMapMap();
+                DropboxSecret dropboxSecret = DropboxSecret.newBuilder()
+                        .setSecretId(secretValues.get("secretId"))
+                        .setAccessToken(secretValues.get("accessToken")).build();
+
+                return Optional.of(dropboxSecret);
+            }
+        }
         return Optional.empty();
     }
 
@@ -213,6 +337,32 @@ public class CustosSecretBackend implements SecretBackend {
 
     @Override
     public Optional<FTPSecret> getFTPSecret(FTPSecretGetRequest request) throws Exception {
+        String agentId = request.getAuthzToken().getAgentId();
+        String secret = request.getAuthzToken().getAgentSecret();
+        Optional<AuthConfig> optionalAuthConfig = handler.authenticate(agentId, secret);
+        if (optionalAuthConfig.isPresent()) {
+            AuthConfig authConfig = optionalAuthConfig.get();
+            PasswordCredential passwordCredential = csAgentClient.getPasswordCredential(request.getAuthzToken().getToken(),
+                    authConfig.getAccessToken(), custosId, request.getSecretId());
+            FTPSecret ftpSecret = FTPSecret.newBuilder()
+                    .setSecretId(request.getSecretId())
+                    .setPassword(passwordCredential.getPassword())
+                    .setUserId(passwordCredential.getUserId())
+                    .build();
+
+            return Optional.of(ftpSecret);
+
+        } else if (!request.getAuthzToken().getToken().isEmpty()) {
+            if (identityClient.isAuthenticated(request.getAuthzToken().getToken())) {
+                PasswordCredential passwordCredential = csClient.getPasswordCredential(custosId, request.getAuthzToken().getToken());
+                FTPSecret ftpSecret = FTPSecret.newBuilder()
+                        .setSecretId(request.getSecretId())
+                        .setPassword(passwordCredential.getPassword())
+                        .setUserId(passwordCredential.getUserId())
+                        .build();
+                return Optional.of(ftpSecret);
+            }
+        }
         return Optional.empty();
     }
 
