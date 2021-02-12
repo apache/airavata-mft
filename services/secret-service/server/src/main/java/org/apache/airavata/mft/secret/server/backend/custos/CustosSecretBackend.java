@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
@@ -63,7 +64,17 @@ public class CustosSecretBackend implements SecretBackend {
 
     @Override
     public void destroy() {
-
+        try {
+            this.csAgentClient.close();
+            this.csClient.close();
+            this.identityClient.close();
+        } catch (IOException e) {
+            LOGGER.error("Error while closing agents");
+        } finally {
+            this.csAgentClient = null;
+            this.csClient = null;
+            this.identityClient = null;
+        }
     }
 
     @Override

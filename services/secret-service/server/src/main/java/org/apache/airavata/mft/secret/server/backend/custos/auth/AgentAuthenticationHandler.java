@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Handle agent authentication
  */
-public class AgentAuthenticationHandler implements AuthenticationHandler {
+public class AgentAuthenticationHandler implements AuthenticationHandler, Closeable {
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentAuthenticationHandler.class);
 
     private static final String CLIENT_CREDENTIALS = "client_credentials";
@@ -24,22 +26,23 @@ public class AgentAuthenticationHandler implements AuthenticationHandler {
 
     private String custosId;
 
-    @Autowired
-    private CustosClientProvider custosClientProvider;
+
+    IdentityManagementClient identityManagementClient;
 
 
-    public AgentAuthenticationHandler(String custosId) {
+    public AgentAuthenticationHandler(String custosId, CustosClientProvider custosClientProvider) throws IOException {
         this.custosId = custosId;
+        this.identityManagementClient = custosClientProvider.getIdentityManagementClient();
     }
 
     @Override
     public Optional<AuthConfig> authenticate(String id, String secret) throws Exception {
+        IdentityManagementClient identityManagementClient = null;
         try {
             AuthConfig cachedAuthConfig = authCache.get(id);
             AuthConfig authConfig = new AuthConfig();
             final boolean agentRequest = id != null & secret != null & !id.isEmpty() & !secret.isEmpty();
             if (cachedAuthConfig == null && agentRequest) {
-                IdentityManagementClient identityManagementClient = custosClientProvider.getIdentityManagementClient();
                 Struct tokenResponse = identityManagementClient.getAgentToken(custosId, id, secret,
                         CLIENT_CREDENTIALS, null);
 
@@ -73,4 +76,10 @@ public class AgentAuthenticationHandler implements AuthenticationHandler {
 
     }
 
+    @Override
+    public void close() throws IOException {
+        if(this.identityManagementClient != null){
+            this.identityManagementClient.close();
+        }
+    }
 }

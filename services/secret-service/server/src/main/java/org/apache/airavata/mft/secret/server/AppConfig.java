@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.IOException;
+
 @Configuration
 public class AppConfig {
 
@@ -48,8 +50,8 @@ public class AppConfig {
     }
 
     @Bean
-    public AgentAuthenticationHandler agentAuthenticationHandler() {
-        return new AgentAuthenticationHandler(this.custosId);
+    public AgentAuthenticationHandler agentAuthenticationHandler(CustosClientProvider custosClientProvider) throws IOException {
+        return new AgentAuthenticationHandler(this.custosId, custosClientProvider);
     }
 
 
