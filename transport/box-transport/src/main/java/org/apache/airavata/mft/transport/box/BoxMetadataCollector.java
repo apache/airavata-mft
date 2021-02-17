@@ -87,7 +87,7 @@ public class BoxMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(String storageId, String resourcePath, String credentialToken) throws Exception {
+    public FileResourceMetadata getFileResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
         throw new UnsupportedOperationException("Method not implemented");
     }
 
@@ -96,7 +96,7 @@ public class BoxMetadataCollector implements MetadataCollector {
         throw new UnsupportedOperationException("Method not implemented");    }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(String storageId, String resourcePath, String credentialToken) throws Exception {
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
         throw new UnsupportedOperationException("Method not implemented");
     }
 
