@@ -119,7 +119,7 @@
         <log4j.over.slf4j>1.7.26</log4j.over.slf4j>
         <dozer>5.5.1</dozer>
         <jsch>0.1.55</jsch>
-        <sshj>0.23.0</sshj>
+        <sshj>0.27.0</sshj>
         <mariadb.jdbc>2.5.1</mariadb.jdbc>
         <custos.clients.version>1.0-SNAPSHOT</custos.clients.version>
     </properties>

@@ -52,7 +52,11 @@ public class TransportMediator {
                            MetadataCollector destMetadataCollector, BiConsumer<String, TransferState> onStatusCallback,
                            BiConsumer<String, Boolean> exitingCallback) throws Exception {
 
-        FileResourceMetadata srcMetadata = srcMetadataCollector.getFileResourceMetadata(authZToken, command.getSourceId(), command.getSourceToken());
+        FileResourceMetadata srcMetadata = srcMetadataCollector.getFileResourceMetadata(authZToken,
+                            command.getSourceStorageId(),
+                            command.getSourcePath(),
+                            command.getSourceToken());
+
 
         final long resourceSize = srcMetadata.getResourceSize();
         logger.debug("Source file size {}. MD5 {}", resourceSize, srcMetadata.getMd5sum());
@@ -65,8 +69,8 @@ public class TransportMediator {
         context.setStreamBuffer(streamBuffer);
         context.setTransferId(command.getTransferId());
 
-        TransferTask recvTask = new TransferTask(inConnector, context);
-        TransferTask sendTask = new TransferTask(outConnector, context);
+        TransferTask recvTask = new TransferTask(inConnector, context, command.getSourcePath());
+        TransferTask sendTask = new TransferTask(outConnector, context, command.getDestinationPath());
         List<Future<Integer>> futureList = new ArrayList<>();
 
         ExecutorCompletionService<Integer> completionService = new ExecutorCompletionService<>(executor);
@@ -121,15 +125,21 @@ public class TransportMediator {
                     }
 
                     if (!transferErrored) {
-                        Boolean transferred = destMetadataCollector.isAvailable(authZToken,command.getDestinationId(), command.getDestinationToken());
+                        Boolean transferred = destMetadataCollector.isAvailable(authZToken,
+                                command.getDestinationStorageId(),
+                                command.getDestinationPath(),
+                                command.getDestinationToken());
 
                         if (!transferred) {
                             logger.error("Transfer completed but resource is not available in destination");
                             throw new Exception("Transfer completed but resource is not available in destination");
                         }
 
-                        FileResourceMetadata destMetadata = destMetadataCollector.getFileResourceMetadata(authZToken, command.getDestinationId(),
+                        FileResourceMetadata destMetadata = destMetadataCollector.getFileResourceMetadata(authZToken,
+                                command.getDestinationStorageId(),
+                                command.getDestinationPath(),
                                 command.getDestinationToken());
+
 
                         boolean doIntegrityVerify = true;
 

@@ -26,18 +26,22 @@ public class S3Example {
     public static void main(String args[]) throws Exception {
         MFTApiServiceGrpc.MFTApiServiceBlockingStub client = MFTApiClient.buildClient("localhost", 7004);
 
-        String sourceId = "remote-ssh-resource2";
-        String sourceToken = "local-ssh-cred";
-        String destId = "s3-file";
+        String sourceStorageId = "remote-ssh-storage";
+        String sourceResourcePath = "/tmp/1mb.txt";
+        String sourceToken = "ssh-cred";
+        String destStorageId = "s3-storage-1";
+        String destResourcePath = "1mb-copy.txt";
         String destToken = "s3-cred";
         String mftAuthorizationToken = "43ff79ac-e4f2-473c-9ea1-04eee9509a53";
 
         TransferApiRequest request = TransferApiRequest.newBuilder()
                 .setMftAuthorizationToken(mftAuthorizationToken)
-                .setSourceId(sourceId)
+                .setSourceStorageId(sourceStorageId)
+                .setSourcePath(sourceResourcePath)
                 .setSourceToken(sourceToken)
                 .setSourceType("SCP")
-                .setDestinationId(destId)
+                .setDestinationStorageId(destStorageId)
+                .setDestinationPath(destResourcePath)
                 .setDestinationToken(destToken)
                 .setDestinationType("S3")
                 .setAffinityTransfer(false).build();

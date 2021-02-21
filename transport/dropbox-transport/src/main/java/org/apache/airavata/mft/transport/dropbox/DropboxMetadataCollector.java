@@ -18,6 +18,7 @@
 package org.apache.airavata.mft.transport.dropbox;
 
 import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.android.Auth;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
 import org.apache.airavata.mft.core.AuthZToken;
@@ -29,8 +30,11 @@ import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecret;
 import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.common.FileResource;
 import org.apache.airavata.mft.resource.stubs.dropbox.resource.DropboxResource;
 import org.apache.airavata.mft.resource.stubs.dropbox.resource.DropboxResourceGetRequest;
+import org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorage;
+import org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
@@ -98,6 +102,23 @@ public class DropboxMetadataCollector implements MetadataCollector {
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         DropboxResource dropboxResource = resourceClient.dropbox().getDropboxResource(DropboxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
+        return isAvailable(dropboxResource, credentialToken);
+    }
+
+    @Override
+    public Boolean isAvailable(AuthZToken authZToken, String storageId, String resourcePath, String credentialToken) throws Exception {
+
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        DropboxStorage dropboxStorage = resourceClient.dropbox().getDropboxStorage(DropboxStorageGetRequest.newBuilder().setStorageId(storageId).build());
+
+        DropboxResource dropboxResource = DropboxResource.newBuilder()
+                .setFile(FileResource.newBuilder().setResourcePath(resourcePath).build())
+                .setDropboxStorage(dropboxStorage).build();
+
+        return isAvailable(dropboxResource, credentialToken);
+    }
+
+    private Boolean isAvailable(DropboxResource dropboxResource, String credentialToken) throws Exception {
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         DropboxSecret dropboxSecret = secretClient.dropbox().getDropboxSecret(DropboxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 

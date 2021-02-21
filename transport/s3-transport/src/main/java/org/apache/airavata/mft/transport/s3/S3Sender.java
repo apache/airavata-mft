@@ -32,6 +32,8 @@ import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.s3.resource.S3Resource;
 import org.apache.airavata.mft.resource.stubs.s3.resource.S3ResourceGetRequest;
+import org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage;
+import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
@@ -42,13 +44,13 @@ public class S3Sender implements Connector {
     private static final Logger logger = LoggerFactory.getLogger(S3Sender.class);
 
     private AmazonS3 s3Client;
-    private S3Resource s3Resource;
+    private S3Storage s3Storage;
 
     @Override
-    public void init(AuthZToken authZToken, String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
+    public void init(AuthZToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        this.s3Resource = resourceClient.s3().getS3Resource(S3ResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        this.s3Storage = resourceClient.s3().getS3Storage(S3StorageGetRequest.newBuilder().setStorageId(storageId).build());
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         S3Secret s3Secret = secretClient.s3().getS3Secret(S3SecretGetRequest.newBuilder().setSecretId(credentialToken).build());
@@ -56,7 +58,7 @@ public class S3Sender implements Connector {
 
         s3Client = AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                .withRegion(s3Resource.getS3Storage().getRegion())
+                .withRegion(s3Storage.getRegion())
                 .build();
     }
 
@@ -66,23 +68,14 @@ public class S3Sender implements Connector {
     }
 
     @Override
-    public void startStream(ConnectorContext context) throws Exception {
+    public void startStream(String targetPath, ConnectorContext context) throws Exception {
 
         logger.info("Starting S3 Sender stream for transfer {}", context.getTransferId());
         logger.info("Content length for transfer {} {}", context.getTransferId(), context.getMetadata().getResourceSize());
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(context.getMetadata().getResourceSize());
 
-        if (ResourceTypes.FILE.equals(this.s3Resource.getResourceCase().name())) {
-            s3Client.putObject(this.s3Resource.getS3Storage().getBucketName(), this.s3Resource.getFile().getResourcePath(),
-                                                        context.getStreamBuffer().getInputStream(), metadata);
-            logger.info("Completed S3 Sender stream for transfer {}", context.getTransferId());
-        } else {
-            logger.error("Resource {} should be a FILE type. Found a {}",
-                    this.s3Resource.getResourceId(), this.s3Resource.getResourceCase().name());
-            throw new Exception("Resource " + this.s3Resource.getResourceId() + " should be a FILE type. Found a " +
-                    this.s3Resource.getResourceCase().name());
-        }
-
+        s3Client.putObject(this.s3Storage.getBucketName(), targetPath, context.getStreamBuffer().getInputStream(), metadata);
+        logger.info("Completed S3 Sender stream for transfer {}", context.getTransferId());
     }
 }

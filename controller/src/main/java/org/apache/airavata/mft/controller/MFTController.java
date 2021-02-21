@@ -221,12 +221,14 @@ public class MFTController implements CommandLineRunner {
 
     private TransferCommand convertRequestToCommand(String transferId, TransferRequest transferRequest) {
         TransferCommand transferCommand = new TransferCommand();
-        transferCommand.setSourceId(transferRequest.getSourceId())
+        transferCommand.setSourceStorageId(transferRequest.getSourceStorageId())
+                .setSourcePath(transferRequest.getSourcePath())
                 .setSourceToken(transferRequest.getSourceToken())
                 .setSourceType(transferRequest.getSourceType())
                 .setSourceResourceBackend(transferRequest.getSourceResourceBackend())
                 .setSourceCredentialBackend(transferRequest.getSourceCredentialBackend())
-                .setDestinationId(transferRequest.getDestinationId())
+                .setDestinationStorageId(transferRequest.getDestinationStorageId())
+                .setDestinationPath(transferRequest.getDestinationPath())
                 .setDestinationToken(transferRequest.getDestinationToken())
                 .setDestinationType(transferRequest.getDestinationType())
                 .setDestResourceBackend(transferRequest.getDestResourceBackend())

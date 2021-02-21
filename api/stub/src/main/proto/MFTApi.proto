@@ -7,23 +7,53 @@ import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 
 message TransferApiRequest {
-    string sourceId = 1;
-    string sourceType = 2;
-    string sourceToken = 3;
-    string sourceResourceBackend = 4;
-    string sourceCredentialBackend = 5;
-    string destinationId = 6;
-    string destinationType = 7;
-    string destinationToken = 8;
-    string destResourceBackend = 9;
-    string destCredentialBackend = 10;
-    bool affinityTransfer = 11;
-    map<string, int32> targetAgents = 12;
-    string mftAuthorizationToken = 13;
+    string sourceStorageId = 1;
+    string sourcePath = 2;
+    string sourceType = 3;
+    string sourceToken = 4;
+    string sourceResourceBackend = 5;
+    string sourceCredentialBackend = 6;
+    string destinationStorageId = 7;
+    string destinationPath = 8;
+    string destinationType = 9;
+    string destinationToken = 10;
+    string destResourceBackend = 11;
+    string destCredentialBackend = 12;
+    bool affinityTransfer = 13;
+    map<string, int32> targetAgents = 14;
+    string mftAuthorizationToken = 15;
 }
 
 message TransferApiResponse {
     string transferId = 1;
+}
+
+message HttpUploadApiRequest {
+    string destinationStoreId = 1;
+    string destinationPath = 2;
+    string destinationToken = 3;
+    string destinationType = 4;
+    string targetAgent = 5;
+    string mftAuthorizationToken = 6;
+}
+
+message HttpUploadApiResponse {
+    string url = 1;
+    string targetAgent = 2;
+}
+
+message HttpDownloadApiRequest {
+    string sourceStoreId = 1;
+    string sourcePath = 2;
+    string sourceToken = 3;
+    string sourceType = 4;
+    string targetAgent = 5;
+    string mftAuthorizationToken = 6;
+}
+
+message HttpDownloadApiResponse {
+    string url = 1;
+    string targetAgent = 2;
 }
 
 message TransferStateApiRequest {
@@ -90,6 +120,18 @@ service  MFTApiService {
     rpc submitTransfer(TransferApiRequest) returns (TransferApiResponse) {
         option (google.api.http) = {
            post: "/v1.0/api/transfer"
+        };
+    }
+
+    rpc submitHttpUpload(HttpUploadApiRequest) returns (HttpUploadApiResponse) {
+        option (google.api.http) = {
+           post: "/v1.0/api/http-upload"
+        };
+    }
+
+    rpc submitHttpDownload(HttpDownloadApiRequest) returns (HttpDownloadApiResponse) {
+        option (google.api.http) = {
+           post: "/v1.0/api/http-download"
         };
     }
 

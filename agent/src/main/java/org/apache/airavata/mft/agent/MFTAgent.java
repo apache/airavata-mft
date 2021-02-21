@@ -30,6 +30,8 @@ import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferCommand;
 import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
+import org.apache.airavata.mft.agent.http.HttpServer;
+import org.apache.airavata.mft.agent.http.HttpTransferRequestsStore;
 import org.apache.airavata.mft.agent.rpc.RPCParser;
 import org.apache.airavata.mft.core.AuthZToken;
 import org.apache.airavata.mft.core.ConnectorResolver;
@@ -63,13 +65,22 @@ public class MFTAgent implements CommandLineRunner {
     @org.springframework.beans.factory.annotation.Value("${agent.id}")
     private String agentId;
 
+
     @org.springframework.beans.factory.annotation.Value("${agent.secret}")
     private String agentSecret;
 
     @org.springframework.beans.factory.annotation.Value("${agent.host}")
     private String agentHost;
+
     @org.springframework.beans.factory.annotation.Value("${agent.user}")
     private String agentUser;
+
+    @org.springframework.beans.factory.annotation.Value("${agent.http.port}")
+    private Integer agentHttpPort;
+
+    @org.springframework.beans.factory.annotation.Value("${agent.https.enabled}")
+    private boolean agentHttpsEnabled;
+
     @org.springframework.beans.factory.annotation.Value("${agent.supported.protocols}")
     private String supportedProtocols;
 
@@ -106,6 +117,9 @@ public class MFTAgent implements CommandLineRunner {
     @Autowired
     private MFTConsulClient mftConsulClient;
 
+    @Autowired
+    private HttpTransferRequestsStore transferRequestsStore;
+
     public void init() {
         transferMessageCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.AGENTS_TRANSFER_REQUEST_MESSAGE_PATH + agentId);
         rpcMessageCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.AGENTS_RPC_REQUEST_MESSAGE_PATH + agentId);
@@ -141,28 +155,23 @@ public class MFTAgent implements CommandLineRunner {
                     logger.info("Received raw message: {}", v);
                     TransferCommand request = null;
                     try {
-                        logger.info("v" + v);
                         request = mapper.readValue(v, TransferCommand.class);
                         logger.info("Received request " + request.getTransferId());
-
-
                         mftConsulClient.submitTransferStateToProcess(request.getTransferId(), agentId, new TransferState()
-                                .setState("STARTING")
-                                .setPercentage(0)
-                                .setUpdateTimeMils(System.currentTimeMillis())
-                                .setPublisher(agentId)
-                                .setDescription("Starting the transfer"));
+                            .setState("STARTING")
+                            .setPercentage(0)
+                            .setUpdateTimeMils(System.currentTimeMillis())
+                            .setPublisher(agentId)
+                            .setDescription("Starting the transfer"));
 
                         AuthZToken authZToken = new AuthZToken(request.getMftAuthorizationToken(), agentId, agentSecret);
                         Optional<Connector> inConnectorOpt = ConnectorResolver.resolveConnector(request.getSourceType(), "IN");
                         Connector inConnector = inConnectorOpt.orElseThrow(() -> new Exception("Could not find an in connector for given input"));
-                        inConnector.init(authZToken, request.getSourceId(),
-                                request.getSourceToken(), resourceServiceHost,
-                                resourceServicePort, secretServiceHost, secretServicePort);
+                        inConnector.init(authZToken, request.getSourceStorageId(), request.getSourceToken(), resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
 
                         Optional<Connector> outConnectorOpt = ConnectorResolver.resolveConnector(request.getDestinationType(), "OUT");
                         Connector outConnector = outConnectorOpt.orElseThrow(() -> new Exception("Could not find an out connector for given input"));
-                        outConnector.init(authZToken, request.getDestinationId(), request.getDestinationToken(), resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
+                        outConnector.init(authZToken, request.getDestinationStorageId(), request.getDestinationToken(), resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
 
                         Optional<MetadataCollector> srcMetadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(request.getSourceType());
                         MetadataCollector srcMetadataCollector = srcMetadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for source"));
@@ -173,29 +182,29 @@ public class MFTAgent implements CommandLineRunner {
                         dstMetadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
 
                         mftConsulClient.submitTransferStateToProcess(request.getTransferId(), agentId, new TransferState()
-                                .setState("STARTED")
-                                .setPercentage(0)
-                                .setUpdateTimeMils(System.currentTimeMillis())
-                                .setPublisher(agentId)
-                                .setDescription("Started the transfer"));
+                            .setState("STARTED")
+                            .setPercentage(0)
+                            .setUpdateTimeMils(System.currentTimeMillis())
+                            .setPublisher(agentId)
+                            .setDescription("Started the transfer"));
 
 
-                        String transferId = mediator.transfer(authZToken,request, inConnector, outConnector, srcMetadataCollector, dstMetadataCollector,
-                                (id, st) -> {
-                                    try {
-                                        mftConsulClient.submitTransferStateToProcess(id, agentId, st.setPublisher(agentId));
-                                    } catch (MFTConsulClientException e) {
-                                        logger.error("Failed while updating transfer state", e);
-                                    }
-                                },
-                                (id, transferSuccess) -> {
-                                    try {
-                                        // Delete scheduled key as the transfer completed / failed if it was placed in current session
-                                        mftConsulClient.getKvClient().deleteKey(MFTConsulClient.AGENTS_SCHEDULED_PATH + agentId + "/" + session + "/" + id);
-                                    } catch (Exception e) {
-                                        logger.error("Failed while deleting scheduled path for transfer {}", id);
-                                    }
+                        String transferId = mediator.transfer(authZToken, request, inConnector, outConnector, srcMetadataCollector, dstMetadataCollector,
+                            (id, st) -> {
+                                try {
+                                    mftConsulClient.submitTransferStateToProcess(id, agentId, st.setPublisher(agentId));
+                                } catch (MFTConsulClientException e) {
+                                    logger.error("Failed while updating transfer state", e);
                                 }
+                            },
+                            (id, transferSuccess) -> {
+                                try {
+                                    // Delete scheduled key as the transfer completed / failed if it was placed in current session
+                                    mftConsulClient.getKvClient().deleteKey(MFTConsulClient.AGENTS_SCHEDULED_PATH + agentId + "/" + session + "/" + id);
+                                } catch (Exception e) {
+                                    logger.error("Failed while deleting scheduled path for transfer {}", id);
+                                }
+                            }
                         );
 
                         logger.info("Started the transfer " + transferId);
@@ -230,6 +239,19 @@ public class MFTAgent implements CommandLineRunner {
         };
         transferMessageCache.addListener(transferCacheListener);
         transferMessageCache.start();
+    }
+
+    private void acceptHTTPRequests() {
+        logger.info("Starting the HTTP front end");
+
+        new Thread(() -> {
+            HttpServer httpServer = new HttpServer(agentHost, agentHttpPort, agentHttpsEnabled, transferRequestsStore);
+            try {
+                httpServer.run();
+            } catch (Exception e) {
+                logger.error("Http frontend server start failed", e);
+            }
+        }).start();
     }
 
     private boolean connectAgent() throws MFTConsulClientException {
@@ -327,6 +349,7 @@ public class MFTAgent implements CommandLineRunner {
 
         acceptTransferRequests();
         acceptRPCRequests();
+        acceptHTTPRequests();
     }
 
     @Override

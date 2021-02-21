@@ -43,7 +43,7 @@ public interface MetadataCollector {
      */
     public FileResourceMetadata getFileResourceMetadata(AuthZToken authZToken, String resourceId, String credentialToken) throws Exception;
 
-    /**
+    /*
      * Fetches a metadata of given File Resource inside a registered directory resource. Target file might be living in
      * multiple level below the parent directory
      *
@@ -88,4 +88,15 @@ public interface MetadataCollector {
      * @throws Exception if the resource details can not be fetched from the resource service
      */
     public Boolean isAvailable(AuthZToken authZToken, String resourceId, String credentialToken) throws Exception;
+
+    /**
+     * Check whether the resource is available in the actual storage
+     *
+     * @param storageId id of the storage
+     * @param resourcePath resource path
+     * @param credentialToken credential token for the resource
+     * @return true of the resource is available false otherwise
+     * @throws Exception if the resource details can not be fetched from the resource service
+     */
+    public Boolean isAvailable(AuthZToken authZToken,String storageId, String resourcePath, String credentialToken) throws Exception;
 }

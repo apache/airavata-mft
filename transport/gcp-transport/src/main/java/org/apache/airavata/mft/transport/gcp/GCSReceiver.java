@@ -34,6 +34,8 @@ import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.gcs.resource.GCSResource;
 import org.apache.airavata.mft.resource.stubs.gcs.resource.GCSResourceGetRequest;
+import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorage;
+import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
@@ -50,16 +52,18 @@ public class GCSReceiver implements Connector {
 
     private static final Logger logger = LoggerFactory.getLogger(GCSReceiver.class);
 
-    private GCSResource gcsResource;
     private Storage storage;
+    private GCSStorage gcsStorage;
 
     @Override
-    public void init(AuthZToken authZToken, String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
+    public void init(AuthZToken authZToken,String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
+
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        this.gcsResource = resourceClient.gcs().getGCSResource(GCSResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        this.gcsStorage = resourceClient.gcs().getGCSStorage(GCSStorageGetRequest.newBuilder().setStorageId(storageId).build());
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         GCSSecret gcsSecret = secretClient.gcs().getGCSSecret(GCSSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
         String jsonString = gcsSecret.getCredentialsJson();
@@ -79,48 +83,40 @@ public class GCSReceiver implements Connector {
     }
 
     @Override
-    public void startStream(ConnectorContext context) throws Exception {
+    public void startStream(String targetPath, ConnectorContext context) throws Exception {
         logger.info("Starting GCS Receiver stream for transfer {}", context.getTransferId());
 
-        if (ResourceTypes.FILE.equals(this.gcsResource.getResourceCase().name())) {
-            InputStream inputStream = storage.objects().get(this.gcsResource.getGcsStorage().getBucketName(),
-                                        this.gcsResource.getFile().getResourcePath()).executeMediaAsInputStream();
-            OutputStream os = context.getStreamBuffer().getOutputStream();
-            int read;
-            long bytes = 0;
-            long fileSize = context.getMetadata().getResourceSize();
-            byte[] buf = new byte[1024];
-            while (true) {
-                int bufSize = 0;
+        InputStream inputStream = storage.objects().get(this.gcsStorage.getBucketName(), targetPath).executeMediaAsInputStream();
+        OutputStream os = context.getStreamBuffer().getOutputStream();
+        int read;
+        long bytes = 0;
+        long fileSize = context.getMetadata().getResourceSize();
+        byte[] buf = new byte[1024];
+        while (true) {
+            int bufSize = 0;
 
-                if (buf.length < fileSize) {
-                    bufSize = buf.length;
-                } else {
-                    bufSize = (int) fileSize;
-                }
-                bufSize = inputStream.read(buf, 0, bufSize);
+            if (buf.length < fileSize) {
+                bufSize = buf.length;
+            } else {
+                bufSize = (int) fileSize;
+            }
+            bufSize = inputStream.read(buf, 0, bufSize);
 
-                if (bufSize < 0) {
-                    break;
-                }
-
-                os.write(buf, 0, bufSize);
-                os.flush();
-
-                fileSize -= bufSize;
-                if (fileSize == 0L)
-                    break;
+            if (bufSize < 0) {
+                break;
             }
 
-            os.close();
+            os.write(buf, 0, bufSize);
+            os.flush();
 
-            logger.info("Completed GCS Receiver stream for transfer {}", context.getTransferId());
-
-        } else {
-            logger.error("Resource {} should be a FILE type. Found a {}",
-                    this.gcsResource.getResourceId(), this.gcsResource.getResourceCase().name());
-            throw new Exception("Resource " + this.gcsResource.getResourceId() + " should be a FILE type. Found a " +
-                    this.gcsResource.getResourceCase().name());
+            fileSize -= bufSize;
+            if (fileSize == 0L)
+                break;
         }
+
+        os.close();
+
+        logger.info("Completed GCS Receiver stream for transfer {}", context.getTransferId());
+
     }
 }

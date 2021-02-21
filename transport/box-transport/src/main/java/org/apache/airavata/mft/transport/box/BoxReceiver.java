@@ -30,6 +30,8 @@ import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.box.resource.BoxResource;
 import org.apache.airavata.mft.resource.stubs.box.resource.BoxResourceGetRequest;
+import org.apache.airavata.mft.resource.stubs.box.storage.BoxStorage;
+import org.apache.airavata.mft.resource.stubs.box.storage.BoxStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
@@ -41,20 +43,14 @@ import java.io.OutputStream;
 public class BoxReceiver implements Connector {
 
     private static final Logger logger = LoggerFactory.getLogger(BoxReceiver.class);
-    private BoxSecret boxSecret;
-    private BoxResource boxResource;
     private BoxAPIConnection boxClient;
 
-
     @Override
-    public void init(AuthZToken authZToken, String resourceId, String credentialToken, String resourceServiceHost, int resourceServicePort,
+    public void init(AuthZToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort,
                      String secretServiceHost, int secretServicePort) throws Exception {
 
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        boxResource = resourceClient.box().getBoxResource(BoxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
-
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
-        boxSecret = secretClient.box().getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        BoxSecret boxSecret = secretClient.box().getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
         boxClient = new BoxAPIConnection(boxSecret.getAccessToken());
     }
@@ -66,25 +62,17 @@ public class BoxReceiver implements Connector {
     }
 
     @Override
-    public void startStream(ConnectorContext context) throws Exception {
+    public void startStream(String targetPath, ConnectorContext context) throws Exception {
 
-        if (ResourceTypes.FILE.equals(this.boxResource.getResourceCase().name())) {
-            logger.info("Starting Box Receiver stream for transfer {}", context.getTransferId());
+        logger.info("Starting Box Receiver stream for transfer {}", context.getTransferId());
 
-            BoxFile file = new BoxFile(this.boxClient, this.boxResource.getFile().getResourcePath());
+        BoxFile file = new BoxFile(this.boxClient, targetPath);
 
-            OutputStream os = context.getStreamBuffer().getOutputStream();
-            file.download(os);
-            os.flush();
-            os.close();
+        OutputStream os = context.getStreamBuffer().getOutputStream();
+        file.download(os);
+        os.flush();
+        os.close();
 
-            logger.info("Completed Box Receiver stream for transfer {}", context.getTransferId());
-
-        } else {
-            logger.error("Resource {} should be a FILE type. Found a {}",
-                    this.boxResource.getResourceId(), this.boxResource.getResourceCase().name());
-            throw new Exception("Resource " + this.boxResource.getResourceId() + " should be a FILE type. Found a " +
-                    this.boxResource.getResourceCase().name());
-        }
+        logger.info("Completed Box Receiver stream for transfer {}", context.getTransferId());
     }
 }

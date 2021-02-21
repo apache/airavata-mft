@@ -16,6 +16,12 @@ public class AuthZToken {
         this.mftAuthorizationToken = mftAuthorizationToken;
     }
 
+    public AuthZToken() {
+
+    }
+
+
+
     public String getMftAuthorizationToken() {
         return mftAuthorizationToken;
     }

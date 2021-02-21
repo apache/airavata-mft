@@ -18,10 +18,10 @@
 package org.apache.airavata.mft.agent;
 
 import org.apache.airavata.mft.admin.MFTConsulClient;
+import org.apache.airavata.mft.agent.http.HttpTransferRequestsStore;
 import org.apache.airavata.mft.agent.rpc.RPCParser;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 public class AppConfig {
@@ -40,5 +40,10 @@ public class AppConfig {
     @Bean
     public RPCParser rpcParser() {
         return new RPCParser();
+    }
+
+    @Bean
+    public HttpTransferRequestsStore transferRequestStore() {
+        return new HttpTransferRequestsStore();
     }
 }

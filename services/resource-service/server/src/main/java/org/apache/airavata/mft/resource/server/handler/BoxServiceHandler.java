@@ -23,6 +23,7 @@ import io.grpc.stub.StreamObserver;
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
 import org.apache.airavata.mft.resource.service.box.BoxResourceServiceGrpc;
 import org.apache.airavata.mft.resource.stubs.box.resource.*;
+import org.apache.airavata.mft.resource.stubs.box.storage.*;
 import org.lognet.springboot.grpc.GRpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +68,8 @@ public class BoxServiceHandler extends BoxResourceServiceGrpc.BoxResourceService
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed in creating the Box resource")
                     .asRuntimeException());
-        }    }
+        }
+    }
 
     @Override
     public void updateBoxResource(BoxResourceUpdateRequest request, StreamObserver<Empty> responseObserver) {
@@ -80,7 +82,8 @@ public class BoxServiceHandler extends BoxResourceServiceGrpc.BoxResourceService
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed in updating the Box resource with id " + request.getResourceId())
                     .asRuntimeException());
-        }    }
+        }
+    }
 
     @Override
     public void deleteBoxResource(BoxResourceDeleteRequest request, StreamObserver<Empty> responseObserver) {
@@ -96,6 +99,72 @@ public class BoxServiceHandler extends BoxResourceServiceGrpc.BoxResourceService
 
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed in deleting the Box resource with id " + request.getResourceId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void getBoxStorage(BoxStorageGetRequest request, StreamObserver<BoxStorage> responseObserver) {
+        try {
+            this.backend.getBoxStorage(request).ifPresentOrElse(resource -> {
+                responseObserver.onNext(resource);
+                responseObserver.onCompleted();
+            }, () -> {
+                responseObserver.onError(Status.INTERNAL
+                        .withDescription("No Box storage with id " + request.getStorageId())
+                        .asRuntimeException());
+            });
+        } catch (Exception e) {
+            logger.error("Failed in retrieving Box resource with id {}", request.getStorageId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in retrieving Box storage with id " + request.getStorageId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void createBoxStorage(BoxStorageCreateRequest request, StreamObserver<BoxStorage> responseObserver) {
+        try {
+            responseObserver.onNext(this.backend.createBoxStorage(request));
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in creating the Box storage", e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in creating the Box storage")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void updateBoxStorage(BoxStorageUpdateRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.updateBoxStorage(request);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in updating the Box storage {}", request.getStorageId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in updating the Box storage with id " + request.getStorageId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void deleteBoxStorage(BoxStorageDeleteRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            boolean res = this.backend.deleteBoxStorage(request);
+            if (res) {
+                responseObserver.onCompleted();
+            } else {
+                responseObserver.onError(new Exception("Failed to delete Box storage with id " + request.getStorageId()));
+            }
+        } catch (Exception e) {
+            logger.error("Failed in deleting the Box storage {}", request.getStorageId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in deleting the Box storage with id " + request.getStorageId())
                     .asRuntimeException());
         }
     }

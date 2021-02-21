@@ -1,0 +1,44 @@
+[
+  {
+    "type": "SCP",
+    "storageId": "remote-ssh-storage",
+    "host": "149.165.156.124",
+    "port": 22,
+    "user": "root"
+  },
+  {
+    "type": "LOCAL",
+    "storageId": "local-storage-1",
+    "agentId": "agent-0"
+  },
+  {
+    "type": "S3",
+    "storageId": "s3-storage-1",
+    "region": "us-east-2",
+    "bucketName": "airavata-s3"
+  },
+  {
+    "type": "BOX",
+    "storageId": "box-storage-1"
+  },
+  {
+    "type": "AZURE",
+    "storageId": "azure-storage-1",
+    "container": "sample-container"
+  },
+  {
+    "type": "GCS",
+    "storageId": "gcs-storage-1",
+    "bucketName": "pika-pika-bucket"
+  },
+  {
+    "type": "DROPBOX",
+    "storageId": "dropbox-storage-1"
+  },
+  {
+    "type": "FTP",
+    "storageId": "ftp-resource",
+    "host": "ftp.dlptest.com",
+    "port": "21"
+  }
+]

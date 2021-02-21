@@ -26,6 +26,5 @@ public interface Connector {
                      String secretServiceHost, int secretServicePort) throws Exception;
 
     public void destroy();
-
-    void startStream(ConnectorContext context) throws Exception;
+    void startStream(String targetPath, ConnectorContext context) throws Exception;
 }

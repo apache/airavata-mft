@@ -23,6 +23,7 @@ import io.grpc.stub.StreamObserver;
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
 import org.apache.airavata.mft.resource.service.azure.AzureResourceServiceGrpc;
 import org.apache.airavata.mft.resource.stubs.azure.resource.*;
+import org.apache.airavata.mft.resource.stubs.azure.storage.*;
 import org.lognet.springboot.grpc.GRpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,4 +103,69 @@ public class AzureServiceHandler extends AzureResourceServiceGrpc.AzureResourceS
         }
     }
 
+    @Override
+    public void getAzureStorage(AzureStorageGetRequest request, StreamObserver<AzureStorage> responseObserver) {
+        try {
+            this.backend.getAzureStorage(request).ifPresentOrElse(resource -> {
+                responseObserver.onNext(resource);
+                responseObserver.onCompleted();
+            }, () -> {
+                responseObserver.onError(Status.INTERNAL
+                        .withDescription("No Azure storage with id " + request.getStorageId())
+                        .asRuntimeException());
+            });
+        } catch (Exception e) {
+            logger.error("Failed in retrieving Azure resource with id {}", request.getStorageId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in retrieving Azure resource with id " + request.getStorageId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void createAzureStorage(AzureStorageCreateRequest request, StreamObserver<AzureStorage> responseObserver) {
+        try {
+            responseObserver.onNext(this.backend.createAzureStorage(request));
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in creating the Azure storage", e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in creating the Azure resource")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void updateAzureStorage(AzureStorageUpdateRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            this.backend.updateAzureStorage(request);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in updating the Azure storage {}", request.getStorageId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in updating the Azure storage with id " + request.getStorageId())
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void deleteAzureStorage(AzureStorageDeleteRequest request, StreamObserver<Empty> responseObserver) {
+        try {
+            boolean res = this.backend.deleteAzureStorage(request);
+            if (res) {
+                responseObserver.onCompleted();
+            } else {
+                responseObserver.onError(new Exception("Failed to delete Azure storage with id " + request.getStorageId()));
+            }
+        } catch (Exception e) {
+            logger.error("Failed in deleting the Azure storage {}", request.getStorageId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in deleting the Azure storage with id " + request.getStorageId())
+                    .asRuntimeException());
+        }
+    }
 }
