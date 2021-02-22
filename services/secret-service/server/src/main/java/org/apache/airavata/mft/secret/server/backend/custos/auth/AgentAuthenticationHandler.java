@@ -7,6 +7,7 @@ import org.apache.custos.identity.management.client.IdentityManagementClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -27,17 +28,20 @@ public class AgentAuthenticationHandler implements AuthenticationHandler, Closea
     private String custosId;
 
 
-    IdentityManagementClient identityManagementClient;
+
+    private  IdentityManagementClient identityManagementClient;
+
+    @Autowired
+    private CustosClientProvider custosClientProvider;
 
 
-    public AgentAuthenticationHandler(String custosId, CustosClientProvider custosClientProvider) throws IOException {
+    public AgentAuthenticationHandler(@Value("${custos.id}") String custosId, @Autowired CustosClientProvider custosClientProvider) throws IOException {
         this.custosId = custosId;
         this.identityManagementClient = custosClientProvider.getIdentityManagementClient();
     }
 
     @Override
     public Optional<AuthConfig> authenticate(String id, String secret) throws Exception {
-        IdentityManagementClient identityManagementClient = null;
         try {
             AuthConfig cachedAuthConfig = authCache.get(id);
             AuthConfig authConfig = new AuthConfig();
