@@ -50,8 +50,8 @@ public class AppConfig {
     }
 
     @Bean
-    public AgentAuthenticationHandler agentAuthenticationHandler(CustosClientProvider custosClientProvider) throws IOException {
-        return new AgentAuthenticationHandler(this.custosId, custosClientProvider);
+    public AgentAuthenticationHandler agentAuthenticationHandler() throws IOException {
+        return new AgentAuthenticationHandler(custosId, custosClientProvider());
     }
 
 
