@@ -17,6 +17,7 @@
 
 package org.apache.airavata.mft.transport.local;
 
+import org.apache.airavata.mft.core.AuthZToken;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
 import org.slf4j.Logger;
@@ -30,11 +31,12 @@ public class LocalSender implements Connector {
 
     private boolean initialized;
     @Override
-    public void init(String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort,
+    public void init(AuthZToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort,
                      String secretServiceHost, int secretServicePort) throws Exception {
 
         this.initialized = true;
     }
+
 
     @Override
     public void destroy() {

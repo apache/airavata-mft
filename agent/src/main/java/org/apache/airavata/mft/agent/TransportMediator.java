@@ -48,11 +48,11 @@ public class TransportMediator {
         executor.shutdown();
     }
 
-    public String transfer(TransferCommand command, Connector inConnector, Connector outConnector, MetadataCollector srcMetadataCollector,
+    public String transfer(AuthZToken authZToken, TransferCommand command, Connector inConnector, Connector outConnector, MetadataCollector srcMetadataCollector,
                            MetadataCollector destMetadataCollector, BiConsumer<String, TransferState> onStatusCallback,
                            BiConsumer<String, Boolean> exitingCallback) throws Exception {
 
-        FileResourceMetadata srcMetadata = srcMetadataCollector.getFileResourceMetadata(
+        FileResourceMetadata srcMetadata = srcMetadataCollector.getFileResourceMetadata(authZToken,
                             command.getSourceStorageId(),
                             command.getSourcePath(),
                             command.getSourceToken());
@@ -129,15 +129,17 @@ public class TransportMediator {
                                 command.getDestinationPath(),
                                 command.getDestinationToken());
 
+
                         if (!transferred) {
                             logger.error("Transfer completed but resource is not available in destination");
                             throw new Exception("Transfer completed but resource is not available in destination");
                         }
 
-                        FileResourceMetadata destMetadata = destMetadataCollector.getFileResourceMetadata(
+                        FileResourceMetadata destMetadata = destMetadataCollector.getFileResourceMetadata(authZToken,
                                 command.getDestinationStorageId(),
                                 command.getDestinationPath(),
-                                command.getDestinationToken());
+                               command.getDestinationToken());
+
 
                         boolean doIntegrityVerify = true;
 

@@ -19,9 +19,11 @@ package org.apache.airavata.mft.transport.scp;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
+import org.apache.airavata.mft.core.AuthZToken;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.DoubleStreamingBuffer;
 import org.apache.airavata.mft.core.api.Connector;
+import org.apache.airavata.mft.credential.stubs.common.AuthToken;
 import org.apache.airavata.mft.credential.stubs.scp.SCPSecret;
 import org.apache.airavata.mft.credential.stubs.scp.SCPSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
@@ -33,7 +35,9 @@ import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class SCPReceiver implements Connector {
 
@@ -43,7 +47,7 @@ public class SCPReceiver implements Connector {
 
     private Session session;
 
-    public void init(String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort,
+    public void init(AuthZToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort,
                      String secretServiceHost, int secretServicePort) throws Exception {
 
         if (initialized) {
@@ -56,7 +60,13 @@ public class SCPReceiver implements Connector {
         SCPStorage scpStorage = resourceClient.scp().getSCPStorage(SCPStorageGetRequest.newBuilder().setStorageId(storageId).build());
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
-        SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        AuthToken authToken = AuthToken.newBuilder()
+                .setToken(authZToken.getMftAuthorizationToken()).setAgentId(authZToken.getAgentId())
+                .setAgentSecret(authZToken.getAgentSecret())
+                .build();
+        SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest
+                .newBuilder()
+                .setAuthzToken(authToken).setSecretId(credentialToken).build());
 
         this.session = SCPTransportUtil.createSession(
                 scpStorage.getUser(),
@@ -64,8 +74,10 @@ public class SCPReceiver implements Connector {
                 scpStorage.getPort(),
                 scpSecret.getPrivateKey().getBytes(),
                 scpSecret.getPublicKey().getBytes(),
-                scpSecret.getPassphrase().equals("")? null : scpSecret.getPassphrase().getBytes());
+                scpSecret.getPassphrase().equals("") ? null : scpSecret.getPassphrase().getBytes());
+
     }
+
 
     public void destroy() {
         try {

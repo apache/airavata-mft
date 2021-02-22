@@ -18,19 +18,11 @@
 package org.apache.airavata.mft.agent.http;
 
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelProgressiveFuture;
-import io.netty.channel.ChannelProgressiveFutureListener;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.stream.ChunkedStream;
 import io.netty.util.CharsetUtil;
-import org.apache.airavata.mft.core.ConnectorContext;
-import org.apache.airavata.mft.core.DoubleStreamingBuffer;
-import org.apache.airavata.mft.core.FileResourceMetadata;
-import org.apache.airavata.mft.core.TransferTask;
+import org.apache.airavata.mft.core.*;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.slf4j.Logger;
@@ -41,9 +33,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static io.netty.handler.codec.http.HttpMethod.*;
+import static io.netty.handler.codec.http.HttpMethod.GET;
 import static io.netty.handler.codec.http.HttpResponseStatus.*;
-import static io.netty.handler.codec.http.HttpVersion.*;
+import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
@@ -84,7 +76,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         ConnectorParams params = httpTransferRequest.getConnectorParams();
 
-        connector.init(params.getStorageId(), params.getCredentialToken(), params.getResourceServiceHost(),
+        AuthZToken authZToken = new AuthZToken();
+
+        connector.init(authZToken, params.getStorageId(), params.getCredentialToken(), params.getResourceServiceHost(),
                 params.getResourceServicePort(), params.getSecretServiceHost(), params.getSecretServicePort());
 
         metadataCollector.init(params.getResourceServiceHost(), params.getResourceServicePort(),
@@ -101,7 +95,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return;
         }
 
-        FileResourceMetadata fileResourceMetadata = metadataCollector.getFileResourceMetadata(params.getStorageId(),
+        FileResourceMetadata fileResourceMetadata = metadataCollector.getFileResourceMetadata(authZToken, params.getStorageId(),
                 httpTransferRequest.getTargetResourcePath(),
                 params.getCredentialToken());
 

@@ -23,6 +23,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import org.apache.airavata.mft.core.AuthZToken;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
@@ -49,7 +50,7 @@ public class S3Receiver implements Connector {
     private S3Storage s3Storage;
 
     @Override
-    public void init(String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort,
+    public void init(AuthZToken authZToken,String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort,
                      String secretServiceHost, int secretServicePort) throws Exception {
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
@@ -64,6 +65,7 @@ public class S3Receiver implements Connector {
                 .withRegion(s3Storage.getRegion())
                 .build();
     }
+
 
     @Override
     public void destroy() {
