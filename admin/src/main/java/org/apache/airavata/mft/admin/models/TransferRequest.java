@@ -33,6 +33,7 @@ public class TransferRequest {
     private String destinationToken;
     private String destResourceBackend;
     private String destCredentialBackend;
+    private String mftAuthorizationToken;
     private boolean affinityTransfer;
     private Map<String, Integer> targetAgents;
 
@@ -160,5 +161,13 @@ public class TransferRequest {
     public TransferRequest setTargetAgents(Map<String, Integer> targetAgents) {
         this.targetAgents = targetAgents;
         return this;
+    }
+
+    public String getMftAuthorizationToken() {
+        return mftAuthorizationToken;
+    }
+
+    public void setMftAuthorizationToken(String mftAuthorizationToken) {
+        this.mftAuthorizationToken = mftAuthorizationToken;
     }
 }

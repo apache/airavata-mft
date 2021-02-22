@@ -20,10 +20,12 @@ package org.apache.airavata.mft.transport.scp;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import org.apache.airavata.mft.core.AuthZToken;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.DoubleStreamingBuffer;
 import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
+import org.apache.airavata.mft.credential.stubs.common.AuthToken;
 import org.apache.airavata.mft.credential.stubs.scp.SCPSecret;
 import org.apache.airavata.mft.credential.stubs.scp.SCPSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
@@ -47,7 +49,7 @@ public class SCPSender implements Connector {
 
     private Session session;
 
-    public void init(String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort,
+    public void init(AuthZToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort,
                      String secretServiceHost, int secretServicePort) throws Exception {
 
         if (initialized) {
@@ -72,6 +74,7 @@ public class SCPSender implements Connector {
                 scpSecret.getPublicKey().getBytes(),
                 scpSecret.getPassphrase().equals("")? null : scpSecret.getPassphrase().getBytes());
     }
+
 
     public void destroy() {
 

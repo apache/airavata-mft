@@ -22,4 +22,6 @@ package org.apache.airavata.mft.credential.stubs.common;
 
 message AuthToken {
     string token = 1;
+    string agentId = 2;
+    string agentSecret = 3;
 }

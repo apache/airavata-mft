@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- package org.apache.airavata.mft.agent.rpc;
+package org.apache.airavata.mft.agent.rpc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
@@ -24,6 +24,7 @@ import org.apache.airavata.mft.agent.http.ConnectorParams;
 import org.apache.airavata.mft.agent.http.HttpTransferRequest;
 import org.apache.airavata.mft.agent.http.HttpTransferRequestsStore;
 import org.apache.airavata.mft.core.ConnectorResolver;
+import org.apache.airavata.mft.core.AuthZToken;
 import org.apache.airavata.mft.core.DirectoryResourceMetadata;
 import org.apache.airavata.mft.core.FileResourceMetadata;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
@@ -73,12 +74,15 @@ public class RPCParser {
                 String resourceType = request.getParameters().get("resourceType");
                 String resourceToken = request.getParameters().get("resourceToken");
                 String mftAuthorizationToken = request.getParameters().get("mftAuthorizationToken");
+                String agentId = request.getAgentId();
+                String agentSecret = request.getParameters().get("agentSecret");
 
                 Optional<MetadataCollector> metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(resourceType);
                 if (metadataCollectorOp.isPresent()) {
                     MetadataCollector metadataCollector = metadataCollectorOp.get();
                     metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
-                    FileResourceMetadata fileResourceMetadata = metadataCollector.getFileResourceMetadata(resourceId, resourceToken);
+                    FileResourceMetadata fileResourceMetadata = metadataCollector
+                            .getFileResourceMetadata(new AuthZToken(mftAuthorizationToken, agentId, agentSecret), resourceId, resourceToken);
                     return mapper.writeValueAsString(fileResourceMetadata);
                 }
                 break;
@@ -89,12 +93,15 @@ public class RPCParser {
                 resourceToken = request.getParameters().get("resourceToken");
                 String childPath = request.getParameters().get("childPath");
                 mftAuthorizationToken = request.getParameters().get("mftAuthorizationToken");
+                agentId = request.getAgentId();
+                agentSecret = request.getParameters().get("agentSecret");
 
                 metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(resourceType);
                 if (metadataCollectorOp.isPresent()) {
                     MetadataCollector metadataCollector = metadataCollectorOp.get();
                     metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
-                    FileResourceMetadata fileResourceMetadata = metadataCollector.getFileResourceMetadata(resourceId, childPath, resourceToken);
+                    FileResourceMetadata fileResourceMetadata = metadataCollector
+                            .getFileResourceMetadata(new AuthZToken(mftAuthorizationToken, agentId, agentSecret), resourceId, childPath, resourceToken);
                     return mapper.writeValueAsString(fileResourceMetadata);
                 }
                 break;
@@ -104,12 +111,15 @@ public class RPCParser {
                 resourceType = request.getParameters().get("resourceType");
                 resourceToken = request.getParameters().get("resourceToken");
                 mftAuthorizationToken = request.getParameters().get("mftAuthorizationToken");
+                agentId = request.getAgentId();
+                agentSecret = request.getParameters().get("agentSecret");
 
                 metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(resourceType);
                 if (metadataCollectorOp.isPresent()) {
                     MetadataCollector metadataCollector = metadataCollectorOp.get();
                     metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
-                    DirectoryResourceMetadata dirResourceMetadata = metadataCollector.getDirectoryResourceMetadata(resourceId, resourceToken);
+                    DirectoryResourceMetadata dirResourceMetadata = metadataCollector
+                            .getDirectoryResourceMetadata(new AuthZToken(mftAuthorizationToken, agentId, agentSecret), resourceId, resourceToken);
                     return mapper.writeValueAsString(dirResourceMetadata);
                 }
                 break;
@@ -120,12 +130,15 @@ public class RPCParser {
                 resourceToken = request.getParameters().get("resourceToken");
                 childPath = request.getParameters().get("childPath");
                 mftAuthorizationToken = request.getParameters().get("mftAuthorizationToken");
+                agentId = request.getAgentId();
+                agentSecret = request.getParameters().get("agentSecret");
 
                 metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(resourceType);
                 if (metadataCollectorOp.isPresent()) {
                     MetadataCollector metadataCollector = metadataCollectorOp.get();
                     metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
-                    DirectoryResourceMetadata dirResourceMetadata = metadataCollector.getDirectoryResourceMetadata(resourceId, childPath, resourceToken);
+                    DirectoryResourceMetadata dirResourceMetadata = metadataCollector
+                            .getDirectoryResourceMetadata(new AuthZToken(mftAuthorizationToken, agentId, agentSecret), resourceId, childPath, resourceToken);
                     return mapper.writeValueAsString(dirResourceMetadata);
                 }
                 break;
@@ -169,7 +182,7 @@ public class RPCParser {
             response.setResponseStatus(SyncRPCResponse.ResponseStatus.SUCCESS);
         } catch (Exception e) {
             logger.error("Errored while processing the rpc request for message {} and method {}",
-                                                request.getMessageId(), request.getMethod(), e);
+                    request.getMessageId(), request.getMethod(), e);
             response.setErrorAsStr(e.getMessage());
             response.setResponseStatus(SyncRPCResponse.ResponseStatus.FAIL);
         }

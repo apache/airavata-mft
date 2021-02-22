@@ -17,6 +17,7 @@
 
 package org.apache.airavata.mft.transport.ftp;
 
+import org.apache.airavata.mft.core.AuthZToken;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.ftp.FTPSecret;
@@ -42,7 +43,7 @@ public class FTPSender implements Connector {
     private FTPClient ftpClient;
 
     @Override
-    public void init(String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
+    public void init(AuthZToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
         this.initialized = true;
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
@@ -53,6 +54,7 @@ public class FTPSender implements Connector {
 
         this.ftpClient = FTPTransportUtil.getFTPClient(ftpStorage, ftpSecret);
     }
+
 
     @Override
     public void destroy() {

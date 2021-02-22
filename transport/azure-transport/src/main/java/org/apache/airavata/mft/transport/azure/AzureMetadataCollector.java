@@ -22,6 +22,7 @@ import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.models.BlobProperties;
+import org.apache.airavata.mft.core.AuthZToken;
 import org.apache.airavata.mft.core.DirectoryResourceMetadata;
 import org.apache.airavata.mft.core.FileResourceMetadata;
 import org.apache.airavata.mft.core.ResourceTypes;
@@ -47,7 +48,7 @@ public class AzureMetadataCollector implements MetadataCollector {
     boolean initialized = false;
 
     @Override
-    public void init(String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) {
+    public void init( String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) {
         this.resourceServiceHost = resourceServiceHost;
         this.resourceServicePort = resourceServicePort;
         this.secretServiceHost = secretServiceHost;
@@ -62,10 +63,10 @@ public class AzureMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(String resourceId, String credentialToken) throws Exception {
+    public FileResourceMetadata getFileResourceMetadata(AuthZToken authZToken,String resourceId, String credentialToken) throws Exception {
         checkInitialized();
 
-        if (!isAvailable(resourceId, credentialToken)) {
+        if (!isAvailable(authZToken,resourceId, credentialToken)) {
             throw new Exception("Azure blob can not find for resource id " + resourceId);
         }
 
@@ -98,21 +99,21 @@ public class AzureMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+    public FileResourceMetadata getFileResourceMetadata(AuthZToken authZToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
         throw new UnsupportedOperationException("Method not implemented");
     }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(String resourceId, String credentialToken) throws Exception {
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthZToken authZToken, String resourceId, String credentialToken) throws Exception {
         throw new UnsupportedOperationException("Method not implemented");    }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthZToken authZToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
         throw new UnsupportedOperationException("Method not implemented");
     }
 
     @Override
-    public Boolean isAvailable(String resourceId, String credentialToken) throws Exception {
+    public Boolean isAvailable(AuthZToken authZToken, String resourceId, String credentialToken) throws Exception {
         checkInitialized();
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
