@@ -12,6 +12,8 @@ public class CustosClientsFactory {
 
     private int custosPort;
 
+    private Map<String, CustosClientProvider> custosClientProviderMap = new ConcurrentHashMap<>();
+
     public CustosClientsFactory(String custosHost, int custosPort, String custosId, String custosSecret) {
         this.custosHost = custosHost;
         this.custosPort = custosPort;
@@ -22,8 +24,6 @@ public class CustosClientsFactory {
         custosClientProviderMap.put(custosId, custosClientProvider);
 
     }
-
-    private Map<String, CustosClientProvider> custosClientProviderMap = new ConcurrentHashMap<>();
 
 
     public CustosClientProvider getCustosClientProvider(String custosId, String custosSecret) {
