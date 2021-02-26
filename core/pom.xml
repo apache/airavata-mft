@@ -39,5 +39,10 @@
             <version>3.8.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
+            <artifactId>mft-common-proto</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

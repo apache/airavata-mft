@@ -19,6 +19,8 @@
 
 import org.apache.airavata.mft.api.client.MFTApiClient;
 import org.apache.airavata.mft.api.service.*;
+import org.apache.airavata.mft.common.AuthToken;
+import org.apache.airavata.mft.common.UserTokenAuth;
 
 import java.util.Iterator;
 
@@ -32,7 +34,8 @@ public class SCPExample {
         String destStorageId = "remote-ssh-storage-2";
         String destResourcePath = "/tmp/1mb-copy.txt";
         String destToken = "ssh-cred-2";
-        String mftAuthorizationToken = "43ff79ac-e4f2-473c-9ea1-04eee9509a53";
+        AuthToken mftAuthorizationToken = AuthToken.newBuilder().setUserTokenAuth(UserTokenAuth.newBuilder().setToken("43ff79ac-e4f2-473c-9ea1-04eee9509a53").build()).build();
+
 
         TransferApiRequest request = TransferApiRequest.newBuilder()
                 .setMftAuthorizationToken(mftAuthorizationToken)

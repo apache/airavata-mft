@@ -32,6 +32,13 @@
 
     <artifactId>mft-secret-service-stub</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
+            <artifactId>mft-common-proto</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
     <build>
         <extensions>
             <extension>
@@ -49,6 +56,9 @@
                     <protocArtifact>com.google.protobuf:protoc:3.0.2:exe:${os.detected.classifier}</protocArtifact>
                     <pluginId>grpc-java</pluginId>
                     <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.0.1:exe:${os.detected.classifier}</pluginArtifact>
+                    <additionalProtoPathElements>
+                        <additionalProtoPathElement>../../../common/mft-common-proto/src/main/proto</additionalProtoPathElement>
+                    </additionalProtoPathElements>
                 </configuration>
                 <executions>
                     <execution>

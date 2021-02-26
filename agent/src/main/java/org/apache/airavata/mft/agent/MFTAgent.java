@@ -33,7 +33,7 @@ import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
 import org.apache.airavata.mft.agent.http.HttpServer;
 import org.apache.airavata.mft.agent.http.HttpTransferRequestsStore;
 import org.apache.airavata.mft.agent.rpc.RPCParser;
-import org.apache.airavata.mft.core.AuthZToken;
+import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.core.ConnectorResolver;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
 import org.apache.airavata.mft.core.api.Connector;
@@ -164,14 +164,13 @@ public class MFTAgent implements CommandLineRunner {
                             .setPublisher(agentId)
                             .setDescription("Starting the transfer"));
 
-                        AuthZToken authZToken = new AuthZToken(request.getMftAuthorizationToken(), agentId, agentSecret);
                         Optional<Connector> inConnectorOpt = ConnectorResolver.resolveConnector(request.getSourceType(), "IN");
                         Connector inConnector = inConnectorOpt.orElseThrow(() -> new Exception("Could not find an in connector for given input"));
-                        inConnector.init(authZToken,request.getSourceStorageId(), request.getSourceToken(), resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
+                        inConnector.init(request.getMftAuthorizationToken(), request.getSourceStorageId(), request.getSourceToken(), resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
 
                         Optional<Connector> outConnectorOpt = ConnectorResolver.resolveConnector(request.getDestinationType(), "OUT");
                         Connector outConnector = outConnectorOpt.orElseThrow(() -> new Exception("Could not find an out connector for given input"));
-                        outConnector.init(authZToken, request.getDestinationStorageId(), request.getDestinationToken(), resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
+                        outConnector.init(request.getMftAuthorizationToken(), request.getDestinationStorageId(), request.getDestinationToken(), resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
 
                         Optional<MetadataCollector> srcMetadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(request.getSourceType());
                         MetadataCollector srcMetadataCollector = srcMetadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for source"));
@@ -189,7 +188,7 @@ public class MFTAgent implements CommandLineRunner {
                             .setDescription("Started the transfer"));
 
 
-                        String transferId = mediator.transfer(authZToken,request, inConnector, outConnector, srcMetadataCollector, dstMetadataCollector,
+                        String transferId = mediator.transfer(request.getMftAuthorizationToken(), request, inConnector, outConnector, srcMetadataCollector, dstMetadataCollector,
                                 (id, st) -> {
                                     try {
                                         mftConsulClient.submitTransferStateToProcess(id, agentId, st.setPublisher(agentId));

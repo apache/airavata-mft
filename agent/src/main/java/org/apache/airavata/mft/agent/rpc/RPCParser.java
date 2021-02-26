@@ -18,13 +18,14 @@
 package org.apache.airavata.mft.agent.rpc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.protobuf.util.JsonFormat;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCResponse;
 import org.apache.airavata.mft.agent.http.ConnectorParams;
 import org.apache.airavata.mft.agent.http.HttpTransferRequest;
 import org.apache.airavata.mft.agent.http.HttpTransferRequestsStore;
+import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.core.ConnectorResolver;
-import org.apache.airavata.mft.core.AuthZToken;
 import org.apache.airavata.mft.core.DirectoryResourceMetadata;
 import org.apache.airavata.mft.core.FileResourceMetadata;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
@@ -73,16 +74,17 @@ public class RPCParser {
                 String resourceId = request.getParameters().get("resourceId");
                 String resourceType = request.getParameters().get("resourceType");
                 String resourceToken = request.getParameters().get("resourceToken");
-                String mftAuthorizationToken = request.getParameters().get("mftAuthorizationToken");
-                String agentId = request.getAgentId();
-                String agentSecret = request.getParameters().get("agentSecret");
+
+                AuthToken.Builder tokenBuilder = AuthToken.newBuilder();
+                JsonFormat.parser().merge(request.getParameters().get("mftAuthorizationToken"), tokenBuilder);
+                AuthToken mftAuthorizationToken = tokenBuilder.build();
 
                 Optional<MetadataCollector> metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(resourceType);
                 if (metadataCollectorOp.isPresent()) {
                     MetadataCollector metadataCollector = metadataCollectorOp.get();
                     metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
                     FileResourceMetadata fileResourceMetadata = metadataCollector
-                            .getFileResourceMetadata(new AuthZToken(mftAuthorizationToken, agentId, agentSecret), resourceId, resourceToken);
+                            .getFileResourceMetadata(mftAuthorizationToken, resourceId, resourceToken);
                     return mapper.writeValueAsString(fileResourceMetadata);
                 }
                 break;
@@ -92,16 +94,17 @@ public class RPCParser {
                 resourceType = request.getParameters().get("resourceType");
                 resourceToken = request.getParameters().get("resourceToken");
                 String childPath = request.getParameters().get("childPath");
-                mftAuthorizationToken = request.getParameters().get("mftAuthorizationToken");
-                agentId = request.getAgentId();
-                agentSecret = request.getParameters().get("agentSecret");
+
+                tokenBuilder = AuthToken.newBuilder();
+                JsonFormat.parser().merge(request.getParameters().get("mftAuthorizationToken"), tokenBuilder);
+                mftAuthorizationToken = tokenBuilder.build();
 
                 metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(resourceType);
                 if (metadataCollectorOp.isPresent()) {
                     MetadataCollector metadataCollector = metadataCollectorOp.get();
                     metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
                     FileResourceMetadata fileResourceMetadata = metadataCollector
-                            .getFileResourceMetadata(new AuthZToken(mftAuthorizationToken, agentId, agentSecret), resourceId, childPath, resourceToken);
+                            .getFileResourceMetadata(mftAuthorizationToken, resourceId, childPath, resourceToken);
                     return mapper.writeValueAsString(fileResourceMetadata);
                 }
                 break;
@@ -110,16 +113,17 @@ public class RPCParser {
                 resourceId = request.getParameters().get("resourceId");
                 resourceType = request.getParameters().get("resourceType");
                 resourceToken = request.getParameters().get("resourceToken");
-                mftAuthorizationToken = request.getParameters().get("mftAuthorizationToken");
-                agentId = request.getAgentId();
-                agentSecret = request.getParameters().get("agentSecret");
+
+                tokenBuilder = AuthToken.newBuilder();
+                JsonFormat.parser().merge(request.getParameters().get("mftAuthorizationToken"), tokenBuilder);
+                mftAuthorizationToken = tokenBuilder.build();
 
                 metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(resourceType);
                 if (metadataCollectorOp.isPresent()) {
                     MetadataCollector metadataCollector = metadataCollectorOp.get();
                     metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
                     DirectoryResourceMetadata dirResourceMetadata = metadataCollector
-                            .getDirectoryResourceMetadata(new AuthZToken(mftAuthorizationToken, agentId, agentSecret), resourceId, resourceToken);
+                            .getDirectoryResourceMetadata(mftAuthorizationToken, resourceId, resourceToken);
                     return mapper.writeValueAsString(dirResourceMetadata);
                 }
                 break;
@@ -129,16 +133,17 @@ public class RPCParser {
                 resourceType = request.getParameters().get("resourceType");
                 resourceToken = request.getParameters().get("resourceToken");
                 childPath = request.getParameters().get("childPath");
-                mftAuthorizationToken = request.getParameters().get("mftAuthorizationToken");
-                agentId = request.getAgentId();
-                agentSecret = request.getParameters().get("agentSecret");
+
+                tokenBuilder = AuthToken.newBuilder();
+                JsonFormat.parser().merge(request.getParameters().get("mftAuthorizationToken"), tokenBuilder);
+                mftAuthorizationToken = tokenBuilder.build();
 
                 metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(resourceType);
                 if (metadataCollectorOp.isPresent()) {
                     MetadataCollector metadataCollector = metadataCollectorOp.get();
                     metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
                     DirectoryResourceMetadata dirResourceMetadata = metadataCollector
-                            .getDirectoryResourceMetadata(new AuthZToken(mftAuthorizationToken, agentId, agentSecret), resourceId, childPath, resourceToken);
+                            .getDirectoryResourceMetadata(mftAuthorizationToken, resourceId, childPath, resourceToken);
                     return mapper.writeValueAsString(dirResourceMetadata);
                 }
                 break;
@@ -148,7 +153,10 @@ public class RPCParser {
                 String sourcePath = request.getParameters().get("sourcePath");
                 String sourceToken = request.getParameters().get("sourceToken");
                 String storeType = request.getParameters().get("storeType");
-                mftAuthorizationToken = request.getParameters().get("mftAuthorizationToken");
+
+                tokenBuilder = AuthToken.newBuilder();
+                JsonFormat.parser().merge(request.getParameters().get("mftAuthorizationToken"), tokenBuilder);
+                mftAuthorizationToken = tokenBuilder.build();
 
                 metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(storeType);
                 Optional<Connector> connectorOp = ConnectorResolver.resolveConnector(storeType, "IN");

@@ -17,6 +17,8 @@
 
 package org.apache.airavata.mft.admin.models;
 
+import org.apache.airavata.mft.common.AuthToken;
+
 import java.util.Map;
 
 public class TransferRequest {
@@ -33,7 +35,7 @@ public class TransferRequest {
     private String destinationToken;
     private String destResourceBackend;
     private String destCredentialBackend;
-    private String mftAuthorizationToken;
+    private AuthToken mftAuthorizationToken;
     private boolean affinityTransfer;
     private Map<String, Integer> targetAgents;
 
@@ -163,11 +165,12 @@ public class TransferRequest {
         return this;
     }
 
-    public String getMftAuthorizationToken() {
+    public AuthToken getMftAuthorizationToken() {
         return mftAuthorizationToken;
     }
 
-    public void setMftAuthorizationToken(String mftAuthorizationToken) {
+    public TransferRequest setMftAuthorizationToken(AuthToken mftAuthorizationToken) {
         this.mftAuthorizationToken = mftAuthorizationToken;
+        return this;
     }
 }

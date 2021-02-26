@@ -17,6 +17,7 @@
 
 package org.apache.airavata.mft.secret.server;
 
+import org.apache.airavata.mft.secret.server.backend.custos.CustosClientsFactory;
 import org.apache.airavata.mft.secret.server.backend.custos.auth.AgentAuthenticationHandler;
 import org.apache.custos.clients.CustosClientProvider;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,16 +43,13 @@ public class AppConfig {
     private String custosSecret;
 
     @Bean
-    public CustosClientProvider custosClientProvider() {
-        return new CustosClientProvider.Builder().setServerHost(custosHost)
-                .setServerPort(custosPort)
-                .setClientId(custosId)
-                .setClientSec(custosSecret).build();
+    public CustosClientsFactory custosClientsFactory() {
+        return new CustosClientsFactory(custosHost, custosPort, custosId, custosSecret);
     }
 
     @Bean
     public AgentAuthenticationHandler agentAuthenticationHandler() throws IOException {
-        return new AgentAuthenticationHandler(custosId, custosClientProvider());
+        return new AgentAuthenticationHandler(custosId, custosSecret, custosClientsFactory());
     }
 
 

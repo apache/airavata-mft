@@ -1,8 +1,8 @@
 package org.apache.airavata.mft.secret.server.backend.custos.auth;
 
 import com.google.protobuf.Struct;
+import org.apache.airavata.mft.secret.server.backend.custos.CustosClientsFactory;
 import org.apache.airavata.mft.secret.server.backend.custos.CustosException;
-import org.apache.custos.clients.CustosClientProvider;
 import org.apache.custos.identity.management.client.IdentityManagementClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,17 +27,22 @@ public class AgentAuthenticationHandler implements AuthenticationHandler, Closea
 
     private String custosId;
 
+    private String custosSecret;
 
-
-    private  IdentityManagementClient identityManagementClient;
+    private IdentityManagementClient identityManagementClient;
 
     @Autowired
-    private CustosClientProvider custosClientProvider;
+    private CustosClientsFactory custosClientsFactory;
 
 
-    public AgentAuthenticationHandler(@Value("${custos.id}") String custosId, @Autowired CustosClientProvider custosClientProvider) throws IOException {
+    public AgentAuthenticationHandler(@Value("${custos.id}") String custosId, @Value("${custos.id}") String custosSecret,
+                                      @Autowired CustosClientsFactory custosClientsFactory) throws IOException {
         this.custosId = custosId;
-        this.identityManagementClient = custosClientProvider.getIdentityManagementClient();
+        this.custosSecret = custosSecret;
+        this.custosClientsFactory = custosClientsFactory;
+        this.identityManagementClient = custosClientsFactory.
+                getCustosClientProvider(custosId, custosSecret)
+                .getIdentityManagementClient();
     }
 
     @Override
@@ -82,7 +87,7 @@ public class AgentAuthenticationHandler implements AuthenticationHandler, Closea
 
     @Override
     public void close() throws IOException {
-        if(this.identityManagementClient != null){
+        if (this.identityManagementClient != null) {
             this.identityManagementClient.close();
         }
     }

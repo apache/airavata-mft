@@ -5,6 +5,7 @@ package org.apache.airavata.mft.api.service;
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
+import "CredCommon.proto";
 
 message TransferApiRequest {
     string sourceStorageId = 1;
@@ -21,7 +22,7 @@ message TransferApiRequest {
     string destCredentialBackend = 12;
     bool affinityTransfer = 13;
     map<string, int32> targetAgents = 14;
-    string mftAuthorizationToken = 15;
+    org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 15;
 }
 
 message TransferApiResponse {
@@ -34,7 +35,7 @@ message HttpUploadApiRequest {
     string destinationToken = 3;
     string destinationType = 4;
     string targetAgent = 5;
-    string mftAuthorizationToken = 6;
+    org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 6;
 }
 
 message HttpUploadApiResponse {
@@ -48,7 +49,7 @@ message HttpDownloadApiRequest {
     string sourceToken = 3;
     string sourceType = 4;
     string targetAgent = 5;
-    string mftAuthorizationToken = 6;
+    org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 6;
 }
 
 message HttpDownloadApiResponse {
@@ -58,7 +59,7 @@ message HttpDownloadApiResponse {
 
 message TransferStateApiRequest {
     string transferId = 1;
-    string mftAuthorizationToken = 2;
+    org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 2;
 }
 
 message TransferStateApiResponse {
@@ -74,7 +75,7 @@ message ResourceAvailabilityRequest {
     string resourceToken = 3;
     string resourceBackend = 4;
     string resourceCredentialBackend = 5;
-    string mftAuthorizationToken = 6;
+    org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 6;
 }
 
 message ResourceAvailabilityResponse {
@@ -112,7 +113,7 @@ message FetchResourceMetadataRequest {
     string resourceCredentialBackend = 5;
     string targetAgentId = 7;
     string childPath = 8; // if the child entities of the parent resource are required, set this field
-    string mftAuthorizationToken = 9;
+    org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 9;
 }
 
 service  MFTApiService {
