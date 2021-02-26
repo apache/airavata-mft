@@ -113,7 +113,7 @@ public class CustosSecretBackend implements SecretBackend {
             case DELEGATEAUTH:
                 DelegateAuth delegateAuth = request.getAuthzToken().getDelegateAuth();
                 ResourceSecretManagementClient csClient = getTenantResourceSecretManagementClient(delegateAuth);
-                SSHCredential sshCredential = csClient.getSSHCredential(delegateAuth.getClientId(),
+                SSHCredential sshCredential = csClient.getSSHCredential(delegateAuth.getPropertiesMap().get("PORTAL_CUSTOS_ID"),
                         request.getSecretId(), false);
                 SCPSecret scpSecret = SCPSecret.newBuilder()
                         .setSecretId(sshCredential.getMetadata().getToken())
@@ -174,7 +174,7 @@ public class CustosSecretBackend implements SecretBackend {
             case DELEGATEAUTH:
                 DelegateAuth delegateAuth = request.getAuthzToken().getDelegateAuth();
                 ResourceSecretManagementClient csClient = getTenantResourceSecretManagementClient(delegateAuth);
-                CredentialMap credentialMap = csClient.getCredentialMap(delegateAuth.getClientId(),
+                CredentialMap credentialMap = csClient.getCredentialMap(delegateAuth.getPropertiesMap().get("PORTAL_CUSTOS_ID"),
                         request.getSecretId());
                 Map<String, String> secretValues = credentialMap.getCredentialMapMap();
                 S3Secret s3Secret = S3Secret.newBuilder()
@@ -233,7 +233,8 @@ public class CustosSecretBackend implements SecretBackend {
             case DELEGATEAUTH:
                 DelegateAuth delegateAuth = request.getAuthzToken().getDelegateAuth();
                 ResourceSecretManagementClient csClient = getTenantResourceSecretManagementClient(delegateAuth);
-                CredentialMap credentialMap = csClient.getCredentialMap(delegateAuth.getClientId(), request.getSecretId());
+                CredentialMap credentialMap = csClient.getCredentialMap(delegateAuth.getPropertiesMap().get("PORTAL_CUSTOS_ID"),
+                        request.getSecretId());
                 Map<String, String> secretValues = credentialMap.getCredentialMapMap();
                 BoxSecret boxSecret = BoxSecret.newBuilder()
                         .setSecretId(secretValues.get("secretId"))
@@ -295,7 +296,8 @@ public class CustosSecretBackend implements SecretBackend {
             case DELEGATEAUTH:
                 DelegateAuth delegateAuth = request.getAuthzToken().getDelegateAuth();
                 ResourceSecretManagementClient csClient = getTenantResourceSecretManagementClient(delegateAuth);
-                CredentialMap credentialMap = csClient.getCredentialMap(delegateAuth.getClientId(), request.getSecretId());
+                CredentialMap credentialMap = csClient.getCredentialMap(delegateAuth.getPropertiesMap().get("PORTAL_CUSTOS_ID"),
+                        request.getSecretId());
                 Map<String, String> secretValues = credentialMap.getCredentialMapMap();
                 AzureSecret azureSecret = AzureSecret.newBuilder()
                         .setSecretId(secretValues.get("secretId"))
@@ -356,7 +358,8 @@ public class CustosSecretBackend implements SecretBackend {
             case DELEGATEAUTH:
                 DelegateAuth delegateAuth = request.getAuthzToken().getDelegateAuth();
                 ResourceSecretManagementClient csClient = getTenantResourceSecretManagementClient(delegateAuth);
-                CredentialMap credentialMap = csClient.getCredentialMap(delegateAuth.getClientId(), request.getSecretId());
+                CredentialMap credentialMap = csClient.getCredentialMap(delegateAuth.getPropertiesMap().get("PORTAL_CUSTOS_ID"),
+                        request.getSecretId());
                 Map<String, String> secretValues = credentialMap.getCredentialMapMap();
                 GCSSecret gcsSecret = GCSSecret.newBuilder()
                         .setSecretId(secretValues.get("secretId"))
@@ -417,7 +420,8 @@ public class CustosSecretBackend implements SecretBackend {
             case DELEGATEAUTH:
                 DelegateAuth delegateAuth = request.getAuthzToken().getDelegateAuth();
                 ResourceSecretManagementClient csClient = getTenantResourceSecretManagementClient(delegateAuth);
-                CredentialMap credentialMap = csClient.getCredentialMap(delegateAuth.getClientId(), request.getSecretId());
+                CredentialMap credentialMap = csClient.getCredentialMap(delegateAuth.getPropertiesMap().get("PORTAL_CUSTOS_ID"),
+                        request.getSecretId());
                 Map<String, String> secretValues = credentialMap.getCredentialMapMap();
                 DropboxSecret dropboxSecret = DropboxSecret.newBuilder()
                         .setSecretId(secretValues.get("secretId"))
@@ -480,8 +484,9 @@ public class CustosSecretBackend implements SecretBackend {
             case DELEGATEAUTH:
                 DelegateAuth delegateAuth = request.getAuthzToken().getDelegateAuth();
                 ResourceSecretManagementClient csClient = getTenantResourceSecretManagementClient(delegateAuth);
-                PasswordCredential passwordCredential = csClient.getPasswordCredential(delegateAuth.getClientId(),
-                        request.getSecretId());
+                PasswordCredential passwordCredential = csClient
+                        .getPasswordCredential(delegateAuth.getPropertiesMap().get("PORTAL_CUSTOS_ID"),
+                                request.getSecretId());
                 FTPSecret ftpSecret = FTPSecret.newBuilder()
                         .setSecretId(request.getSecretId())
                         .setPassword(passwordCredential.getPassword())
@@ -509,8 +514,8 @@ public class CustosSecretBackend implements SecretBackend {
 
 
     private ResourceSecretManagementClient getTenantResourceSecretManagementClient(DelegateAuth delegateAuth) throws IOException {
-        String adminCustosId = delegateAuth.getPropertiesMap().get("ADMIN_TENANT_CUSTOS_ID");
-        String adminCustosSecret = delegateAuth.getPropertiesMap().get("ADMIN_TENANT_CUSTOS_SECRET");
+        String adminCustosId = delegateAuth.getClientId();
+        String adminCustosSecret = delegateAuth.getClientSecret();
         CustosClientProvider custosClientProvider = custosClientsFactory
                 .getCustosClientProvider(adminCustosId, adminCustosSecret);
         return custosClientProvider
