@@ -17,6 +17,8 @@
 
 package org.apache.airavata.mft.admin.models;
 
+import org.apache.airavata.mft.common.AuthToken;
+
 public class TransferCommand {
 
     private String transferId;
@@ -32,7 +34,7 @@ public class TransferCommand {
     private String destinationToken;
     private String destResourceBackend;
     private String destCredentialBackend;
-    private String mftAuthorizationToken;
+    private AuthToken mftAuthorizationToken;
 
     public String getTransferId() {
         return transferId;
@@ -151,11 +153,12 @@ public class TransferCommand {
         return this;
     }
 
-    public String getMftAuthorizationToken() {
+    public AuthToken getMftAuthorizationToken() {
         return mftAuthorizationToken;
     }
 
-    public void setMftAuthorizationToken(String mftAuthorizationToken) {
+    public TransferCommand setMftAuthorizationToken(AuthToken mftAuthorizationToken) {
         this.mftAuthorizationToken = mftAuthorizationToken;
+        return this;
     }
 }

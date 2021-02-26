@@ -18,10 +18,29 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-package org.apache.airavata.mft.stubs.common;
+package org.apache.airavata.mft.common;
 
-message AuthToken {
+message UserTokenAuth {
+    string token = 1;
+}
+
+message AgentAuth {
     string token = 1;
     string agentId = 2;
     string agentSecret = 3;
+}
+
+message DelegateAuth {
+    string userId = 1;
+    string clientId = 2;
+    string clientSecret = 3;
+    map<string, string> properties = 4;
+}
+
+message AuthToken {
+    oneof authMechanism {
+        UserTokenAuth userTokenAuth = 1;
+        AgentAuth agentAuth = 2;
+        DelegateAuth delegateAuth = 3;
+    }
 }

@@ -24,16 +24,13 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
-import org.apache.airavata.mft.core.AuthZToken;
+import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.core.ConnectorContext;
-import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.gcs.GCSSecret;
 import org.apache.airavata.mft.credential.stubs.gcs.GCSSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.gcs.resource.GCSResource;
-import org.apache.airavata.mft.resource.stubs.gcs.resource.GCSResourceGetRequest;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorage;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
@@ -56,7 +53,7 @@ public class GCSReceiver implements Connector {
     private GCSStorage gcsStorage;
 
     @Override
-    public void init(AuthZToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
+    public void init(AuthToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         this.gcsStorage = resourceClient.gcs().getGCSStorage(GCSStorageGetRequest.newBuilder().setStorageId(storageId).build());

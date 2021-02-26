@@ -19,11 +19,10 @@ package org.apache.airavata.mft.transport.scp;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
-import org.apache.airavata.mft.core.AuthZToken;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.DoubleStreamingBuffer;
 import org.apache.airavata.mft.core.api.Connector;
-import org.apache.airavata.mft.credential.stubs.common.AuthToken;
+import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.credential.stubs.scp.SCPSecret;
 import org.apache.airavata.mft.credential.stubs.scp.SCPSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
@@ -47,7 +46,7 @@ public class SCPReceiver implements Connector {
 
     private Session session;
 
-    public void init(AuthZToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort,
+    public void init(AuthToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort,
                      String secretServiceHost, int secretServicePort) throws Exception {
 
         if (initialized) {
@@ -60,13 +59,9 @@ public class SCPReceiver implements Connector {
         SCPStorage scpStorage = resourceClient.scp().getSCPStorage(SCPStorageGetRequest.newBuilder().setStorageId(storageId).build());
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
-        AuthToken authToken = AuthToken.newBuilder()
-                .setToken(authZToken.getMftAuthorizationToken()).setAgentId(authZToken.getAgentId())
-                .setAgentSecret(authZToken.getAgentSecret())
-                .build();
         SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest
                 .newBuilder()
-                .setAuthzToken(authToken).setSecretId(credentialToken).build());
+                .setAuthzToken(authZToken).setSecretId(credentialToken).build());
 
         this.session = SCPTransportUtil.createSession(
                 scpStorage.getUser(),

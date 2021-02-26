@@ -28,7 +28,7 @@ import net.schmizz.sshj.userauth.method.AuthMethod;
 import net.schmizz.sshj.userauth.method.AuthPublickey;
 import net.schmizz.sshj.userauth.method.ChallengeResponseProvider;
 import net.schmizz.sshj.userauth.password.Resource;
-import org.apache.airavata.mft.core.AuthZToken;
+import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.core.DirectoryResourceMetadata;
 import org.apache.airavata.mft.core.FileResourceMetadata;
 import org.apache.airavata.mft.core.ResourceTypes;
@@ -42,7 +42,6 @@ import org.apache.airavata.mft.resource.stubs.common.FileResource;
 import org.apache.airavata.mft.resource.stubs.scp.resource.SCPResource;
 import org.apache.airavata.mft.resource.stubs.scp.resource.SCPResourceGetRequest;
 import org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorage;
-import org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageCreateRequest;
 import org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
@@ -51,7 +50,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -81,7 +79,7 @@ public class SCPMetadataCollector implements MetadataCollector {
         }
     }
 
-    private FileResourceMetadata getFileResourceMetadata(AuthZToken authZToken, SCPResource scpResource, SCPSecret scpSecret) throws Exception {
+    private FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, SCPResource scpResource, SCPSecret scpSecret) throws Exception {
         try (SSHClient sshClient = getSSHClient(scpResource, scpSecret)) {
 
             logger.info("Fetching metadata for resource {} in {}", scpResource.getFile().getResourcePath(), scpResource.getScpStorage().getHost());
@@ -121,7 +119,7 @@ public class SCPMetadataCollector implements MetadataCollector {
         }
     }
 
-    public FileResourceMetadata getFileResourceMetadata(AuthZToken authZToken, String resourceId, String credentialToken) throws Exception {
+    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
 
         checkInitialized();
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
@@ -134,7 +132,7 @@ public class SCPMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(AuthZToken authZToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         SCPResource scpResource = resourceClient.scp().getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(parentResourceId).build());
 
@@ -149,7 +147,7 @@ public class SCPMetadataCollector implements MetadataCollector {
         return getFileResourceMetadata(authZToken, scpResource2, scpSecret);
     }
 
-    private DirectoryResourceMetadata getDirectoryResourceMetadata(AuthZToken authZToken, SCPResource scpResource, SCPSecret scpSecret) throws Exception {
+    private DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, SCPResource scpResource, SCPSecret scpSecret) throws Exception {
         try (SSHClient sshClient = getSSHClient(scpResource, scpSecret)) {
 
             logger.info("Fetching metadata for resource {} in {}", scpResource.getFile().getResourcePath(), scpResource.getScpStorage().getHost());
@@ -193,7 +191,7 @@ public class SCPMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthZToken authZToken, String resourceId, String credentialToken) throws Exception {
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         SCPResource scpPResource = resourceClient.scp().getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
@@ -205,7 +203,7 @@ public class SCPMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthZToken authZToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         SCPResource scpPResource = resourceClient.scp().getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(parentResourceId).build());
 
@@ -220,31 +218,36 @@ public class SCPMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public Boolean isAvailable(AuthZToken authZToken, String resourceId, String credentialToken) throws Exception {
+    public Boolean isAvailable(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
 
         checkInitialized();
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         SCPResource scpResource = resourceClient.scp().getSCPResource(SCPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        return isAvailable(scpResource, credentialToken);
+        return isAvailable(authZToken, scpResource, credentialToken);
     }
 
     @Override
-    public Boolean isAvailable(String storageId, String resourcePath, String credentialToken) throws Exception {
+    public Boolean isAvailable(AuthToken authToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
         checkInitialized();
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        SCPStorage scpStorage = resourceClient.scp().getSCPStorage(SCPStorageGetRequest.newBuilder().setStorageId(storageId).build());
-        SCPResource scpResource = SCPResource.newBuilder()
-                .setFile(FileResource.newBuilder().setResourcePath(resourcePath).build())
-                .setScpStorage(scpStorage).build();
+        SCPResource scpResource = resourceClient.scp().getSCPResource(SCPResourceGetRequest.newBuilder()
+                .setResourceId(parentResourceId).build());
 
-        return isAvailable(scpResource, credentialToken);
+        validateParent(scpResource, resourcePath);
+
+        SCPResource targetScpResource = SCPResource.newBuilder()
+                .setFile(FileResource.newBuilder().setResourcePath(resourcePath).build())
+                .setScpStorage(scpResource.getScpStorage()).build();
+
+        return isAvailable(authToken, targetScpResource, credentialToken);
     }
 
-    public Boolean isAvailable(SCPResource scpResource, String credentialToken) throws Exception {
+    public Boolean isAvailable(AuthToken authToken, SCPResource scpResource, String credentialToken) throws Exception {
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
-        SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder()
+                .setAuthzToken(authToken).setSecretId(credentialToken).build());
 
         try (SSHClient sshClient = getSSHClient(scpResource, scpSecret)) {
             logger.info("Checking the availability of file {}", scpResource.getFile().getResourcePath());

@@ -19,6 +19,7 @@ package org.apache.airavata.mft.agent;
 
 import org.apache.airavata.mft.admin.models.TransferCommand;
 import org.apache.airavata.mft.admin.models.TransferState;
+import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.core.*;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.core.api.MetadataCollector;
@@ -48,7 +49,7 @@ public class TransportMediator {
         executor.shutdown();
     }
 
-    public String transfer(AuthZToken authZToken, TransferCommand command, Connector inConnector, Connector outConnector, MetadataCollector srcMetadataCollector,
+    public String transfer(AuthToken authZToken, TransferCommand command, Connector inConnector, Connector outConnector, MetadataCollector srcMetadataCollector,
                            MetadataCollector destMetadataCollector, BiConsumer<String, TransferState> onStatusCallback,
                            BiConsumer<String, Boolean> exitingCallback) throws Exception {
 
@@ -124,10 +125,9 @@ public class TransportMediator {
                     }
 
                     if (!transferErrored) {
-                        Boolean transferred = destMetadataCollector.isAvailable(
+                        Boolean transferred = destMetadataCollector.isAvailable(authZToken,
                                 command.getDestinationStorageId(),
-                                command.getDestinationPath(),
-                                command.getDestinationToken());
+                                command.getDestinationPath(), command.getDestinationToken());
 
 
                         if (!transferred) {

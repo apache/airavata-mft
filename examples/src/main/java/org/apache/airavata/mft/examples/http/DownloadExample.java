@@ -21,9 +21,13 @@ import org.apache.airavata.mft.api.client.MFTApiClient;
 import org.apache.airavata.mft.api.service.HttpDownloadApiRequest;
 import org.apache.airavata.mft.api.service.HttpDownloadApiResponse;
 import org.apache.airavata.mft.api.service.MFTApiServiceGrpc;
+import org.apache.airavata.mft.common.AuthToken;
+import org.apache.airavata.mft.common.UserTokenAuth;
 
 public class DownloadExample {
     public static void main(String args[]) {
+        AuthToken mftAuthorizationToken = AuthToken.newBuilder().setUserTokenAuth(UserTokenAuth.newBuilder().setToken("43ff79ac-e4f2-473c-9ea1-04eee9509a53").build()).build();
+
         MFTApiServiceGrpc.MFTApiServiceBlockingStub client = MFTApiClient.buildClient("localhost", 7004);
         HttpDownloadApiResponse httpDownloadApiResponse = client.submitHttpDownload(HttpDownloadApiRequest.newBuilder()
                 .setTargetAgent("agent0")
@@ -31,7 +35,7 @@ public class DownloadExample {
                 .setSourceStoreId("remote-ssh-storage")
                 .setSourceToken("local-ssh-cred")
                 .setSourceType("SCP")
-                .setMftAuthorizationToken("")
+                .setMftAuthorizationToken(mftAuthorizationToken)
                 .build());
 
         System.out.println(httpDownloadApiResponse);

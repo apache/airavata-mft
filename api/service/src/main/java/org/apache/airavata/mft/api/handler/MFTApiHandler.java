@@ -18,6 +18,7 @@
 package org.apache.airavata.mft.api.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.protobuf.util.JsonFormat;
 import io.grpc.stub.StreamObserver;
 import org.apache.airavata.mft.admin.MFTConsulClient;
 import org.apache.airavata.mft.admin.SyncRPCClient;
@@ -26,7 +27,6 @@ import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCResponse;
 import org.apache.airavata.mft.api.service.*;
-import org.apache.airavata.mft.core.AuthZToken;
 import org.apache.airavata.mft.core.DirectoryResourceMetadata;
 import org.apache.airavata.mft.core.FileResourceMetadata;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
@@ -102,7 +102,6 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
     @Override
     public void submitHttpDownload(HttpDownloadApiRequest request, StreamObserver<HttpDownloadApiResponse> responseObserver) {
         try {
-
             // TODO : Automatically derive agent if the target agent is empty
             SyncRPCRequest.SyncRPCRequestBuilder requestBuilder = SyncRPCRequest.SyncRPCRequestBuilder.builder()
                     .withAgentId(request.getTargetAgent())
@@ -112,7 +111,7 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
                     .withParameter("sourcePath", request.getSourcePath())
                     .withParameter("sourceToken", request.getSourceToken())
                     .withParameter("storeType", request.getSourceType())
-                    .withParameter("mftAuthorizationToken", request.getMftAuthorizationToken());
+                    .withParameter("mftAuthorizationToken", JsonFormat.printer().print(request.getMftAuthorizationToken()));
 
             SyncRPCResponse rpcResponse = agentRPCClient.sendSyncRequest(requestBuilder.build());
 
@@ -181,8 +180,8 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
                     () -> new Exception("Could not find a metadata collector for resource " + request.getResourceId()));
 
             metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
-            AuthZToken authZToken = new AuthZToken(request.getMftAuthorizationToken());
-            Boolean available = metadataCollector.isAvailable(authZToken, request.getResourceId(), request.getResourceToken());
+            Boolean available = metadataCollector.isAvailable(request.getMftAuthorizationToken(),
+                    request.getResourceId(), request.getResourceToken());
             responseObserver.onNext(ResourceAvailabilityResponse.newBuilder().setAvailable(available).build());
             responseObserver.onCompleted();
 
@@ -208,7 +207,7 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
                     .withParameter("resourceId", request.getResourceId())
                     .withParameter("resourceType", request.getResourceType())
                     .withParameter("resourceToken", request.getResourceToken())
-                    .withParameter("mftAuthorizationToken", request.getMftAuthorizationToken());
+                    .withParameter("mftAuthorizationToken", JsonFormat.printer().print(request.getMftAuthorizationToken()));
 
             if (request.getChildPath().isEmpty()) {
                 requestBuilder.withMethod("getFileResourceMetadata");
@@ -256,7 +255,7 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
                     .withParameter("resourceId", request.getResourceId())
                     .withParameter("resourceType", request.getResourceType())
                     .withParameter("resourceToken", request.getResourceToken())
-                    .withParameter("mftAuthorizationToken", request.getMftAuthorizationToken());
+                    .withParameter("mftAuthorizationToken", JsonFormat.printer().print(request.getMftAuthorizationToken()));
 
             if (request.getChildPath().isEmpty()) {
                 requestBuilder.withMethod("getDirectoryResourceMetadata");

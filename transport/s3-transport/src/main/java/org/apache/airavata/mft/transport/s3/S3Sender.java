@@ -22,16 +22,13 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import org.apache.airavata.mft.core.AuthZToken;
+import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.core.ConnectorContext;
-import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.s3.S3Secret;
 import org.apache.airavata.mft.credential.stubs.s3.S3SecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.s3.resource.S3Resource;
-import org.apache.airavata.mft.resource.stubs.s3.resource.S3ResourceGetRequest;
 import org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage;
 import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
@@ -47,7 +44,7 @@ public class S3Sender implements Connector {
     private S3Storage s3Storage;
 
     @Override
-    public void init(AuthZToken authZToken,String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
+    public void init(AuthToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         this.s3Storage = resourceClient.s3().getS3Storage(S3StorageGetRequest.newBuilder().setStorageId(storageId).build());

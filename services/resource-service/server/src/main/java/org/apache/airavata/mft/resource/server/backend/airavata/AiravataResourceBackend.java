@@ -51,10 +51,10 @@ public class AiravataResourceBackend implements ResourceBackend {
 
     private static final Logger logger = LoggerFactory.getLogger(AiravataResourceBackend.class);
 
-    @org.springframework.beans.factory.annotation.Value("${registry.server.host}")
+    @org.springframework.beans.factory.annotation.Value("${airavata.backend.registry.server.host}")
     private String registryServerHost;
 
-    @org.springframework.beans.factory.annotation.Value("${registry.server.port}")
+    @org.springframework.beans.factory.annotation.Value("${airavata.backend.registry.server.port}")
     private int registryServerPort;
 
     @Override
@@ -73,8 +73,8 @@ public class AiravataResourceBackend implements ResourceBackend {
         String resourceId = request.getStorageId();
         String[] parts = resourceId.split(":");
         String type = parts[0];
-        String storageOrComputeId = parts[3];
-        String user = parts[4];
+        String storageOrComputeId = parts[2];
+        String user = parts[3];
 
         logger.info("Connecting to registry service {}:{}", registryServerHost, registryServerPort);
 

@@ -19,6 +19,8 @@ package org.apache.airavata.mft.examples.transfer;
 
 import org.apache.airavata.mft.api.client.MFTApiClient;
 import org.apache.airavata.mft.api.service.*;
+import org.apache.airavata.mft.common.AuthToken;
+import org.apache.airavata.mft.common.UserTokenAuth;
 
 import java.util.Iterator;
 
@@ -32,7 +34,7 @@ public class LocalExample {
         String destStorageId = "local-storage-1";
         String destResourcePath = "/tmp/1mb-copy.txt";
         String destToken = "";
-        String mftAuthorizationToken = "43ff79ac-e4f2-473c-9ea1-04eee9509a53";
+        AuthToken mftAuthorizationToken = AuthToken.newBuilder().setUserTokenAuth(UserTokenAuth.newBuilder().setToken("43ff79ac-e4f2-473c-9ea1-04eee9509a53").build()).build();
 
         TransferApiRequest request = TransferApiRequest.newBuilder()
                 .setMftAuthorizationToken(mftAuthorizationToken)

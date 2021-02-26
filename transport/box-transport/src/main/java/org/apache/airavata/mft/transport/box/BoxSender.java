@@ -20,16 +20,11 @@ package org.apache.airavata.mft.transport.box;
 
 import com.box.sdk.BoxAPIConnection;
 import com.box.sdk.BoxFile;
-import org.apache.airavata.mft.core.AuthZToken;
+import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.core.ConnectorContext;
-import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.box.BoxSecret;
 import org.apache.airavata.mft.credential.stubs.box.BoxSecretGetRequest;
-import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.box.resource.BoxResource;
-import org.apache.airavata.mft.resource.stubs.box.resource.BoxResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
@@ -41,7 +36,7 @@ public class BoxSender implements Connector {
     private BoxAPIConnection boxClient;
 
     @Override
-    public void init(AuthZToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
+    public void init(AuthToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         BoxSecret boxSecret = secretClient.box().getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());

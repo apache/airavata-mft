@@ -7,10 +7,18 @@
         <groupId>org.apache.airavata</groupId>
         <version>0.01-SNAPSHOT</version>
     </parent>
+    <packaging>jar</packaging>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>mft-common-proto</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>${protobuf.java}</version>
+        </dependency>
+    </dependencies>
     <build>
         <extensions>
             <extension>

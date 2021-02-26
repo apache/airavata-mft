@@ -22,6 +22,7 @@ import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.stream.ChunkedStream;
 import io.netty.util.CharsetUtil;
+import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.core.*;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.core.api.MetadataCollector;
@@ -76,17 +77,18 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         ConnectorParams params = httpTransferRequest.getConnectorParams();
 
-        AuthZToken authZToken = new AuthZToken();
+        // TODO Load from HTTP Headers
+        AuthToken authToken = AuthToken.newBuilder().build();
 
-        connector.init(authZToken, params.getStorageId(), params.getCredentialToken(), params.getResourceServiceHost(),
+        connector.init(authToken, params.getStorageId(), params.getCredentialToken(), params.getResourceServiceHost(),
                 params.getResourceServicePort(), params.getSecretServiceHost(), params.getSecretServicePort());
 
         metadataCollector.init(params.getResourceServiceHost(), params.getResourceServicePort(),
                 params.getSecretServiceHost(), params.getSecretServicePort());
 
-        Boolean available = metadataCollector.isAvailable(params.getStorageId(),
-                httpTransferRequest.getTargetResourcePath(),
-                params.getCredentialToken());
+        Boolean available = metadataCollector.isAvailable(authToken,
+                params.getStorageId(),
+                httpTransferRequest.getTargetResourcePath(), params.getCredentialToken());
 
 
         if (!available) {
@@ -95,7 +97,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return;
         }
 
-        FileResourceMetadata fileResourceMetadata = metadataCollector.getFileResourceMetadata(authZToken, params.getStorageId(),
+        FileResourceMetadata fileResourceMetadata = metadataCollector.getFileResourceMetadata(authToken, params.getStorageId(),
                 httpTransferRequest.getTargetResourcePath(),
                 params.getCredentialToken());
 
