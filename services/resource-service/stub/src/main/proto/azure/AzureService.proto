@@ -22,10 +22,9 @@ package org.apache.airavata.mft.resource.service.azure;
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
-import "azure/AzureResource.proto";
 import "azure/AzureStorage.proto";
 
-service AzureResourceService {
+service AzureStorageService {
     
     // Storage
 
@@ -52,34 +51,6 @@ service AzureResourceService {
     rpc deleteAzureStorage (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageDeleteRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
            delete: "/v1.0/resource/azure/storage"
-        };
-    }
-
-    // Resource
-
-    rpc getAzureResource (org.apache.airavata.mft.resource.stubs.azure.resource.AzureResourceGetRequest) returns
-                                            (org.apache.airavata.mft.resource.stubs.azure.resource.AzureResource) {
-        option (google.api.http) = {
-           get: "/v1.0/resource/azure"
-        };
-    }
-
-    rpc createAzureResource (org.apache.airavata.mft.resource.stubs.azure.resource.AzureResourceCreateRequest) returns
-                                            (org.apache.airavata.mft.resource.stubs.azure.resource.AzureResource) {
-        option (google.api.http) = {
-           post: "/v1.0/resource/azure"
-        };
-    }
-
-    rpc updateAzureResource (org.apache.airavata.mft.resource.stubs.azure.resource.AzureResourceUpdateRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-           put: "/v1.0/resource/azure"
-        };
-    }
-
-    rpc deleteAzureResource (org.apache.airavata.mft.resource.stubs.azure.resource.AzureResourceDeleteRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-           delete: "/v1.0/resource/azure"
         };
     }
 }

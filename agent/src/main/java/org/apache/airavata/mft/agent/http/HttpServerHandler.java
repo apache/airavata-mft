@@ -80,32 +80,31 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         // TODO Load from HTTP Headers
         AuthToken authToken = AuthToken.newBuilder().build();
 
-        connector.init(authToken, params.getStorageId(), params.getCredentialToken(), params.getResourceServiceHost(),
+        connector.init(params.getResourceServiceHost(),
                 params.getResourceServicePort(), params.getSecretServiceHost(), params.getSecretServicePort());
 
         metadataCollector.init(params.getResourceServiceHost(), params.getResourceServicePort(),
                 params.getSecretServiceHost(), params.getSecretServicePort());
 
         Boolean available = metadataCollector.isAvailable(authToken,
-                params.getStorageId(),
-                httpTransferRequest.getTargetResourcePath(), params.getCredentialToken());
+                httpTransferRequest.getResourceId(), httpTransferRequest.getCredentialToken());
 
 
         if (!available) {
-            logger.error("File {} is not available in store {}", httpTransferRequest.getTargetResourcePath(), params.getStorageId());
+            logger.error("File resource {} is not available", httpTransferRequest.getResourceId());
             sendError(ctx, NOT_FOUND);
             return;
         }
 
-        FileResourceMetadata fileResourceMetadata = metadataCollector.getFileResourceMetadata(authToken, params.getStorageId(),
-                httpTransferRequest.getTargetResourcePath(),
-                params.getCredentialToken());
+        FileResourceMetadata fileResourceMetadata = metadataCollector.getFileResourceMetadata(authToken,
+                httpTransferRequest.getResourceId(),
+                httpTransferRequest.getCredentialToken());
 
         long fileLength = fileResourceMetadata.getResourceSize();
 
         HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
         HttpUtil.setContentLength(response, fileLength);
-        setContentTypeHeader(response, httpTransferRequest.getTargetResourcePath());
+        setContentTypeHeader(response, httpTransferRequest.getResourceId());
 
         if (HttpUtil.isKeepAlive(request)) {
             response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
@@ -123,7 +122,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         connectorContext.setTransferId(uri);
         connectorContext.setMetadata(new FileResourceMetadata()); // TODO Resolve
 
-        TransferTask pullTask = new TransferTask(connector, connectorContext, httpTransferRequest.getTargetResourcePath());
+        TransferTask pullTask = new TransferTask(authToken, httpTransferRequest.getResourceId(), httpTransferRequest.getCredentialToken(), connectorContext, connector);
 
         // TODO aggregate pullStatusFuture and sendFileFuture for keepalive test
         Future<Integer> pullStatusFuture = executor.submit(pullTask);

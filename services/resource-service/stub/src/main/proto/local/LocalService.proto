@@ -22,10 +22,9 @@ package org.apache.airavata.mft.resource.service.local;
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
-import "local/LocalResource.proto";
 import "local/LocalStorage.proto";
 
-service LocalResourceService {
+service LocalStorageService {
 
     // Storage
     rpc getLocalStorage (org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageGetRequest) returns (org.apache.airavata.mft.resource.stubs.local.storage.LocalStorage) {
@@ -49,33 +48,6 @@ service LocalResourceService {
     rpc deleteLocalStorage (org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageDeleteRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
            delete: "/v1.0/resource/local/storage"
-        };
-    }
-
-    // Resource
-    rpc getLocalResource (org.apache.airavata.mft.resource.stubs.local.resource.LocalResourceGetRequest) returns
-    (org.apache.airavata.mft.resource.stubs.local.resource.LocalResource) {
-        option (google.api.http) = {
-           get: "/v1.0/resource/local"
-        };
-    }
-
-    rpc createLocalResource (org.apache.airavata.mft.resource.stubs.local.resource.LocalResourceCreateRequest) returns
-    (org.apache.airavata.mft.resource.stubs.local.resource.LocalResource) {
-        option (google.api.http) = {
-           post: "/v1.0/resource/local"
-        };
-    }
-
-    rpc updateLocalResource (org.apache.airavata.mft.resource.stubs.local.resource.LocalResourceUpdateRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-           put: "/v1.0/resource/local"
-        };
-    }
-
-    rpc deleteLocalResource (org.apache.airavata.mft.resource.stubs.local.resource.LocalResourceDeleteRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-           delete: "/v1.0/resource/local"
         };
     }
 }

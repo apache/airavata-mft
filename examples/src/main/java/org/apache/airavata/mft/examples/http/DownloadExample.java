@@ -31,8 +31,7 @@ public class DownloadExample {
         MFTApiServiceGrpc.MFTApiServiceBlockingStub client = MFTApiClient.buildClient("localhost", 7004);
         HttpDownloadApiResponse httpDownloadApiResponse = client.submitHttpDownload(HttpDownloadApiRequest.newBuilder()
                 .setTargetAgent("agent0")
-                .setSourcePath("/tmp/a.txt")
-                .setSourceStoreId("remote-ssh-storage")
+                .setSourceResourceId("remote-ssh-resource")
                 .setSourceToken("local-ssh-cred")
                 .setSourceType("SCP")
                 .setMftAuthorizationToken(mftAuthorizationToken)

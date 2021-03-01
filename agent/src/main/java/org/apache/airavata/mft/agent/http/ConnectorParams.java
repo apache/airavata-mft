@@ -19,26 +19,8 @@ package org.apache.airavata.mft.agent.http;
 
 public class ConnectorParams {
 
-    private String storageId, credentialToken, resourceServiceHost, secretServiceHost;
+    private String resourceServiceHost, secretServiceHost;
     private int resourceServicePort, secretServicePort;
-
-    public String getStorageId() {
-        return storageId;
-    }
-
-    public ConnectorParams setStorageId(String storageId) {
-        this.storageId = storageId;
-        return this;
-    }
-
-    public String getCredentialToken() {
-        return credentialToken;
-    }
-
-    public ConnectorParams setCredentialToken(String credentialToken) {
-        this.credentialToken = credentialToken;
-        return this;
-    }
 
     public String getResourceServiceHost() {
         return resourceServiceHost;

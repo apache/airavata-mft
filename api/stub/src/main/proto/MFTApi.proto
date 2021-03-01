@@ -8,18 +8,12 @@ import "google/protobuf/empty.proto";
 import "CredCommon.proto";
 
 message TransferApiRequest {
-    string sourceStorageId = 1;
-    string sourcePath = 2;
-    string sourceType = 3;
-    string sourceToken = 4;
-    string sourceResourceBackend = 5;
-    string sourceCredentialBackend = 6;
-    string destinationStorageId = 7;
-    string destinationPath = 8;
+    string sourceResourceId = 1;
+    string sourceType = 2;
+    string sourceToken = 3;
+    string destinationResourceId = 7;
     string destinationType = 9;
     string destinationToken = 10;
-    string destResourceBackend = 11;
-    string destCredentialBackend = 12;
     bool affinityTransfer = 13;
     map<string, int32> targetAgents = 14;
     org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 15;
@@ -30,8 +24,7 @@ message TransferApiResponse {
 }
 
 message HttpUploadApiRequest {
-    string destinationStoreId = 1;
-    string destinationPath = 2;
+    string destinationResourceId = 1;
     string destinationToken = 3;
     string destinationType = 4;
     string targetAgent = 5;
@@ -44,8 +37,7 @@ message HttpUploadApiResponse {
 }
 
 message HttpDownloadApiRequest {
-    string sourceStoreId = 1;
-    string sourcePath = 2;
+    string sourceResourceId = 1;
     string sourceToken = 3;
     string sourceType = 4;
     string targetAgent = 5;

@@ -19,16 +19,17 @@ package org.apache.airavata.mft.transport.scp;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
+import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.DoubleStreamingBuffer;
 import org.apache.airavata.mft.core.api.Connector;
-import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.credential.stubs.scp.SCPSecret;
 import org.apache.airavata.mft.credential.stubs.scp.SCPSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.common.GenericResource;
+import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorage;
-import org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
@@ -45,34 +46,25 @@ public class SCPReceiver implements Connector {
     boolean initialized = false;
 
     private Session session;
+    private String resourceServiceHost;
+    private int resourceServicePort;
+    private String secretServiceHost;
+    private int secretServicePort;
 
-    public void init(AuthToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort,
+    public void init(String resourceServiceHost, int resourceServicePort,
                      String secretServiceHost, int secretServicePort) throws Exception {
+
+        this.resourceServiceHost = resourceServiceHost;
+        this.resourceServicePort = resourceServicePort;
+        this.secretServiceHost = secretServiceHost;
+        this.secretServicePort = secretServicePort;
 
         if (initialized) {
             destroy();
         }
 
         this.initialized = true;
-
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        SCPStorage scpStorage = resourceClient.scp().getSCPStorage(SCPStorageGetRequest.newBuilder().setStorageId(storageId).build());
-
-        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
-        SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest
-                .newBuilder()
-                .setAuthzToken(authZToken).setSecretId(credentialToken).build());
-
-        this.session = SCPTransportUtil.createSession(
-                scpStorage.getUser(),
-                scpStorage.getHost(),
-                scpStorage.getPort(),
-                scpSecret.getPrivateKey().getBytes(),
-                scpSecret.getPublicKey().getBytes(),
-                scpSecret.getPassphrase().equals("") ? null : scpSecret.getPassphrase().getBytes());
-
     }
-
 
     public void destroy() {
         try {
@@ -88,14 +80,40 @@ public class SCPReceiver implements Connector {
         }
     }
 
-    public void startStream(String targetPath, ConnectorContext context) throws Exception {
+    public void startStream(AuthToken authToken, String resourceId, String credentialToken, ConnectorContext context) throws Exception {
         checkInitialized();
+
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        GenericResource resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
+                .setResourceId(resourceId).build());
+
+        if (resource.getStorageCase() != GenericResource.StorageCase.SCPSTORAGE) {
+            logger.error("Invalid storage type {} specified for resource {}", resource.getStorageCase(), resourceId);
+            throw new Exception("Invalid storage type specified for resource " + resourceId);
+        }
+
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder()
+                .setAuthzToken(authToken)
+                .setSecretId(credentialToken).build());
+
+        SCPStorage scpStorage = resource.getScpStorage();
+        logger.info("Creating a ssh session for {}@{}:{}", scpStorage.getUser(), scpStorage.getHost(), scpStorage.getPort());
+
+        this.session = SCPTransportUtil.createSession(
+                scpStorage.getUser(),
+                scpStorage.getHost(),
+                scpStorage.getPort(),
+                scpSecret.getPrivateKey().getBytes(),
+                scpSecret.getPublicKey().getBytes(),
+                scpSecret.getPassphrase().equals("")? null : scpSecret.getPassphrase().getBytes());
+
         if (session == null) {
             logger.error("Session can not be null. Make sure that SCP Receiver is properly initialized");
             throw new Exception("Session can not be null. Make sure that SCP Receiver is properly initialized");
         }
 
-        transferRemoteToStream(session, targetPath, context.getStreamBuffer());
+        transferRemoteToStream(session, resource.getFile().getResourcePath(), context.getStreamBuffer());
         logger.info("SCP Receive completed. Transfer {}", context.getTransferId());
 
     }

@@ -22,7 +22,6 @@ import com.google.protobuf.util.JsonFormat;
 import io.grpc.stub.StreamObserver;
 import org.apache.airavata.mft.admin.MFTConsulClient;
 import org.apache.airavata.mft.admin.SyncRPCClient;
-import org.apache.airavata.mft.admin.models.TransferRequest;
 import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCResponse;
@@ -72,13 +71,8 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
     @Override
     public void submitTransfer(TransferApiRequest request, StreamObserver<TransferApiResponse> responseObserver) {
         try {
-            TransferRequest transferRequest = dozerBeanMapper.map(request, TransferRequest.class);
-            Optional.ofNullable(request.getTargetAgentsMap()).ifPresent(transferRequest::setTargetAgents); // Custom mapping
-
-            String transferId = mftConsulClient.submitTransfer(transferRequest);
+            String transferId = mftConsulClient.submitTransfer(request);
             logger.info("Submitted the transfer request {}", transferId);
-            logger.info("User token " + request.getMftAuthorizationToken());
-            logger.info("User token " + transferRequest.getMftAuthorizationToken());
 
             mftConsulClient.saveTransferState(transferId, new TransferState()
                     .setUpdateTimeMils(System.currentTimeMillis())
@@ -107,8 +101,7 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
                     .withAgentId(request.getTargetAgent())
                     .withMessageId(UUID.randomUUID().toString())
                     .withMethod("submitHttpDownload")
-                    .withParameter("storeId", request.getSourceStoreId())
-                    .withParameter("sourcePath", request.getSourcePath())
+                    .withParameter("resourceId", request.getSourceResourceId())
                     .withParameter("sourceToken", request.getSourceToken())
                     .withParameter("storeType", request.getSourceType())
                     .withParameter("mftAuthorizationToken", JsonFormat.printer().print(request.getMftAuthorizationToken()));
@@ -125,15 +118,15 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
                     responseObserver.onCompleted();
                     return;
                 case FAIL:
-                    logger.error("Errored while processing the download request to resource {} in store {}. Error msg : {}",
-                            request.getSourcePath(), request.getSourceStoreId(), rpcResponse.getErrorAsStr());
+                    logger.error("Errored while processing the download request to resource {}. Error msg : {}",
+                            request.getSourceResourceId(), rpcResponse.getErrorAsStr());
                     responseObserver.onError(new Exception("Errored while processing the the fetch file metadata response. Error msg : " +
                             rpcResponse.getErrorAsStr()));
             }
 
         } catch (Exception e) {
-            logger.error("Error while submitting http download request to path {} in store {}",
-                                                request.getSourcePath(), request.getSourceStoreId() , e);
+            logger.error("Error while submitting http download request to resource {}",
+                                                request.getSourceResourceId() , e);
             responseObserver.onError(new Exception("Failed to submit http download request", e));
         }
     }

@@ -26,6 +26,10 @@ import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecret;
 import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretGetRequest;
+import org.apache.airavata.mft.resource.client.ResourceServiceClient;
+import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.common.GenericResource;
+import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
@@ -38,16 +42,19 @@ public class DropboxSender implements Connector {
 
     private DbxClientV2 dbxClientV2;
 
+    private String resourceServiceHost;
+    private int resourceServicePort;
+    private String secretServiceHost;
+    private int secretServicePort;
+
     @Override
-    public void init(AuthToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
+    public void init(String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
 
-        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
-        DropboxSecret dropboxSecret = secretClient.dropbox().getDropboxSecret(DropboxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
-
-        DbxRequestConfig config = DbxRequestConfig.newBuilder("mftdropbox/v1").build();
-        dbxClientV2 = new DbxClientV2(config, dropboxSecret.getAccessToken());
+        this.resourceServiceHost = resourceServiceHost;
+        this.resourceServicePort = resourceServicePort;
+        this.secretServiceHost = secretServiceHost;
+        this.secretServicePort = secretServicePort;
     }
-
 
     @Override
     public void destroy() {
@@ -55,11 +62,26 @@ public class DropboxSender implements Connector {
     }
 
     @Override
-    public void startStream(String targetPath, ConnectorContext context) throws Exception {
+    public void startStream(AuthToken authToken, String resourceId, String credentialToken, ConnectorContext context) throws Exception {
         logger.info("Starting Dropbox Sender stream for transfer {}", context.getTransferId());
         logger.info("Content length for transfer {} {}", context.getTransferId(), context.getMetadata().getResourceSize());
 
-        FileMetadata metadata = dbxClientV2.files().uploadBuilder(targetPath)
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        GenericResource resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
+                .setResourceId(resourceId).build());
+
+        if (resource.getStorageCase() != GenericResource.StorageCase.DROPBOXSTORAGE) {
+            logger.error("Invalid storage type {} specified for resource {}", resource.getStorageCase(), resourceId);
+            throw new Exception("Invalid storage type specified for resource " + resourceId);
+        }
+
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        DropboxSecret dropboxSecret = secretClient.dropbox().getDropboxSecret(DropboxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+
+        DbxRequestConfig config = DbxRequestConfig.newBuilder("mftdropbox/v1").build();
+        dbxClientV2 = new DbxClientV2(config, dropboxSecret.getAccessToken());
+
+        FileMetadata metadata = dbxClientV2.files().uploadBuilder(resource.getFile().getResourcePath())
                 .withMode(WriteMode.OVERWRITE)
                 .uploadAndFinish(context.getStreamBuffer().getInputStream());
         logger.info("Completed Dropbox Sender stream for transfer {}", context.getTransferId());

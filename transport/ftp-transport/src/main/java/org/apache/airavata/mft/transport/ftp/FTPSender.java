@@ -24,8 +24,9 @@ import org.apache.airavata.mft.credential.stubs.ftp.FTPSecret;
 import org.apache.airavata.mft.credential.stubs.ftp.FTPSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.common.GenericResource;
+import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorage;
-import org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.apache.commons.net.ftp.FTPClient;
@@ -42,17 +43,19 @@ public class FTPSender implements Connector {
     private boolean initialized;
     private FTPClient ftpClient;
 
+    private String resourceServiceHost;
+    private int resourceServicePort;
+    private String secretServiceHost;
+    private int secretServicePort;
+
     @Override
-    public void init(AuthToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
+    public void init(String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
         this.initialized = true;
 
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        FTPStorage ftpStorage = resourceClient.ftp().getFTPStorage(FTPStorageGetRequest.newBuilder().setStorageId(storageId).build());
-
-        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
-        FTPSecret ftpSecret = secretClient.ftp().getFTPSecret(FTPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
-
-        this.ftpClient = FTPTransportUtil.getFTPClient(ftpStorage, ftpSecret);
+        this.resourceServiceHost = resourceServiceHost;
+        this.resourceServicePort = resourceServicePort;
+        this.secretServiceHost = secretServiceHost;
+        this.secretServicePort = secretServicePort;
     }
 
 
@@ -62,7 +65,7 @@ public class FTPSender implements Connector {
     }
 
     @Override
-    public void startStream(String targetPath, ConnectorContext context) throws Exception {
+    public void startStream(AuthToken authToken, String resourceId, String credentialToken, ConnectorContext context) throws Exception {
 
         logger.info("Starting FTP sender stream for transfer {}", context.getTransferId());
 
@@ -70,9 +73,25 @@ public class FTPSender implements Connector {
 
         logger.info("Completed FTP sender stream for transfer {}", context.getTransferId());
 
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        GenericResource resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
+                .setResourceId(resourceId).build());
+
+        if (resource.getStorageCase() != GenericResource.StorageCase.FTPSTORAGE) {
+            logger.error("Invalid storage type {} specified for resource {}", resource.getStorageCase(), resourceId);
+            throw new Exception("Invalid storage type specified for resource " + resourceId);
+        }
+
+        FTPStorage ftpStorage = resource.getFtpStorage();
+
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        FTPSecret ftpSecret = secretClient.ftp().getFTPSecret(FTPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+
+        this.ftpClient = FTPTransportUtil.getFTPClient(ftpStorage, ftpSecret);
+
         InputStream in = context.getStreamBuffer().getInputStream();
         long fileSize = context.getMetadata().getResourceSize();
-        OutputStream outputStream = ftpClient.storeFileStream(targetPath);
+        OutputStream outputStream = ftpClient.storeFileStream(resource.getFile().getResourcePath());
 
         byte[] buf = new byte[1024];
         while (true) {

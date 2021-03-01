@@ -17,16 +17,16 @@
 
 package org.apache.airavata.mft.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
 import com.orbitz.consul.cache.ConsulCache;
 import com.orbitz.consul.cache.KVCache;
 import com.orbitz.consul.model.kv.Value;
 import org.apache.airavata.mft.admin.MFTConsulClient;
 import org.apache.airavata.mft.admin.MFTConsulClientException;
-import org.apache.airavata.mft.admin.models.TransferCommand;
-import org.apache.airavata.mft.admin.models.TransferRequest;
 import org.apache.airavata.mft.admin.models.TransferState;
+import org.apache.airavata.mft.api.service.TransferApiRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,9 +100,12 @@ public class MFTController implements CommandLineRunner {
             decodedValue.ifPresent(v -> {
                 logger.info("Received transfer request : {} with id {}", v, transferId);
 
-                TransferRequest transferRequest;
+
+                TransferApiRequest transferRequest;
                 try {
-                    transferRequest = jsonMapper.readValue(v, TransferRequest.class);
+                    TransferApiRequest.Builder builder = TransferApiRequest.newBuilder();
+                    JsonFormat.parser().merge(value.getValueAsString().get(), builder);
+                    transferRequest = builder.build();
                 } catch (IOException e) {
                     logger.error("Failed to parse the transfer request {}", v, e);
                     return;
@@ -181,8 +184,9 @@ public class MFTController implements CommandLineRunner {
 
                                 if (!scheduledSession.equals(sessionId)) {
                                     logger.info("Old transfer session found. Re scheduling to agent {}", agentId);
-                                    mftConsulClient.commandTransferToAgent(agentId,
-                                                    mapper.readValue(v.getValueAsString().get(), TransferCommand.class));
+                                    TransferApiRequest.Builder builder = TransferApiRequest.newBuilder();
+                                    JsonFormat.parser().merge(v.getValueAsString().get(), builder);
+                                    mftConsulClient.commandTransferToAgent(agentId, scheduledTransfer, builder.build());
 
                                     // Delete the key as it is already processed
                                     mftConsulClient.getKvClient().deleteKey(v.getKey());
@@ -211,34 +215,17 @@ public class MFTController implements CommandLineRunner {
         liveAgentCache.start();
     }
 
-    private void markAsProcessed(String transferId, TransferRequest transferRequest) throws JsonProcessingException {
-        mftConsulClient.getKvClient().putValue(MFTConsulClient.TRANSFER_PROCESSED_PATH +transferId, jsonMapper.writeValueAsString(transferRequest));
+    private void markAsProcessed(String transferId, TransferApiRequest transferRequest) throws InvalidProtocolBufferException {
+        mftConsulClient.getKvClient().putValue(MFTConsulClient.TRANSFER_PROCESSED_PATH + transferId,
+                JsonFormat.printer().print(transferRequest));
     }
 
-    private void markAsPending(String transferId, TransferRequest transferRequest) throws JsonProcessingException {
-        mftConsulClient.getKvClient().putValue(MFTConsulClient.TRANSFER_PENDING_PATH +transferId, jsonMapper.writeValueAsString(transferRequest));
+    private void markAsPending(String transferId, TransferApiRequest transferRequest) throws InvalidProtocolBufferException {
+        mftConsulClient.getKvClient().putValue(MFTConsulClient.TRANSFER_PENDING_PATH + transferId,
+                JsonFormat.printer().print(transferRequest));
     }
 
-    private TransferCommand convertRequestToCommand(String transferId, TransferRequest transferRequest) {
-        TransferCommand transferCommand = new TransferCommand();
-        transferCommand.setSourceStorageId(transferRequest.getSourceStorageId())
-                .setSourcePath(transferRequest.getSourcePath())
-                .setSourceToken(transferRequest.getSourceToken())
-                .setSourceType(transferRequest.getSourceType())
-                .setSourceResourceBackend(transferRequest.getSourceResourceBackend())
-                .setSourceCredentialBackend(transferRequest.getSourceCredentialBackend())
-                .setDestinationStorageId(transferRequest.getDestinationStorageId())
-                .setDestinationPath(transferRequest.getDestinationPath())
-                .setDestinationToken(transferRequest.getDestinationToken())
-                .setDestinationType(transferRequest.getDestinationType())
-                .setDestResourceBackend(transferRequest.getDestResourceBackend())
-                .setDestCredentialBackend(transferRequest.getDestCredentialBackend())
-                .setTransferId(transferId)
-                .setMftAuthorizationToken(transferRequest.getMftAuthorizationToken());
-        return transferCommand;
-    }
-
-    private Optional<String> selectAgent(String transferId, TransferRequest transferRequest) throws MFTConsulClientException {
+    private Optional<String> selectAgent(String transferId, TransferApiRequest transferRequest) throws MFTConsulClientException {
 
         List<String> liveAgentIds = mftConsulClient.getLiveAgentIds();
         if (liveAgentIds.isEmpty()) {
@@ -259,7 +246,7 @@ public class MFTController implements CommandLineRunner {
             if (possibleAgent.isPresent()) {
                 selectedAgent = possibleAgent.get();
             }
-        } else if (!transferRequest.isAffinityTransfer()){
+        } else if (!transferRequest.getAffinityTransfer()){
             selectedAgent = liveAgentIds.get(0);
         }
 
@@ -284,15 +271,16 @@ public class MFTController implements CommandLineRunner {
             if (value.getValueAsString().isPresent()) {
                 logger.debug("Pending " + value.getKey() + " : " + value.getValueAsString().get());
                 try {
-                    TransferRequest transferRequest = jsonMapper.readValue(value.getValueAsString().get(), TransferRequest.class);
+                    TransferApiRequest.Builder builder = TransferApiRequest.newBuilder();
+                    JsonFormat.parser().merge(value.getValueAsString().get(), builder);
+                    TransferApiRequest transferRequest = builder.build();
+
                     String transferId = value.getKey().substring(value.getKey().lastIndexOf("/") + 1);
                     Optional<String> agent = selectAgent(transferId, transferRequest);
 
                     if (agent.isPresent()) {
                         logger.info("Found agent {} to initiate the transfer {}", agent, transferId);
-                        TransferCommand transferCommand = convertRequestToCommand(transferId, transferRequest);
-
-                        mftConsulClient.commandTransferToAgent(agent.get(), transferCommand);
+                        mftConsulClient.commandTransferToAgent(agent.get(), transferId, transferRequest);
                         markAsProcessed(transferId, transferRequest);
                         mftConsulClient.getKvClient().deleteKey(value.getKey());
                         logger.info("Marked transfer {} as processed", transferId);

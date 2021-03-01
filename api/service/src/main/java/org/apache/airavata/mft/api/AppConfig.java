@@ -19,10 +19,7 @@ package org.apache.airavata.mft.api;
 
 import org.apache.airavata.mft.admin.MFTConsulClient;
 import org.apache.airavata.mft.admin.SyncRPCClient;
-import org.apache.airavata.mft.admin.models.TransferRequest;
-import org.apache.airavata.mft.api.service.TransferApiRequest;
 import org.dozer.DozerBeanMapper;
-import org.dozer.loader.api.BeanMappingBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -52,15 +49,6 @@ public class AppConfig {
 
     @Bean
     public DozerBeanMapper dozerBeanMapper() {
-        DozerBeanMapper mapper = new DozerBeanMapper();
-        BeanMappingBuilder mappingBuilder = new BeanMappingBuilder() {
-            @Override
-            protected void configure() {
-                mapping(TransferApiRequest.class, TransferRequest.class).exclude("targetAgents");
-            }
-        };
-
-        mapper.addMapping(mappingBuilder);
-        return mapper;
+        return new DozerBeanMapper();
     }
 }

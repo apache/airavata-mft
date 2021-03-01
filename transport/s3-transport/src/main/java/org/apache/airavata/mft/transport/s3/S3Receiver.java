@@ -30,8 +30,9 @@ import org.apache.airavata.mft.credential.stubs.s3.S3Secret;
 import org.apache.airavata.mft.credential.stubs.s3.S3SecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.common.GenericResource;
+import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage;
-import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
@@ -44,14 +45,42 @@ public class S3Receiver implements Connector {
     private static final Logger logger = LoggerFactory.getLogger(S3Receiver.class);
 
     private AmazonS3 s3Client;
-    private S3Storage s3Storage;
+
+    private String resourceServiceHost;
+    private int resourceServicePort;
+    private String secretServiceHost;
+    private int secretServicePort;
 
     @Override
-    public void init(AuthToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort,
+    public void init(String resourceServiceHost, int resourceServicePort,
                      String secretServiceHost, int secretServicePort) throws Exception {
 
+        this.resourceServiceHost = resourceServiceHost;
+        this.resourceServicePort = resourceServicePort;
+        this.secretServiceHost = secretServiceHost;
+        this.secretServicePort = secretServicePort;
+    }
+
+    @Override
+    public void destroy() {
+
+    }
+
+    @Override
+    public void startStream(AuthToken authToken, String resourceId, String credentialToken, ConnectorContext context) throws Exception {
+
+        logger.info("Starting S3 Receiver stream for transfer {}", context.getTransferId());
+
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        this.s3Storage = resourceClient.s3().getS3Storage(S3StorageGetRequest.newBuilder().setStorageId(storageId).build());
+        GenericResource resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
+                .setResourceId(resourceId).build());
+
+        if (resource.getStorageCase() != GenericResource.StorageCase.S3STORAGE) {
+            logger.error("Invalid storage type {} specified for resource {}", resource.getStorageCase(), resourceId);
+            throw new Exception("Invalid storage type specified for resource " + resourceId);
+        }
+
+        S3Storage s3Storage = resource.getS3Storage();
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         S3Secret s3Secret = secretClient.s3().getS3Secret(S3SecretGetRequest.newBuilder().setSecretId(credentialToken).build());
@@ -61,20 +90,8 @@ public class S3Receiver implements Connector {
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
                 .withRegion(s3Storage.getRegion())
                 .build();
-    }
 
-
-    @Override
-    public void destroy() {
-
-    }
-
-    @Override
-    public void startStream(String targetPath, ConnectorContext context) throws Exception {
-
-        logger.info("Starting S3 Receiver stream for transfer {}", context.getTransferId());
-
-        S3Object s3object = s3Client.getObject(this.s3Storage.getBucketName(), targetPath);
+        S3Object s3object = s3Client.getObject(s3Storage.getBucketName(), resource.getFile().getResourcePath());
         S3ObjectInputStream inputStream = s3object.getObjectContent();
 
         OutputStream os = context.getStreamBuffer().getOutputStream();

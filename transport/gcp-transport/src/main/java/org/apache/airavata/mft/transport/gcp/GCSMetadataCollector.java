@@ -35,8 +35,8 @@ import org.apache.airavata.mft.credential.stubs.gcs.GCSSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.common.FileResource;
-import org.apache.airavata.mft.resource.stubs.gcs.resource.GCSResource;
-import org.apache.airavata.mft.resource.stubs.gcs.resource.GCSResourceGetRequest;
+import org.apache.airavata.mft.resource.stubs.common.GenericResource;
+import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorage;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
@@ -75,7 +75,7 @@ public class GCSMetadataCollector implements MetadataCollector {
     public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
         checkInitialized();
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        GCSResource gcsResource = resourceClient.gcs().getGCSResource(GCSResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        GenericResource gcsResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         GCSSecret gcsSecret = secretClient.gcs().getGCSSecret(GCSSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
@@ -120,7 +120,8 @@ public class GCSMetadataCollector implements MetadataCollector {
     public Boolean isAvailable(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
         checkInitialized();
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        GCSResource gcsResource = resourceClient.gcs().getGCSResource(GCSResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        GenericResource gcsResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
+                .setResourceId(resourceId).build());
 
         return isAvailable(gcsResource, credentialToken);
     }
@@ -129,16 +130,17 @@ public class GCSMetadataCollector implements MetadataCollector {
     public Boolean isAvailable(AuthToken authToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
         checkInitialized();
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        GCSStorage gcsStorage = resourceClient.gcs().getGCSStorage(GCSStorageGetRequest.newBuilder().setStorageId(parentResourceId).build());
+        GenericResource genericResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
+                .setResourceId(parentResourceId).build());
 
-        GCSResource gcsResource = GCSResource.newBuilder()
+        GenericResource gcsResource = GenericResource.newBuilder()
                 .setFile(FileResource.newBuilder().setResourcePath(resourcePath).build())
-                .setGcsStorage(gcsStorage).build();
+                .setGcsStorage(genericResource.getGcsStorage()).build();
 
         return isAvailable(gcsResource, credentialToken);
     }
 
-    private Boolean isAvailable(GCSResource gcsResource, String credentialToken) throws Exception {
+    private Boolean isAvailable(GenericResource gcsResource, String credentialToken) throws Exception {
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         GCSSecret gcsSecret = secretClient.gcs().getGCSSecret(GCSSecretGetRequest.newBuilder().setSecretId(credentialToken).build());

@@ -24,7 +24,8 @@ public class HttpTransferRequest {
     private Connector otherConnector;
     private MetadataCollector otherMetadataCollector;
     private ConnectorParams connectorParams;
-    private String targetResourcePath;
+    private String resourceId;
+    private String credentialToken;
     private long createdTime = System.currentTimeMillis();
 
     public Connector getOtherConnector() {
@@ -45,12 +46,21 @@ public class HttpTransferRequest {
         return this;
     }
 
-    public String getTargetResourcePath() {
-        return targetResourcePath;
+    public String getResourceId() {
+        return resourceId;
     }
 
-    public HttpTransferRequest setTargetResourcePath(String targetResourcePath) {
-        this.targetResourcePath = targetResourcePath;
+    public HttpTransferRequest setResourceId(String resourceId) {
+        this.resourceId = resourceId;
+        return this;
+    }
+
+    public String getCredentialToken() {
+        return credentialToken;
+    }
+
+    public HttpTransferRequest setCredentialToken(String credentialToken) {
+        this.credentialToken = credentialToken;
         return this;
     }
 

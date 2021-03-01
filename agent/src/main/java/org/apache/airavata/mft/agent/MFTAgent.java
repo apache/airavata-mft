@@ -18,6 +18,7 @@
 package org.apache.airavata.mft.agent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.protobuf.util.JsonFormat;
 import com.orbitz.consul.ConsulException;
 import com.orbitz.consul.cache.ConsulCache;
 import com.orbitz.consul.cache.KVCache;
@@ -27,13 +28,12 @@ import com.orbitz.consul.model.session.SessionCreatedResponse;
 import org.apache.airavata.mft.admin.MFTConsulClient;
 import org.apache.airavata.mft.admin.MFTConsulClientException;
 import org.apache.airavata.mft.admin.models.AgentInfo;
-import org.apache.airavata.mft.admin.models.TransferCommand;
 import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
 import org.apache.airavata.mft.agent.http.HttpServer;
 import org.apache.airavata.mft.agent.http.HttpTransferRequestsStore;
 import org.apache.airavata.mft.agent.rpc.RPCParser;
-import org.apache.airavata.mft.common.AuthToken;
+import org.apache.airavata.mft.api.service.TransferApiRequest;
 import org.apache.airavata.mft.core.ConnectorResolver;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
 import org.apache.airavata.mft.core.api.Connector;
@@ -64,7 +64,6 @@ public class MFTAgent implements CommandLineRunner {
 
     @org.springframework.beans.factory.annotation.Value("${agent.id}")
     private String agentId;
-
 
     @org.springframework.beans.factory.annotation.Value("${agent.secret}")
     private String agentSecret;
@@ -151,13 +150,17 @@ public class MFTAgent implements CommandLineRunner {
         transferCacheListener = newValues -> {
             newValues.values().forEach(value -> {
                 Optional<String> decodedValue = value.getValueAsString();
+                String transferId = value.getKey().substring(value.getKey().lastIndexOf("/") + 1);
                 decodedValue.ifPresent(v -> {
                     logger.info("Received raw message: {}", v);
-                    TransferCommand request = null;
+                    TransferApiRequest request = null;
                     try {
-                        request = mapper.readValue(v, TransferCommand.class);
-                        logger.info("Received request " + request.getTransferId());
-                        mftConsulClient.submitTransferStateToProcess(request.getTransferId(), agentId, new TransferState()
+                        TransferApiRequest.Builder builder = TransferApiRequest.newBuilder();
+                        JsonFormat.parser().merge(v, builder);
+                        request = builder.build();
+
+                        logger.info("Received request " + transferId);
+                        mftConsulClient.submitTransferStateToProcess(transferId, agentId, new TransferState()
                             .setState("STARTING")
                             .setPercentage(0)
                             .setUpdateTimeMils(System.currentTimeMillis())
@@ -166,11 +169,11 @@ public class MFTAgent implements CommandLineRunner {
 
                         Optional<Connector> inConnectorOpt = ConnectorResolver.resolveConnector(request.getSourceType(), "IN");
                         Connector inConnector = inConnectorOpt.orElseThrow(() -> new Exception("Could not find an in connector for given input"));
-                        inConnector.init(request.getMftAuthorizationToken(), request.getSourceStorageId(), request.getSourceToken(), resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
+                        inConnector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
 
                         Optional<Connector> outConnectorOpt = ConnectorResolver.resolveConnector(request.getDestinationType(), "OUT");
                         Connector outConnector = outConnectorOpt.orElseThrow(() -> new Exception("Could not find an out connector for given input"));
-                        outConnector.init(request.getMftAuthorizationToken(), request.getDestinationStorageId(), request.getDestinationToken(), resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
+                        outConnector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
 
                         Optional<MetadataCollector> srcMetadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(request.getSourceType());
                         MetadataCollector srcMetadataCollector = srcMetadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for source"));
@@ -180,7 +183,7 @@ public class MFTAgent implements CommandLineRunner {
                         MetadataCollector dstMetadataCollector = dstMetadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for destination"));
                         dstMetadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
 
-                        mftConsulClient.submitTransferStateToProcess(request.getTransferId(), agentId, new TransferState()
+                        mftConsulClient.submitTransferStateToProcess(transferId, agentId, new TransferState()
                             .setState("STARTED")
                             .setPercentage(0)
                             .setUpdateTimeMils(System.currentTimeMillis())
@@ -188,7 +191,7 @@ public class MFTAgent implements CommandLineRunner {
                             .setDescription("Started the transfer"));
 
 
-                        String transferId = mediator.transfer(request.getMftAuthorizationToken(), request, inConnector, outConnector, srcMetadataCollector, dstMetadataCollector,
+                        mediator.transfer(transferId, request, inConnector, outConnector, srcMetadataCollector, dstMetadataCollector,
                                 (id, st) -> {
                                     try {
                                         mftConsulClient.submitTransferStateToProcess(id, agentId, st.setPublisher(agentId));
@@ -213,9 +216,9 @@ public class MFTAgent implements CommandLineRunner {
                     } catch (Throwable e) {
                         if (request != null) {
                             try {
-                                logger.error("Error in submitting transfer {}", request.getTransferId(), e);
+                                logger.error("Error in submitting transfer {}", transferId, e);
 
-                                mftConsulClient.submitTransferStateToProcess(request.getTransferId(), agentId, new TransferState()
+                                mftConsulClient.submitTransferStateToProcess(transferId, agentId, new TransferState()
                                         .setState("FAILED")
                                         .setPercentage(0)
                                         .setUpdateTimeMils(System.currentTimeMillis())

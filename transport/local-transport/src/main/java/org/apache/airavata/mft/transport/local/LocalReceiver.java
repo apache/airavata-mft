@@ -20,6 +20,10 @@ package org.apache.airavata.mft.transport.local;
 import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
+import org.apache.airavata.mft.resource.client.ResourceServiceClient;
+import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.common.GenericResource;
+import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,10 +35,20 @@ public class LocalReceiver implements Connector {
 
     private boolean initialized;
 
+    private String resourceServiceHost;
+    private int resourceServicePort;
+    private String secretServiceHost;
+    private int secretServicePort;
+
     @Override
-    public void init(AuthToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort,
+    public void init(String resourceServiceHost, int resourceServicePort,
                      String secretServiceHost, int secretServicePort) throws Exception {
         this.initialized = true;
+
+        this.resourceServiceHost = resourceServiceHost;
+        this.resourceServicePort = resourceServicePort;
+        this.secretServiceHost = secretServiceHost;
+        this.secretServicePort = secretServicePort;
     }
 
 
@@ -50,13 +64,22 @@ public class LocalReceiver implements Connector {
     }
 
     @Override
-    public void startStream(String targetPath, ConnectorContext context) throws Exception {
+    public void startStream(AuthToken authToken, String resourceId, String credentialToken, ConnectorContext context) throws Exception {
         logger.info("Starting local receiver stream for transfer {}", context.getTransferId());
 
         checkInitialized();
 
+        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        GenericResource resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
+                .setResourceId(resourceId).build());
+
+        if (resource.getStorageCase() != GenericResource.StorageCase.LOCALSTORAGE) {
+            logger.error("Invalid storage type {} specified for resource {}", resource.getStorageCase(), resourceId);
+            throw new Exception("Invalid storage type specified for resource " + resourceId);
+        }
+
         OutputStream streamOs = context.getStreamBuffer().getOutputStream();
-        FileInputStream fis = new FileInputStream(new File(targetPath));
+        FileInputStream fis = new FileInputStream(new File(resource.getFile().getResourcePath()));
 
         long fileSize = context.getMetadata().getResourceSize();
 

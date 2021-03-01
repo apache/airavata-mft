@@ -27,8 +27,8 @@ import org.apache.airavata.mft.credential.stubs.ftp.FTPSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.common.FileResource;
-import org.apache.airavata.mft.resource.stubs.ftp.resource.FTPResource;
-import org.apache.airavata.mft.resource.stubs.ftp.resource.FTPResourceGetRequest;
+import org.apache.airavata.mft.resource.stubs.common.GenericResource;
+import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorage;
 import org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
@@ -71,7 +71,8 @@ public class FTPMetadataCollector implements MetadataCollector {
 
         checkInitialized();
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        FTPResource ftpResource = resourceClient.ftp().getFTPResource(FTPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        GenericResource ftpResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
+                .setResourceId(resourceId).build());
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         FTPSecret ftpSecret = secretClient.ftp().getFTPSecret(FTPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
@@ -123,7 +124,7 @@ public class FTPMetadataCollector implements MetadataCollector {
         checkInitialized();
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        FTPResource ftpResource = resourceClient.ftp().getFTPResource(FTPResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        GenericResource ftpResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
         return isAvailable(ftpResource, credentialToken);
     }
@@ -134,15 +135,16 @@ public class FTPMetadataCollector implements MetadataCollector {
         checkInitialized();
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        FTPStorage ftpStorage = resourceClient.ftp().getFTPStorage(FTPStorageGetRequest.newBuilder().setStorageId(parentResourceId).build());
+        GenericResource genericResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
+                            .setResourceId(parentResourceId).build());
 
-        FTPResource ftpResource = FTPResource.newBuilder()
+        GenericResource ftpResource = GenericResource.newBuilder()
                 .setFile(FileResource.newBuilder().setResourcePath(resourcePath).build())
-                .setFtpStorage(ftpStorage).build();
+                .setFtpStorage(genericResource.getFtpStorage()).build();
         return isAvailable(ftpResource, credentialToken);
     }
 
-    public Boolean isAvailable(FTPResource ftpResource, String credentialToken) {
+    public Boolean isAvailable(GenericResource ftpResource, String credentialToken) {
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         FTPSecret ftpSecret = secretClient.ftp().getFTPSecret(FTPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());

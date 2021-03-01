@@ -17,9 +17,8 @@
 
 package org.apache.airavata.mft.agent;
 
-import org.apache.airavata.mft.admin.models.TransferCommand;
 import org.apache.airavata.mft.admin.models.TransferState;
-import org.apache.airavata.mft.common.AuthToken;
+import org.apache.airavata.mft.api.service.TransferApiRequest;
 import org.apache.airavata.mft.core.*;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.core.api.MetadataCollector;
@@ -49,14 +48,14 @@ public class TransportMediator {
         executor.shutdown();
     }
 
-    public String transfer(AuthToken authZToken, TransferCommand command, Connector inConnector, Connector outConnector, MetadataCollector srcMetadataCollector,
+    public void transfer(String transferId, TransferApiRequest request, Connector inConnector, Connector outConnector, MetadataCollector srcMetadataCollector,
                            MetadataCollector destMetadataCollector, BiConsumer<String, TransferState> onStatusCallback,
                            BiConsumer<String, Boolean> exitingCallback) throws Exception {
 
-        FileResourceMetadata srcMetadata = srcMetadataCollector.getFileResourceMetadata(authZToken,
-                            command.getSourceStorageId(),
-                            command.getSourcePath(),
-                            command.getSourceToken());
+        FileResourceMetadata srcMetadata = srcMetadataCollector.getFileResourceMetadata(
+                            request.getMftAuthorizationToken(),
+                            request.getSourceResourceId(),
+                            request.getSourceToken());
 
         final long resourceSize = srcMetadata.getResourceSize();
         logger.debug("Source file size {}. MD5 {}", resourceSize, srcMetadata.getMd5sum());
@@ -67,10 +66,12 @@ public class TransportMediator {
         ConnectorContext context = new ConnectorContext();
         context.setMetadata(srcMetadata);
         context.setStreamBuffer(streamBuffer);
-        context.setTransferId(command.getTransferId());
+        context.setTransferId(transferId);
 
-        TransferTask recvTask = new TransferTask(inConnector, context, command.getSourcePath());
-        TransferTask sendTask = new TransferTask(outConnector, context, command.getDestinationPath());
+        TransferTask recvTask = new TransferTask(request.getMftAuthorizationToken(), request.getSourceResourceId(),
+                request.getSourceToken(), context, inConnector);
+        TransferTask sendTask = new TransferTask(request.getMftAuthorizationToken(), request.getDestinationResourceId(),
+                request.getDestinationToken(), context, outConnector);
         List<Future<Integer>> futureList = new ArrayList<>();
 
         ExecutorCompletionService<Integer> completionService = new ExecutorCompletionService<>(executor);
@@ -103,7 +104,7 @@ public class TransportMediator {
                             logger.error("One task failed with error", e);
                             transferErrored = true;
                             statusLock.lock();
-                            onStatusCallback.accept(command.getTransferId(), new TransferState()
+                            onStatusCallback.accept(transferId, new TransferState()
                                 .setPercentage(0)
                                 .setState("FAILED")
                                 .setUpdateTimeMils(System.currentTimeMillis())
@@ -125,9 +126,10 @@ public class TransportMediator {
                     }
 
                     if (!transferErrored) {
-                        Boolean transferred = destMetadataCollector.isAvailable(authZToken,
-                                command.getDestinationStorageId(),
-                                command.getDestinationPath(), command.getDestinationToken());
+                        Boolean transferred = destMetadataCollector.isAvailable(
+                                request.getMftAuthorizationToken(),
+                                request.getDestinationResourceId(),
+                                request.getDestinationToken());
 
 
                         if (!transferred) {
@@ -135,10 +137,10 @@ public class TransportMediator {
                             throw new Exception("Transfer completed but resource is not available in destination");
                         }
 
-                        FileResourceMetadata destMetadata = destMetadataCollector.getFileResourceMetadata(authZToken,
-                                command.getDestinationStorageId(),
-                                command.getDestinationPath(),
-                               command.getDestinationToken());
+                        FileResourceMetadata destMetadata = destMetadataCollector.getFileResourceMetadata(
+                                request.getMftAuthorizationToken(),
+                                request.getDestinationResourceId(),
+                                request.getDestinationToken());
 
 
                         boolean doIntegrityVerify = true;
@@ -165,7 +167,7 @@ public class TransportMediator {
                         double time = (endTime - startTime) * 1.0 / 1000000000;
 
                         statusLock.lock();
-                        onStatusCallback.accept(command.getTransferId(), new TransferState()
+                        onStatusCallback.accept(transferId, new TransferState()
                                 .setPercentage(100)
                                 .setState("COMPLETED")
                                 .setUpdateTimeMils(System.currentTimeMillis())
@@ -174,13 +176,13 @@ public class TransportMediator {
                         transferSuccess.set(true);
                         statusLock.unlock();
 
-                        logger.info("Transfer {} completed.  Speed {} MB/s", command.getTransferId(),
+                        logger.info("Transfer {} completed.  Speed {} MB/s", transferId,
                                 (srcMetadata.getResourceSize() * 1.0 / time) / (1024 * 1024));
                     }
                 } catch (Exception e) {
 
                     statusLock.lock();
-                    onStatusCallback.accept(command.getTransferId(), new TransferState()
+                    onStatusCallback.accept(transferId, new TransferState()
                             .setPercentage(0)
                             .setState("FAILED")
                             .setUpdateTimeMils(System.currentTimeMillis())
@@ -189,12 +191,12 @@ public class TransportMediator {
                     transferSuccess.set(false);
                     statusLock.unlock();
 
-                    logger.error("Transfer {} failed", command.getTransferId(), e);
+                    logger.error("Transfer {} failed", transferId, e);
                 } finally {
                     inConnector.destroy();
                     outConnector.destroy();
                     transferInProgress.set(false);
-                    exitingCallback.accept(command.getTransferId(),transferSuccess.get());
+                    exitingCallback.accept(transferId,transferSuccess.get());
                 }
             }
         });
@@ -213,12 +215,12 @@ public class TransportMediator {
                     statusLock.lock();
                     if (!transferInProgress.get()){
                         statusLock.unlock();
-                        logger.info("Status monitor is exiting for transfer {}", command.getTransferId());
+                        logger.info("Status monitor is exiting for transfer {}", transferId);
                         break;
                     }
                     double transferPercentage = streamBuffer.getProcessedBytes() * 100.0/ resourceSize;
-                    logger.info("Transfer percentage for transfer {} {}", command.getTransferId(), transferPercentage);
-                    onStatusCallback.accept(command.getTransferId(), new TransferState()
+                    logger.info("Transfer percentage for transfer {} {}", transferId, transferPercentage);
+                    onStatusCallback.accept(transferId, new TransferState()
                             .setPercentage(transferPercentage)
                             .setState("RUNNING")
                             .setUpdateTimeMils(System.currentTimeMillis())
@@ -230,7 +232,5 @@ public class TransportMediator {
 
         monitorPool.submit(monitorThread);
         monitorPool.submit(progressThread);
-
-        return command.getTransferId();
     }
 }

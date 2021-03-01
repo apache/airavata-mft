@@ -37,6 +37,10 @@ import org.apache.airavata.mft.credential.stubs.gcs.GCSSecret;
 import org.apache.airavata.mft.credential.stubs.gcs.GCSSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.client.StorageServiceClient;
+import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.common.GenericResource;
+import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorage;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
@@ -55,14 +59,43 @@ public class GCSSender implements Connector {
     private static final Logger logger = LoggerFactory.getLogger(GCSSender.class);
 
     private Storage storage;
-    private GCSStorage gcsStorage;
     private JsonObject jsonObject;
 
+    private String resourceServiceHost;
+    private int resourceServicePort;
+    private String secretServiceHost;
+    private int secretServicePort;
+
     @Override
-    public void init(AuthToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
+    public void init(String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
+
+        this.resourceServiceHost = resourceServiceHost;
+        this.resourceServicePort = resourceServicePort;
+        this.secretServiceHost = secretServiceHost;
+        this.secretServicePort = secretServicePort;
+    }
+
+
+    @Override
+    public void destroy() {
+
+    }
+
+    @Override
+    public void startStream(AuthToken authToken, String resourceId, String credentialToken, ConnectorContext context) throws Exception {
+        logger.info("Starting GCS Sender stream for transfer {}", context.getTransferId());
+        logger.debug("Content length for transfer {} {}", context.getTransferId(), context.getMetadata().getResourceSize());
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        this.gcsStorage = resourceClient.gcs().getGCSStorage(GCSStorageGetRequest.newBuilder().setStorageId(storageId).build());
+        GenericResource resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
+                .setResourceId(resourceId).build());
+
+        if (resource.getStorageCase() != GenericResource.StorageCase.GCSSTORAGE) {
+            logger.error("Invalid storage type {} specified for resource {}", resource.getStorageCase(), resourceId);
+            throw new Exception("Invalid storage type specified for resource " + resourceId);
+        }
+
+        GCSStorage gcsStorage = resource.getGcsStorage();
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         GCSSecret gcsSecret = secretClient.gcs().getGCSSecret(GCSSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
@@ -78,29 +111,17 @@ public class GCSSender implements Connector {
         }
 
         storage = new Storage.Builder(transport, jsonFactory, credential).build();
-    }
-
-
-    @Override
-    public void destroy() {
-
-    }
-
-    @Override
-    public void startStream(String targetPath, ConnectorContext context) throws Exception {
-        logger.info("Starting GCS Sender stream for transfer {}", context.getTransferId());
-        logger.debug("Content length for transfer {} {}", context.getTransferId(), context.getMetadata().getResourceSize());
 
         InputStreamContent contentStream = new InputStreamContent(
                 null, context.getStreamBuffer().getInputStream());
         String entityUser = jsonObject.get("client_email").getAsString();
         StorageObject objectMetadata = new StorageObject()
                 // Set the destination object name
-                .setName(targetPath)
+                .setName(resource.getFile().getResourcePath())
                 // Set the access control list to publicly read-only
                 .setAcl(Arrays.asList(new ObjectAccessControl().setEntity("user-" + entityUser).setRole("OWNER")));
 
-        Insert insertRequest = storage.objects().insert(this.gcsStorage.getBucketName(), objectMetadata, contentStream);
+        Insert insertRequest = storage.objects().insert(gcsStorage.getBucketName(), objectMetadata, contentStream);
 
         insertRequest.execute();
 

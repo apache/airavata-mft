@@ -17,6 +17,7 @@
 
 package org.apache.airavata.mft.core;
 
+import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.core.api.Connector;
 
 import java.util.concurrent.Callable;
@@ -25,17 +26,22 @@ public class TransferTask implements Callable<Integer> {
 
     private Connector connector;
     private ConnectorContext context;
-    private String resourcePath;
+    private String resourceId;
+    private String credentialToken;
+    private AuthToken authToken;
 
-    public TransferTask(Connector connector, ConnectorContext context, String resourcePath) {
+    public TransferTask(AuthToken authToken, String resourceId, String credentialToken,
+                        ConnectorContext context, Connector connector) {
         this.connector = connector;
         this.context = context;
-        this.resourcePath = resourcePath;
+        this.resourceId = resourceId;
+        this.authToken = authToken;
+        this.credentialToken = credentialToken;
     }
 
     @Override
     public Integer call() throws Exception {
-        this.connector.startStream(resourcePath, context);
+        this.connector.startStream(authToken, resourceId, credentialToken, context);
         return 0;
     }
 }

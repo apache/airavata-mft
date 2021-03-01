@@ -22,10 +22,9 @@ package org.apache.airavata.mft.resource.service.dropbox;
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
-import "dropbox/DropboxResource.proto";
 import "dropbox/DropboxStorage.proto";
 
-service DropboxService {
+service DropboxStorageService {
 
     // Storage
 
@@ -52,34 +51,6 @@ service DropboxService {
     rpc deleteDropboxStorage (org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageDeleteRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
            delete: "/v1.0/resource/dropbox/storage"
-        };
-    }
-
-    // Resource
-
-    rpc getDropboxResource (org.apache.airavata.mft.resource.stubs.dropbox.resource.DropboxResourceGetRequest) returns
-                                            (org.apache.airavata.mft.resource.stubs.dropbox.resource.DropboxResource) {
-        option (google.api.http) = {
-            get: "/v1.0/resource/dropbox"
-        };
-    }
-
-    rpc createDropboxResource (org.apache.airavata.mft.resource.stubs.dropbox.resource.DropboxResourceCreateRequest) returns
-                                            (org.apache.airavata.mft.resource.stubs.dropbox.resource.DropboxResource) {
-        option (google.api.http) = {
-            post: "/v1.0/resource/dropbox"
-        };
-    }
-
-    rpc updateDropboxResource (org.apache.airavata.mft.resource.stubs.dropbox.resource.DropboxResourceUpdateRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-            put: "/v1.0/resource/dropbox"
-        };
-    }
-
-    rpc deleteDropboxResource (org.apache.airavata.mft.resource.stubs.dropbox.resource.DropboxResourceDeleteRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-            delete: "/v1.0/resource/dropbox"
         };
     }
 }

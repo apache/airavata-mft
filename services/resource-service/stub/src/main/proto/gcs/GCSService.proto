@@ -22,12 +22,10 @@ package org.apache.airavata.mft.resource.service.gcs;
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
-import "gcs/GCSResource.proto";
 import "gcs/GCSStorage.proto";
 
-service GCSResourceService {
+service GCSStorageService {
 
-    // Storage
     rpc getGCSStorage (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageGetRequest) returns
                                                     (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorage) {
         option (google.api.http) = {
@@ -51,32 +49,6 @@ service GCSResourceService {
     rpc deleteGCSStorage (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageDeleteRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
            delete: "/v1.0/resource/gcs/storage"
-        };
-    }
-    
-    rpc getGCSResource (org.apache.airavata.mft.resource.stubs.gcs.resource.GCSResourceGetRequest) returns
-                                                    (org.apache.airavata.mft.resource.stubs.gcs.resource.GCSResource) {
-        option (google.api.http) = {
-            get: "/v1.0/resource/gcs"
-        };
-    }
-
-    rpc createGCSResource (org.apache.airavata.mft.resource.stubs.gcs.resource.GCSResourceCreateRequest) returns
-                                                    (org.apache.airavata.mft.resource.stubs.gcs.resource.GCSResource) {
-        option (google.api.http) = {
-            post: "/v1.0/resource/gcs"
-        };
-    }
-
-    rpc updateGCSResource (org.apache.airavata.mft.resource.stubs.gcs.resource.GCSResourceUpdateRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-            put: "/v1.0/resource/gcs"
-        };
-    }
-
-    rpc deleteGCSResource (org.apache.airavata.mft.resource.stubs.gcs.resource.GCSResourceDeleteRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-            delete: "/v1.0/resource/gcs"
         };
     }
 }

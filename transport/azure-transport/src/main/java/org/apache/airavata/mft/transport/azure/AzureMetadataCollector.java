@@ -31,11 +31,11 @@ import org.apache.airavata.mft.credential.stubs.azure.AzureSecret;
 import org.apache.airavata.mft.credential.stubs.azure.AzureSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.azure.resource.AzureResource;
-import org.apache.airavata.mft.resource.stubs.azure.resource.AzureResourceGetRequest;
 import org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage;
 import org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageGetRequest;
 import org.apache.airavata.mft.resource.stubs.common.FileResource;
+import org.apache.airavata.mft.resource.stubs.common.GenericResource;
+import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
@@ -71,7 +71,7 @@ public class AzureMetadataCollector implements MetadataCollector {
         }
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        AzureResource azureResource = resourceClient.azure().getAzureResource(AzureResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        GenericResource azureResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         AzureSecret azureSecret = secretClient.azure().getAzureSecret(AzureSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
@@ -117,7 +117,8 @@ public class AzureMetadataCollector implements MetadataCollector {
         checkInitialized();
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        AzureResource azureResource = resourceClient.azure().getAzureResource(AzureResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        GenericResource azureResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
+                .setResourceId(resourceId).build());
 
         return isAvailable(azureResource, credentialToken);
     }
@@ -125,13 +126,14 @@ public class AzureMetadataCollector implements MetadataCollector {
     @Override
     public Boolean isAvailable(AuthToken authToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        AzureStorage azureStorage = resourceClient.azure().getAzureStorage(AzureStorageGetRequest.newBuilder().setStorageId(parentResourceId).build());
+        GenericResource genericResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder().setResourceId(parentResourceId).build());
 
-        AzureResource azureResource = AzureResource.newBuilder().setFile(FileResource.newBuilder().setResourcePath(resourcePath).build()).setAzureStorage(azureStorage).build();
+        GenericResource azureResource = GenericResource.newBuilder().setFile(FileResource.newBuilder()
+                .setResourcePath(resourcePath).build()).setAzureStorage(genericResource.getAzureStorage()).build();
         return isAvailable(azureResource, credentialToken);
     }
 
-    public Boolean isAvailable(AzureResource azureResource, String credentialToken) throws Exception {
+    public Boolean isAvailable(GenericResource azureResource, String credentialToken) throws Exception {
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         AzureSecret azureSecret = secretClient.azure().getAzureSecret(AzureSecretGetRequest.newBuilder().setSecretId(credentialToken).build());

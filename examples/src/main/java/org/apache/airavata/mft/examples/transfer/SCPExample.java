@@ -28,23 +28,20 @@ public class SCPExample {
     public static void main(String args[]) throws Exception {
         MFTApiServiceGrpc.MFTApiServiceBlockingStub client = MFTApiClient.buildClient("localhost", 7004);
 
-        String sourceStorageId = "remote-ssh-storage-1";
+        String sourceResourceId = "remote-ssh-resource-1";
         String sourceResourcePath = "/tmp/1mb.txt";
         String sourceToken = "ssh-cred-1";
-        String destStorageId = "remote-ssh-storage-2";
-        String destResourcePath = "/tmp/1mb-copy.txt";
+        String destResourceId = "remote-ssh-resource-2";
         String destToken = "ssh-cred-2";
         AuthToken mftAuthorizationToken = AuthToken.newBuilder().setUserTokenAuth(UserTokenAuth.newBuilder().setToken("43ff79ac-e4f2-473c-9ea1-04eee9509a53").build()).build();
 
 
         TransferApiRequest request = TransferApiRequest.newBuilder()
                 .setMftAuthorizationToken(mftAuthorizationToken)
-                .setSourceStorageId(sourceStorageId)
-                .setSourcePath(sourceResourcePath)
+                .setSourceResourceId(sourceResourceId)
                 .setSourceToken(sourceToken)
                 .setSourceType("SCP")
-                .setDestinationStorageId(destStorageId)
-                .setDestinationPath(destResourcePath)
+                .setDestinationResourceId(destResourceId)
                 .setDestinationToken(destToken)
                 .setDestinationType("SCP")
                 .setAffinityTransfer(false).build();

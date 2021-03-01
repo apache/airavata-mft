@@ -21,8 +21,7 @@ import com.google.protobuf.Empty;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
-import org.apache.airavata.mft.resource.service.box.BoxResourceServiceGrpc;
-import org.apache.airavata.mft.resource.stubs.box.resource.*;
+import org.apache.airavata.mft.resource.service.box.BoxStorageServiceGrpc;
 import org.apache.airavata.mft.resource.stubs.box.storage.*;
 import org.lognet.springboot.grpc.GRpcService;
 import org.slf4j.Logger;
@@ -30,78 +29,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @GRpcService
-public class BoxServiceHandler extends BoxResourceServiceGrpc.BoxResourceServiceImplBase {
+public class BoxServiceHandler extends BoxStorageServiceGrpc.BoxStorageServiceImplBase {
 
     private static final Logger logger = LoggerFactory.getLogger(BoxServiceHandler.class);
 
     @Autowired
     private ResourceBackend backend;
-
-    @Override
-    public void getBoxResource(BoxResourceGetRequest request, StreamObserver<BoxResource> responseObserver) {
-        try {
-            this.backend.getBoxResource(request).ifPresentOrElse(resource -> {
-                responseObserver.onNext(resource);
-                responseObserver.onCompleted();
-            }, () -> {
-                responseObserver.onError(Status.INTERNAL
-                        .withDescription("No Box Resource with id " + request.getResourceId())
-                        .asRuntimeException());
-            });
-        } catch (Exception e) {
-            logger.error("Failed in retrieving Box resource with id {}", request.getResourceId(), e);
-
-            responseObserver.onError(Status.INTERNAL.withCause(e)
-                    .withDescription("Failed in retrieving Box resource with id " + request.getResourceId())
-                    .asRuntimeException());
-        }
-    }
-
-    @Override
-    public void createBoxResource(BoxResourceCreateRequest request, StreamObserver<BoxResource> responseObserver) {
-        try {
-            responseObserver.onNext(this.backend.createBoxResource(request));
-            responseObserver.onCompleted();
-        } catch (Exception e) {
-            logger.error("Failed in creating the Box resource", e);
-
-            responseObserver.onError(Status.INTERNAL.withCause(e)
-                    .withDescription("Failed in creating the Box resource")
-                    .asRuntimeException());
-        }
-    }
-
-    @Override
-    public void updateBoxResource(BoxResourceUpdateRequest request, StreamObserver<Empty> responseObserver) {
-        try {
-            this.backend.updateBoxResource(request);
-            responseObserver.onCompleted();
-        } catch (Exception e) {
-            logger.error("Failed in updating the Box resource {}", request.getResourceId(), e);
-
-            responseObserver.onError(Status.INTERNAL.withCause(e)
-                    .withDescription("Failed in updating the Box resource with id " + request.getResourceId())
-                    .asRuntimeException());
-        }
-    }
-
-    @Override
-    public void deleteBoxResource(BoxResourceDeleteRequest request, StreamObserver<Empty> responseObserver) {
-        try {
-            boolean res = this.backend.deleteBoxResource(request);
-            if (res) {
-                responseObserver.onCompleted();
-            } else {
-                responseObserver.onError(new Exception("Failed to delete Box Resource with id " + request.getResourceId()));
-            }
-        } catch (Exception e) {
-            logger.error("Failed in deleting the Box resource {}", request.getResourceId(), e);
-
-            responseObserver.onError(Status.INTERNAL.withCause(e)
-                    .withDescription("Failed in deleting the Box resource with id " + request.getResourceId())
-                    .asRuntimeException());
-        }
-    }
 
     @Override
     public void getBoxStorage(BoxStorageGetRequest request, StreamObserver<BoxStorage> responseObserver) {

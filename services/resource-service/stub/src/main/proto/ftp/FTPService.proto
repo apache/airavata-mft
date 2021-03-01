@@ -23,9 +23,8 @@ package org.apache.airavata.mft.resource.service.ftp;
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "ftp/FTPStorage.proto";
-import "ftp/FTPResource.proto";
 
-service FTPResourceService {
+service FTPStorageService {
 
     rpc getFTPStorage (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageGetRequest) returns
                                                         (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorage) {
@@ -50,32 +49,6 @@ service FTPResourceService {
     rpc deleteFTPStorage (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageDeleteRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
            delete: "/v1.0/resource/ftp/storage"
-        };
-    }
-
-    rpc getFTPResource (org.apache.airavata.mft.resource.stubs.ftp.resource.FTPResourceGetRequest) returns
-                                                    (org.apache.airavata.mft.resource.stubs.ftp.resource.FTPResource) {
-        option (google.api.http) = {
-           get: "/v1.0/resource/ftp"
-        };
-    }
-
-    rpc createFTPResource (org.apache.airavata.mft.resource.stubs.ftp.resource.FTPResourceCreateRequest) returns
-                                                    (org.apache.airavata.mft.resource.stubs.ftp.resource.FTPResource) {
-        option (google.api.http) = {
-           post: "/v1.0/resource/ftp"
-        };
-    }
-
-    rpc updateFTPResource (org.apache.airavata.mft.resource.stubs.ftp.resource.FTPResourceUpdateRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-           put: "/v1.0/resource/ftp"
-        };
-    }
-
-    rpc deleteFTPResource (org.apache.airavata.mft.resource.stubs.ftp.resource.FTPResourceDeleteRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-           delete: "/v1.0/resource/ftp"
         };
     }
 }

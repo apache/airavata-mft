@@ -18,22 +18,14 @@
 package org.apache.airavata.mft.resource.server.backend.airavata;
 
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
-import org.apache.airavata.mft.resource.stubs.azure.resource.*;
 import org.apache.airavata.mft.resource.stubs.azure.storage.*;
-import org.apache.airavata.mft.resource.stubs.box.resource.*;
 import org.apache.airavata.mft.resource.stubs.box.storage.*;
-import org.apache.airavata.mft.resource.stubs.common.FileResource;
-import org.apache.airavata.mft.resource.stubs.dropbox.resource.*;
+import org.apache.airavata.mft.resource.stubs.common.*;
 import org.apache.airavata.mft.resource.stubs.dropbox.storage.*;
-import org.apache.airavata.mft.resource.stubs.ftp.resource.*;
 import org.apache.airavata.mft.resource.stubs.ftp.storage.*;
-import org.apache.airavata.mft.resource.stubs.gcs.resource.*;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.*;
-import org.apache.airavata.mft.resource.stubs.local.resource.*;
 import org.apache.airavata.mft.resource.stubs.local.storage.*;
-import org.apache.airavata.mft.resource.stubs.s3.resource.*;
 import org.apache.airavata.mft.resource.stubs.s3.storage.*;
-import org.apache.airavata.mft.resource.stubs.scp.resource.*;
 import org.apache.airavata.mft.resource.stubs.scp.storage.*;
 import org.apache.airavata.model.appcatalog.computeresource.ComputeResourceDescription;
 import org.apache.airavata.model.appcatalog.storageresource.StorageResourceDescription;
@@ -65,6 +57,35 @@ public class AiravataResourceBackend implements ResourceBackend {
     @Override
     public void destroy() {
         logger.info("Destroying Airavata resource backend");
+    }
+
+    @Override
+    public Optional<GenericResource> getGenericResource(GenericResourceGetRequest request) throws Exception {
+        String resourceId = request.getResourceId();
+        String storageId = resourceId.substring(0, resourceId.lastIndexOf(":"));
+        String path = resourceId.substring(resourceId.lastIndexOf(":") + 1);
+
+        GenericResource scpResource = GenericResource.newBuilder()
+                .setResourceId(resourceId)
+                .setFile(FileResource.newBuilder().setResourcePath(path).build())
+                .setScpStorage(getSCPStorage(SCPStorageGetRequest.newBuilder().setStorageId(storageId).build()).get())
+                .build();
+        return Optional.of(scpResource);
+    }
+
+    @Override
+    public GenericResource createGenericResource(GenericResourceCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateGenericResource(GenericResourceUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteGenericResource(GenericResourceDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
@@ -129,38 +150,6 @@ public class AiravataResourceBackend implements ResourceBackend {
     }
 
     @Override
-    public Optional<SCPResource> getSCPResource(SCPResourceGetRequest request) throws Exception {
-        String resourceId = request.getResourceId();
-        String[] parts = resourceId.split(":");
-        String path = parts[1];
-
-        SCPResource scpResource = SCPResource.newBuilder()
-                .setResourceId(resourceId)
-                .setFile(FileResource.newBuilder().setResourcePath(path).build())
-                .setScpStorage(getSCPStorage(SCPStorageGetRequest.newBuilder().setStorageId(resourceId).build()).get())
-                .build();
-        return Optional.of(scpResource);
-    }
-
-    @Override
-    public SCPResource createSCPResource(SCPResourceCreateRequest request) {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-
-    }
-
-    @Override
-    public boolean updateSCPResource(SCPResourceUpdateRequest request) {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-
-    }
-
-    @Override
-    public boolean deleteSCPResource(SCPResourceDeleteRequest request) {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-
-    }
-
-    @Override
     public Optional<LocalStorage> getLocalStorage(LocalStorageGetRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
@@ -178,30 +167,6 @@ public class AiravataResourceBackend implements ResourceBackend {
     @Override
     public boolean deleteLocalStorage(LocalStorageDeleteRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
-    public Optional<LocalResource> getLocalResource(LocalResourceGetRequest request) {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-
-    }
-
-    @Override
-    public LocalResource createLocalResource(LocalResourceCreateRequest request) {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-
-    }
-
-    @Override
-    public boolean updateLocalResource(LocalResourceUpdateRequest request) {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-
-    }
-
-    @Override
-    public boolean deleteLocalResource(LocalResourceDeleteRequest request) {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-
     }
 
     @Override
@@ -225,30 +190,6 @@ public class AiravataResourceBackend implements ResourceBackend {
     }
 
     @Override
-    public Optional<S3Resource> getS3Resource(S3ResourceGetRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-
-    }
-
-    @Override
-    public S3Resource createS3Resource(S3ResourceCreateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-
-    }
-
-    @Override
-    public boolean updateS3Resource(S3ResourceUpdateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-
-    }
-
-    @Override
-    public boolean deleteS3Resource(S3ResourceDeleteRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-
-    }
-
-    @Override
     public Optional<BoxStorage> getBoxStorage(BoxStorageGetRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
@@ -265,26 +206,6 @@ public class AiravataResourceBackend implements ResourceBackend {
 
     @Override
     public boolean deleteBoxStorage(BoxStorageDeleteRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
-    public Optional<BoxResource> getBoxResource(BoxResourceGetRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
-    public BoxResource createBoxResource(BoxResourceCreateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
-    public boolean updateBoxResource(BoxResourceUpdateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
-    public boolean deleteBoxResource(BoxResourceDeleteRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
@@ -309,26 +230,6 @@ public class AiravataResourceBackend implements ResourceBackend {
     }
 
     @Override
-    public Optional<AzureResource> getAzureResource(AzureResourceGetRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
-    public AzureResource createAzureResource(AzureResourceCreateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
-    public boolean updateAzureResource(AzureResourceUpdateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
-    public boolean deleteAzureResource(AzureResourceDeleteRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
     public Optional<GCSStorage> getGCSStorage(GCSStorageGetRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
@@ -349,26 +250,6 @@ public class AiravataResourceBackend implements ResourceBackend {
     }
 
     @Override
-    public Optional<GCSResource> getGCSResource(GCSResourceGetRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
-    public GCSResource createGCSResource(GCSResourceCreateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
-    public boolean updateGCSResource(GCSResourceUpdateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
-    public boolean deleteGCSResource(GCSResourceDeleteRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
     public Optional<DropboxStorage> getDropboxStorage(DropboxStorageGetRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
@@ -385,46 +266,6 @@ public class AiravataResourceBackend implements ResourceBackend {
 
     @Override
     public boolean deleteDropboxStorage(DropboxStorageDeleteRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
-    public Optional<DropboxResource> getDropboxResource(DropboxResourceGetRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
-    public DropboxResource createDropboxResource(DropboxResourceCreateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
-    public boolean updateDropboxResource(DropboxResourceUpdateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
-    public boolean deleteDropboxResource(DropboxResourceDeleteRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
-    public Optional<FTPResource> getFTPResource(FTPResourceGetRequest request) {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
-    public FTPResource createFTPResource(FTPResourceCreateRequest request) {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
-    public boolean updateFTPResource(FTPResourceUpdateRequest request) {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
-
-    @Override
-    public boolean deleteFTPResource(FTPResourceDeleteRequest request) {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 

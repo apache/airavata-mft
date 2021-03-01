@@ -21,8 +21,8 @@ import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.core.ConnectorContext;
 
 public interface Connector {
-    public void init(AuthToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort,
+    public void init(String resourceServiceHost, int resourceServicePort,
                      String secretServiceHost, int secretServicePort) throws Exception;
     public void destroy();
-    void startStream(String targetPath, ConnectorContext context) throws Exception;
+    void startStream(AuthToken authToken, String resourceId, String credentialToken, ConnectorContext context) throws Exception;
 }

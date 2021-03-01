@@ -25,8 +25,8 @@ import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.common.FileResource;
-import org.apache.airavata.mft.resource.stubs.local.resource.LocalResource;
-import org.apache.airavata.mft.resource.stubs.local.resource.LocalResourceGetRequest;
+import org.apache.airavata.mft.resource.stubs.common.GenericResource;
+import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.resource.stubs.local.storage.LocalStorage;
 import org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageGetRequest;
 
@@ -64,7 +64,7 @@ public class LocalMetadataCollector implements MetadataCollector {
     public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        LocalResource localResource = resourceClient.local().getLocalResource(LocalResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        GenericResource localResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder().setResourceId(resourceId).build());
         File resourceFile = new File(localResource.getFile().getResourcePath());
         if (resourceFile.exists()) {
 
@@ -112,22 +112,23 @@ public class LocalMetadataCollector implements MetadataCollector {
     @Override
     public Boolean isAvailable(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        LocalResource localResource = resourceClient.local().getLocalResource(LocalResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        GenericResource localResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder().setResourceId(resourceId).build());
         return isAvailable(localResource, credentialToken);
     }
 
     @Override
     public Boolean isAvailable(AuthToken authToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        LocalStorage localStorage = resourceClient.local().getLocalStorage(LocalStorageGetRequest.newBuilder().setStorageId(parentResourceId).build());
+        GenericResource localResource = resourceClient.get()
+                .getGenericResource(GenericResourceGetRequest.newBuilder().setResourceId(parentResourceId).build());
 
-        LocalResource localResource = LocalResource.newBuilder()
+        GenericResource localResource2 = GenericResource.newBuilder()
                 .setFile(FileResource.newBuilder().setResourcePath(resourcePath).build())
-                .setLocalStorage(localStorage).build();
-        return isAvailable(localResource, credentialToken);
+                .setLocalStorage(localResource.getLocalStorage()).build();
+        return isAvailable(localResource2, credentialToken);
     }
 
-    public Boolean isAvailable(LocalResource localResource, String credentialToken) throws Exception {
+    public Boolean isAvailable(GenericResource localResource, String credentialToken) throws Exception {
         switch (localResource.getResourceCase().name()){
             case ResourceTypes.FILE:
                 return new File(localResource.getFile().getResourcePath()).exists();

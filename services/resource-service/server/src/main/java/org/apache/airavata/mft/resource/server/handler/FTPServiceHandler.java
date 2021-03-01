@@ -21,8 +21,7 @@ import com.google.protobuf.Empty;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
-import org.apache.airavata.mft.resource.service.ftp.FTPResourceServiceGrpc;
-import org.apache.airavata.mft.resource.stubs.ftp.resource.*;
+import org.apache.airavata.mft.resource.service.ftp.FTPStorageServiceGrpc;
 import org.apache.airavata.mft.resource.stubs.ftp.storage.*;
 import org.lognet.springboot.grpc.GRpcService;
 import org.slf4j.Logger;
@@ -30,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @GRpcService
-public class FTPServiceHandler extends FTPResourceServiceGrpc.FTPResourceServiceImplBase {
+public class FTPServiceHandler extends FTPStorageServiceGrpc.FTPStorageServiceImplBase {
 
     private static final Logger logger = LoggerFactory.getLogger(FTPServiceHandler.class);
 
@@ -101,73 +100,6 @@ public class FTPServiceHandler extends FTPResourceServiceGrpc.FTPResourceService
 
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed in deleting the FTP storage")
-                    .asRuntimeException());
-        }
-    }
-
-    @Override
-    public void getFTPResource(FTPResourceGetRequest request, StreamObserver<FTPResource> responseObserver) {
-        try {
-            this.backend.getFTPResource(request).ifPresentOrElse(resource -> {
-                responseObserver.onNext(resource);
-                responseObserver.onCompleted();
-            }, () -> responseObserver.onError(Status.INTERNAL
-                    .withDescription("No FTP Resource with id " + request.getResourceId())
-                    .asRuntimeException()));
-        } catch (Exception e) {
-            logger.error("Failed in retrieving FTP resource with id {}", request.getResourceId(), e);
-
-            responseObserver.onError(Status.INTERNAL.withCause(e)
-                    .withDescription("Failed in retrieving FTP resource with id " + request.getResourceId())
-                    .asRuntimeException());
-        }
-    }
-
-    @Override
-    public void createFTPResource(FTPResourceCreateRequest request, StreamObserver<FTPResource> responseObserver) {
-        try {
-            responseObserver.onNext(this.backend.createFTPResource(request));
-            responseObserver.onCompleted();
-        } catch (Exception e) {
-            logger.error("Failed in creating the FTP resource", e);
-
-            responseObserver.onError(Status.INTERNAL.withCause(e)
-                    .withDescription("Failed in creating the FTP resource")
-                    .asRuntimeException());
-        }
-    }
-
-    @Override
-    public void updateFTPResource(FTPResourceUpdateRequest request, StreamObserver<Empty> responseObserver) {
-        try {
-            this.backend.updateFTPResource(request);
-            responseObserver.onCompleted();
-        } catch (Exception e) {
-            logger.error("Failed in updating the FTP resource {}", request.getResourceId(), e);
-
-            responseObserver.onError(Status.INTERNAL.withCause(e)
-                    .withDescription("Failed in updating the FTP resource")
-                    .asRuntimeException());
-        }
-    }
-
-    @Override
-    public void deleteFTPResource(FTPResourceDeleteRequest request, StreamObserver<Empty> responseObserver) {
-        try {
-            boolean res = this.backend.deleteFTPResource(request);
-            if (res) {
-                responseObserver.onCompleted();
-            } else {
-
-                responseObserver.onError(Status.INTERNAL
-                        .withDescription("Failed to delete FTP Resource with id " + request.getResourceId())
-                        .asRuntimeException());
-            }
-        } catch (Exception e) {
-            logger.error("Failed in deleting the scp resource {}", request.getResourceId(), e);
-
-            responseObserver.onError(Status.INTERNAL.withCause(e)
-                    .withDescription("Failed in deleting the FTP resource")
                     .asRuntimeException());
         }
     }

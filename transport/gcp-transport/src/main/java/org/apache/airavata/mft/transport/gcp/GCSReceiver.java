@@ -31,6 +31,10 @@ import org.apache.airavata.mft.credential.stubs.gcs.GCSSecret;
 import org.apache.airavata.mft.credential.stubs.gcs.GCSSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.client.StorageServiceClient;
+import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.common.GenericResource;
+import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorage;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
@@ -50,13 +54,40 @@ public class GCSReceiver implements Connector {
     private static final Logger logger = LoggerFactory.getLogger(GCSReceiver.class);
 
     private Storage storage;
-    private GCSStorage gcsStorage;
+
+    private String resourceServiceHost;
+    private int resourceServicePort;
+    private String secretServiceHost;
+    private int secretServicePort;
 
     @Override
-    public void init(AuthToken authZToken, String storageId, String credentialToken, String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
+    public void init(String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) throws Exception {
+
+        this.resourceServiceHost = resourceServiceHost;
+        this.resourceServicePort = resourceServicePort;
+        this.secretServiceHost = secretServiceHost;
+        this.secretServicePort = secretServicePort;
+    }
+
+    @Override
+    public void destroy() {
+
+    }
+
+    @Override
+    public void startStream(AuthToken authToken, String resourceId, String credentialToken, ConnectorContext context) throws Exception {
+        logger.info("Starting GCS Receiver stream for transfer {}", context.getTransferId());
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        this.gcsStorage = resourceClient.gcs().getGCSStorage(GCSStorageGetRequest.newBuilder().setStorageId(storageId).build());
+        GenericResource resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
+                .setResourceId(resourceId).build());
+
+        if (resource.getStorageCase() != GenericResource.StorageCase.GCSSTORAGE) {
+            logger.error("Invalid storage type {} specified for resource {}", resource.getStorageCase(), resourceId);
+            throw new Exception("Invalid storage type specified for resource " + resourceId);
+        }
+
+        GCSStorage gcsStorage = resource.getGcsStorage();
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         GCSSecret gcsSecret = secretClient.gcs().getGCSSecret(GCSSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
@@ -70,20 +101,10 @@ public class GCSReceiver implements Connector {
             credential = credential.createScoped(scopes);
         }
         storage = new Storage.Builder(transport, jsonFactory, credential).build();
-    }
 
+        InputStream inputStream = storage.objects().get(gcsStorage.getBucketName(),
+                resource.getFile().getResourcePath()).executeMediaAsInputStream();
 
-
-    @Override
-    public void destroy() {
-
-    }
-
-    @Override
-    public void startStream(String targetPath, ConnectorContext context) throws Exception {
-        logger.info("Starting GCS Receiver stream for transfer {}", context.getTransferId());
-
-        InputStream inputStream = storage.objects().get(this.gcsStorage.getBucketName(), targetPath).executeMediaAsInputStream();
         OutputStream os = context.getStreamBuffer().getOutputStream();
         int read;
         long bytes = 0;

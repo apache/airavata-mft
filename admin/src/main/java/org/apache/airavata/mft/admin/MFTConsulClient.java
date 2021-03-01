@@ -20,6 +20,8 @@ package org.apache.airavata.mft.admin;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HostAndPort;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
 import com.orbitz.consul.Consul;
 import com.orbitz.consul.ConsulException;
 import com.orbitz.consul.KeyValueClient;
@@ -28,6 +30,7 @@ import com.orbitz.consul.model.kv.Value;
 import org.apache.airavata.mft.admin.models.*;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCResponse;
+import org.apache.airavata.mft.api.service.TransferApiRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,36 +82,36 @@ public class MFTConsulClient {
         this.sessionClient = client.sessionClient();
     }
 
-    public String submitTransfer(TransferRequest transferRequest) throws MFTConsulClientException {
+    public String submitTransfer(TransferApiRequest transferRequest) throws MFTConsulClientException {
         try {
-            String asStr = mapper.writeValueAsString(transferRequest);
+            String asStr = JsonFormat.printer().print(transferRequest);
             String transferId = UUID.randomUUID().toString();
             kvClient.putValue(CONTROLLER_TRANSFER_MESSAGE_PATH + transferId, asStr);
             return transferId;
-        } catch (JsonProcessingException e) {
+        } catch (InvalidProtocolBufferException e) {
             throw new MFTConsulClientException("Error in serializing transfer request", e);
         }
     }
 
     /**
-     * Submits a {@link TransferCommand} to a target agent
+     * Submits a {@link TransferApiRequest} to a target agent
      *
      * @param agentId Agent Id
-     * @param transferCommand Target transfer command
-     * @throws MFTConsulClientException If {@link TransferCommand} can not be delivered to consul store
+     * @param transferRequest Target transfer request
+     * @throws MFTConsulClientException If {@link TransferApiRequest} can not be delivered to consul store
      */
-    public void commandTransferToAgent(String agentId, TransferCommand transferCommand) throws MFTConsulClientException {
+    public void commandTransferToAgent(String agentId, String transferId, TransferApiRequest transferRequest) throws MFTConsulClientException {
         try {
-            submitTransferStateToProcess(transferCommand.getTransferId(), "controller", new TransferState()
+            submitTransferStateToProcess(transferId, "controller", new TransferState()
             .setState("INITIALIZING")
             .setPercentage(0)
             .setUpdateTimeMils(System.currentTimeMillis())
             .setPublisher("controller")
             .setDescription("Initializing the transfer"));
-            String asString = mapper.writeValueAsString(transferCommand);
-            kvClient.putValue(AGENTS_TRANSFER_REQUEST_MESSAGE_PATH + agentId + "/" + transferCommand.getTransferId(), asString);
+            String asString = JsonFormat.printer().print(transferRequest);
+            kvClient.putValue(AGENTS_TRANSFER_REQUEST_MESSAGE_PATH + agentId + "/" + transferId, asString);
 
-        } catch (JsonProcessingException e) {
+        } catch (InvalidProtocolBufferException e) {
             throw new MFTConsulClientException("Error in serializing transfer request", e);
         }
     }

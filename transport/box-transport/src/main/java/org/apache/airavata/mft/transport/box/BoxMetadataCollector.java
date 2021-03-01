@@ -29,11 +29,9 @@ import org.apache.airavata.mft.credential.stubs.box.BoxSecret;
 import org.apache.airavata.mft.credential.stubs.box.BoxSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.box.resource.BoxResource;
-import org.apache.airavata.mft.resource.stubs.box.resource.BoxResourceGetRequest;
-import org.apache.airavata.mft.resource.stubs.box.storage.BoxStorage;
-import org.apache.airavata.mft.resource.stubs.box.storage.BoxStorageGetRequest;
 import org.apache.airavata.mft.resource.stubs.common.FileResource;
+import org.apache.airavata.mft.resource.stubs.common.GenericResource;
+import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
@@ -66,7 +64,7 @@ public class BoxMetadataCollector implements MetadataCollector {
         checkInitialized();
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        BoxResource boxResource = resourceClient.box().getBoxResource(BoxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        GenericResource boxResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         BoxSecret boxSecret = secretClient.box().getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
@@ -107,7 +105,8 @@ public class BoxMetadataCollector implements MetadataCollector {
         checkInitialized();
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        BoxResource boxResource = resourceClient.box().getBoxResource(BoxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        GenericResource boxResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
+                .setResourceId(resourceId).build());
         return isAvailable(boxResource, credentialToken);
     }
 
@@ -116,14 +115,16 @@ public class BoxMetadataCollector implements MetadataCollector {
         checkInitialized();
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        BoxStorage boxStorage = resourceClient.box().getBoxStorage(BoxStorageGetRequest.newBuilder().setStorageId(parentResourceId).build());
+        GenericResource genericResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
+                .setResourceId(parentResourceId).build());
 
-        BoxResource boxResource = BoxResource.newBuilder().setFile(FileResource.newBuilder().setResourcePath(resourcePath).build()).setBoxStorage(boxStorage).build();
+        GenericResource boxResource = GenericResource.newBuilder().setFile(FileResource.newBuilder()
+                .setResourcePath(resourcePath).build()).setBoxStorage(genericResource.getBoxStorage()).build();
 
         return isAvailable(boxResource, credentialToken);
     }
 
-    private Boolean isAvailable(BoxResource boxResource, String credentialToken) throws Exception {
+    private Boolean isAvailable(GenericResource boxResource, String credentialToken) throws Exception {
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         BoxSecret boxSecret = secretClient.box().getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 

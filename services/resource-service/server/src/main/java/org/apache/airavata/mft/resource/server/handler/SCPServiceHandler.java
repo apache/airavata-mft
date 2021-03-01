@@ -21,8 +21,7 @@ import com.google.protobuf.Empty;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
-import org.apache.airavata.mft.resource.service.scp.SCPResourceServiceGrpc;
-import org.apache.airavata.mft.resource.stubs.scp.resource.*;
+import org.apache.airavata.mft.resource.service.scp.SCPStorageServiceGrpc;
 import org.apache.airavata.mft.resource.stubs.scp.storage.*;
 import org.lognet.springboot.grpc.GRpcService;
 import org.slf4j.Logger;
@@ -30,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @GRpcService
-public class SCPServiceHandler extends SCPResourceServiceGrpc.SCPResourceServiceImplBase {
+public class SCPServiceHandler extends SCPStorageServiceGrpc.SCPStorageServiceImplBase {
 
     private static final Logger logger = LoggerFactory.getLogger(SCPServiceHandler.class);
 
@@ -106,76 +105,6 @@ public class SCPServiceHandler extends SCPResourceServiceGrpc.SCPResourceService
 
             responseObserver.onError(Status.INTERNAL.withCause(e)
                     .withDescription("Failed in deleting the scp storage")
-                    .asRuntimeException());
-        }
-    }
-
-    @Override
-    public void getSCPResource(SCPResourceGetRequest request, StreamObserver<SCPResource> responseObserver) {
-        try {
-            this.backend.getSCPResource(request).ifPresentOrElse(resource -> {
-                responseObserver.onNext(resource);
-                responseObserver.onCompleted();
-            }, () -> {
-
-                responseObserver.onError(Status.INTERNAL
-                        .withDescription("No SCP Resource with id " + request.getResourceId())
-                        .asRuntimeException());
-            });
-        } catch (Exception e) {
-            logger.error("Failed in retrieving resource with id {}", request.getResourceId(), e);
-
-            responseObserver.onError(Status.INTERNAL.withCause(e)
-                    .withDescription("Failed in retrieving resource with id " + request.getResourceId())
-                    .asRuntimeException());
-        }
-    }
-
-    @Override
-    public void createSCPResource(SCPResourceCreateRequest request, StreamObserver<SCPResource> responseObserver) {
-        try {
-            responseObserver.onNext(this.backend.createSCPResource(request));
-            responseObserver.onCompleted();
-        } catch (Exception e) {
-            logger.error("Failed in creating the scp resource", e);
-
-            responseObserver.onError(Status.INTERNAL.withCause(e)
-                    .withDescription("Failed in creating the scp resource")
-                    .asRuntimeException());
-        }
-    }
-
-    @Override
-    public void updateSCPResource(SCPResourceUpdateRequest request, StreamObserver<Empty> responseObserver) {
-        try {
-            this.backend.updateSCPResource(request);
-            responseObserver.onCompleted();
-        } catch (Exception e) {
-            logger.error("Failed in updating the scp resource {}", request.getResourceId(), e);
-
-            responseObserver.onError(Status.INTERNAL.withCause(e)
-                    .withDescription("Failed in updating the scp resource")
-                    .asRuntimeException());
-        }
-    }
-
-    @Override
-    public void deleteSCPResource(SCPResourceDeleteRequest request, StreamObserver<Empty> responseObserver) {
-        try {
-            boolean res = this.backend.deleteSCPResource(request);
-            if (res) {
-                responseObserver.onCompleted();
-            } else {
-
-                responseObserver.onError(Status.INTERNAL
-                        .withDescription("Failed to delete SCP Resource with id " + request.getResourceId())
-                        .asRuntimeException());
-            }
-        } catch (Exception e) {
-            logger.error("Failed in deleting the scp resource {}", request.getResourceId(), e);
-
-            responseObserver.onError(Status.INTERNAL.withCause(e)
-                    .withDescription("Failed in deleting the scp resource")
                     .asRuntimeException());
         }
     }

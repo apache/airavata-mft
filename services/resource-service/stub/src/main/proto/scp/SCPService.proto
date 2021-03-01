@@ -23,9 +23,8 @@ package org.apache.airavata.mft.resource.service.scp;
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "scp/SCPStorage.proto";
-import "scp/SCPResource.proto";
 
-service SCPResourceService {
+service SCPStorageService {
     rpc getSCPStorage (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageGetRequest) returns (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorage) {
         option (google.api.http) = {
            get: "/v1.0/resource/scp/storage"
@@ -47,32 +46,6 @@ service SCPResourceService {
     rpc deleteSCPStorage (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageDeleteRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
            delete: "/v1.0/resource/scp/storage"
-        };
-    }
-
-    // SCP Resource
-
-    rpc getSCPResource (org.apache.airavata.mft.resource.stubs.scp.resource.SCPResourceGetRequest) returns (org.apache.airavata.mft.resource.stubs.scp.resource.SCPResource) {
-        option (google.api.http) = {
-           get: "/v1.0/resource/scp"
-        };
-    }
-
-    rpc createSCPResource (org.apache.airavata.mft.resource.stubs.scp.resource.SCPResourceCreateRequest) returns (org.apache.airavata.mft.resource.stubs.scp.resource.SCPResource) {
-        option (google.api.http) = {
-           post: "/v1.0/resource/scp"
-        };
-    }
-
-    rpc updateSCPResource (org.apache.airavata.mft.resource.stubs.scp.resource.SCPResourceUpdateRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-           put: "/v1.0/resource/scp"
-        };
-    }
-
-    rpc deleteSCPResource (org.apache.airavata.mft.resource.stubs.scp.resource.SCPResourceDeleteRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-           delete: "/v1.0/resource/scp"
         };
     }
 }

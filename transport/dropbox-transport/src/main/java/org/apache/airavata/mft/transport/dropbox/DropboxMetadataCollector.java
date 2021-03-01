@@ -30,10 +30,8 @@ import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.common.FileResource;
-import org.apache.airavata.mft.resource.stubs.dropbox.resource.DropboxResource;
-import org.apache.airavata.mft.resource.stubs.dropbox.resource.DropboxResourceGetRequest;
-import org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorage;
-import org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageGetRequest;
+import org.apache.airavata.mft.resource.stubs.common.GenericResource;
+import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
@@ -64,7 +62,7 @@ public class DropboxMetadataCollector implements MetadataCollector {
     public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
         checkInitialized();
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        DropboxResource dropboxResource = resourceClient.dropbox().getDropboxResource(DropboxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        GenericResource dropboxResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         DropboxSecret dropboxSecret = secretClient.dropbox().getDropboxSecret(DropboxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
@@ -99,7 +97,8 @@ public class DropboxMetadataCollector implements MetadataCollector {
     public Boolean isAvailable(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
         checkInitialized();
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        DropboxResource dropboxResource = resourceClient.dropbox().getDropboxResource(DropboxResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        GenericResource dropboxResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
+                .setResourceId(resourceId).build());
 
         return isAvailable(dropboxResource, credentialToken);
     }
@@ -108,16 +107,17 @@ public class DropboxMetadataCollector implements MetadataCollector {
     public Boolean isAvailable(AuthToken authToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        DropboxStorage dropboxStorage = resourceClient.dropbox().getDropboxStorage(DropboxStorageGetRequest.newBuilder().setStorageId(parentResourceId).build());
+        GenericResource genericResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
+                .setResourceId(parentResourceId).build());
 
-        DropboxResource dropboxResource = DropboxResource.newBuilder()
+        GenericResource dropboxResource = GenericResource.newBuilder()
                 .setFile(FileResource.newBuilder().setResourcePath(resourcePath).build())
-                .setDropboxStorage(dropboxStorage).build();
+                .setDropboxStorage(genericResource.getDropboxStorage()).build();
 
         return isAvailable(dropboxResource, credentialToken);
     }
 
-    private Boolean isAvailable(DropboxResource dropboxResource, String credentialToken) throws Exception {
+    private Boolean isAvailable(GenericResource dropboxResource, String credentialToken) throws Exception {
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         DropboxSecret dropboxSecret = secretClient.dropbox().getDropboxSecret(DropboxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
