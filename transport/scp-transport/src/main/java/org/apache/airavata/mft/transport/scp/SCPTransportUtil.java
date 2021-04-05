@@ -45,7 +45,9 @@ public class SCPTransportUtil {
 
             return session;
         } catch (JSchException e) {
-            throw new Exception("Failed to create a ssh session for " + user + "@" + host + ":" + port, e);
+            String message = "Failed to create a ssh session for " + user + "@" + host + ":" + port;
+            logger.error(message, e);
+            throw new Exception(message, e);
         }
     }
 }
