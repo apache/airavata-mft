@@ -174,7 +174,8 @@ public class SCPMetadataCollector implements MetadataCollector {
                                         .withFriendlyName(rri.getName())
                                         .withResourcePath(rri.getPath())
                                         .withCreatedTime(rri.getAttributes().getAtime())
-                                        .withUpdateTime(rri.getAttributes().getMtime());
+                                        .withUpdateTime(rri.getAttributes().getMtime())
+                                        .withResourceSize(rri.getAttributes().getSize());
 
                         dirMetadataBuilder = dirMetadataBuilder.withFile(childFileBuilder.build());
                     }
