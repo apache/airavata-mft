@@ -9,14 +9,16 @@ import "CredCommon.proto";
 
 message TransferApiRequest {
     string sourceResourceId = 1;
-    string sourceType = 2;
-    string sourceToken = 3;
-    string destinationResourceId = 7;
-    string destinationType = 9;
-    string destinationToken = 10;
-    bool affinityTransfer = 13;
-    map<string, int32> targetAgents = 14;
-    org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 15;
+    string sourceChildResourcePath = 2;
+    string sourceType = 3;
+    string sourceToken = 4;
+    string destinationResourceId = 5;
+    string destinationChildResourcePath = 6;
+    string destinationType = 7;
+    string destinationToken = 8;
+    bool affinityTransfer = 9;
+    map<string, int32> targetAgents = 10;
+    org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 11;
 }
 
 message TransferApiResponse {
@@ -25,6 +27,7 @@ message TransferApiResponse {
 
 message HttpUploadApiRequest {
     string destinationResourceId = 1;
+    string destinationResourceChildPath = 2;
     string destinationToken = 3;
     string destinationType = 4;
     string targetAgent = 5;
@@ -38,6 +41,7 @@ message HttpUploadApiResponse {
 
 message HttpDownloadApiRequest {
     string sourceResourceId = 1;
+    string sourceResourceChildPath = 2;
     string sourceToken = 3;
     string sourceType = 4;
     string targetAgent = 5;
@@ -63,11 +67,12 @@ message TransferStateApiResponse {
 
 message ResourceAvailabilityRequest {
     string resourceId = 1;
-    string resourceType = 2;
-    string resourceToken = 3;
-    string resourceBackend = 4;
-    string resourceCredentialBackend = 5;
-    org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 6;
+    string childResourcePath = 2;
+    string resourceType = 3;
+    string resourceToken = 4;
+    string resourceBackend = 5;
+    string resourceCredentialBackend = 6;
+    org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 7;
 }
 
 message ResourceAvailabilityResponse {
@@ -99,10 +104,11 @@ message DirectoryMetadataResponse {
 
 message FetchResourceMetadataRequest {
     string resourceId = 1;
-    string resourceType = 2;
-    string resourceToken = 3;
-    string resourceBackend = 4;
-    string resourceCredentialBackend = 5;
+    string childResourcePath = 2;
+    string resourceType = 3;
+    string resourceToken = 4;
+    string resourceBackend = 5;
+    string resourceCredentialBackend = 6;
     string targetAgentId = 7;
     string childPath = 8; // if the child entities of the parent resource are required, set this field
     org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 9;

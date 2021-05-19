@@ -102,6 +102,7 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
                     .withMessageId(UUID.randomUUID().toString())
                     .withMethod("submitHttpDownload")
                     .withParameter("resourceId", request.getSourceResourceId())
+                    .withParameter("childResourcePath", request.getSourceResourceChildPath())
                     .withParameter("sourceToken", request.getSourceToken())
                     .withParameter("storeType", request.getSourceType())
                     .withParameter("mftAuthorizationToken", JsonFormat.printer().print(request.getMftAuthorizationToken()));

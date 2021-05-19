@@ -25,4 +25,5 @@ public interface Connector {
                      String secretServiceHost, int secretServicePort) throws Exception;
     public void destroy();
     void startStream(AuthToken authToken, String resourceId, String credentialToken, ConnectorContext context) throws Exception;
+    void startStream(AuthToken authToken, String resourceId, String childResourcePath, String credentialToken, ConnectorContext context) throws Exception;
 }

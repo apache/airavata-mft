@@ -69,9 +69,9 @@ public class TransportMediator {
         context.setTransferId(transferId);
 
         TransferTask recvTask = new TransferTask(request.getMftAuthorizationToken(), request.getSourceResourceId(),
-                request.getSourceToken(), context, inConnector);
+                request.getSourceChildResourcePath(), request.getSourceToken(), context, inConnector);
         TransferTask sendTask = new TransferTask(request.getMftAuthorizationToken(), request.getDestinationResourceId(),
-                request.getDestinationToken(), context, outConnector);
+                request.getDestinationChildResourcePath(), request.getDestinationToken(), context, outConnector);
         List<Future<Integer>> futureList = new ArrayList<>();
 
         ExecutorCompletionService<Integer> completionService = new ExecutorCompletionService<>(executor);

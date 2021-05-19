@@ -25,6 +25,7 @@ public class HttpTransferRequest {
     private MetadataCollector otherMetadataCollector;
     private ConnectorParams connectorParams;
     private String resourceId;
+    private String childResourcePath;
     private String credentialToken;
     private long createdTime = System.currentTimeMillis();
 
@@ -52,6 +53,15 @@ public class HttpTransferRequest {
 
     public HttpTransferRequest setResourceId(String resourceId) {
         this.resourceId = resourceId;
+        return this;
+    }
+
+    public String getChildResourcePath() {
+        return childResourcePath;
+    }
+
+    public HttpTransferRequest setChildResourcePath(String childResourcePath) {
+        this.childResourcePath = childResourcePath;
         return this;
     }
 

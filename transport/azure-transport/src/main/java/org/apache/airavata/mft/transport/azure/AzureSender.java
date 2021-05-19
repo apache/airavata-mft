@@ -94,4 +94,10 @@ public class AzureSender implements Connector {
         blockBlobClient.upload(context.getStreamBuffer().getInputStream(), context.getMetadata().getResourceSize(), true);
         logger.info("Completed Azure send for remote server for transfer {}", context.getTransferId());
     }
+
+    @Override
+    public void startStream(AuthToken authToken, String resourceId, String childResourcePath, String credentialToken,
+                            ConnectorContext context) throws Exception {
+        throw new UnsupportedOperationException();
+    }
 }

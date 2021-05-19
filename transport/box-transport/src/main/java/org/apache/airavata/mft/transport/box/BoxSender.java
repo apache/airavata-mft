@@ -91,4 +91,10 @@ public class BoxSender implements Connector {
         logger.info("Completed Box Sender stream for transfer {}", context.getTransferId());
 
     }
+
+    @Override
+    public void startStream(AuthToken authToken, String resourceId, String childResourcePath, String credentialToken,
+                            ConnectorContext context) throws Exception {
+        throw new UnsupportedOperationException();
+    }
 }

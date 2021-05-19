@@ -106,4 +106,10 @@ public class S3Receiver implements Connector {
 
         logger.info("Completed S3 Receiver stream for transfer {}", context.getTransferId());
     }
+
+    @Override
+    public void startStream(AuthToken authToken, String resourceId, String childResourcePath, String credentialToken,
+                            ConnectorContext context) throws Exception {
+        throw new UnsupportedOperationException();
+    }
 }

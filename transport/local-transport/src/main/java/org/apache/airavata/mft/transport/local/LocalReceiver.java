@@ -110,4 +110,10 @@ public class LocalReceiver implements Connector {
         streamOs.close();
         logger.info("Completed local receiver stream for transfer {}", context.getTransferId());
     }
+
+    @Override
+    public void startStream(AuthToken authToken, String resourceId, String childResourcePath, String credentialToken,
+                            ConnectorContext context) throws Exception {
+        throw new UnsupportedOperationException();
+    }
 }

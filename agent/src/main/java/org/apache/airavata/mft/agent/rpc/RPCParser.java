@@ -150,6 +150,7 @@ public class RPCParser {
 
             case "submitHttpDownload":
                 resourceId = request.getParameters().get("resourceId");
+                String childResourcePath = request.getParameters().get("childResourcePath");
                 String sourceToken = request.getParameters().get("sourceToken");
                 String storeType = request.getParameters().get("storeType");
 
@@ -168,6 +169,7 @@ public class RPCParser {
                             .setSecretServiceHost(secretServiceHost)
                             .setSecretServicePort(secretServicePort));
                     transferRequest.setResourceId(resourceId);
+                    transferRequest.setChildResourcePath(childResourcePath);
                     transferRequest.setCredentialToken(sourceToken);
                     transferRequest.setOtherMetadataCollector(metadataCollectorOp.get());
                     transferRequest.setOtherConnector(connectorOp.get());

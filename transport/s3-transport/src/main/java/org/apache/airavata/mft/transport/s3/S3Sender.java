@@ -95,4 +95,10 @@ public class S3Sender implements Connector {
                 context.getStreamBuffer().getInputStream(), metadata);
         logger.info("Completed S3 Sender stream for transfer {}", context.getTransferId());
     }
+
+    @Override
+    public void startStream(AuthToken authToken, String resourceId, String childResourcePath, String credentialToken,
+                            ConnectorContext context) throws Exception {
+        throw new UnsupportedOperationException();
+    }
 }

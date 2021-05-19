@@ -28,12 +28,9 @@ import org.apache.airavata.mft.credential.stubs.scp.SCPSecret;
 import org.apache.airavata.mft.credential.stubs.scp.SCPSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.client.StorageServiceClient;
-import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.common.GenericResource;
 import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorage;
-import org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
@@ -84,7 +81,11 @@ public class SCPSender implements Connector {
     }
 
     public void startStream(AuthToken authToken, String resourceId, String credentialToken, ConnectorContext context) throws Exception {
+        startStream(authToken, resourceId, null, credentialToken, context);
+    }
 
+    @Override
+    public void startStream(AuthToken authToken, String resourceId, String childResourcePath, String credentialToken, ConnectorContext context) throws Exception {
         checkInitialized();
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
@@ -116,9 +117,39 @@ public class SCPSender implements Connector {
             System.out.println("Session can not be null. Make sure that SCP Sender is properly initialized");
             throw new Exception("Session can not be null. Make sure that SCP Sender is properly initialized");
         }
+
+        String resourcePath = null;
+        switch (resource.getResourceCase()){
+            case FILE:
+                resourcePath = resource.getFile().getResourcePath();
+                break;
+            case DIRECTORY:
+                resourcePath = resource.getDirectory().getResourcePath();
+                break;
+            case RESOURCE_NOT_SET:
+                throw new Exception("Resource was not set in resource with id " + resourceId);
+        }
+
+        if (childResourcePath != null && !"".equals(childResourcePath)) {
+            if (resourcePath.startsWith("/")) {
+                // Linux
+                resourcePath = resourcePath.endsWith("/") ?
+                        resourcePath + childResourcePath : resourcePath + "/" + childResourcePath;
+            } else if (resourcePath.contains("\\")) {
+                // Windows
+                resourcePath = resourcePath.endsWith("\\") ?
+                        resourcePath + childResourcePath : resourcePath + "\\" + childResourcePath;
+            } else {
+                logger.error("Couldn't detect path seperator to append child path {} resource path {}",
+                        childResourcePath, resourcePath);
+                throw new Exception("Couldn't detect path seperator to append child path " + childResourcePath
+                        +" resource path " + resourcePath);
+            }
+        }
+
         try {
             copyLocalToRemote(this.session,
-                    resource.getFile().getResourcePath(),
+                    resourcePath,
                     context.getStreamBuffer(),
                     context.getMetadata().getResourceSize());
             logger.info("SCP send to transfer {} completed", context.getTransferId());

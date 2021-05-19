@@ -126,4 +126,10 @@ public class FTPReceiver implements Connector {
             throw new IllegalStateException("FTP Receiver is not initialized");
         }
     }
+
+    @Override
+    public void startStream(AuthToken authToken, String resourceId, String childResourcePath, String credentialToken,
+                            ConnectorContext context) throws Exception {
+        throw new UnsupportedOperationException();
+    }
 }

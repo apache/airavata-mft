@@ -43,12 +43,12 @@
     <modules>
         <module>common</module>
         <module>core</module>
+        <module>api</module>
         <module>transport</module>
         <module>agent</module>
         <module>services</module>
         <module>admin</module>
         <module>controller</module>
-        <module>api</module>
         <module>examples</module>
     </modules>
 

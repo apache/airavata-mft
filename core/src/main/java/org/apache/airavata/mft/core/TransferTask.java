@@ -27,21 +27,27 @@ public class TransferTask implements Callable<Integer> {
     private Connector connector;
     private ConnectorContext context;
     private String resourceId;
+    private String childResourcePath;
     private String credentialToken;
     private AuthToken authToken;
 
-    public TransferTask(AuthToken authToken, String resourceId, String credentialToken,
+    public TransferTask(AuthToken authToken, String resourceId, String childResourcePath, String credentialToken,
                         ConnectorContext context, Connector connector) {
         this.connector = connector;
         this.context = context;
         this.resourceId = resourceId;
         this.authToken = authToken;
         this.credentialToken = credentialToken;
+        this.childResourcePath = childResourcePath;
     }
 
     @Override
     public Integer call() throws Exception {
-        this.connector.startStream(authToken, resourceId, credentialToken, context);
+        if (childResourcePath == null || "".equals(childResourcePath)) {
+            this.connector.startStream(authToken, resourceId, credentialToken, context);
+        } else {
+            this.connector.startStream(authToken, resourceId, childResourcePath, credentialToken, context);
+        }
         return 0;
     }
 }

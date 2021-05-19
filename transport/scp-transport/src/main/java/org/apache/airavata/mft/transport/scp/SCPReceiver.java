@@ -81,6 +81,12 @@ public class SCPReceiver implements Connector {
     }
 
     public void startStream(AuthToken authToken, String resourceId, String credentialToken, ConnectorContext context) throws Exception {
+        startStream(authToken, resourceId, null, credentialToken, context);
+    }
+
+    @Override
+    public void startStream(AuthToken authToken, String resourceId, String childResourcePath, String credentialToken,
+                            ConnectorContext context) throws Exception {
         checkInitialized();
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
@@ -113,9 +119,36 @@ public class SCPReceiver implements Connector {
             throw new Exception("Session can not be null. Make sure that SCP Receiver is properly initialized");
         }
 
-        transferRemoteToStream(session, resource.getFile().getResourcePath(), context.getStreamBuffer());
-        logger.info("SCP Receive completed. Transfer {}", context.getTransferId());
+        String resourcePath = null;
+        switch (resource.getResourceCase()){
+            case FILE:
+                resourcePath = resource.getFile().getResourcePath();
+                break;
+            case DIRECTORY:
+                resourcePath = resource.getDirectory().getResourcePath();
+                break;
+            case RESOURCE_NOT_SET:
+                throw new Exception("Resource was not set in resource with id " + resourceId);
+        }
 
+        if (childResourcePath != null && !"".equals(childResourcePath)) {
+            if (resourcePath.startsWith("/")) {
+                // Linux
+                resourcePath = resourcePath.endsWith("/") ?
+                        resourcePath + childResourcePath : resourcePath + "/" + childResourcePath;
+            } else if (resourcePath.contains("\\")) {
+                // Windows
+                resourcePath = resourcePath.endsWith("\\") ?
+                        resourcePath + childResourcePath : resourcePath + "\\" + childResourcePath;
+            } else {
+                logger.error("Couldn't detect path seperator to append child path {} resource path {}",
+                        childResourcePath, resourcePath);
+                throw new Exception("Couldn't detect path seperator to append child path " + childResourcePath
+                        +" resource path " + resourcePath);
+            }
+        }
+        transferRemoteToStream(session, resourcePath, context.getStreamBuffer());
+        logger.info("SCP Receive completed. Transfer {}", context.getTransferId());
     }
 
     private void transferRemoteToStream(Session session, String from, DoubleStreamingBuffer streamBuffer) throws Exception {

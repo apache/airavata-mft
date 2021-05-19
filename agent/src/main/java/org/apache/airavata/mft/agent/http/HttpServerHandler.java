@@ -98,6 +98,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
         FileResourceMetadata fileResourceMetadata = metadataCollector.getFileResourceMetadata(authToken,
                 httpTransferRequest.getResourceId(),
+                httpTransferRequest.getChildResourcePath(),
                 httpTransferRequest.getCredentialToken());
 
         long fileLength = fileResourceMetadata.getResourceSize();
@@ -122,7 +123,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         connectorContext.setTransferId(uri);
         connectorContext.setMetadata(new FileResourceMetadata()); // TODO Resolve
 
-        TransferTask pullTask = new TransferTask(authToken, httpTransferRequest.getResourceId(), httpTransferRequest.getCredentialToken(), connectorContext, connector);
+        TransferTask pullTask = new TransferTask(authToken, httpTransferRequest.getResourceId(),
+                httpTransferRequest.getChildResourcePath(), httpTransferRequest.getCredentialToken(),
+                connectorContext, connector);
 
         // TODO aggregate pullStatusFuture and sendFileFuture for keepalive test
         Future<Integer> pullStatusFuture = executor.submit(pullTask);
@@ -137,9 +140,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             @Override
             public void operationProgressed(ChannelProgressiveFuture future, long progress, long total) {
                 if (total < 0) { // total unknown
-                    System.err.println(future.channel() + " Transfer progress: " + progress);
+                    logger.error(future.channel() + " Transfer progress: " + progress);
                 } else {
-                    System.err.println(future.channel() + " Transfer progress: " + progress + " / " + total);
+                    logger.error(future.channel() + " Transfer progress: " + progress + " / " + total);
                 }
             }
 

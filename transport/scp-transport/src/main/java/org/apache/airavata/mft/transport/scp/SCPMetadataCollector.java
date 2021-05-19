@@ -131,17 +131,47 @@ public class SCPMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String parentResourceId, String childResourcePath, String credentialToken) throws Exception {
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        GenericResource scpResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder().setResourceId(parentResourceId).build());
+        GenericResource resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder().setResourceId(parentResourceId).build());
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
+        String resourcePath = null;
+
+        switch (resource.getResourceCase()){
+            case FILE:
+                resourcePath = resource.getFile().getResourcePath();
+                break;
+            case DIRECTORY:
+                resourcePath = resource.getDirectory().getResourcePath();
+                break;
+            case RESOURCE_NOT_SET:
+                throw new Exception("Resource was not set in resource with id " + parentResourceId);
+        }
+
+        if (childResourcePath != null && !"".equals(childResourcePath)) {
+            if (resourcePath.startsWith("/")) {
+                // Linux
+                resourcePath = resourcePath.endsWith("/") ?
+                        resourcePath + childResourcePath : resourcePath + "/" + childResourcePath;
+            } else if (resourcePath.contains("\\")) {
+                // Windows
+                resourcePath = resourcePath.endsWith("\\") ?
+                        resourcePath + childResourcePath : resourcePath + "\\" + childResourcePath;
+            } else {
+                logger.error("Couldn't detect path seperator to append child path {} resource path {}",
+                        childResourcePath, resourcePath);
+                throw new Exception("Couldn't detect path seperator to append child path " + childResourcePath
+                        +" resource path " + resourcePath);
+            }
+        }
+
         GenericResource scpResource2 = GenericResource.newBuilder()
                                         .setFile(FileResource.newBuilder()
                                         .setResourcePath(resourcePath).build())
-                                        .setScpStorage(scpResource.getScpStorage()).build();
+                                        .setScpStorage(resource.getScpStorage()).build();
 
         return getFileResourceMetadata(authZToken, scpResource2, scpSecret);
     }
@@ -203,16 +233,45 @@ public class SCPMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String parentResourceId, String childResourcePath, String credentialToken) throws Exception {
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        GenericResource scpPResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder().setResourceId(parentResourceId).build());
+        GenericResource resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder().setResourceId(parentResourceId).build());
 
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
+        String resourcePath = null;
+
+        switch (resource.getResourceCase()){
+            case FILE:
+                resourcePath = resource.getFile().getResourcePath();
+                break;
+            case DIRECTORY:
+                resourcePath = resource.getDirectory().getResourcePath();
+            case RESOURCE_NOT_SET:
+                throw new Exception("Resource was not set in resource with id " + parentResourceId);
+        }
+
+        if (childResourcePath != null && !"".equals(childResourcePath)) {
+            if (resourcePath.startsWith("/")) {
+                // Linux
+                resourcePath = resourcePath.endsWith("/") ?
+                        resourcePath + childResourcePath : resourcePath + "/" + childResourcePath;
+            } else if (resourcePath.contains("\\")) {
+                // Windows
+                resourcePath = resourcePath.endsWith("\\") ?
+                        resourcePath + childResourcePath : resourcePath + "\\" + childResourcePath;
+            } else {
+                logger.error("Couldn't detect path seperator to append child path {} resource path {}",
+                        childResourcePath, resourcePath);
+                throw new Exception("Couldn't detect path seperator to append child path " + childResourcePath
+                        +" resource path " + resourcePath);
+            }
+        }
+
         GenericResource scpResource = GenericResource.newBuilder()
                 .setDirectory(DirectoryResource.newBuilder().setResourcePath(resourcePath).build())
-                .setScpStorage(scpPResource.getScpStorage()).build();
+                .setScpStorage(resource.getScpStorage()).build();
 
         return getDirectoryResourceMetadata(authZToken,scpResource, scpSecret);
     }
