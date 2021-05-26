@@ -248,6 +248,7 @@ public class SCPMetadataCollector implements MetadataCollector {
                 break;
             case DIRECTORY:
                 resourcePath = resource.getDirectory().getResourcePath();
+                break;
             case RESOURCE_NOT_SET:
                 throw new Exception("Resource was not set in resource with id " + parentResourceId);
         }
