@@ -119,34 +119,33 @@ public class SCPReceiver implements Connector {
             throw new Exception("Session can not be null. Make sure that SCP Receiver is properly initialized");
         }
 
+        boolean isChildPath = false;
+        if (childResourcePath != null && !"".equals(childResourcePath)) {
+            isChildPath = true;
+        }
+
         String resourcePath = null;
         switch (resource.getResourceCase()){
             case FILE:
+                if (isChildPath){
+                    throw new Exception("A child path can not be associated with a file parent");
+                }
                 resourcePath = resource.getFile().getResourcePath();
                 break;
             case DIRECTORY:
                 resourcePath = resource.getDirectory().getResourcePath();
+                if (isChildPath) {
+                    if (!childResourcePath.startsWith(resourcePath)) {
+                        throw new Exception("Child path " + childResourcePath + " is not in the parent path " + resourcePath);
+                    }
+                    resourcePath = childResourcePath;
+                }
+
                 break;
             case RESOURCE_NOT_SET:
                 throw new Exception("Resource was not set in resource with id " + resourceId);
         }
 
-        if (childResourcePath != null && !"".equals(childResourcePath)) {
-            if (resourcePath.startsWith("/")) {
-                // Linux
-                resourcePath = resourcePath.endsWith("/") ?
-                        resourcePath + childResourcePath : resourcePath + "/" + childResourcePath;
-            } else if (resourcePath.contains("\\")) {
-                // Windows
-                resourcePath = resourcePath.endsWith("\\") ?
-                        resourcePath + childResourcePath : resourcePath + "\\" + childResourcePath;
-            } else {
-                logger.error("Couldn't detect path seperator to append child path {} resource path {}",
-                        childResourcePath, resourcePath);
-                throw new Exception("Couldn't detect path seperator to append child path " + childResourcePath
-                        +" resource path " + resourcePath);
-            }
-        }
         transferRemoteToStream(session, resourcePath, context.getStreamBuffer());
         logger.info("SCP Receive completed. Transfer {}", context.getTransferId());
     }

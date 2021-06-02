@@ -138,34 +138,31 @@ public class SCPMetadataCollector implements MetadataCollector {
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
-        String resourcePath = null;
+        boolean isChildPath = false;
+        if (childResourcePath != null && !"".equals(childResourcePath)) {
+            isChildPath = true;
+        }
 
+        String resourcePath = null;
         switch (resource.getResourceCase()){
             case FILE:
+                if (isChildPath){
+                    throw new Exception("A child path can not be associated with a file parent");
+                }
                 resourcePath = resource.getFile().getResourcePath();
                 break;
             case DIRECTORY:
                 resourcePath = resource.getDirectory().getResourcePath();
+                if (isChildPath) {
+                    if (!childResourcePath.startsWith(resourcePath)) {
+                        throw new Exception("Child path " + childResourcePath + " is not in the parent path " + resourcePath);
+                    }
+                    resourcePath = childResourcePath;
+                }
+
                 break;
             case RESOURCE_NOT_SET:
                 throw new Exception("Resource was not set in resource with id " + parentResourceId);
-        }
-
-        if (childResourcePath != null && !"".equals(childResourcePath)) {
-            if (resourcePath.startsWith("/")) {
-                // Linux
-                resourcePath = resourcePath.endsWith("/") ?
-                        resourcePath + childResourcePath : resourcePath + "/" + childResourcePath;
-            } else if (resourcePath.contains("\\")) {
-                // Windows
-                resourcePath = resourcePath.endsWith("\\") ?
-                        resourcePath + childResourcePath : resourcePath + "\\" + childResourcePath;
-            } else {
-                logger.error("Couldn't detect path seperator to append child path {} resource path {}",
-                        childResourcePath, resourcePath);
-                throw new Exception("Couldn't detect path seperator to append child path " + childResourcePath
-                        +" resource path " + resourcePath);
-            }
         }
 
         GenericResource scpResource2 = GenericResource.newBuilder()
@@ -240,34 +237,32 @@ public class SCPMetadataCollector implements MetadataCollector {
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
         SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
+        boolean isChildPath = false;
+        if (childResourcePath != null && !"".equals(childResourcePath)) {
+            isChildPath = true;
+        }
+
         String resourcePath = null;
 
         switch (resource.getResourceCase()){
             case FILE:
+                if (isChildPath){
+                    throw new Exception("A child path can not be associated with a file parent");
+                }
                 resourcePath = resource.getFile().getResourcePath();
                 break;
             case DIRECTORY:
                 resourcePath = resource.getDirectory().getResourcePath();
+                if (isChildPath) {
+                    if (!resourcePath.startsWith(childResourcePath)) {
+                        throw new Exception("Child path " + childResourcePath + " is not in the parent path " + resourcePath);
+                    }
+                    resourcePath = childResourcePath;
+                }
+
                 break;
             case RESOURCE_NOT_SET:
                 throw new Exception("Resource was not set in resource with id " + parentResourceId);
-        }
-
-        if (childResourcePath != null && !"".equals(childResourcePath)) {
-            if (resourcePath.startsWith("/")) {
-                // Linux
-                resourcePath = resourcePath.endsWith("/") ?
-                        resourcePath + childResourcePath : resourcePath + "/" + childResourcePath;
-            } else if (resourcePath.contains("\\")) {
-                // Windows
-                resourcePath = resourcePath.endsWith("\\") ?
-                        resourcePath + childResourcePath : resourcePath + "\\" + childResourcePath;
-            } else {
-                logger.error("Couldn't detect path seperator to append child path {} resource path {}",
-                        childResourcePath, resourcePath);
-                throw new Exception("Couldn't detect path seperator to append child path " + childResourcePath
-                        +" resource path " + resourcePath);
-            }
         }
 
         GenericResource scpResource = GenericResource.newBuilder()
