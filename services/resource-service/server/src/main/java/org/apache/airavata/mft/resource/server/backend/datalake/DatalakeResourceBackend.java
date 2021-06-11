@@ -85,18 +85,19 @@ public class DatalakeResourceBackend implements ResourceBackend {
 
                             }
                         } catch (Exception exception) {
-                            exception.printStackTrace();
+                            String msg = "Error occurred while deserializing records from datalake DB " + exception.getMessage();
+                            logger.error(msg, exception);
+                            throw new RuntimeException(msg, exception);
                         }
-
                     });
                 }
             }
             return Optional.ofNullable(resource.get());
         } catch (Exception ex) {
-            String msg = "Fetch generic resource " + ex.getMessage();
+            String msg = "Error occurred while fetching generic resource fom datalake DB " + ex.getMessage();
             logger.error(msg, ex);
+            throw new RuntimeException(msg, ex);
         }
-        return null;
     }
 
     @Override
