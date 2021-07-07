@@ -261,7 +261,7 @@ public class SCPMetadataCollector implements MetadataCollector {
             case DIRECTORY:
                 resourcePath = resource.getDirectory().getResourcePath();
                 if (isChildPath) {
-                    if (!resourcePath.startsWith(childResourcePath)) {
+                    if (!childResourcePath.startsWith(resourcePath)) {
                         throw new Exception("Child path " + childResourcePath + " is not in the parent path " + resourcePath);
                     }
                     resourcePath = childResourcePath;
