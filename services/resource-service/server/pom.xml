@@ -64,6 +64,11 @@
             <artifactId>grpc-services</artifactId>
             <version>1.25.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.airavata.data.lake</groupId>
+            <artifactId>drms-stubs</artifactId>
+            <version>0.01-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>

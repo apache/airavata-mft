@@ -33,11 +33,20 @@ import java.util.Optional;
 public class CustosSecretBackend implements SecretBackend {
     private static final Logger LOGGER = LoggerFactory.getLogger(CustosSecretBackend.class);
 
+    @Value("${custos.host}")
+    private String custosHost;
 
-    @Autowired
+    @Value("${custos.port}")
+    private int custosPort;
+
+    @Value("${custos.id}")
+    private String custosId;
+
+    @Value("${custos.secret}")
+    private String custosSecret;
+
     private AgentAuthenticationHandler handler;
 
-    @Autowired
     private CustosClientsFactory custosClientsFactory;
 
     private IdentityManagementClient identityClient;
@@ -46,13 +55,13 @@ public class CustosSecretBackend implements SecretBackend {
 
     private ResourceSecretManagementAgentClient csAgentClient;
 
-    @Value("${custos.id}")
-    private String custosId;
-
 
     @Override
     public void init() {
         try {
+
+            custosClientsFactory = new CustosClientsFactory(custosHost, custosPort, custosId, custosSecret);
+            handler = new AgentAuthenticationHandler(custosId, custosSecret, custosClientsFactory);
             Optional<CustosClientProvider> custosClientProvider = custosClientsFactory.getCustosClientProvider(custosId);
             if (custosClientProvider.isPresent()) {
 

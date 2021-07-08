@@ -31,7 +31,6 @@ public class AgentAuthenticationHandler implements AuthenticationHandler, Closea
 
     private IdentityManagementClient identityManagementClient;
 
-    @Autowired
     private CustosClientsFactory custosClientsFactory;
 
 

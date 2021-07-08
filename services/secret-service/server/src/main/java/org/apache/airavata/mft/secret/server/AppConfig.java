@@ -29,28 +29,4 @@ import java.io.IOException;
 @Configuration
 public class AppConfig {
 
-
-    @Value("${custos.host}")
-    private String custosHost;
-
-    @Value("${custos.port}")
-    private int custosPort;
-
-    @Value("${custos.id}")
-    private String custosId;
-
-    @Value("${custos.secret}")
-    private String custosSecret;
-
-    @Bean
-    public CustosClientsFactory custosClientsFactory() {
-        return new CustosClientsFactory(custosHost, custosPort, custosId, custosSecret);
-    }
-
-    @Bean
-    public AgentAuthenticationHandler agentAuthenticationHandler() throws IOException {
-        return new AgentAuthenticationHandler(custosId, custosSecret, custosClientsFactory());
-    }
-
-
 }

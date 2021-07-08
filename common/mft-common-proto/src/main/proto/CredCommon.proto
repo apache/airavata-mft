@@ -24,6 +24,11 @@ message UserTokenAuth {
     string token = 1;
 }
 
+message PasswordAuth {
+    string userName = 1;
+    string password = 2;
+}
+
 message AgentAuth {
     string token = 1;
     string agentId = 2;
@@ -42,5 +47,6 @@ message AuthToken {
         UserTokenAuth userTokenAuth = 1;
         AgentAuth agentAuth = 2;
         DelegateAuth delegateAuth = 3;
+        PasswordAuth passwordAuth = 4;
     }
 }
