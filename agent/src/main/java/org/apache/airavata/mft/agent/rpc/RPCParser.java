@@ -162,17 +162,18 @@ public class RPCParser {
                 Optional<Connector> connectorOp = ConnectorResolver.resolveConnector(storeType, "IN");
 
                 if (metadataCollectorOp.isPresent() && connectorOp.isPresent()) {
-                    HttpTransferRequest transferRequest = new HttpTransferRequest();
-                    transferRequest.setConnectorParams(new ConnectorParams()
-                            .setResourceServiceHost(resourceServiceHost)
-                            .setResourceServicePort(resourceServicePort)
-                            .setSecretServiceHost(secretServiceHost)
-                            .setSecretServicePort(secretServicePort));
-                    transferRequest.setResourceId(resourceId);
-                    transferRequest.setChildResourcePath(childResourcePath);
-                    transferRequest.setCredentialToken(sourceToken);
-                    transferRequest.setOtherMetadataCollector(metadataCollectorOp.get());
-                    transferRequest.setOtherConnector(connectorOp.get());
+                    HttpTransferRequest transferRequest = new HttpTransferRequest()
+                            .setConnectorParams(new ConnectorParams()
+                                .setResourceServiceHost(resourceServiceHost)
+                                .setResourceServicePort(resourceServicePort)
+                                .setSecretServiceHost(secretServiceHost)
+                                .setSecretServicePort(secretServicePort))
+                            .setResourceId(resourceId)
+                            .setChildResourcePath(childResourcePath)
+                            .setCredentialToken(sourceToken)
+                            .setOtherMetadataCollector(metadataCollectorOp.get())
+                            .setOtherConnector(connectorOp.get())
+                            .setAuthToken(mftAuthorizationToken);
                     String url = httpTransferRequestsStore.addDownloadRequest(transferRequest);
                     return (agentHttpsEnabled? "https": "http") + "://" + agentHost + ":" + agentHttpPort + "/" + url;
                 }

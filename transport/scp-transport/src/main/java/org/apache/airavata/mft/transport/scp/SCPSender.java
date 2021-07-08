@@ -90,7 +90,7 @@ public class SCPSender implements Connector {
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         GenericResource resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
-                .setResourceId(resourceId).build());
+                .setAuthzToken(authToken).setResourceId(resourceId).build());
 
         if (resource.getStorageCase() != GenericResource.StorageCase.SCPSTORAGE) {
             logger.error("Invalid storage type {} specified for resource {}", resource.getStorageCase(), resourceId);

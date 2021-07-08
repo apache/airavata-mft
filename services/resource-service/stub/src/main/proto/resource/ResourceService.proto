@@ -30,6 +30,7 @@ import "gcs/GCSStorage.proto";
 import "local/LocalStorage.proto";
 import "s3/S3Storage.proto";
 import "scp/SCPStorage.proto";
+import "CredCommon.proto";
 
 message FileResource {
     string resourcePath = 1;
@@ -62,6 +63,7 @@ message GenericResource {
 
 message GenericResourceGetRequest {
     string resourceId = 1;
+    org.apache.airavata.mft.common.AuthToken authzToken = 2;
 }
 
 message GenericResourceCreateRequest {
@@ -70,6 +72,7 @@ message GenericResourceCreateRequest {
         org.apache.airavata.mft.resource.stubs.common.FileResource file = 2;
         org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 3;
     }
+    org.apache.airavata.mft.common.AuthToken authzToken = 4;
 }
 
 message GenericResourceUpdateRequest {
@@ -79,10 +82,12 @@ message GenericResourceUpdateRequest {
         org.apache.airavata.mft.resource.stubs.common.FileResource file = 3;
         org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 4;
     }
+    org.apache.airavata.mft.common.AuthToken authzToken = 5;
 }
 
 message GenericResourceDeleteRequest {
     string resourceId = 1;
+    org.apache.airavata.mft.common.AuthToken authzToken = 2;
 }
 
 service GenericResourceService {
