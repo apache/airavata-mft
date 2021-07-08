@@ -17,6 +17,7 @@
 
 package org.apache.airavata.mft.agent.http;
 
+import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 
@@ -28,6 +29,7 @@ public class HttpTransferRequest {
     private String childResourcePath;
     private String credentialToken;
     private long createdTime = System.currentTimeMillis();
+    private AuthToken authToken;
 
     public Connector getOtherConnector() {
         return otherConnector;
@@ -89,6 +91,15 @@ public class HttpTransferRequest {
 
     public HttpTransferRequest setCreatedTime(long createdTime) {
         this.createdTime = createdTime;
+        return this;
+    }
+
+    public AuthToken getAuthToken() {
+        return authToken;
+    }
+
+    public HttpTransferRequest setAuthToken(AuthToken authToken) {
+        this.authToken = authToken;
         return this;
     }
 }

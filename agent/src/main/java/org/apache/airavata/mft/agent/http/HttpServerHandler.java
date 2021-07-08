@@ -78,7 +78,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         ConnectorParams params = httpTransferRequest.getConnectorParams();
 
         // TODO Load from HTTP Headers
-        AuthToken authToken = AuthToken.newBuilder().build();
+        AuthToken authToken = httpTransferRequest.getAuthToken();
 
         connector.init(params.getResourceServiceHost(),
                 params.getResourceServicePort(), params.getSecretServiceHost(), params.getSecretServicePort());

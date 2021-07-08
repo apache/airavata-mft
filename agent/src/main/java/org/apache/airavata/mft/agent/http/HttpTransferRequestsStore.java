@@ -66,6 +66,9 @@ public class HttpTransferRequestsStore {
 
         //TODO  Need to block concurrent calls to same url as connectors are not thread safe
         HttpTransferRequest request = downloadRequestStore.get(url);
+        if (request != null) {
+            downloadRequestStore.remove(url);
+        }
         return request;
     }
 
@@ -78,7 +81,10 @@ public class HttpTransferRequestsStore {
     public HttpTransferRequest getUploadRequest(String url) {
 
         //TODO  Need to block concurrent calls to same url as connectors are not thread safe
-        HttpTransferRequest request = downloadRequestStore.get(url);
+        HttpTransferRequest request = uploadRequestStore.get(url);
+        if (request != null) {
+            uploadRequestStore.remove(url);
+        }
         return request;
     }
 }
