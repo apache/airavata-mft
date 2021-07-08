@@ -33,6 +33,7 @@ import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
 import org.apache.airavata.mft.agent.http.HttpServer;
 import org.apache.airavata.mft.agent.http.HttpTransferRequestsStore;
 import org.apache.airavata.mft.agent.rpc.RPCParser;
+import org.apache.airavata.mft.api.service.CallbackEndpoint;
 import org.apache.airavata.mft.api.service.TransferApiRequest;
 import org.apache.airavata.mft.core.ConnectorResolver;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
@@ -47,8 +48,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -191,10 +196,12 @@ public class MFTAgent implements CommandLineRunner {
                             .setDescription("Started the transfer"));
 
 
+                        TransferApiRequest finalRequest = request;
                         mediator.transfer(transferId, request, inConnector, outConnector, srcMetadataCollector, dstMetadataCollector,
                                 (id, st) -> {
                                     try {
                                         mftConsulClient.submitTransferStateToProcess(id, agentId, st.setPublisher(agentId));
+                                        handleCallbacks(finalRequest.getCallbackEndpointsList(), id, st);
                                     } catch (MFTConsulClientException e) {
                                         logger.error("Failed while updating transfer state", e);
                                     }
@@ -241,6 +248,19 @@ public class MFTAgent implements CommandLineRunner {
         };
         transferMessageCache.addListener(transferCacheListener);
         transferMessageCache.start();
+    }
+
+    private void handleCallbacks(List<CallbackEndpoint> callbackEndpoints, String transferId, TransferState transferState) {
+        if (callbackEndpoints != null && !callbackEndpoints.isEmpty()) {
+            for (CallbackEndpoint cbe : callbackEndpoints) {
+                switch (cbe.getType()) {
+                    case HTTP:
+                        break;
+                    case KAFKA:
+                        break;
+                }
+            }
+        }
     }
 
     private void acceptHTTPRequests() {

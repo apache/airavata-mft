@@ -7,6 +7,15 @@ import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "CredCommon.proto";
 
+message CallbackEndpoint {
+    enum CallbackType {
+        HTTP = 0;
+        KAFKA = 1;
+    }
+    CallbackType type = 1;
+    string endpoint = 2;
+}
+
 message TransferApiRequest {
     string sourceResourceId = 1;
     string sourceChildResourcePath = 2;
@@ -19,6 +28,7 @@ message TransferApiRequest {
     bool affinityTransfer = 9;
     map<string, int32> targetAgents = 10;
     org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 11;
+    repeated CallbackEndpoint callbackEndpoints = 12;
 }
 
 message TransferApiResponse {
