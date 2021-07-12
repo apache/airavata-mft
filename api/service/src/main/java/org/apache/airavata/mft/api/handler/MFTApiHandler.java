@@ -22,6 +22,7 @@ import com.google.protobuf.util.JsonFormat;
 import io.grpc.stub.StreamObserver;
 import org.apache.airavata.mft.admin.MFTConsulClient;
 import org.apache.airavata.mft.admin.SyncRPCClient;
+import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCResponse;
@@ -97,8 +98,13 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
     public void submitHttpDownload(HttpDownloadApiRequest request, StreamObserver<HttpDownloadApiResponse> responseObserver) {
         try {
             // TODO : Automatically derive agent if the target agent is empty
+
+            logger.info("Processing submit http download for resource {}", request.getSourceResourceId());
+
+            String targetAgent = derriveTargetAgent(request.getTargetAgent());
+
             SyncRPCRequest.SyncRPCRequestBuilder requestBuilder = SyncRPCRequest.SyncRPCRequestBuilder.builder()
-                    .withAgentId(request.getTargetAgent())
+                    .withAgentId(targetAgent)
                     .withMessageId(UUID.randomUUID().toString())
                     .withMethod("submitHttpDownload")
                     .withParameter("resourceId", request.getSourceResourceId())
@@ -293,5 +299,22 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
             logger.error("Error while fetching directory resource metadata for resource " + request.getResourceId(), e);
             responseObserver.onError(new Exception("Failed to fetch directory resource metadata", e));
         }
+    }
+
+    private String derriveTargetAgent(String targetAgent) throws Exception {
+        if (targetAgent.isEmpty()) {
+            List<String> liveAgentIds = mftConsulClient.getLiveAgentIds();
+            if (liveAgentIds.isEmpty()) {
+                throw new Exception("No agent is available to perform the operation");
+            }
+            targetAgent = liveAgentIds.get(0);
+            logger.info("Using agent {} for processing the operation", targetAgent);
+        } else {
+            Optional<AgentInfo> agentInfo = mftConsulClient.getAgentInfo(targetAgent);
+            if (agentInfo.isEmpty()) {
+                throw new Exception("Target agent " + targetAgent + " is not available");
+            }
+        }
+        return targetAgent;
     }
 }
