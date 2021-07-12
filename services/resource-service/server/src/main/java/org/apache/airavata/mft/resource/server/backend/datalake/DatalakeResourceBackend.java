@@ -76,19 +76,10 @@ public class DatalakeResourceBackend implements ResourceBackend {
     public Optional<GenericResource> getGenericResource(GenericResourceGetRequest request) throws Exception {
 
         AuthToken authzToken = request.getAuthzToken();
-        PasswordAuth passwordAuth = authzToken.getPasswordAuth();
-        String accessToken = getAccessToken(clientId, clientSecret, passwordAuth.getUserName(), passwordAuth.getPassword());
-
-        if (accessToken == null) {
-            logger.error("Failed to fetch an access token when fetching a resource with id {} to user {}",
-                    request.getResourceId(), passwordAuth.getUserName());
-            throw new Exception("\"Failed to fetch an access token when fetching a resource with id " + request.getResourceId() +
-                    " to user " + passwordAuth.getUserName());
-        }
 
         ResourceServiceGrpc.ResourceServiceBlockingStub datalakeResourceStub = ResourceServiceGrpc.newBlockingStub(channel);
         ResourceFetchResponse resourceFetchResponse = datalakeResourceStub.fetchResource(ResourceFetchRequest.newBuilder()
-                .setAuthToken(DRMSServiceAuthToken.newBuilder().setAccessToken(accessToken).build())
+                .setAuthToken(DRMSServiceAuthToken.newBuilder().setAccessToken(authzToken.getUserTokenAuth().getToken()).build())
                 .setResourceId(request.getResourceId())
                 .build());
 
@@ -111,24 +102,21 @@ public class DatalakeResourceBackend implements ResourceBackend {
                 break;
         }
 
-        switch (resource.getStoragePreferenceCase()) {
-            case SSH_PREFERENCE:
-                SSHStoragePreference sshPreference = resource.getSshPreference();
-                SSHStorage storage = sshPreference.getStorage();
+        switch (resource.getStorageCase()) {
+            case SSH_STORAGE:
+                SSHStorage storage = resource.getSshStorage();
                 resourceBuilder.setScpStorage(SCPStorage.newBuilder()
                         .setStorageId(storage.getStorageId()).setHost(storage.getHostName())
-                        .setPort(storage.getPort())
-                        .setUser(sshPreference.getUserName()).build());
+                        .setPort(storage.getPort()).build());
                 break;
-            case S3_PREFERENCE:
-                S3StoragePreference s3Preference = resource.getS3Preference();
-                org.apache.airavata.datalake.drms.storage.s3.S3Storage s3Storage = s3Preference.getStorage();
+            case S3_STORAGE:
+                org.apache.airavata.datalake.drms.storage.s3.S3Storage s3Storage = resource.getS3Storage();
                 resourceBuilder.setS3Storage(S3Storage.newBuilder()
                         .setStorageId(s3Storage.getStorageId())
                         .setBucketName(s3Storage.getBucketName())
                         .setRegion(s3Storage.getRegion()).build());
                 break;
-            case STORAGEPREFERENCE_NOT_SET:
+            case STORAGE_NOT_SET:
                 logger.error("No preference registered for the resource {}", request.getResourceId());
                 throw new Exception("No preference registered for the resource " + request.getResourceId());
         }
@@ -309,23 +297,5 @@ public class DatalakeResourceBackend implements ResourceBackend {
     @Override
     public boolean deleteFTPStorage(FTPStorageDeleteRequest request) throws Exception {
         return false;
-    }
-
-
-    private String getAccessToken(String clientId, String clientSecret, String userName, String password) {
-        try {
-
-            CustosClientProvider custosClientProvider = new CustosClientProvider.Builder().setServerHost("custos.scigap.org")
-                    .setServerPort(31499)
-                    .setClientId(clientId)
-                    .setClientSec(clientSecret).build();
-
-            IdentityManagementClient identityManagementClient = custosClientProvider.getIdentityManagementClient();
-            Struct struct = identityManagementClient.getToken(null, null, userName, password, null, "password");
-            return struct.getFieldsMap().get("access_token").getStringValue();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return null;
     }
 }
