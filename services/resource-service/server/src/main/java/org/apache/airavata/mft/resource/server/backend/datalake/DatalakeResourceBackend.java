@@ -58,9 +58,15 @@ public class DatalakeResourceBackend implements ResourceBackend {
     @org.springframework.beans.factory.annotation.Value("${datalake.backend.custos.client.secret}")
     private String clientSecret;
 
+    @org.springframework.beans.factory.annotation.Value("${datalake.backend.drms.host}")
+    private String drmsHost;
+
+    @org.springframework.beans.factory.annotation.Value("${datalake.backend.drms.port}")
+    private int drmsPort;
+
     @Override
     public void init() {
-        channel = ManagedChannelBuilder.forAddress("localhost", 7070).usePlaintext().build();
+        channel = ManagedChannelBuilder.forAddress(drmsHost, drmsPort).usePlaintext().build();
     }
 
     @Override
