@@ -17,7 +17,6 @@
 
 package org.apache.airavata.mft.resource.server.backend.datalake;
 
-import com.google.protobuf.Struct;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.apache.airavata.datalake.drms.DRMSServiceAuthToken;
@@ -26,7 +25,6 @@ import org.apache.airavata.datalake.drms.storage.ResourceFetchResponse;
 import org.apache.airavata.datalake.drms.storage.ResourceServiceGrpc;
 import org.apache.airavata.datalake.drms.storage.ssh.SSHStorage;
 import org.apache.airavata.mft.common.AuthToken;
-import org.apache.airavata.mft.common.PasswordAuth;
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
 import org.apache.airavata.mft.resource.stubs.azure.storage.*;
 import org.apache.airavata.mft.resource.stubs.box.storage.*;
@@ -37,8 +35,6 @@ import org.apache.airavata.mft.resource.stubs.gcs.storage.*;
 import org.apache.airavata.mft.resource.stubs.local.storage.*;
 import org.apache.airavata.mft.resource.stubs.s3.storage.*;
 import org.apache.airavata.mft.resource.stubs.scp.storage.*;
-import org.apache.custos.clients.CustosClientProvider;
-import org.apache.custos.identity.management.client.IdentityManagementClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,9 +52,15 @@ public class DatalakeResourceBackend implements ResourceBackend {
     @org.springframework.beans.factory.annotation.Value("${datalake.backend.custos.client.secret}")
     private String clientSecret;
 
+    @org.springframework.beans.factory.annotation.Value("${datalake.backend.drms.host}")
+    private String drmsHost;
+
+    @org.springframework.beans.factory.annotation.Value("${datalake.backend.drms.port}")
+    private int drmsPort;
+
     @Override
     public void init() {
-        channel = ManagedChannelBuilder.forAddress("localhost", 7070).usePlaintext().build();
+        channel = ManagedChannelBuilder.forAddress(drmsHost, drmsPort).usePlaintext().build();
     }
 
     @Override
@@ -74,19 +76,10 @@ public class DatalakeResourceBackend implements ResourceBackend {
     public Optional<GenericResource> getGenericResource(GenericResourceGetRequest request) throws Exception {
 
         AuthToken authzToken = request.getAuthzToken();
-        PasswordAuth passwordAuth = authzToken.getPasswordAuth();
-        String accessToken = getAccessToken(clientId, clientSecret, passwordAuth.getUserName(), passwordAuth.getPassword());
-
-        if (accessToken == null) {
-            logger.error("Failed to fetch an access token when fetching a resource with id {} to user {}",
-                    request.getResourceId(), passwordAuth.getUserName());
-            throw new Exception("\"Failed to fetch an access token when fetching a resource with id " + request.getResourceId() +
-                    " to user " + passwordAuth.getUserName());
-        }
 
         ResourceServiceGrpc.ResourceServiceBlockingStub datalakeResourceStub = ResourceServiceGrpc.newBlockingStub(channel);
         ResourceFetchResponse resourceFetchResponse = datalakeResourceStub.fetchResource(ResourceFetchRequest.newBuilder()
-                .setAuthToken(DRMSServiceAuthToken.newBuilder().setAccessToken(accessToken).build())
+                .setAuthToken(DRMSServiceAuthToken.newBuilder().setAccessToken(authzToken.getUserTokenAuth().getToken()).build())
                 .setResourceId(request.getResourceId())
                 .build());
 
@@ -308,20 +301,4 @@ public class DatalakeResourceBackend implements ResourceBackend {
     }
 
 
-    private String getAccessToken(String clientId, String clientSecret, String userName, String password) {
-        try {
-
-            CustosClientProvider custosClientProvider = new CustosClientProvider.Builder().setServerHost("custos.scigap.org")
-                    .setServerPort(31499)
-                    .setClientId(clientId)
-                    .setClientSec(clientSecret).build();
-
-            IdentityManagementClient identityManagementClient = custosClientProvider.getIdentityManagementClient();
-            Struct struct = identityManagementClient.getToken(null, null, userName, password, null, "password");
-            return struct.getFieldsMap().get("access_token").getStringValue();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return null;
-    }
 }

@@ -104,10 +104,10 @@ public class SCPReceiver implements Connector {
                 .setSecretId(credentialToken).build());
 
         SCPStorage scpStorage = resource.getScpStorage();
-        logger.info("Creating a ssh session for {}@{}:{}", scpStorage.getUser(), scpStorage.getHost(), scpStorage.getPort());
+        logger.info("Creating a ssh session for {}@{}:{}", scpSecret.getUser(), scpStorage.getHost(), scpStorage.getPort());
 
         this.session = SCPTransportUtil.createSession(
-                scpStorage.getUser(),
+                scpSecret.getUser(),
                 scpStorage.getHost(),
                 scpStorage.getPort(),
                 scpSecret.getPrivateKey().getBytes(),

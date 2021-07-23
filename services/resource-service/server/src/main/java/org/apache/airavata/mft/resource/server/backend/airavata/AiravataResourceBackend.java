@@ -95,7 +95,6 @@ public class AiravataResourceBackend implements ResourceBackend {
         String[] parts = resourceId.split(":");
         String type = parts[0];
         String storageOrComputeId = parts[2];
-        String user = parts[3];
 
         logger.info("Connecting to registry service {}:{}", registryServerHost, registryServerPort);
 
@@ -121,13 +120,11 @@ public class AiravataResourceBackend implements ResourceBackend {
 
             builder.setHost(selectedHostName);
             builder.setPort(selectedPort);
-            builder.setUser(user);
 
         } else if ("CLUSTER".equals(type)) {
             ComputeResourceDescription computeResource = registryClient.getComputeResource(storageOrComputeId);
             builder.setHost(computeResource.getHostName());
             builder.setPort(22);
-            builder.setUser(user);
         }
         return Optional.of(builder.build());
     }

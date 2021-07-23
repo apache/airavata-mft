@@ -75,6 +75,7 @@ public class FileBasedSecretBackend implements SecretBackend {
                                 .setSecretId(r.get("secretId").toString())
                                 .setPublicKey(r.get("publicKey").toString())
                                 .setPassphrase(r.get("passphrase").toString())
+                                .setUser(r.get("user").toString())
                                 .setPrivateKey(r.get("privateKey").toString()).build();
 
                         return scpSecret;

@@ -174,7 +174,6 @@ public class FileBasedResourceBackend implements ResourceBackend {
                         SCPStorage storage = SCPStorage.newBuilder()
                                 .setStorageId(s.get("storageId").toString())
                                 .setHost(s.get("host").toString())
-                                .setUser(s.get("user").toString())
                                 .setPort(Integer.parseInt(s.get("port").toString())).build();
 
                         return storage;

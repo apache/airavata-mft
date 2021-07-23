@@ -38,9 +38,6 @@ public class SCPStorageEntity {
     @Column(name = "PORT")
     private int port;
 
-    @Column(name = "USER")
-    private int user;
-
     public String getStorageId() {
         return storageId;
     }
@@ -63,13 +60,5 @@ public class SCPStorageEntity {
 
     public void setPort(int port) {
         this.port = port;
-    }
-
-    public int getUser() {
-        return user;
-    }
-
-    public void setUser(int user) {
-        this.user = user;
     }
 }
