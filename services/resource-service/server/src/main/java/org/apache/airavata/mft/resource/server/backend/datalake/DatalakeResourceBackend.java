@@ -24,8 +24,6 @@ import org.apache.airavata.datalake.drms.DRMSServiceAuthToken;
 import org.apache.airavata.datalake.drms.storage.ResourceFetchRequest;
 import org.apache.airavata.datalake.drms.storage.ResourceFetchResponse;
 import org.apache.airavata.datalake.drms.storage.ResourceServiceGrpc;
-import org.apache.airavata.datalake.drms.storage.preference.s3.S3StoragePreference;
-import org.apache.airavata.datalake.drms.storage.preference.ssh.SSHStoragePreference;
 import org.apache.airavata.datalake.drms.storage.ssh.SSHStorage;
 import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.common.PasswordAuth;
@@ -111,24 +109,22 @@ public class DatalakeResourceBackend implements ResourceBackend {
                 break;
         }
 
-        switch (resource.getStoragePreferenceCase()) {
-            case SSH_PREFERENCE:
-                SSHStoragePreference sshPreference = resource.getSshPreference();
-                SSHStorage storage = sshPreference.getStorage();
-                resourceBuilder.setScpStorage(SCPStorage.newBuilder()
-                        .setStorageId(storage.getStorageId()).setHost(storage.getHostName())
-                        .setPort(storage.getPort())
-                        .setUser(sshPreference.getUserName()).build());
+        switch (resource.getStorageCase()) {
+            case SSH_STORAGE:
+                SSHStorage storage = resource.getSshStorage();
+//                resourceBuilder.setScpStorage(SCPStorage.newBuilder()
+//                        .setStorageId(storage.getStorageId()).setHost(storage.getHostName())
+//                        .setPort(storage.getPort())
+//                        .setUser(sshPreference.getUserName()).build());
                 break;
-            case S3_PREFERENCE:
-                S3StoragePreference s3Preference = resource.getS3Preference();
-                org.apache.airavata.datalake.drms.storage.s3.S3Storage s3Storage = s3Preference.getStorage();
+            case S3_STORAGE:
+                org.apache.airavata.datalake.drms.storage.s3.S3Storage s3Storage = resource.getS3Storage();
                 resourceBuilder.setS3Storage(S3Storage.newBuilder()
                         .setStorageId(s3Storage.getStorageId())
                         .setBucketName(s3Storage.getBucketName())
                         .setRegion(s3Storage.getRegion()).build());
                 break;
-            case STORAGEPREFERENCE_NOT_SET:
+            case STORAGE_NOT_SET:
                 logger.error("No preference registered for the resource {}", request.getResourceId());
                 throw new Exception("No preference registered for the resource " + request.getResourceId());
         }
