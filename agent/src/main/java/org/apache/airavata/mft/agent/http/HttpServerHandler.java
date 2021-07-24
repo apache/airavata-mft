@@ -63,7 +63,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 return;
             }
 
-            final String uri = request.uri().substring(1);
+            final String uri = request.uri().substring(request.uri().lastIndexOf("/") + 1);
             logger.info("Received download request through url {}", uri);
 
             HttpTransferRequest httpTransferRequest = transferRequestsStore.getDownloadRequest(uri);
