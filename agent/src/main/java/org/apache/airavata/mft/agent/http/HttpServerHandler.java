@@ -113,6 +113,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
             }
 
+            response.headers().set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+
             // Write the initial line and the header.
             ctx.write(response);
 
