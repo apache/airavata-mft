@@ -107,7 +107,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
             HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
             HttpUtil.setContentLength(response, fileLength);
-            setContentTypeHeader(response, httpTransferRequest.getResourceId());
+            setContentTypeHeader(response, fileResourceMetadata.getFriendlyName());
 
             if (HttpUtil.isKeepAlive(request)) {
                 response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
@@ -192,7 +192,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     private static void setContentTypeHeader(HttpResponse response, String path) {
-        MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE, path);
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/octet-stream");
+        response.headers().set(HttpHeaderNames.CONTENT_DISPOSITION, "attachment; filename=\"" + path+ "\"");
     }
 }
