@@ -171,8 +171,10 @@ public class RPCParser {
                     String url = httpTransferRequestsStore.addDownloadRequest(transferRequest);
 
                     return (agentAdvertisedUrl.endsWith("/")? agentAdvertisedUrl : agentAdvertisedUrl + "/") + url;
+                } else {
+                    logger.error("Medata collector or connector is not available for store type {}", storeType);
+                    throw new Exception("Medata collector or connector is not available for store type " + storeType);
                 }
-                break;
         }
         logger.error("Unknown method type specified {}", request.getMethod());
         throw new Exception("Unknown method " + request.getMethod());
