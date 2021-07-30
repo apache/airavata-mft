@@ -201,8 +201,11 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
     public void getFileResourceMetadata(FetchResourceMetadataRequest request, StreamObserver<FileMetadataResponse> responseObserver) {
 
         try {
+
+            String targetAgent = derriveTargetAgent(request.getTargetAgentId());
+
             SyncRPCRequest.SyncRPCRequestBuilder requestBuilder = SyncRPCRequest.SyncRPCRequestBuilder.builder()
-                    .withAgentId(request.getTargetAgentId())
+                    .withAgentId(targetAgent)
                     .withMessageId(UUID.randomUUID().toString())
                     .withParameter("resourceId", request.getResourceId())
                     .withParameter("resourceType", request.getResourceType())
@@ -249,8 +252,11 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
     @Override
     public void getDirectoryResourceMetadata(FetchResourceMetadataRequest request, StreamObserver<DirectoryMetadataResponse> responseObserver) {
         try {
+
+            String targetAgent = derriveTargetAgent(request.getTargetAgentId());
+
             SyncRPCRequest.SyncRPCRequestBuilder requestBuilder = SyncRPCRequest.SyncRPCRequestBuilder.builder()
-                    .withAgentId(request.getTargetAgentId())
+                    .withAgentId(targetAgent)
                     .withMessageId(UUID.randomUUID().toString())
                     .withParameter("resourceId", request.getResourceId())
                     .withParameter("resourceType", request.getResourceType())
