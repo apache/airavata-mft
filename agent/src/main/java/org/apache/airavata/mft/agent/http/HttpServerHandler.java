@@ -142,15 +142,15 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 @Override
                 public void operationProgressed(ChannelProgressiveFuture future, long progress, long total) {
                     if (total < 0) { // total unknown
-                        logger.error(future.channel() + " Transfer progress: " + progress);
+                        logger.debug(future.channel() + " Transfer progress: " + progress);
                     } else {
-                        logger.error(future.channel() + " Transfer progress: " + progress + " / " + total);
+                        logger.debug(future.channel() + " Transfer progress: " + progress + " / " + total);
                     }
                 }
 
                 @Override
                 public void operationComplete(ChannelProgressiveFuture future) {
-                    System.err.println(future.channel() + " Transfer complete.");
+                    logger.info(future.channel() + " Transfer complete.");
                 }
             });
 
