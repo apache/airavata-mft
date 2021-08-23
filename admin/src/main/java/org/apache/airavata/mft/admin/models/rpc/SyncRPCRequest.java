@@ -19,8 +19,10 @@
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class SyncRPCRequest {
+    private String requestId = UUID.randomUUID().toString();
     private String agentId;
     private String method;
     private Map<String, String> parameters;
@@ -70,6 +72,14 @@ public class SyncRPCRequest {
     public SyncRPCRequest setMessageId(String messageId) {
         this.messageId = messageId;
         return this;
+    }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 
     public static final class SyncRPCRequestBuilder {

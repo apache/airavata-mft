@@ -202,6 +202,8 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
 
         try {
 
+            logger.info("Calling get file resource metadata for resource {}", request.getResourceId());
+
             String targetAgent = derriveTargetAgent(request.getTargetAgentId());
 
             SyncRPCRequest.SyncRPCRequestBuilder requestBuilder = SyncRPCRequest.SyncRPCRequestBuilder.builder()
@@ -253,6 +255,7 @@ public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
     public void getDirectoryResourceMetadata(FetchResourceMetadataRequest request, StreamObserver<DirectoryMetadataResponse> responseObserver) {
         try {
 
+            logger.info("Calling get directory metadata for resource {}", request.getResourceId());
             String targetAgent = derriveTargetAgent(request.getTargetAgentId());
 
             SyncRPCRequest.SyncRPCRequestBuilder requestBuilder = SyncRPCRequest.SyncRPCRequestBuilder.builder()

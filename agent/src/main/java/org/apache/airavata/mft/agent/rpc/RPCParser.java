@@ -62,6 +62,7 @@ public class RPCParser {
     public String resolveRPCRequest(SyncRPCRequest request) throws Exception {
         // TODO implement using the reflection
         ObjectMapper mapper = new ObjectMapper();
+        logger.info("Accepting sync request {}", request.getRequestId());
 
         switch (request.getMethod()) {
             case "getFileResourceMetadata":
