@@ -108,6 +108,6 @@ public class SyncRPCClient {
     }
 
     public SyncRPCResponse sendSyncRequest(SyncRPCRequest request) throws MFTConsulClientException, InterruptedException {
-        return sendSyncRequest(request, 10000);
+        return sendSyncRequest(request, 100000);
     }
 }
