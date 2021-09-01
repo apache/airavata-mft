@@ -88,19 +88,24 @@ public class SCPSender implements Connector {
     public void startStream(AuthToken authToken, String resourceId, String childResourcePath, String credentialToken, ConnectorContext context) throws Exception {
         checkInitialized();
 
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        GenericResource resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
-                .setAuthzToken(authToken).setResourceId(resourceId).build());
+        GenericResource resource;
+        try (ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort)) {
+            resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
+                    .setAuthzToken(authToken).setResourceId(resourceId).build());
+        }
 
         if (resource.getStorageCase() != GenericResource.StorageCase.SCPSTORAGE) {
             logger.error("Invalid storage type {} specified for resource {}", resource.getStorageCase(), resourceId);
             throw new Exception("Invalid storage type specified for resource " + resourceId);
         }
 
-        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
-        SCPSecret scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder()
-                .setAuthzToken(authToken)
-                .setSecretId(credentialToken).build());
+        SCPSecret scpSecret;
+
+        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort)) {
+            scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder()
+                    .setAuthzToken(authToken)
+                    .setSecretId(credentialToken).build());
+        }
 
         SCPStorage scpStorage = resource.getScpStorage();
         logger.info("Creating a ssh session for {}@{}:{}", scpSecret.getUser(), scpStorage.getHost(), scpStorage.getPort());
