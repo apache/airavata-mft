@@ -201,7 +201,7 @@ public class CustosSecretBackend implements SecretBackend {
             case DELEGATEAUTH:
                 DelegateAuth delegateAuth = request.getAuthzToken().getDelegateAuth();
                 ResourceSecretManagementClient csClient = getTenantResourceSecretManagementClient(delegateAuth);
-                SSHCredential sshCredential = csClient.getSSHCredential(delegateAuth.getPropertiesMap().get("PORTAL_CUSTOS_ID"),
+                SSHCredential sshCredential = csClient.getSSHCredential(delegateAuth.getPropertiesMap().get("TENANT_ID"),
                         sshStoragePreference.getCredentialToken(), false);
                 SCPSecret scpSecret = SCPSecret.newBuilder()
                         .setUser(sshStoragePreference.getUserName())
