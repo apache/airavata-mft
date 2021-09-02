@@ -149,7 +149,8 @@ public class SCPMetadataCollector implements MetadataCollector {
         }
 
         try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort)) {
-            scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+            scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder()
+                    .setAuthzToken(authZToken).setSecretId(credentialToken).build());
         }
 
         boolean isChildPath = false;
@@ -243,7 +244,8 @@ public class SCPMetadataCollector implements MetadataCollector {
         }
 
         try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort)) {
-            scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+            scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder()
+                    .setAuthzToken(authZToken).setSecretId(credentialToken).build());
         }
 
         return getDirectoryResourceMetadata(authZToken, resource, scpSecret);
@@ -260,7 +262,8 @@ public class SCPMetadataCollector implements MetadataCollector {
         }
 
         try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort)) {
-            scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+            scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder()
+                    .setAuthzToken(authZToken).setSecretId(credentialToken).build());
         }
 
         boolean isChildPath = false;
