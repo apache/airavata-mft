@@ -21,24 +21,28 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.apache.airavata.mft.api.service.*;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class MFTApiClient {
-    private static Map<String, Map<Integer, MFTApiServiceGrpc.MFTApiServiceBlockingStub>> stubCache = new ConcurrentHashMap<>();
+public class MFTApiClient implements Closeable {
 
-    public static MFTApiServiceGrpc.MFTApiServiceBlockingStub buildClient(String hostName, int port) {
+    private final ManagedChannel channel;
 
-        if (stubCache.containsKey(hostName)) {
-            if (stubCache.get(hostName).containsKey(port)) {
-                return stubCache.get(hostName).get(port);
-            }
+    public MFTApiClient(String hostName, int port) {
+        channel = ManagedChannelBuilder.forAddress(hostName, port).usePlaintext().build();
+    }
+
+    public MFTApiServiceGrpc.MFTApiServiceBlockingStub get() {
+        return MFTApiServiceGrpc.newBlockingStub(channel);
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (channel != null) {
+            channel.shutdown();
         }
-
-        ManagedChannel channel = ManagedChannelBuilder.forAddress(hostName, port).usePlaintext().build();
-        MFTApiServiceGrpc.MFTApiServiceBlockingStub stub = MFTApiServiceGrpc.newBlockingStub(channel);
-        stubCache.put(hostName, Collections.singletonMap(port, stub));
-        return stub;
     }
 }
