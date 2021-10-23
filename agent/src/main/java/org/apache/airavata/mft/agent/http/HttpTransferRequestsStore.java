@@ -31,8 +31,8 @@ public class HttpTransferRequestsStore {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpTransferRequestsStore.class);
 
-    final private Map<String, HttpTransferRequest> downloadRequestStore = new ConcurrentHashMap<>();
-    final private Map<String, HttpTransferRequest> uploadRequestStore = new ConcurrentHashMap<>();
+    final private Map<String, AgentHttpDownloadData> downloadRequestStore = new ConcurrentHashMap<>();
+    final private Map<String, AgentHttpDownloadData> uploadRequestStore = new ConcurrentHashMap<>();
 
     final private ScheduledExecutorService monitor = Executors.newSingleThreadScheduledExecutor();
     private long entryExpiryTimeMS = 300 * 1000;
@@ -56,32 +56,32 @@ public class HttpTransferRequestsStore {
         }, 2, 10, TimeUnit.SECONDS);
     }
 
-    public String addDownloadRequest(HttpTransferRequest request) {
+    public String addDownloadRequest(AgentHttpDownloadData request) {
         String randomUrl = UUID.randomUUID().toString();
         downloadRequestStore.put(randomUrl, request);
         return randomUrl;
     }
 
-    public HttpTransferRequest getDownloadRequest(String url) {
+    public AgentHttpDownloadData getDownloadRequest(String url) {
 
         //TODO  Need to block concurrent calls to same url as connectors are not thread safe
-        HttpTransferRequest request = downloadRequestStore.get(url);
+        AgentHttpDownloadData request = downloadRequestStore.get(url);
         if (request != null) {
             downloadRequestStore.remove(url);
         }
         return request;
     }
 
-    public String addUploadRequest(HttpTransferRequest request) {
+    public String addUploadRequest(AgentHttpDownloadData request) {
         String randomUrl = UUID.randomUUID().toString();
         uploadRequestStore.put(randomUrl, request);
         return randomUrl;
     }
 
-    public HttpTransferRequest getUploadRequest(String url) {
+    public AgentHttpDownloadData getUploadRequest(String url) {
 
         //TODO  Need to block concurrent calls to same url as connectors are not thread safe
-        HttpTransferRequest request = uploadRequestStore.get(url);
+        AgentHttpDownloadData request = uploadRequestStore.get(url);
         if (request != null) {
             uploadRequestStore.remove(url);
         }

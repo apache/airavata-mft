@@ -212,7 +212,7 @@ public class SCPMetadataCollector implements MetadataCollector {
                     }
 
                     if (rri.isRegularFile()) {
-                        FileResourceMetadata.Builder childFileBuilder = FileResourceMetadata.Builder.getBuilder()
+                        FileResourceMetadata.Builder childFileBuilder = FileResourceMetadata.Builder.newBuilder()
                                         .withFriendlyName(rri.getName())
                                         .withResourcePath(rri.getPath())
                                         .withCreatedTime(rri.getAttributes().getAtime())

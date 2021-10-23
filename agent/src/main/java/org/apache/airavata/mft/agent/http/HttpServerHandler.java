@@ -25,14 +25,12 @@ import io.netty.util.CharsetUtil;
 import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.core.*;
 import org.apache.airavata.mft.core.api.Connector;
+import org.apache.airavata.mft.core.api.IncomingConnector;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.activation.MimetypesFileTypeMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.io.InputStream;
 
 import static io.netty.handler.codec.http.HttpMethod.GET;
 import static io.netty.handler.codec.http.HttpResponseStatus.*;
@@ -43,7 +41,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static final Logger logger = LoggerFactory.getLogger(HttpServerHandler.class);
 
     private final HttpTransferRequestsStore transferRequestsStore;
-    private final ExecutorService executor = Executors.newFixedThreadPool(10);
 
     public HttpServerHandler(HttpTransferRequestsStore transferRequestsStore) {
         this.transferRequestsStore = transferRequestsStore;
@@ -66,48 +63,19 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             final String uri = request.uri().substring(request.uri().lastIndexOf("/") + 1);
             logger.info("Received download request through url {}", uri);
 
-            HttpTransferRequest httpTransferRequest = transferRequestsStore.getDownloadRequest(uri);
+            AgentHttpDownloadData downloadData = transferRequestsStore.getDownloadRequest(uri);
 
-            if (httpTransferRequest == null) {
+            if (downloadData == null) {
                 logger.error("Couldn't find transfer request for uri {}", uri);
                 sendError(ctx, NOT_FOUND);
                 return;
             }
 
-            Connector connector = httpTransferRequest.getOtherConnector();
-            MetadataCollector metadataCollector = httpTransferRequest.getOtherMetadataCollector();
-
-            ConnectorParams params = httpTransferRequest.getConnectorParams();
-
-            // TODO Load from HTTP Headers
-            AuthToken authToken = httpTransferRequest.getAuthToken();
-
-            connector.init(params.getResourceServiceHost(),
-                    params.getResourceServicePort(), params.getSecretServiceHost(), params.getSecretServicePort());
-
-            metadataCollector.init(params.getResourceServiceHost(), params.getResourceServicePort(),
-                    params.getSecretServiceHost(), params.getSecretServicePort());
-
-            Boolean available = metadataCollector.isAvailable(authToken,
-                    httpTransferRequest.getResourceId(), httpTransferRequest.getCredentialToken());
-
-
-            if (!available) {
-                logger.error("File resource {} is not available", httpTransferRequest.getResourceId());
-                sendError(ctx, NOT_FOUND);
-                return;
-            }
-
-            FileResourceMetadata fileResourceMetadata = metadataCollector.getFileResourceMetadata(authToken,
-                    httpTransferRequest.getResourceId(),
-                    httpTransferRequest.getChildResourcePath(),
-                    httpTransferRequest.getCredentialToken());
-
-            long fileLength = fileResourceMetadata.getResourceSize();
+            long fileLength = downloadData.getConnectorConfig().getMetadata().getResourceSize();
 
             HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
             HttpUtil.setContentLength(response, fileLength);
-            setContentTypeHeader(response, fileResourceMetadata.getFriendlyName());
+            setContentTypeHeader(response, downloadData.getConnectorConfig().getMetadata().getFriendlyName());
 
             if (HttpUtil.isKeepAlive(request)) {
                 response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
@@ -120,19 +88,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             ChannelFuture sendFileFuture;
             ChannelFuture lastContentFuture;
 
-            ConnectorContext connectorContext = new ConnectorContext();
-            connectorContext.setStreamBuffer(new DoubleStreamingBuffer());
-            connectorContext.setTransferId(uri);
-            connectorContext.setMetadata(new FileResourceMetadata()); // TODO Resolve
+            IncomingConnector incomingConnector = downloadData.getIncomingConnector();
+            incomingConnector.init(downloadData.getConnectorConfig());
+            InputStream inputStream = downloadData.getChildResourcePath().equals("")?
+                    incomingConnector.fetchInputStream() :
+                    incomingConnector.fetchInputStream(downloadData.getChildResourcePath());
 
-            TransferTask pullTask = new TransferTask(authToken, httpTransferRequest.getResourceId(),
-                    httpTransferRequest.getChildResourcePath(), httpTransferRequest.getCredentialToken(),
-                    connectorContext, connector);
-
-            // TODO aggregate pullStatusFuture and sendFileFuture for keepalive test
-            Future<Integer> pullStatusFuture = executor.submit(pullTask);
-
-            sendFileFuture = ctx.writeAndFlush(new HttpChunkedInput(new ChunkedStream(connectorContext.getStreamBuffer().getInputStream())),
+            sendFileFuture = ctx.writeAndFlush(new HttpChunkedInput(new ChunkedStream(inputStream)),
                     ctx.newProgressivePromise());
 
             // HttpChunkedInput will write the end marker (LastHttpContent) for us.

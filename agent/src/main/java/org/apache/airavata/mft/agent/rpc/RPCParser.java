@@ -21,8 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.util.JsonFormat;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCResponse;
-import org.apache.airavata.mft.agent.http.ConnectorParams;
-import org.apache.airavata.mft.agent.http.HttpTransferRequest;
+import org.apache.airavata.mft.agent.http.AgentHttpDownloadData;
 import org.apache.airavata.mft.agent.http.HttpTransferRequestsStore;
 import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.core.ConnectorResolver;
@@ -30,6 +29,8 @@ import org.apache.airavata.mft.core.DirectoryResourceMetadata;
 import org.apache.airavata.mft.core.FileResourceMetadata;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
 import org.apache.airavata.mft.core.api.Connector;
+import org.apache.airavata.mft.core.api.ConnectorConfig;
+import org.apache.airavata.mft.core.api.IncomingConnector;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,22 +155,33 @@ public class RPCParser {
                 mftAuthorizationToken = tokenBuilder.build();
 
                 metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(storeType);
-                Optional<Connector> connectorOp = ConnectorResolver.resolveConnector(storeType, "IN");
+                Optional<IncomingConnector> connectorOp = ConnectorResolver.resolveIncomingConnector(storeType);
 
                 if (metadataCollectorOp.isPresent() && connectorOp.isPresent()) {
-                    HttpTransferRequest transferRequest = new HttpTransferRequest()
-                            .setConnectorParams(new ConnectorParams()
-                                .setResourceServiceHost(resourceServiceHost)
-                                .setResourceServicePort(resourceServicePort)
-                                .setSecretServiceHost(secretServiceHost)
-                                .setSecretServicePort(secretServicePort))
-                            .setResourceId(resourceId)
-                            .setChildResourcePath(childResourcePath)
-                            .setCredentialToken(sourceToken)
-                            .setOtherMetadataCollector(metadataCollectorOp.get())
-                            .setOtherConnector(connectorOp.get())
-                            .setAuthToken(mftAuthorizationToken);
-                    String url = httpTransferRequestsStore.addDownloadRequest(transferRequest);
+
+                    MetadataCollector metadataCollector = metadataCollectorOp.get();
+                    metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
+
+                    FileResourceMetadata fileResourceMetadata = metadataCollector.getFileResourceMetadata(
+                            mftAuthorizationToken,
+                            resourceId,
+                            childResourcePath,
+                            sourceToken);
+
+                    AgentHttpDownloadData downloadData = AgentHttpDownloadData.AgentHttpDownloadDataBuilder.newBuilder()
+                            .withChildResourcePath(childResourcePath)
+                            .withIncomingConnector(connectorOp.get())
+                            .withConnectorConfig(ConnectorConfig.ConnectorConfigBuilder.newBuilder()
+                                    .withResourceServiceHost(resourceServiceHost)
+                                    .withResourceServicePort(resourceServicePort)
+                                    .withSecretServiceHost(secretServiceHost)
+                                    .withSecretServicePort(secretServicePort)
+                                    .withResourceId(resourceId)
+                                    .withCredentialToken(sourceToken)
+                                    .withAuthToken(mftAuthorizationToken)
+                                    .withMetadata(fileResourceMetadata).build()).build();
+
+                    String url = httpTransferRequestsStore.addDownloadRequest(downloadData);
 
                     return (agentAdvertisedUrl.endsWith("/")? agentAdvertisedUrl : agentAdvertisedUrl + "/") + url;
                 } else {
