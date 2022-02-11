@@ -92,6 +92,10 @@ public final class SCPIncomingConnector implements IncomingConnector {
         }
     }
 
+    private String escapeSpecialChars(String path) {
+        return  path.replace(" ", "\\ ");
+    }
+
     @Override
     public InputStream fetchInputStream() throws Exception {
         String resourcePath = null;
@@ -105,7 +109,7 @@ public final class SCPIncomingConnector implements IncomingConnector {
                 throw new Exception("Resource was not set in resource with id " + resource.getResourceId());
         }
 
-        return fetchInputStreamJCraft(resourcePath);
+        return fetchInputStreamJCraft(escapeSpecialChars(resourcePath));
     }
 
     @Override
@@ -126,7 +130,7 @@ public final class SCPIncomingConnector implements IncomingConnector {
                 throw new Exception("Resource was not set in resource with id " + resource.getResourceId());
         }
 
-        return fetchInputStreamJCraft(resourcePath);
+        return fetchInputStreamJCraft(escapeSpecialChars(resourcePath));
     }
 
     private InputStream fetchInputStreamJCraft(String resourcePath) throws Exception{

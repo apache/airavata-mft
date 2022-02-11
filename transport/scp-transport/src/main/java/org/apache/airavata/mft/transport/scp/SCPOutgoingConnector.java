@@ -95,6 +95,10 @@ public final class SCPOutgoingConnector implements OutgoingConnector {
         }
     }
 
+    private String escapeSpecialChars(String path) {
+        return  path.replace(" ", "\\ ");
+    }
+
     @Override
     public OutputStream fetchOutputStream() throws Exception {
         String resourcePath = null;
@@ -108,7 +112,7 @@ public final class SCPOutgoingConnector implements OutgoingConnector {
                 throw new Exception("Resource was not set in resource with id " + resource.getResourceId());
         }
 
-        return fetchOutputStreamJCraft(resourcePath, cc.getMetadata().getResourceSize());
+        return fetchOutputStreamJCraft(escapeSpecialChars(resourcePath), cc.getMetadata().getResourceSize());
     }
 
     @Override
@@ -128,7 +132,7 @@ public final class SCPOutgoingConnector implements OutgoingConnector {
                 throw new Exception("Resource was not set in resource with id " + resource.getResourceId());
         }
 
-        return fetchOutputStreamJCraft(resourcePath, cc.getMetadata().getResourceSize());
+        return fetchOutputStreamJCraft(escapeSpecialChars(resourcePath), cc.getMetadata().getResourceSize());
     }
 
     public OutputStream fetchOutputStreamJCraft(String resourcePath, long fileSize) throws Exception {
