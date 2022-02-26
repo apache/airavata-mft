@@ -28,9 +28,9 @@ import org.apache.airavata.mft.core.ConnectorResolver;
 import org.apache.airavata.mft.core.DirectoryResourceMetadata;
 import org.apache.airavata.mft.core.FileResourceMetadata;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
-import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.core.api.ConnectorConfig;
-import org.apache.airavata.mft.core.api.IncomingConnector;
+import org.apache.airavata.mft.core.api.IncomingChunkedConnector;
+import org.apache.airavata.mft.core.api.IncomingStreamingConnector;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -155,9 +155,10 @@ public class RPCParser {
                 mftAuthorizationToken = tokenBuilder.build();
 
                 metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(storeType);
-                Optional<IncomingConnector> connectorOp = ConnectorResolver.resolveIncomingConnector(storeType);
+                Optional<IncomingStreamingConnector> connectorStreamingOp = ConnectorResolver.resolveIncomingStreamingConnector(storeType);
+                Optional<IncomingChunkedConnector> connectorChunkedOp = ConnectorResolver.resolveIncomingChunkedConnector(storeType);
 
-                if (metadataCollectorOp.isPresent() && connectorOp.isPresent()) {
+                if (metadataCollectorOp.isPresent() && (connectorStreamingOp.isPresent() || connectorChunkedOp.isPresent())) {
 
                     MetadataCollector metadataCollector = metadataCollectorOp.get();
                     metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
@@ -168,9 +169,8 @@ public class RPCParser {
                             childResourcePath,
                             sourceToken);
 
-                    AgentHttpDownloadData downloadData = AgentHttpDownloadData.AgentHttpDownloadDataBuilder.newBuilder()
+                    AgentHttpDownloadData.AgentHttpDownloadDataBuilder agentHttpDownloadDataBuilder = AgentHttpDownloadData.AgentHttpDownloadDataBuilder.newBuilder()
                             .withChildResourcePath(childResourcePath)
-                            .withIncomingConnector(connectorOp.get())
                             .withConnectorConfig(ConnectorConfig.ConnectorConfigBuilder.newBuilder()
                                     .withResourceServiceHost(resourceServiceHost)
                                     .withResourceServicePort(resourceServicePort)
@@ -179,7 +179,12 @@ public class RPCParser {
                                     .withResourceId(resourceId)
                                     .withCredentialToken(sourceToken)
                                     .withAuthToken(mftAuthorizationToken)
-                                    .withMetadata(fileResourceMetadata).build()).build();
+                                    .withMetadata(fileResourceMetadata).build());
+
+                    connectorStreamingOp.ifPresent(agentHttpDownloadDataBuilder::withIncomingStreamingConnector);
+                    connectorChunkedOp.ifPresent(agentHttpDownloadDataBuilder::withIncomingChunkedConnector);
+
+                    AgentHttpDownloadData downloadData = agentHttpDownloadDataBuilder.build();
 
                     String url = httpTransferRequestsStore.addDownloadRequest(downloadData);
 

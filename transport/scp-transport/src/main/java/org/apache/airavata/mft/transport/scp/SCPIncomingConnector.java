@@ -21,7 +21,7 @@ import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
 import org.apache.airavata.mft.core.api.ConnectorConfig;
-import org.apache.airavata.mft.core.api.IncomingConnector;
+import org.apache.airavata.mft.core.api.IncomingStreamingConnector;
 import org.apache.airavata.mft.credential.stubs.scp.SCPSecret;
 import org.apache.airavata.mft.credential.stubs.scp.SCPSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
@@ -38,7 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public final class SCPIncomingConnector implements IncomingConnector {
+public final class SCPIncomingConnector implements IncomingStreamingConnector {
 
     private static final Logger logger = LoggerFactory.getLogger(SCPIncomingConnector.class);
 

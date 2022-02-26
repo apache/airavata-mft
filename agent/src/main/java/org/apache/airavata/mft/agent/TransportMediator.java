@@ -25,6 +25,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Optional;
@@ -43,6 +44,12 @@ public class TransportMediator {
     private final int concurrentTransfers = 10;
     private final ExecutorService executor = Executors.newFixedThreadPool(concurrentTransfers * 2); // 2 connections per transfer
     private final ExecutorService monitorPool = Executors.newFixedThreadPool(concurrentTransfers * 2); // 2 monitors per transfer
+
+    private String tempDataDir = "/tmp";
+
+    public TransportMediator(String tempDataDir) {
+        this.tempDataDir = tempDataDir;
+    }
 
     public void transferSingleThread(String transferId,
                                      TransferApiRequest request,
@@ -65,58 +72,120 @@ public class TransportMediator {
                         .setUpdateTimeMils(System.currentTimeMillis())
                         .setDescription("Transfer successfully completed"));
 
-                Optional<IncomingConnector> inConnectorOp = ConnectorResolver.resolveIncomingConnector(request.getSourceType());
-                Optional<OutgoingConnector> outConnectorOp = ConnectorResolver.resolveOutgoingConnector(request.getDestinationType());
+                Optional<IncomingStreamingConnector> inStreamingConnectorOp = ConnectorResolver
+                        .resolveIncomingStreamingConnector(request.getSourceType());
+                Optional<OutgoingStreamingConnector> outStreamingConnectorOp = ConnectorResolver
+                        .resolveOutgoingStreamingConnector(request.getDestinationType());
 
-                IncomingConnector inConnector = inConnectorOp
-                        .orElseThrow(() -> new Exception("Could not find an in connector for type " + request.getSourceType()));
+                Optional<IncomingChunkedConnector> inChunkedConnectorOp = ConnectorResolver
+                        .resolveIncomingChunkedConnector(request.getSourceType());
+                Optional<OutgoingChunkedConnector> outChunkedConnectorOp = ConnectorResolver
+                        .resolveOutgoingChunkedConnector(request.getDestinationType());
 
-                OutgoingConnector outConnector = outConnectorOp
-                        .orElseThrow(() -> new Exception("Could not find an out connector for type " + request.getDestinationType()));
+                // Give priority for chunked transfers.
+                // TODO: Provide a preference at the API level
+                if (inChunkedConnectorOp.isPresent() && outChunkedConnectorOp.isPresent()) {
 
-                inConnector.init(srcCC);
-                outConnector.init(dstCC);
+                    logger.info("Starting the chunked transfer for transfer {}", transferId);
 
-                String srcChild = request.getSourceChildResourcePath();
-                String dstChild = request.getDestinationChildResourcePath();
+                    long chunkSize = 20 * 1024 * 1024L;
 
-                InputStream inputStream = srcChild.equals("") ? inConnector.fetchInputStream() : inConnector.fetchInputStream(srcChild);
-                OutputStream outputStream = dstChild.equals("") ? outConnector.fetchOutputStream() : outConnector.fetchOutputStream(dstChild);
+                    ExecutorService chunkedExecutorService = Executors.newFixedThreadPool(20);
 
-                long count = 0;
-                final AtomicLong countAtomic = new AtomicLong();
-                countAtomic.set(count);
+                    CompletionService<Integer> completionService = new ExecutorCompletionService<Integer>(chunkedExecutorService);
 
-                monitorPool.submit(() -> {
-                    while (true) {
-                        try {
-                            Thread.sleep(2000);
-                        } catch (InterruptedException e) {
-                            // Ignore
+                    long fileLength = srcCC.getMetadata().getResourceSize();
+                    long uploadLength = 0L;
+                    int chunkIdx = 0;
+
+                    IncomingChunkedConnector inConnector = inChunkedConnectorOp
+                            .orElseThrow(() -> new Exception("Could not find an in chunked connector for type " + request.getSourceType()));
+
+                    OutgoingChunkedConnector outConnector = outChunkedConnectorOp
+                            .orElseThrow(() -> new Exception("Could not find an out chunked connector for type " + request.getDestinationType()));
+
+                    inConnector.init(srcCC);
+                    outConnector.init(dstCC);
+
+                    while(uploadLength < fileLength) {
+
+                        long endPos = uploadLength + chunkSize;
+                        if (endPos > fileLength) {
+                            endPos = fileLength;
                         }
-                        if (!transferInProgress.get()) {
-                            logger.info("Status monitor is exiting for transfer {}", transferId);
-                            break;
-                        }
-                        double transferPercentage = countAtomic.get() * 100.0/ srcCC.getMetadata().getResourceSize();
-                        logger.info("Transfer percentage for transfer {} {}", transferId, transferPercentage);
-                        onStatusCallback.accept(transferId, new TransferState()
-                                .setPercentage(transferPercentage)
-                                .setState("RUNNING")
-                                .setUpdateTimeMils(System.currentTimeMillis())
-                                .setDescription("Transfer Progress Updated"));
+
+                        String tempFile = tempDataDir + File.separator + transferId + "-" + chunkIdx;
+                        completionService.submit(new ChunkMover(inConnector, outConnector, uploadLength, endPos, chunkIdx, tempFile));
+
+                        uploadLength = endPos;
+                        chunkIdx++;
                     }
-                });
 
-                int n;
-                byte[] buffer = new byte[128 * 1024];
-                for(count = 0L; -1 != (n = inputStream.read(buffer)); count += (long)n) {
-                    outputStream.write(buffer, 0, n);
+
+                    for (int i = 0; i < chunkIdx; i++) {
+                        Future<Integer> future = completionService.take();
+                    }
+
+                    logger.info("Completed chunked transfer for transfer {}", transferId);
+
+                } else if (inStreamingConnectorOp.isPresent() && outStreamingConnectorOp.isPresent()) {
+
+                    logger.info("Starting streaming transfer for transfer {}", transferId);
+                    IncomingStreamingConnector inConnector = inStreamingConnectorOp
+                            .orElseThrow(() -> new Exception("Could not find an in streaming connector for type " + request.getSourceType()));
+
+                    OutgoingStreamingConnector outConnector = outStreamingConnectorOp
+                            .orElseThrow(() -> new Exception("Could not find an out streaming connector for type " + request.getDestinationType()));
+
+                    inConnector.init(srcCC);
+                    outConnector.init(dstCC);
+
+                    String srcChild = request.getSourceChildResourcePath();
+                    String dstChild = request.getDestinationChildResourcePath();
+
+                    InputStream inputStream = srcChild.equals("") ? inConnector.fetchInputStream() : inConnector.fetchInputStream(srcChild);
+                    OutputStream outputStream = dstChild.equals("") ? outConnector.fetchOutputStream() : outConnector.fetchOutputStream(dstChild);
+
+                    long count = 0;
+                    final AtomicLong countAtomic = new AtomicLong();
                     countAtomic.set(count);
-                }
 
-                inConnector.complete();
-                outConnector.complete();
+                    monitorPool.submit(() -> {
+                        while (true) {
+                            try {
+                                Thread.sleep(2000);
+                            } catch (InterruptedException e) {
+                                // Ignore
+                            }
+                            if (!transferInProgress.get()) {
+                                logger.info("Status monitor is exiting for transfer {}", transferId);
+                                break;
+                            }
+                            double transferPercentage = countAtomic.get() * 100.0 / srcCC.getMetadata().getResourceSize();
+                            logger.info("Transfer percentage for transfer {} {}", transferId, transferPercentage);
+                            onStatusCallback.accept(transferId, new TransferState()
+                                    .setPercentage(transferPercentage)
+                                    .setState("RUNNING")
+                                    .setUpdateTimeMils(System.currentTimeMillis())
+                                    .setDescription("Transfer Progress Updated"));
+                        }
+                    });
+
+                    int n;
+                    byte[] buffer = new byte[128 * 1024];
+                    for (count = 0L; -1 != (n = inputStream.read(buffer)); count += (long) n) {
+                        outputStream.write(buffer, 0, n);
+                        countAtomic.set(count);
+                    }
+
+                    inConnector.complete();
+                    outConnector.complete();
+
+                    logger.info("Completed s ttreaming ransfer for transfer {}", transferId);
+
+                } else {
+                    throw new Exception("No matching connector found to perform the transfer");
+                }
 
                 long time = (System.currentTimeMillis() - start) / 1000;
 
@@ -148,5 +217,33 @@ public class TransportMediator {
     public void destroy() {
         executor.shutdown();
         monitorPool.shutdown();
+    }
+
+    private static class ChunkMover implements Callable<Integer> {
+
+        IncomingChunkedConnector downloader;
+        OutgoingChunkedConnector uploader;
+        long uploadLength;
+        long endPos;
+        int chunkIdx;
+        String tempFile;
+
+        public ChunkMover(IncomingChunkedConnector downloader, OutgoingChunkedConnector uploader, long uploadLength,
+                          long endPos, int chunkIdx, String tempFile) {
+            this.downloader = downloader;
+            this.uploader = uploader;
+            this.uploadLength = uploadLength;
+            this.endPos = endPos;
+            this.chunkIdx = chunkIdx;
+            this.tempFile = tempFile;
+        }
+
+        @Override
+        public Integer call() throws Exception {
+            downloader.downloadChunk(chunkIdx, uploadLength, endPos, tempFile);
+            uploader.uploadChunk(chunkIdx, uploadLength, endPos, tempFile);
+            new File(tempFile).delete();
+            return chunkIdx;
+        }
     }
 }

@@ -65,8 +65,6 @@ public class MFTAgent implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(MFTAgent.class);
 
-    private final TransportMediator mediator = new TransportMediator();
-
     @org.springframework.beans.factory.annotation.Value("${agent.id}")
     private String agentId;
 
@@ -87,6 +85,9 @@ public class MFTAgent implements CommandLineRunner {
 
     @org.springframework.beans.factory.annotation.Value("${agent.supported.protocols}")
     private String supportedProtocols;
+
+    @org.springframework.beans.factory.annotation.Value("${agent.temp.data.dir}")
+    private String tempDataDir = "/tmp";
 
     @org.springframework.beans.factory.annotation.Value("${resource.service.host}")
     private String resourceServiceHost;
@@ -113,6 +114,9 @@ public class MFTAgent implements CommandLineRunner {
     private long sessionTTLSeconds = 10;
     private String session;
 
+    private TransportMediator mediator;
+
+
     private ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
@@ -127,6 +131,7 @@ public class MFTAgent implements CommandLineRunner {
     public void init() {
         transferMessageCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.AGENTS_TRANSFER_REQUEST_MESSAGE_PATH + agentId);
         rpcMessageCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.AGENTS_RPC_REQUEST_MESSAGE_PATH + agentId);
+        mediator = new TransportMediator(tempDataDir);
     }
 
     private void acceptRPCRequests() {

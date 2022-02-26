@@ -18,20 +18,30 @@
 package org.apache.airavata.mft.agent.http;
 
 import org.apache.airavata.mft.core.api.ConnectorConfig;
-import org.apache.airavata.mft.core.api.IncomingConnector;
+import org.apache.airavata.mft.core.api.IncomingChunkedConnector;
+import org.apache.airavata.mft.core.api.IncomingStreamingConnector;
 
 public class AgentHttpDownloadData {
-    private IncomingConnector incomingConnector;
+    private IncomingStreamingConnector incomingStreamingConnector;
+    private IncomingChunkedConnector incomingChunkedConnector;
     private ConnectorConfig connectorConfig;
     private String childResourcePath;
     private long createdTime = System.currentTimeMillis();
 
-    public IncomingConnector getIncomingConnector() {
-        return incomingConnector;
+    public IncomingStreamingConnector getIncomingStreamingConnector() {
+        return incomingStreamingConnector;
     }
 
-    public void setIncomingConnector(IncomingConnector incomingConnector) {
-        this.incomingConnector = incomingConnector;
+    public void setIncomingStreamingConnector(IncomingStreamingConnector incomingStreamingConnector) {
+        this.incomingStreamingConnector = incomingStreamingConnector;
+    }
+
+    public IncomingChunkedConnector getIncomingChunkedConnector() {
+        return incomingChunkedConnector;
+    }
+
+    public void setIncomingChunkedConnector(IncomingChunkedConnector incomingChunkedConnector) {
+        this.incomingChunkedConnector = incomingChunkedConnector;
     }
 
     public ConnectorConfig getConnectorConfig() {
@@ -60,7 +70,8 @@ public class AgentHttpDownloadData {
 
 
     public static final class AgentHttpDownloadDataBuilder {
-        private IncomingConnector incomingConnector;
+        private IncomingStreamingConnector incomingStreamingConnector;
+        private IncomingChunkedConnector incomingChunkedConnector;
         private ConnectorConfig connectorConfig;
         private String childResourcePath;
         private long createdTime = System.currentTimeMillis();
@@ -72,8 +83,13 @@ public class AgentHttpDownloadData {
             return new AgentHttpDownloadDataBuilder();
         }
 
-        public AgentHttpDownloadDataBuilder withIncomingConnector(IncomingConnector incomingConnector) {
-            this.incomingConnector = incomingConnector;
+        public AgentHttpDownloadDataBuilder withIncomingStreamingConnector(IncomingStreamingConnector incomingConnector) {
+            this.incomingStreamingConnector = incomingConnector;
+            return this;
+        }
+
+        public AgentHttpDownloadDataBuilder withIncomingChunkedConnector(IncomingChunkedConnector incomingConnector) {
+            this.incomingChunkedConnector = incomingConnector;
             return this;
         }
 
@@ -95,7 +111,8 @@ public class AgentHttpDownloadData {
 
         public AgentHttpDownloadData build() {
             AgentHttpDownloadData agentHttpDownloadData = new AgentHttpDownloadData();
-            agentHttpDownloadData.setIncomingConnector(incomingConnector);
+            agentHttpDownloadData.setIncomingStreamingConnector(incomingStreamingConnector);
+            agentHttpDownloadData.setIncomingChunkedConnector(incomingChunkedConnector);
             agentHttpDownloadData.setConnectorConfig(connectorConfig);
             agentHttpDownloadData.setChildResourcePath(childResourcePath);
             agentHttpDownloadData.setCreatedTime(createdTime);

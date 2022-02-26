@@ -17,14 +17,16 @@
 
 package org.apache.airavata.mft.core;
 
-import org.apache.airavata.mft.core.api.IncomingConnector;
-import org.apache.airavata.mft.core.api.OutgoingConnector;
+import org.apache.airavata.mft.core.api.IncomingChunkedConnector;
+import org.apache.airavata.mft.core.api.IncomingStreamingConnector;
+import org.apache.airavata.mft.core.api.OutgoingChunkedConnector;
+import org.apache.airavata.mft.core.api.OutgoingStreamingConnector;
 
 import java.util.Optional;
 
 public final class ConnectorResolver {
 
-    public static Optional<IncomingConnector> resolveIncomingConnector(String type) throws Exception {
+    public static Optional<IncomingStreamingConnector> resolveIncomingStreamingConnector(String type) throws Exception {
 
         String className = null;
         switch (type) {
@@ -35,26 +37,64 @@ public final class ConnectorResolver {
 
         if (className != null) {
             Class<?> aClass = Class.forName(className);
-            return Optional.of((IncomingConnector) aClass.getDeclaredConstructor().newInstance());
+            return Optional.of((IncomingStreamingConnector) aClass.getDeclaredConstructor().newInstance());
         } else {
             return Optional.empty();
         }
     }
 
-    public static Optional<OutgoingConnector> resolveOutgoingConnector(String type) throws Exception {
+    public static Optional<OutgoingStreamingConnector> resolveOutgoingStreamingConnector(String type) throws Exception {
 
         String className = null;
         switch (type) {
             case "SCP":
                 className = "org.apache.airavata.mft.transport.scp.SCPOutgoingConnector";
                 break;
+            case "S3":
+                className = "org.apache.airavata.mft.transport.s3.S3IncomingConnector";
+                break;
         }
 
         if (className != null) {
             Class<?> aClass = Class.forName(className);
-            return Optional.of((OutgoingConnector) aClass.getDeclaredConstructor().newInstance());
+            return Optional.of((OutgoingStreamingConnector) aClass.getDeclaredConstructor().newInstance());
         } else {
             return Optional.empty();
         }
     }
+
+    public static Optional<IncomingChunkedConnector> resolveIncomingChunkedConnector(String type) throws Exception {
+
+        String className = null;
+        switch (type) {
+            case "S3":
+                className = "org.apache.airavata.mft.transport.s3.S3IncomingConnector";
+                break;
+        }
+
+        if (className != null) {
+            Class<?> aClass = Class.forName(className);
+            return Optional.of((IncomingChunkedConnector) aClass.getDeclaredConstructor().newInstance());
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    public static Optional<OutgoingChunkedConnector> resolveOutgoingChunkedConnector(String type) throws Exception {
+
+        String className = null;
+        switch (type) {
+            case "S3":
+                className = "org.apache.airavata.mft.transport.s3.S3OutgoingConnector";
+                break;
+        }
+
+        if (className != null) {
+            Class<?> aClass = Class.forName(className);
+            return Optional.of((OutgoingChunkedConnector) aClass.getDeclaredConstructor().newInstance());
+        } else {
+            return Optional.empty();
+        }
+    }
+
 }

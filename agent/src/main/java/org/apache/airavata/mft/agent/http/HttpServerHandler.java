@@ -22,11 +22,7 @@ import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.stream.ChunkedStream;
 import io.netty.util.CharsetUtil;
-import org.apache.airavata.mft.common.AuthToken;
-import org.apache.airavata.mft.core.*;
-import org.apache.airavata.mft.core.api.Connector;
-import org.apache.airavata.mft.core.api.IncomingConnector;
-import org.apache.airavata.mft.core.api.MetadataCollector;
+import org.apache.airavata.mft.core.api.IncomingStreamingConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,11 +84,17 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             ChannelFuture sendFileFuture;
             ChannelFuture lastContentFuture;
 
-            IncomingConnector incomingConnector = downloadData.getIncomingConnector();
-            incomingConnector.init(downloadData.getConnectorConfig());
+            // TODO: Support chunked streaming
+            if (downloadData.getIncomingStreamingConnector() == null && downloadData.getIncomingChunkedConnector() != null) {
+                logger.error("Chunked data download is not yes supported in Http transport");
+                throw new Exception("Chunked data download is not yes supported in Http transport");
+            }
+
+            IncomingStreamingConnector incomingStreamingConnector = downloadData.getIncomingStreamingConnector();
+            incomingStreamingConnector.init(downloadData.getConnectorConfig());
             InputStream inputStream = downloadData.getChildResourcePath().equals("")?
-                    incomingConnector.fetchInputStream() :
-                    incomingConnector.fetchInputStream(downloadData.getChildResourcePath());
+                    incomingStreamingConnector.fetchInputStream() :
+                    incomingStreamingConnector.fetchInputStream(downloadData.getChildResourcePath());
 
             sendFileFuture = ctx.writeAndFlush(new HttpChunkedInput(new ChunkedStream(inputStream)),
                     ctx.newProgressivePromise());
