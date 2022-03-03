@@ -35,7 +35,7 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.airavata</groupId>
-            <artifactId>mft-admin</artifactId>
+            <artifactId>mft-common-clients</artifactId>
             <version>0.01-SNAPSHOT</version>
         </dependency>
         <dependency>

@@ -47,7 +47,6 @@
         <module>transport</module>
         <module>agent</module>
         <module>services</module>
-        <module>admin</module>
         <module>controller</module>
         <module>examples</module>
     </modules>

@@ -27,7 +27,8 @@ import com.orbitz.consul.ConsulException;
 import com.orbitz.consul.KeyValueClient;
 import com.orbitz.consul.SessionClient;
 import com.orbitz.consul.model.kv.Value;
-import org.apache.airavata.mft.admin.models.*;
+import org.apache.airavata.mft.admin.models.AgentInfo;
+import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCResponse;
 import org.apache.airavata.mft.api.service.TransferApiRequest;
@@ -39,6 +40,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.net.HostAndPort.*;
+import static com.google.common.net.HostAndPort.fromParts;
 
 /*
  mft/agents/messages/{agent-id} -> message
