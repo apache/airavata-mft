@@ -23,7 +23,7 @@ CWD="$PWD"
 cd ${AIRAVATA_HOME}/bin
 LOGO_FILE="logo.txt"
 
-JAVA_OPTS="-Dspring.config.location=${AIRAVATA_HOME}/conf/ -Dairavata.home=${AIRAVATA_HOME} -Dlogback.configurationFile=file:${AIRAVATA_HOME}/conf/logback.xml"
+JAVA_OPTS="-Dspring.config.location=${AIRAVATA_HOME}/conf/ -Dairavata.home=${AIRAVATA_HOME} -Dlog4j.configurationFile=file:${AIRAVATA_HOME}/conf/log4j2.xml"
 AIRAVATA_COMMAND=""
 EXTRA_ARGS=""
 SERVERS=""
