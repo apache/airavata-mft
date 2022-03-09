@@ -49,6 +49,7 @@
         <module>agent</module>
         <module>controller</module>
         <module>examples</module>
+        <module>command-line</module>
     </modules>
 
     <url>http://airavata.apache.org/</url>
