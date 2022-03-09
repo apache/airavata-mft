@@ -26,7 +26,8 @@ import java.util.Iterator;
 
 public class LocalExample {
     public static void main(String args[]) throws Exception {
-        MFTApiServiceGrpc.MFTApiServiceBlockingStub client = new MFTApiClient("localhost", 7004).get();
+        MFTTransferServiceGrpc.MFTTransferServiceBlockingStub client = MFTApiClient.MFTApiClientBuilder
+                .newBuilder().build().getTransferClient();
 
         String sourceResourceId = "remote-ssh-resource";
         String sourceToken = "local-ssh-cred";

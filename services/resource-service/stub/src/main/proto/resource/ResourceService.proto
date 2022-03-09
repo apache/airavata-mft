@@ -73,6 +73,18 @@ message GenericResourceCreateRequest {
         org.apache.airavata.mft.resource.stubs.common.DirectoryResource directory = 3;
     }
     org.apache.airavata.mft.common.AuthToken authzToken = 4;
+    enum StorageType {
+        S3 = 0;
+        SCP = 1;
+        FTP = 2;
+        LOCAL = 3;
+        BOX = 4;
+        DROPBOX = 5;
+        GCS = 6;
+        AZURE = 7;
+    }
+
+    StorageType storageType = 5;
 }
 
 message GenericResourceUpdateRequest {

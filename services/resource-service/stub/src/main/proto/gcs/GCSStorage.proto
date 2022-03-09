@@ -31,6 +31,7 @@ message GCSStorageGetRequest {
 
 message GCSStorageCreateRequest {
     string bucketName = 1;
+    string storageId = 2;
 }
 
 message GCSStorageUpdateRequest {

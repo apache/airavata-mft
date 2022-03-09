@@ -29,6 +29,7 @@ message BoxStorageGetRequest {
 }
 
 message BoxStorageCreateRequest {
+    string storageId = 1;
 }
 
 message BoxStorageUpdateRequest {

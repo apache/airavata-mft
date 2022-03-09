@@ -24,6 +24,8 @@ message S3Storage {
     string storageId = 1;
     string bucketName = 2;
     string region = 3;
+    string endpoint = 4;
+    bool useTLS = 5;
 }
 
 message S3StorageGetRequest {
@@ -33,12 +35,17 @@ message S3StorageGetRequest {
 message S3StorageCreateRequest {
     string bucketName = 1;
     string region = 2;
+    string storageId = 3;
+    string endpoint = 4;
+    bool useTLS = 5;
 }
 
 message S3StorageUpdateRequest {
     string storageId = 1;
     string bucketName = 2;
     string region = 3;
+    string endpoint = 4;
+    bool useTLS = 5;
 }
 
 message S3StorageDeleteRequest {

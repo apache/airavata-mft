@@ -42,7 +42,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @GRpcService
-public class MFTApiHandler extends MFTApiServiceGrpc.MFTApiServiceImplBase {
+public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImplBase {
 
     private static final Logger logger = LoggerFactory.getLogger(MFTApiHandler.class);
 

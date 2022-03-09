@@ -33,7 +33,9 @@ import org.dozer.DozerBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.CrudRepository;
 
+import javax.el.ELException;
 import java.util.Optional;
 
 public class SQLResourceBackend implements ResourceBackend {
@@ -41,19 +43,19 @@ public class SQLResourceBackend implements ResourceBackend {
     private static final Logger logger = LoggerFactory.getLogger(SQLResourceBackend.class);
 
     @Autowired
+    private GenericResourceRepository resourceRepository;
+
+    @Autowired
     private SCPStorageRepository scpStorageRepository;
 
     @Autowired
-    private SCPResourceRepository scpResourceRepository;
-
-    @Autowired
-    private LocalResourceRepository localResourceRepository;
-
-    @Autowired
-    private FTPResourceRepository ftpResourceRepository;
+    private S3StorageRepository s3StorageRepository;
 
     @Autowired
     private FTPStorageRepository ftpStorageRepository;
+
+    @Autowired
+    private LocalStorageRepository localStorageRepository;
 
     private DozerBeanMapper mapper = new DozerBeanMapper();
 
@@ -69,11 +71,93 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public Optional<GenericResource> getGenericResource(GenericResourceGetRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        Optional<GenericResourceEntity> resourceEtyOp = resourceRepository.findByResourceId(request.getResourceId());
+        if (resourceEtyOp.isPresent()) {
+
+            GenericResourceEntity resourceEty = resourceEtyOp.get();
+                    GenericResource.Builder builder = GenericResource.newBuilder();
+            builder.setResourceId(resourceEty.getResourceId());
+            switch (resourceEty.getResourceType()){
+                case DIRECTORY:
+                    builder.setDirectory(DirectoryResource.newBuilder().setResourcePath(resourceEty.getResourcePath()).build());
+                    break;
+                case FILE:
+                    builder.setFile(FileResource.newBuilder().setResourcePath(resourceEty.getResourcePath()).build());
+                    break;
+            }
+
+            switch (resourceEty.getStorageType()) {
+                case S3:
+                    Optional<S3Storage> s3Storage = getS3Storage(S3StorageGetRequest.newBuilder()
+                            .setStorageId(resourceEty.getStorageId()).build());
+                    builder.setS3Storage(s3Storage.orElseThrow(() -> new Exception("Could not find a S3 storage with id "
+                            + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
+                    break;
+                case SCP:
+                    Optional<SCPStorage> scpStorage = getSCPStorage(SCPStorageGetRequest.newBuilder()
+                            .setStorageId(resourceEty.getStorageId()).build());
+                    builder.setScpStorage(scpStorage.orElseThrow(() -> new Exception("Could not find a SCP storage with id "
+                            + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
+                    break;
+                case LOCAL:
+                    Optional<LocalStorage> localStorage = getLocalStorage(LocalStorageGetRequest.newBuilder()
+                            .setStorageId(resourceEty.getStorageId()).build());
+                    builder.setLocalStorage(localStorage.orElseThrow(() -> new Exception("Could not find a Local storage with id "
+                            + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
+                    break;
+                case FTP:
+                    Optional<FTPStorage> ftpStorage = getFTPStorage(FTPStorageGetRequest.newBuilder()
+                            .setStorageId(resourceEty.getStorageId()).build());
+                    builder.setFtpStorage(ftpStorage.orElseThrow(() -> new Exception("Could not find a FTP storage with id "
+                            + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
+                    break;
+                case BOX:
+                    Optional<BoxStorage> boxStorage = getBoxStorage(BoxStorageGetRequest.newBuilder()
+                            .setStorageId(resourceEty.getStorageId()).build());
+                    builder.setBoxStorage(boxStorage.orElseThrow(() -> new Exception("Could not find a Box storage with id "
+                            + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
+                    break;
+                case DROPBOX:
+                    Optional<DropboxStorage> dropBoxStorage = getDropboxStorage(DropboxStorageGetRequest.newBuilder()
+                            .setStorageId(resourceEty.getStorageId()).build());
+                    builder.setDropboxStorage(dropBoxStorage.orElseThrow(() -> new Exception("Could not find a Dropbox storage with id "
+                            + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
+                    break;
+                case GCS:
+                    Optional<GCSStorage> gcsStorage = getGCSStorage(GCSStorageGetRequest.newBuilder()
+                            .setStorageId(resourceEty.getStorageId()).build());
+                    builder.setGcsStorage(gcsStorage.orElseThrow(() -> new Exception("Could not find a GCS storage with id "
+                            + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
+                    break;
+                case AZURE:
+                    Optional<AzureStorage> azureStorage = getAzureStorage(AzureStorageGetRequest.newBuilder()
+                            .setStorageId(resourceEty.getStorageId()).build());
+                    builder.setAzureStorage(azureStorage.orElseThrow(() -> new Exception("Could not find a Azure storage with id "
+                            + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
+                    break;
+            }
+
+            return Optional.of(builder.build());
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override
     public GenericResource createGenericResource(GenericResourceCreateRequest request) throws Exception {
+
+        GenericResourceEntity entity = new GenericResourceEntity();
+        entity.setStorageId(request.getStorageId());
+
+        switch (request.getResourceCase()) {
+            case FILE:
+                entity.setResourcePath(request.getFile().getResourcePath());
+                break;
+            case DIRECTORY:
+                entity.setResourcePath(request.getDirectory().getResourcePath());
+                break;
+        }
+
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
@@ -113,42 +197,52 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public Optional<LocalStorage> getLocalStorage(LocalStorageGetRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        Optional<LocalStorageEntity> entity = localStorageRepository.findById(request.getStorageId());
+        return entity.map(e -> mapper.map(e, LocalStorage.newBuilder().getClass()).build());
     }
 
     @Override
     public LocalStorage createLocalStorage(LocalStorageCreateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        LocalStorageEntity savedEntity = localStorageRepository.save(mapper.map(request, LocalStorageEntity.class));
+        return mapper.map(savedEntity, LocalStorage.newBuilder().getClass()).build();
     }
 
     @Override
     public boolean updateLocalStorage(LocalStorageUpdateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        localStorageRepository.save(mapper.map(request, LocalStorageEntity.class));
+        return true;
     }
 
     @Override
     public boolean deleteLocalStorage(LocalStorageDeleteRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        localStorageRepository.deleteById(request.getStorageId());
+        resourceRepository.deleteByStorageIdAndStorageType(request.getStorageId(), GenericResourceEntity.StorageType.LOCAL);
+        return true;
     }
 
     @Override
     public Optional<S3Storage> getS3Storage(S3StorageGetRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        Optional<S3StorageEntity> entity = s3StorageRepository.findById(request.getStorageId());
+        return entity.map(e -> mapper.map(e, S3Storage.newBuilder().getClass()).build());
     }
 
     @Override
     public S3Storage createS3Storage(S3StorageCreateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        S3StorageEntity savedEntity = s3StorageRepository.save(mapper.map(request, S3StorageEntity.class));
+        return mapper.map(savedEntity, S3Storage.newBuilder().getClass()).build();
     }
 
     @Override
     public boolean updateS3Storage(S3StorageUpdateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        s3StorageRepository.save(mapper.map(request, S3StorageEntity.class));
+        return true;
     }
 
     @Override
     public boolean deleteS3Storage(S3StorageDeleteRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        s3StorageRepository.deleteById(request.getStorageId());
+        resourceRepository.deleteByStorageIdAndStorageType(request.getStorageId(), GenericResourceEntity.StorageType.S3);
+        return true;
     }
 
     @Override
@@ -233,8 +327,8 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public Optional<FTPStorage> getFTPStorage(FTPStorageGetRequest request) {
-        Optional<FTPStorageEntity> storageEty = ftpStorageRepository.findByStorageId(request.getStorageId());
-        return storageEty.map(ftpStorageEntity -> mapper.map(ftpStorageEntity, FTPStorage.newBuilder().getClass()).build());
+        Optional<FTPStorageEntity> entity = ftpStorageRepository.findByStorageId(request.getStorageId());
+        return entity.map(e -> mapper.map(e, FTPStorage.newBuilder().getClass()).build());
     }
 
     @Override
@@ -251,7 +345,8 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public boolean deleteFTPStorage(FTPStorageDeleteRequest request) {
-        ftpResourceRepository.deleteById(request.getStorageId());
+        ftpStorageRepository.deleteById(request.getStorageId());
+        resourceRepository.deleteByStorageIdAndStorageType(request.getStorageId(), GenericResourceEntity.StorageType.FTP);
         return true;
     }
 

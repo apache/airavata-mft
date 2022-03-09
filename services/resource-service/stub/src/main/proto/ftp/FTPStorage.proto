@@ -33,6 +33,7 @@ message FTPStorageGetRequest {
 message FTPStorageCreateRequest {
     string host = 1;
     int32 port = 2;
+    string storageId = 3;
 }
 
 message FTPStorageUpdateRequest {

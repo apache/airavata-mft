@@ -31,6 +31,7 @@ message LocalStorageGetRequest {
 
 message LocalStorageCreateRequest {
     string agentId = 1;
+    string storageId = 2;
 }
 
 message LocalStorageUpdateRequest {

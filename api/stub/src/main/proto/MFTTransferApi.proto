@@ -124,7 +124,7 @@ message FetchResourceMetadataRequest {
     org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 9;
 }
 
-service  MFTApiService {
+service  MFTTransferService {
 
     rpc submitTransfer(TransferApiRequest) returns (TransferApiResponse) {
         option (google.api.http) = {

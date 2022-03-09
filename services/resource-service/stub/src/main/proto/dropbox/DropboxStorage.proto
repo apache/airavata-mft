@@ -29,6 +29,7 @@ message DropboxStorageGetRequest {
 }
 
 message DropboxStorageCreateRequest {
+    string storageId = 4;
 }
 
 message DropboxStorageUpdateRequest {

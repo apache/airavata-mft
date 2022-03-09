@@ -4,11 +4,12 @@ import org.apache.airavata.mft.api.client.MFTApiClient;
 import org.apache.airavata.mft.api.service.DirectoryMetadataResponse;
 import org.apache.airavata.mft.api.service.FetchResourceMetadataRequest;
 import org.apache.airavata.mft.api.service.FileMetadataResponse;
-import org.apache.airavata.mft.api.service.MFTApiServiceGrpc;
+import org.apache.airavata.mft.api.service.MFTTransferServiceGrpc;
 
 public class SCPExample {
     public static void main(String args[]) throws Exception {
-        MFTApiServiceGrpc.MFTApiServiceBlockingStub client = new MFTApiClient("localhost", 7004).get();
+        MFTTransferServiceGrpc.MFTTransferServiceBlockingStub client = MFTApiClient.MFTApiClientBuilder
+                .newBuilder().build().getTransferClient();
 
         // File metadata
         long startTime = System.currentTimeMillis();

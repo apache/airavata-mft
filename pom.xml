@@ -43,10 +43,10 @@
     <modules>
         <module>common</module>
         <module>core</module>
+        <module>services</module>
         <module>api</module>
         <module>transport</module>
         <module>agent</module>
-        <module>services</module>
         <module>controller</module>
         <module>examples</module>
     </modules>

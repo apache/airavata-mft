@@ -20,6 +20,13 @@ package org.apache.airavata.mft.api.client;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.apache.airavata.mft.api.service.*;
+import org.apache.airavata.mft.resource.client.ResourceServiceClient;
+import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.client.StorageServiceClient;
+import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.common.GenericResourceServiceGrpc;
+import org.apache.airavata.mft.secret.client.SecretServiceClient;
+import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -29,20 +36,105 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class MFTApiClient implements Closeable {
 
-    private final ManagedChannel channel;
+    private ManagedChannel channel;
+    private ResourceServiceClient resourceServiceClient;
+    private StorageServiceClient storageServiceClient;
+    private SecretServiceClient secretServiceClient;
 
-    public MFTApiClient(String hostName, int port) {
-        channel = ManagedChannelBuilder.forAddress(hostName, port).usePlaintext().build();
+    private String transferServiceHost;
+    private int transferServicePort;
+
+    private String resourceServiceHost;
+    private int resourceServicePort;
+
+    private String secretServiceHost;
+    private int secretServicePort;
+
+    public void init() {
+        channel = ManagedChannelBuilder.forAddress(transferServiceHost, transferServicePort).usePlaintext().build();
+        resourceServiceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        storageServiceClient = StorageServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        secretServiceClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
     }
 
-    public MFTApiServiceGrpc.MFTApiServiceBlockingStub get() {
-        return MFTApiServiceGrpc.newBlockingStub(channel);
+    public MFTTransferServiceGrpc.MFTTransferServiceBlockingStub getTransferClient() {
+        return MFTTransferServiceGrpc.newBlockingStub(channel);
+    }
+
+    public GenericResourceServiceGrpc.GenericResourceServiceBlockingStub getResourceClient() {
+        return resourceServiceClient.get();
+    }
+
+    public StorageServiceClient getStorageServiceClient() {
+        return storageServiceClient;
+    }
+
+    public SecretServiceClient getSecretServiceClient() {
+        return secretServiceClient;
     }
 
     @Override
     public void close() throws IOException {
         if (channel != null) {
             channel.shutdown();
+        }
+    }
+
+    public static final class MFTApiClientBuilder {
+        private String transferServiceHost = "localhost";
+        private int transferServicePort = 7004;
+        private String resourceServiceHost = "localhost";
+        private int resourceServicePort = 7002;
+        private String secretServiceHost = "localhost";
+        private int secretServicePort = 7003;
+
+        private MFTApiClientBuilder() {
+        }
+
+        public static MFTApiClientBuilder newBuilder() {
+            return new MFTApiClientBuilder();
+        }
+
+        public MFTApiClientBuilder withTransferServiceHost(String transferServiceHost) {
+            this.transferServiceHost = transferServiceHost;
+            return this;
+        }
+
+        public MFTApiClientBuilder withTransferServicePort(int transferServicePort) {
+            this.transferServicePort = transferServicePort;
+            return this;
+        }
+
+        public MFTApiClientBuilder withResourceServiceHost(String resourceServiceHost) {
+            this.resourceServiceHost = resourceServiceHost;
+            return this;
+        }
+
+        public MFTApiClientBuilder withResourceServicePort(int resourceServicePort) {
+            this.resourceServicePort = resourceServicePort;
+            return this;
+        }
+
+        public MFTApiClientBuilder withSecretServiceHost(String secretServiceHost) {
+            this.secretServiceHost = secretServiceHost;
+            return this;
+        }
+
+        public MFTApiClientBuilder withSecretServicePort(int secretServicePort) {
+            this.secretServicePort = secretServicePort;
+            return this;
+        }
+
+        public MFTApiClient build() {
+            MFTApiClient mFTApiClient = new MFTApiClient();
+            mFTApiClient.transferServicePort = this.transferServicePort;
+            mFTApiClient.transferServiceHost = this.transferServiceHost;
+            mFTApiClient.secretServicePort = this.secretServicePort;
+            mFTApiClient.resourceServicePort = this.resourceServicePort;
+            mFTApiClient.secretServiceHost = this.secretServiceHost;
+            mFTApiClient.resourceServiceHost = this.resourceServiceHost;
+            mFTApiClient.init();
+            return mFTApiClient;
         }
     }
 }
