@@ -22,6 +22,7 @@ import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
 import org.apache.airavata.mft.resource.service.scp.SCPStorageServiceGrpc;
+import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageListResponse;
 import org.apache.airavata.mft.resource.stubs.scp.storage.*;
 import org.lognet.springboot.grpc.GRpcService;
 import org.slf4j.Logger;
@@ -35,6 +36,21 @@ public class SCPServiceHandler extends SCPStorageServiceGrpc.SCPStorageServiceIm
 
     @Autowired
     private ResourceBackend backend;
+
+    @Override
+    public void listSCPStorage(SCPStorageListRequest request, StreamObserver<SCPStorageListResponse> responseObserver) {
+        try {
+            SCPStorageListResponse response = this.backend.listSCPStorage(request);
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in retrieving SCP storage list", e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in retrieving SCP storage list")
+                    .asRuntimeException());
+        }
+    }
 
     @Override
     public void getSCPStorage(SCPStorageGetRequest request, StreamObserver<SCPStorage> responseObserver) {

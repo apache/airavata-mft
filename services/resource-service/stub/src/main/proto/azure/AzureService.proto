@@ -28,6 +28,12 @@ service AzureStorageService {
     
     // Storage
 
+    rpc listAzureStorage (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageListRequest) returns (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageListResponse) {
+        option (google.api.http) = {
+           get: "/v1.0/resource/azure/storage"
+        };
+    }
+    
     rpc getAzureStorage (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageGetRequest) returns
     (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage) {
         option (google.api.http) = {

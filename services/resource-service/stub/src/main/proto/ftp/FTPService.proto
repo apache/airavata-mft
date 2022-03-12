@@ -26,6 +26,12 @@ import "ftp/FTPStorage.proto";
 
 service FTPStorageService {
 
+    rpc listFTPStorage (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageListRequest) returns (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageListResponse) {
+        option (google.api.http) = {
+           get: "/v1.0/resource/ftp/storage"
+        };
+    }
+    
     rpc getFTPStorage (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageGetRequest) returns
                                                         (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorage) {
         option (google.api.http) = {

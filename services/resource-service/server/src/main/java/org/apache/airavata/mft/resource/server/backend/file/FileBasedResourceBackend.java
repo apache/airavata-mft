@@ -181,6 +181,11 @@ public class FileBasedResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public SCPStorageListResponse listSCPStorage(SCPStorageListRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request) throws Exception {
         InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(storageFile);
 
@@ -229,6 +234,11 @@ public class FileBasedResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public LocalStorageListResponse listLocalStorage(LocalStorageListRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<LocalStorage> getLocalStorage(LocalStorageGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
         InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(storageFile);
@@ -267,6 +277,11 @@ public class FileBasedResourceBackend implements ResourceBackend {
     @Override
     public boolean deleteLocalStorage(LocalStorageDeleteRequest request) throws Exception {
         return false;
+    }
+
+    @Override
+    public S3StorageListResponse listS3Storage(S3StorageListRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
@@ -312,6 +327,11 @@ public class FileBasedResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public BoxStorageListResponse listBoxStorage(BoxStorageListRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<BoxStorage> getBoxStorage(BoxStorageGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
         InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(storageFile);
@@ -349,6 +369,11 @@ public class FileBasedResourceBackend implements ResourceBackend {
 
     @Override
     public boolean deleteBoxStorage(BoxStorageDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public AzureStorageListResponse listAzureStorage(AzureStorageListRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
@@ -394,6 +419,11 @@ public class FileBasedResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public GCSStorageListResponse listGCSStorage(GCSStorageListRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<GCSStorage> getGCSStorage(GCSStorageGetRequest request) throws Exception {
         JSONParser jsonParser = new JSONParser();
         InputStream inputStream = FileBasedResourceBackend.class.getClassLoader().getResourceAsStream(storageFile);
@@ -431,6 +461,11 @@ public class FileBasedResourceBackend implements ResourceBackend {
 
     @Override
     public boolean deleteGCSStorage(GCSStorageDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public DropboxStorageListResponse listDropboxStorage(DropboxStorageListRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
@@ -473,6 +508,11 @@ public class FileBasedResourceBackend implements ResourceBackend {
 
     @Override
     public boolean deleteDropboxStorage(DropboxStorageDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public FTPStorageListResponse listFTPStorage(FTPStorageListRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 

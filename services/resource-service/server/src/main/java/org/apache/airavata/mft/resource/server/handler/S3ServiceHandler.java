@@ -37,6 +37,21 @@ public class S3ServiceHandler extends S3StorageServiceGrpc.S3StorageServiceImplB
     private ResourceBackend backend;
 
     @Override
+    public void listS3Storage(S3StorageListRequest request, StreamObserver<S3StorageListResponse> responseObserver) {
+        try {
+            S3StorageListResponse response = this.backend.listS3Storage(request);
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in retrieving S3 storage list", e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in retrieving S3 storage list")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
     public void getS3Storage(S3StorageGetRequest request, StreamObserver<S3Storage> responseObserver) {
         try {
             this.backend.getS3Storage(request).ifPresentOrElse(resource -> {

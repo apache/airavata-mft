@@ -27,6 +27,11 @@ import "box/BoxStorage.proto";
 service BoxStorageService {
 
     // Storage
+    rpc listBoxStorage (org.apache.airavata.mft.resource.stubs.box.storage.BoxStorageListRequest) returns (org.apache.airavata.mft.resource.stubs.box.storage.BoxStorageListResponse) {
+        option (google.api.http) = {
+           get: "/v1.0/resource/box/storage"
+        };
+    }
 
     rpc getBoxStorage (org.apache.airavata.mft.resource.stubs.box.storage.BoxStorageGetRequest) returns
     (org.apache.airavata.mft.resource.stubs.box.storage.BoxStorage) {

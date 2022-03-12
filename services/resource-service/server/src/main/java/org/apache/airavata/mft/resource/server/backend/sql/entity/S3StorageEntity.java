@@ -16,6 +16,9 @@ public class S3StorageEntity {
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String storageId;
 
+    @Column(name = "STORAGE_NAME")
+    private String name;
+
     @Column(name = "BUCKET_NAME")
     private String bucketName;
 
@@ -66,5 +69,13 @@ public class S3StorageEntity {
 
     public void setUseTLS(boolean useTLS) {
         this.useTLS = useTLS;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

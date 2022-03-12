@@ -46,41 +46,49 @@ public interface ResourceBackend {
     public boolean deleteStorageSecret(StorageSecretDeleteRequest request) throws Exception;
     public Optional<StorageSecret> searchStorageSecret(StorageSecretSearchRequest request) throws Exception;
 
+    public SCPStorageListResponse listSCPStorage(SCPStorageListRequest request) throws Exception;
     public Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request) throws Exception;
     public SCPStorage createSCPStorage(SCPStorageCreateRequest request) throws Exception;
     public boolean updateSCPStorage(SCPStorageUpdateRequest request) throws Exception;
     public boolean deleteSCPStorage(SCPStorageDeleteRequest request) throws Exception;
 
+    public LocalStorageListResponse listLocalStorage(LocalStorageListRequest request) throws Exception;
     public Optional<LocalStorage> getLocalStorage(LocalStorageGetRequest request) throws Exception;
     public LocalStorage createLocalStorage(LocalStorageCreateRequest request) throws Exception;
     public boolean updateLocalStorage(LocalStorageUpdateRequest request) throws Exception;
     public boolean deleteLocalStorage(LocalStorageDeleteRequest request) throws Exception;
 
+    public S3StorageListResponse listS3Storage(S3StorageListRequest request) throws Exception;
     public Optional<S3Storage> getS3Storage(S3StorageGetRequest request) throws Exception;
     public S3Storage createS3Storage(S3StorageCreateRequest request) throws Exception;
     public boolean updateS3Storage(S3StorageUpdateRequest request) throws Exception;
     public boolean deleteS3Storage(S3StorageDeleteRequest request) throws Exception;
 
+    public BoxStorageListResponse listBoxStorage(BoxStorageListRequest request) throws Exception;
     public Optional<BoxStorage> getBoxStorage(BoxStorageGetRequest request) throws Exception;
     public BoxStorage createBoxStorage(BoxStorageCreateRequest request) throws Exception;
     public boolean updateBoxStorage(BoxStorageUpdateRequest request) throws Exception;
     public boolean deleteBoxStorage(BoxStorageDeleteRequest request) throws Exception;
 
+    public AzureStorageListResponse listAzureStorage(AzureStorageListRequest request) throws Exception;
     public Optional<AzureStorage> getAzureStorage(AzureStorageGetRequest request) throws Exception;
     public AzureStorage createAzureStorage(AzureStorageCreateRequest request) throws Exception;
     public boolean updateAzureStorage(AzureStorageUpdateRequest request) throws Exception;
     public boolean deleteAzureStorage(AzureStorageDeleteRequest request) throws Exception;
 
+    public GCSStorageListResponse listGCSStorage(GCSStorageListRequest request) throws Exception;
     public Optional<GCSStorage> getGCSStorage(GCSStorageGetRequest request) throws Exception;
     public GCSStorage createGCSStorage(GCSStorageCreateRequest request) throws Exception;
     public boolean updateGCSStorage(GCSStorageUpdateRequest request) throws Exception;
     public boolean deleteGCSStorage(GCSStorageDeleteRequest request) throws Exception;
 
+    public DropboxStorageListResponse listDropboxStorage(DropboxStorageListRequest request) throws Exception;
     public Optional<DropboxStorage> getDropboxStorage(DropboxStorageGetRequest request) throws Exception;
     public DropboxStorage createDropboxStorage(DropboxStorageCreateRequest request) throws Exception;
     public boolean updateDropboxStorage(DropboxStorageUpdateRequest request) throws Exception;
     public boolean deleteDropboxStorage(DropboxStorageDeleteRequest request) throws Exception;
 
+    public FTPStorageListResponse listFTPStorage(FTPStorageListRequest request) throws Exception;
     Optional<FTPStorage> getFTPStorage(FTPStorageGetRequest request) throws Exception;
     FTPStorage createFTPStorage(FTPStorageCreateRequest request) throws Exception;
     boolean updateFTPStorage(FTPStorageUpdateRequest request) throws Exception;

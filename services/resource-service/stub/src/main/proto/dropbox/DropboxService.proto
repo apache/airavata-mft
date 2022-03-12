@@ -27,6 +27,11 @@ import "dropbox/DropboxStorage.proto";
 service DropboxStorageService {
 
     // Storage
+    rpc listDropboxStorage (org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageListRequest) returns (org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageListResponse) {
+        option (google.api.http) = {
+           get: "/v1.0/resource/dropbox/storage"
+        };
+    }
 
     rpc getDropboxStorage (org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageGetRequest) returns
                                                     (org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorage) {

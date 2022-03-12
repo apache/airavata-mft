@@ -23,6 +23,7 @@ import io.grpc.stub.StreamObserver;
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
 import org.apache.airavata.mft.resource.service.local.LocalStorageServiceGrpc;
 import org.apache.airavata.mft.resource.stubs.local.storage.*;
+import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageListResponse;
 import org.lognet.springboot.grpc.GRpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,21 @@ public class LocalServiceHandler extends LocalStorageServiceGrpc.LocalStorageSer
 
     @Autowired
     private ResourceBackend backend;
+
+    @Override
+    public void listLocalStorage(LocalStorageListRequest request, StreamObserver<LocalStorageListResponse> responseObserver) {
+        try {
+            LocalStorageListResponse response = this.backend.listLocalStorage(request);
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in retrieving Local storage list", e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in retrieving Local storage list")
+                    .asRuntimeException());
+        }
+    }
 
     @Override
     public void getLocalStorage(LocalStorageGetRequest request, StreamObserver<LocalStorage> responseObserver) {

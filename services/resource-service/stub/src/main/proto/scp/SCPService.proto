@@ -25,6 +25,13 @@ import "google/protobuf/empty.proto";
 import "scp/SCPStorage.proto";
 
 service SCPStorageService {
+
+    rpc listSCPStorage (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageListRequest) returns (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageListResponse) {
+        option (google.api.http) = {
+           get: "/v1.0/resource/scp/storage"
+        };
+    }
+
     rpc getSCPStorage (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageGetRequest) returns (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorage) {
         option (google.api.http) = {
            get: "/v1.0/resource/scp/storage"

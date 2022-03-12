@@ -23,6 +23,16 @@ package org.apache.airavata.mft.resource.stubs.azure.storage;
 message AzureStorage {
     string storageId = 1;
     string container = 2;
+    string name = 3;
+}
+
+message AzureStorageListRequest {
+    int32 offset = 1;
+    int32 limit = 2;
+}
+
+message AzureStorageListResponse {
+    repeated AzureStorage storages = 1;
 }
 
 message AzureStorageGetRequest {
@@ -32,11 +42,13 @@ message AzureStorageGetRequest {
 message AzureStorageCreateRequest {
     string container = 1;
     string storageId = 2;
+    string name = 3;
 }
 
 message AzureStorageUpdateRequest {
     string storageId = 1;
     string container = 2;
+    string name = 3;
 }
 
 message AzureStorageDeleteRequest {

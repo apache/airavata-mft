@@ -27,6 +27,12 @@ import "local/LocalStorage.proto";
 service LocalStorageService {
 
     // Storage
+    rpc listLocalStorage (org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageListRequest) returns (org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageListResponse) {
+        option (google.api.http) = {
+           get: "/v1.0/resource/local/storage"
+        };
+    }
+    
     rpc getLocalStorage (org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageGetRequest) returns (org.apache.airavata.mft.resource.stubs.local.storage.LocalStorage) {
         option (google.api.http) = {
            get: "/v1.0/resource/local/storage"

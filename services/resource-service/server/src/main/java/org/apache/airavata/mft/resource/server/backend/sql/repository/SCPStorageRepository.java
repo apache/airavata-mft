@@ -18,10 +18,13 @@
 package org.apache.airavata.mft.resource.server.backend.sql.repository;
 
 import org.apache.airavata.mft.resource.server.backend.sql.entity.SCPStorageEntity;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface SCPStorageRepository extends CrudRepository<SCPStorageEntity, String> {
     Optional<SCPStorageEntity> findByStorageId(String storageId);
+    List<SCPStorageEntity> findAll(Pageable pageable);
 }

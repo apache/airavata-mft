@@ -7,6 +7,8 @@ import org.apache.airavata.mft.credential.stubs.s3.S3SecretCreateRequest;
 import org.apache.airavata.mft.resource.service.s3.S3StorageServiceGrpc;
 import org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage;
 import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageCreateRequest;
+import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageListRequest;
+import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageListResponse;
 import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecret;
 import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretCreateRequest;
 import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretServiceGrpc;
@@ -42,7 +44,7 @@ public class S3ResourceSubCommand {
         StorageSecretServiceGrpc.StorageSecretServiceBlockingStub storageSecretClient = mftApiClient.getStorageServiceClient().storageSecret();
 
         S3Storage s3Storage = s3StorageClient.createS3Storage(S3StorageCreateRequest.newBuilder()
-                .setStorageId(remoteName)
+                .setName(remoteName)
                 .setEndpoint(endpoint)
                 .setBucketName(bucket)
                 .setUseTLS("Y".equals(useTLS))
@@ -68,6 +70,14 @@ public class S3ResourceSubCommand {
     @CommandLine.Command(name = "list")
     void listS3Resource() {
         System.out.println("Listing S3 Resource");
+        MFTApiClient mftApiClient = MFTApiClient.MFTApiClientBuilder.newBuilder().build();
+
+        S3StorageListResponse s3StorageListResponse = mftApiClient.getStorageServiceClient().s3()
+                .listS3Storage(S3StorageListRequest.newBuilder().setOffset(0).setLimit(10).build());
+
+        s3StorageListResponse.getStoragesList().forEach(s -> {
+            System.out.println("Storage Id : " + s.getStorageId() + " Name : " + s.getName()+ " Bucket : " + s.getBucketName());
+        });
     }
 
     @CommandLine.Command(name = "get")

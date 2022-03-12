@@ -22,6 +22,16 @@ package org.apache.airavata.mft.resource.stubs.dropbox.storage;
 
 message DropboxStorage {
     string storageId = 1;
+    string name = 2;
+}
+
+message DropboxStorageListRequest {
+    int32 offset = 1;
+    int32 limit = 2;
+}
+
+message DropboxStorageListResponse {
+    repeated DropboxStorage storages = 1;
 }
 
 message DropboxStorageGetRequest {
@@ -30,10 +40,12 @@ message DropboxStorageGetRequest {
 
 message DropboxStorageCreateRequest {
     string storageId = 4;
+    string name = 2;
 }
 
 message DropboxStorageUpdateRequest {
     string storageId = 1;
+    string name = 2;
 }
 
 message DropboxStorageDeleteRequest {

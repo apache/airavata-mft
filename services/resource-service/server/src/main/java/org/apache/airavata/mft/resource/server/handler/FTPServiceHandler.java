@@ -23,6 +23,7 @@ import io.grpc.stub.StreamObserver;
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
 import org.apache.airavata.mft.resource.service.ftp.FTPStorageServiceGrpc;
 import org.apache.airavata.mft.resource.stubs.ftp.storage.*;
+import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageListResponse;
 import org.lognet.springboot.grpc.GRpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,21 @@ public class FTPServiceHandler extends FTPStorageServiceGrpc.FTPStorageServiceIm
 
     @Autowired
     private ResourceBackend backend;
+
+    @Override
+    public void listFTPStorage(FTPStorageListRequest request, StreamObserver<FTPStorageListResponse> responseObserver) {
+        try {
+            FTPStorageListResponse response = this.backend.listFTPStorage(request);
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed in retrieving FTP storage list", e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed in retrieving FTP storage list")
+                    .asRuntimeException());
+        }
+    }
 
     @Override
     public void getFTPStorage(FTPStorageGetRequest request, StreamObserver<FTPStorage> responseObserver) {

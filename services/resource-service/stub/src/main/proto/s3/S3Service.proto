@@ -27,6 +27,12 @@ import "s3/S3Storage.proto";
 service S3StorageService {
 
     // Storage
+    rpc listS3Storage (org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageListRequest) returns (org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageListResponse) {
+        option (google.api.http) = {
+           get: "/v1.0/resource/s3/storage"
+        };
+    }
+    
     rpc getS3Storage (org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageGetRequest) returns (org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage) {
         option (google.api.http) = {
            get: "/v1.0/resource/s3/storage"

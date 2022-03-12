@@ -34,7 +34,10 @@ import org.dozer.DozerBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 public class SQLResourceBackend implements ResourceBackend {
@@ -204,6 +207,14 @@ public class SQLResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public SCPStorageListResponse listSCPStorage(SCPStorageListRequest request) throws Exception {
+        SCPStorageListResponse.Builder respBuilder = SCPStorageListResponse.newBuilder();
+        List<SCPStorageEntity> all = scpStorageRepository.findAll(PageRequest.of(request.getOffset(), request.getLimit()));
+        all.forEach(ety -> respBuilder.addStorages(mapper.map(ety, SCPStorage.newBuilder().getClass())));
+        return respBuilder.build();
+    }
+
+    @Override
     public Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request) {
         Optional<SCPStorageEntity> storageEty = scpStorageRepository.findByStorageId(request.getStorageId());
         return storageEty.map(scpStorageEntity -> mapper.map(scpStorageEntity, SCPStorage.newBuilder().getClass()).build());
@@ -226,6 +237,14 @@ public class SQLResourceBackend implements ResourceBackend {
         scpStorageRepository.deleteById(request.getStorageId());
         resourceRepository.deleteByStorageIdAndStorageType(request.getStorageId(), GenericResourceEntity.StorageType.SCP);
         return true;
+    }
+
+    @Override
+    public LocalStorageListResponse listLocalStorage(LocalStorageListRequest request) throws Exception {
+        LocalStorageListResponse.Builder respBuilder = LocalStorageListResponse.newBuilder();
+        List<LocalStorageEntity> all = localStorageRepository.findAll(PageRequest.of(request.getOffset(), request.getLimit()));
+        all.forEach(ety -> respBuilder.addStorages(mapper.map(ety, LocalStorage.newBuilder().getClass())));
+        return respBuilder.build();
     }
 
     @Override
@@ -254,6 +273,14 @@ public class SQLResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public S3StorageListResponse listS3Storage(S3StorageListRequest request) throws Exception {
+        S3StorageListResponse.Builder respBuilder = S3StorageListResponse.newBuilder();
+        List<S3StorageEntity> all = s3StorageRepository.findAll(PageRequest.of(request.getOffset(), request.getLimit()));
+        all.forEach(ety -> respBuilder.addStorages(mapper.map(ety, S3Storage.newBuilder().getClass())));
+        return respBuilder.build();
+    }
+
+    @Override
     public Optional<S3Storage> getS3Storage(S3StorageGetRequest request) throws Exception {
         Optional<S3StorageEntity> entity = s3StorageRepository.findById(request.getStorageId());
         return entity.map(e -> mapper.map(e, S3Storage.newBuilder().getClass()).build());
@@ -279,6 +306,11 @@ public class SQLResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public BoxStorageListResponse listBoxStorage(BoxStorageListRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<BoxStorage> getBoxStorage(BoxStorageGetRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
@@ -295,6 +327,11 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public boolean deleteBoxStorage(BoxStorageDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public AzureStorageListResponse listAzureStorage(AzureStorageListRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
@@ -319,6 +356,11 @@ public class SQLResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public GCSStorageListResponse listGCSStorage(GCSStorageListRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<GCSStorage> getGCSStorage(GCSStorageGetRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
@@ -335,6 +377,11 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public boolean deleteGCSStorage(GCSStorageDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public DropboxStorageListResponse listDropboxStorage(DropboxStorageListRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
@@ -356,6 +403,14 @@ public class SQLResourceBackend implements ResourceBackend {
     @Override
     public boolean deleteDropboxStorage(DropboxStorageDeleteRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public FTPStorageListResponse listFTPStorage(FTPStorageListRequest request) throws Exception {
+        FTPStorageListResponse.Builder respBuilder = FTPStorageListResponse.newBuilder();
+        List<FTPStorageEntity> all = ftpStorageRepository.findAll(PageRequest.of(request.getOffset(), request.getLimit()));
+        all.forEach(ety -> respBuilder.addStorages(mapper.map(ety, FTPStorage.newBuilder().getClass())));
+        return respBuilder.build();
     }
 
     @Override

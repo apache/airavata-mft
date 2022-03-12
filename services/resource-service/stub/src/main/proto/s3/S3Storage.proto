@@ -26,6 +26,16 @@ message S3Storage {
     string region = 3;
     string endpoint = 4;
     bool useTLS = 5;
+    string name = 6;
+}
+
+message S3StorageListRequest {
+    int32 offset = 1;
+    int32 limit = 2;
+}
+
+message S3StorageListResponse {
+    repeated S3Storage storages = 1;
 }
 
 message S3StorageGetRequest {
@@ -38,6 +48,7 @@ message S3StorageCreateRequest {
     string storageId = 3;
     string endpoint = 4;
     bool useTLS = 5;
+    string name = 6;
 }
 
 message S3StorageUpdateRequest {
@@ -46,6 +57,7 @@ message S3StorageUpdateRequest {
     string region = 3;
     string endpoint = 4;
     bool useTLS = 5;
+    string name = 6;
 }
 
 message S3StorageDeleteRequest {

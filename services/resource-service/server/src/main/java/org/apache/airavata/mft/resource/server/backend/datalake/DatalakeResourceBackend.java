@@ -202,6 +202,11 @@ public class DatalakeResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public SCPStorageListResponse listSCPStorage(SCPStorageListRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request) throws Exception {
         return Optional.empty();
     }
@@ -219,6 +224,11 @@ public class DatalakeResourceBackend implements ResourceBackend {
     @Override
     public boolean deleteSCPStorage(SCPStorageDeleteRequest request) throws Exception {
         return false;
+    }
+
+    @Override
+    public LocalStorageListResponse listLocalStorage(LocalStorageListRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
@@ -242,6 +252,11 @@ public class DatalakeResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public S3StorageListResponse listS3Storage(S3StorageListRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<S3Storage> getS3Storage(S3StorageGetRequest request) throws Exception {
         return Optional.empty();
     }
@@ -259,6 +274,11 @@ public class DatalakeResourceBackend implements ResourceBackend {
     @Override
     public boolean deleteS3Storage(S3StorageDeleteRequest request) throws Exception {
         return false;
+    }
+
+    @Override
+    public BoxStorageListResponse listBoxStorage(BoxStorageListRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
@@ -282,6 +302,11 @@ public class DatalakeResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public AzureStorageListResponse listAzureStorage(AzureStorageListRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<AzureStorage> getAzureStorage(AzureStorageGetRequest request) throws Exception {
         return Optional.empty();
     }
@@ -299,6 +324,11 @@ public class DatalakeResourceBackend implements ResourceBackend {
     @Override
     public boolean deleteAzureStorage(AzureStorageDeleteRequest request) throws Exception {
         return false;
+    }
+
+    @Override
+    public GCSStorageListResponse listGCSStorage(GCSStorageListRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override
@@ -322,6 +352,11 @@ public class DatalakeResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public DropboxStorageListResponse listDropboxStorage(DropboxStorageListRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
     public Optional<DropboxStorage> getDropboxStorage(DropboxStorageGetRequest request) throws Exception {
         return Optional.empty();
     }
@@ -339,6 +374,11 @@ public class DatalakeResourceBackend implements ResourceBackend {
     @Override
     public boolean deleteDropboxStorage(DropboxStorageDeleteRequest request) throws Exception {
         return false;
+    }
+
+    @Override
+    public FTPStorageListResponse listFTPStorage(FTPStorageListRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override

@@ -24,6 +24,16 @@ message FTPStorage {
     string storageId = 1;
     string host = 2;
     int32 port = 3;
+    string name = 4;
+}
+
+message FTPStorageListRequest {
+    int32 offset = 1;
+    int32 limit = 2;
+}
+
+message FTPStorageListResponse {
+    repeated FTPStorage storages = 1;
 }
 
 message FTPStorageGetRequest {
@@ -34,12 +44,14 @@ message FTPStorageCreateRequest {
     string host = 1;
     int32 port = 2;
     string storageId = 3;
+    string name = 4;
 }
 
 message FTPStorageUpdateRequest {
     string storageId = 1;
     string host = 2;
     int32 port = 3;
+    string name = 4;
 }
 
 message FTPStorageDeleteRequest {

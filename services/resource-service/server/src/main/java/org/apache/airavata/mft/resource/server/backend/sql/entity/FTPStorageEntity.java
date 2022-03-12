@@ -33,6 +33,9 @@ public class FTPStorageEntity {
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String storageId;
 
+    @Column(name = "STORAGE_NAME")
+    private String name;
+
     @Column(name = "HOST")
     private String host;
 
@@ -61,5 +64,13 @@ public class FTPStorageEntity {
 
     public void setPort(int port) {
         this.port = port;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

@@ -22,6 +22,16 @@ package org.apache.airavata.mft.resource.stubs.box.storage;
 
 message BoxStorage {
     string storageId = 1;
+    string name = 2;
+}
+
+message BoxStorageListRequest {
+    int32 offset = 1;
+    int32 limit = 2;
+}
+
+message BoxStorageListResponse {
+    repeated BoxStorage storages = 1;
 }
 
 message BoxStorageGetRequest {
@@ -30,10 +40,12 @@ message BoxStorageGetRequest {
 
 message BoxStorageCreateRequest {
     string storageId = 1;
+    string name = 2;
 }
 
 message BoxStorageUpdateRequest {
     string storageId = 1;
+    string name = 2;
 }
 
 message BoxStorageDeleteRequest {
