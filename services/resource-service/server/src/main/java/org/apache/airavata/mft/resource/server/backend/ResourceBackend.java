@@ -26,6 +26,7 @@ import org.apache.airavata.mft.resource.stubs.gcs.storage.*;
 import org.apache.airavata.mft.resource.stubs.local.storage.*;
 import org.apache.airavata.mft.resource.stubs.s3.storage.*;
 import org.apache.airavata.mft.resource.stubs.scp.storage.*;
+import org.apache.airavata.mft.storage.stubs.storagesecret.*;
 
 import java.util.Optional;
 
@@ -38,6 +39,12 @@ public interface ResourceBackend {
     public GenericResource createGenericResource(GenericResourceCreateRequest request) throws Exception;
     public boolean updateGenericResource(GenericResourceUpdateRequest request) throws Exception;
     public boolean deleteGenericResource(GenericResourceDeleteRequest request) throws Exception;
+
+    public Optional<StorageSecret> getStorageSecret(StorageSecretGetRequest request) throws Exception;
+    public StorageSecret createStorageSecret(StorageSecretCreateRequest request) throws Exception;
+    public boolean updateStorageSecret(StorageSecretUpdateRequest request) throws Exception;
+    public boolean deleteStorageSecret(StorageSecretDeleteRequest request) throws Exception;
+    public Optional<StorageSecret> searchStorageSecret(StorageSecretSearchRequest request) throws Exception;
 
     public Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request) throws Exception;
     public SCPStorage createSCPStorage(SCPStorageCreateRequest request) throws Exception;

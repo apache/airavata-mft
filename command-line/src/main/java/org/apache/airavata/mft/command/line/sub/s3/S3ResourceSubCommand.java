@@ -7,6 +7,9 @@ import org.apache.airavata.mft.credential.stubs.s3.S3SecretCreateRequest;
 import org.apache.airavata.mft.resource.service.s3.S3StorageServiceGrpc;
 import org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage;
 import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageCreateRequest;
+import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecret;
+import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretCreateRequest;
+import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretServiceGrpc;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "remote")
@@ -36,6 +39,7 @@ public class S3ResourceSubCommand {
 
         System.out.println("Adding S3 Storage");
         S3StorageServiceGrpc.S3StorageServiceBlockingStub s3StorageClient = mftApiClient.getStorageServiceClient().s3();
+        StorageSecretServiceGrpc.StorageSecretServiceBlockingStub storageSecretClient = mftApiClient.getStorageServiceClient().storageSecret();
 
         S3Storage s3Storage = s3StorageClient.createS3Storage(S3StorageCreateRequest.newBuilder()
                 .setStorageId(remoteName)
@@ -44,7 +48,15 @@ public class S3ResourceSubCommand {
                 .setUseTLS("Y".equals(useTLS))
                 .setRegion(region).build());
 
+
         System.out.println("Successfully created the remote " + remoteName);
+
+        StorageSecret storageSecret = storageSecretClient.createStorageSecret(StorageSecretCreateRequest.newBuilder()
+                .setStorageId(s3Storage.getStorageId())
+                .setSecretId(s3Secret.getSecretId())
+                .setType(StorageSecret.StorageType.S3).build());
+
+        System.out.println("Created the storage secret " + storageSecret.getId());
 
     }
 

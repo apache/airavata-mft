@@ -26,9 +26,11 @@ import org.apache.airavata.mft.credential.stubs.s3.*;
 import org.apache.airavata.mft.credential.stubs.scp.*;
 import org.apache.airavata.mft.secret.server.backend.SecretBackend;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.FTPSecretEntity;
+import org.apache.airavata.mft.secret.server.backend.sql.entity.S3SecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.SCPSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.FTPSecretRepository;
-import org.apache.airavata.mft.secret.server.backend.sql.repository.SecretRepository;
+import org.apache.airavata.mft.secret.server.backend.sql.repository.S3SecretRepository;
+import org.apache.airavata.mft.secret.server.backend.sql.repository.SCPSecretRepository;
 import org.dozer.DozerBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,10 +43,13 @@ public class SQLSecretBackend implements SecretBackend {
     private static final Logger logger = LoggerFactory.getLogger(SQLSecretBackend.class);
 
     @Autowired
-    private SecretRepository secretRepository;
+    private SCPSecretRepository scpSecretRepository;
 
     @Autowired
     private FTPSecretRepository ftpSecretRepository;
+
+    @Autowired
+    private S3SecretRepository s3SecretRepository;
 
     private DozerBeanMapper mapper = new DozerBeanMapper();
 
@@ -60,46 +65,50 @@ public class SQLSecretBackend implements SecretBackend {
 
     @Override
     public Optional<SCPSecret> getSCPSecret(SCPSecretGetRequest request) {
-        Optional<SCPSecretEntity> secretEty = secretRepository.findBySecretId(request.getSecretId());
+        Optional<SCPSecretEntity> secretEty = scpSecretRepository.findBySecretId(request.getSecretId());
         return secretEty.map(scpSecretEntity -> mapper.map(scpSecretEntity, SCPSecret.newBuilder().getClass()).build());
     }
 
     @Override
     public SCPSecret createSCPSecret(SCPSecretCreateRequest request) {
-        SCPSecretEntity savedEntity = secretRepository.save(mapper.map(request, SCPSecretEntity.class));
+        SCPSecretEntity savedEntity = scpSecretRepository.save(mapper.map(request, SCPSecretEntity.class));
         return mapper.map(savedEntity, SCPSecret.newBuilder().getClass()).build();
     }
 
     @Override
     public boolean updateSCPSecret(SCPSecretUpdateRequest request) {
-        secretRepository.save(mapper.map(request, SCPSecretEntity.class));
+        scpSecretRepository.save(mapper.map(request, SCPSecretEntity.class));
         return true;
     }
 
     @Override
     public boolean deleteSCPSecret(SCPSecretDeleteRequest request) {
-        secretRepository.deleteById(request.getSecretId());
+        scpSecretRepository.deleteById(request.getSecretId());
         return true;
     }
 
     @Override
     public Optional<S3Secret> getS3Secret(S3SecretGetRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        Optional<S3SecretEntity> secretEty = s3SecretRepository.findBySecretId(request.getSecretId());
+        return secretEty.map(s3SecretEntity -> mapper.map(s3SecretEntity, S3Secret.newBuilder().getClass()).build());
     }
 
     @Override
     public S3Secret createS3Secret(S3SecretCreateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        S3SecretEntity savedEntity = s3SecretRepository.save(mapper.map(request, S3SecretEntity.class));
+        return mapper.map(savedEntity, S3Secret.newBuilder().getClass()).build();
     }
 
     @Override
     public boolean updateS3Secret(S3SecretUpdateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        s3SecretRepository.save(mapper.map(request, S3SecretEntity.class));
+        return true;
     }
 
     @Override
     public boolean deleteS3Secret(S3SecretDeleteRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        s3SecretRepository.deleteById(request.getSecretId());
+        return true;
     }
 
     @Override

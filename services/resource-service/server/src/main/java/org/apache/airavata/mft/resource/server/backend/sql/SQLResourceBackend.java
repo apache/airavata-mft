@@ -29,13 +29,12 @@ import org.apache.airavata.mft.resource.stubs.gcs.storage.*;
 import org.apache.airavata.mft.resource.stubs.local.storage.*;
 import org.apache.airavata.mft.resource.stubs.s3.storage.*;
 import org.apache.airavata.mft.resource.stubs.scp.storage.*;
+import org.apache.airavata.mft.storage.stubs.storagesecret.*;
 import org.dozer.DozerBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.CrudRepository;
 
-import javax.el.ELException;
 import java.util.Optional;
 
 public class SQLResourceBackend implements ResourceBackend {
@@ -56,6 +55,9 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Autowired
     private LocalStorageRepository localStorageRepository;
+
+    @Autowired
+    private StorageSecretRepository resourceSecretRepository;
 
     private DozerBeanMapper mapper = new DozerBeanMapper();
 
@@ -172,6 +174,36 @@ public class SQLResourceBackend implements ResourceBackend {
     }
 
     @Override
+    public Optional<StorageSecret> getStorageSecret(StorageSecretGetRequest request) throws Exception {
+        Optional<StorageSecretEntity> resourceSecEty = resourceSecretRepository.findById(request.getId());
+        return resourceSecEty.map(ety -> mapper.map(ety, StorageSecret.newBuilder().getClass()).build());
+    }
+
+    @Override
+    public StorageSecret createStorageSecret(StorageSecretCreateRequest request) throws Exception {
+        StorageSecretEntity savedEntity = resourceSecretRepository.save(mapper.map(request, StorageSecretEntity.class));
+        return mapper.map(savedEntity, StorageSecret.newBuilder().getClass()).build();
+    }
+
+    @Override
+    public boolean updateStorageSecret(StorageSecretUpdateRequest request) throws Exception {
+        resourceSecretRepository.save(mapper.map(request, StorageSecretEntity.class));
+        return true;
+    }
+
+    @Override
+    public boolean deleteStorageSecret(StorageSecretDeleteRequest request) throws Exception {
+        resourceSecretRepository.deleteById(request.getId());
+        return false;
+    }
+
+    @Override
+    public Optional<StorageSecret> searchStorageSecret(StorageSecretSearchRequest request) throws Exception {
+        //resourceSecretRepository.findByStorageId();
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request) {
         Optional<SCPStorageEntity> storageEty = scpStorageRepository.findByStorageId(request.getStorageId());
         return storageEty.map(scpStorageEntity -> mapper.map(scpStorageEntity, SCPStorage.newBuilder().getClass()).build());
@@ -191,7 +223,8 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public boolean deleteSCPStorage(SCPStorageDeleteRequest request) {
-        //scpStorageRepository.delete(request.getStorageId());
+        scpStorageRepository.deleteById(request.getStorageId());
+        resourceRepository.deleteByStorageIdAndStorageType(request.getStorageId(), GenericResourceEntity.StorageType.SCP);
         return true;
     }
 

@@ -39,6 +39,7 @@ import org.apache.airavata.mft.resource.stubs.gcs.storage.*;
 import org.apache.airavata.mft.resource.stubs.local.storage.*;
 import org.apache.airavata.mft.resource.stubs.s3.storage.*;
 import org.apache.airavata.mft.resource.stubs.scp.storage.*;
+import org.apache.airavata.mft.storage.stubs.storagesecret.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,6 +174,31 @@ public class DatalakeResourceBackend implements ResourceBackend {
     @Override
     public boolean deleteGenericResource(GenericResourceDeleteRequest request) throws Exception {
         return false;
+    }
+
+    @Override
+    public Optional<StorageSecret> getStorageSecret(StorageSecretGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public StorageSecret createStorageSecret(StorageSecretCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateStorageSecret(StorageSecretUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteStorageSecret(StorageSecretDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public Optional<StorageSecret> searchStorageSecret(StorageSecretSearchRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
     @Override

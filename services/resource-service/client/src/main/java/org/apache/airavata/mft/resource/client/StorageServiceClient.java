@@ -9,6 +9,7 @@ import org.apache.airavata.mft.resource.service.gcs.GCSStorageServiceGrpc;
 import org.apache.airavata.mft.resource.service.local.LocalStorageServiceGrpc;
 import org.apache.airavata.mft.resource.service.s3.S3StorageServiceGrpc;
 import org.apache.airavata.mft.resource.service.scp.SCPStorageServiceGrpc;
+import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretServiceGrpc;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -19,6 +20,10 @@ public class StorageServiceClient implements Closeable {
 
     public StorageServiceClient(ManagedChannel channel) {
         this.channel = channel;
+    }
+
+    public StorageSecretServiceGrpc.StorageSecretServiceBlockingStub storageSecret() {
+        return StorageSecretServiceGrpc.newBlockingStub(channel);
     }
 
     public SCPStorageServiceGrpc.SCPStorageServiceBlockingStub scp() {
