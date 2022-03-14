@@ -34,6 +34,19 @@ case $1 in
             echo "Consul is already running ..."
         fi
     ;;
+    linux)
+        if [ ! -f $PID_PATH_NAME ]; then
+            mkdir -p ../build/consul
+            curl -O https://releases.hashicorp.com/consul/1.7.1/consul_1.7.1_linux_amd64.zip
+            unzip -o consul_1.7.1_linux_amd64.zip -d ../build/consul
+            rm consul_1.7.1_linux_amd64.zip
+            nohup ../build/consul/consul agent -dev > $LOG_FILE 2>&1 &
+            echo $! > $PID_PATH_NAME
+            echo "Consul started"
+        else
+            echo "Consul is already running ..."
+        fi
+    ;;
     -h)
         echo "Usage: start-consul.sh"
 

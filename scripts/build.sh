@@ -26,9 +26,20 @@ cp controller/target/MFT-Controller-0.01-bin.zip build/
 cp services/resource-service/server/target/Resource-Service-0.01-bin.zip build/
 cp services/secret-service/server/target/Secret-Service-0.01-bin.zip build/
 cp api/service/target/API-Service-0.01-bin.zip build/
+cp scripts/log.sh build/
+cp scripts/start-mft.sh build/
+cp scripts/stop-mft.sh build/
+cp scripts/start-consul.sh build/
+cp scripts/stop-consul.sh build/
+cp command-line/target/mft-command-line-0.01-SNAPSHOT-jar-with-dependencies.jar build/mft-client.jar
 
 unzip -o build/MFT-Agent-0.01-bin.zip -d build/
+rm build/MFT-Agent-0.01-bin.zip
 unzip -o build/MFT-Controller-0.01-bin.zip -d build/
+rm build/MFT-Controller-0.01-bin.zip
 unzip -o build/Resource-Service-0.01-bin.zip -d build/
+rm build/Resource-Service-0.01-bin.zip
 unzip -o build/Secret-Service-0.01-bin.zip -d build/
+rm build/Secret-Service-0.01-bin.zip
 unzip -o build/API-Service-0.01-bin.zip -d build/
+rm build/API-Service-0.01-bin.zip
