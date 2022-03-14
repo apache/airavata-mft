@@ -2,6 +2,7 @@ package org.apache.airavata.mft.transport.s3;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
@@ -64,14 +65,17 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
             BasicAWSCredentials awsCreds = new BasicAWSCredentials(s3Secret.getAccessKey(), s3Secret.getSecretKey());
 
             s3Client = AmazonS3ClientBuilder.standard()
+                    .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
+                            s3Storage.getEndpoint(), s3Storage.getRegion()))
                     .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                    .withRegion(s3Storage.getRegion())
                     .build();
         }
 
         InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(resource.getS3Storage().getBucketName(),
                 resource.getFile().getResourcePath());
         initResponse = s3Client.initiateMultipartUpload(initRequest);
+        logger.info("Initialized multipart upload for file {} in bucket {}",
+                resource.getFile().getResourcePath(), resource.getS3Storage().getBucketName());
     }
 
     @Override
@@ -97,5 +101,7 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
         CompleteMultipartUploadRequest compRequest = new CompleteMultipartUploadRequest(resource.getS3Storage().getBucketName(),
                 resource.getFile().getResourcePath(), initResponse.getUploadId(), partETags);
         s3Client.completeMultipartUpload(compRequest);
+        logger.info("Completing the upload for file {} in bucket {}", resource.getFile().getResourcePath(),
+                resource.getS3Storage().getBucketName());
     }
 }

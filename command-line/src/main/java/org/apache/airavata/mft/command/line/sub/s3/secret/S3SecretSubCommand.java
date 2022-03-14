@@ -1,4 +1,4 @@
-package org.apache.airavata.mft.command.line.sub.s3;
+package org.apache.airavata.mft.command.line.sub.s3.secret;
 
 import picocli.CommandLine;
 

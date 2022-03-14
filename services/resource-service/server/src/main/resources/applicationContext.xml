@@ -6,7 +6,6 @@
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <bean id="resourceBackend" class="org.apache.airavata.mft.resource.server.backend.file.FileBasedResourceBackend"
+    <bean id="resourceBackend" class="org.apache.airavata.mft.resource.server.backend.sql.SQLResourceBackend"
           init-method="init" destroy-method="destroy"></bean>
-
 </beans>

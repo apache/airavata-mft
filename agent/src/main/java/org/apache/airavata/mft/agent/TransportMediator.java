@@ -126,6 +126,8 @@ public class TransportMediator {
                         Future<Integer> future = completionService.take();
                     }
 
+                    inConnector.complete();
+                    outConnector.complete();
                     logger.info("Completed chunked transfer for transfer {}", transferId);
 
                 } else if (inStreamingConnectorOp.isPresent() && outStreamingConnectorOp.isPresent()) {

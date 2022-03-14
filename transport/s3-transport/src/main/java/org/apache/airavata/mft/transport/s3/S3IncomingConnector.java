@@ -2,6 +2,7 @@ package org.apache.airavata.mft.transport.s3;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.GetObjectRequest;
@@ -61,8 +62,9 @@ public class S3IncomingConnector implements IncomingChunkedConnector, IncomingSt
             BasicAWSCredentials awsCreds = new BasicAWSCredentials(s3Secret.getAccessKey(), s3Secret.getSecretKey());
 
             s3Client = AmazonS3ClientBuilder.standard()
+                    .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
+                            s3Storage.getEndpoint(), s3Storage.getRegion()))
                     .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                    .withRegion(s3Storage.getRegion())
                     .build();
         }
     }

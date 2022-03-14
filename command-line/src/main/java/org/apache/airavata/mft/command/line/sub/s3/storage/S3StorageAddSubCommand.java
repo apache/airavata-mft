@@ -1,4 +1,4 @@
-package org.apache.airavata.mft.command.line.sub.s3;
+package org.apache.airavata.mft.command.line.sub.s3.storage;
 
 import org.apache.airavata.mft.api.client.MFTApiClient;
 import org.apache.airavata.mft.common.AuthToken;
@@ -7,29 +7,39 @@ import org.apache.airavata.mft.credential.stubs.s3.S3SecretCreateRequest;
 import org.apache.airavata.mft.resource.service.s3.S3StorageServiceGrpc;
 import org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage;
 import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageCreateRequest;
-import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageListRequest;
-import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageListResponse;
 import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecret;
 import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretCreateRequest;
 import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretServiceGrpc;
 import picocli.CommandLine;
 
-@CommandLine.Command(name = "remote")
-public class S3ResourceSubCommand {
+import java.util.concurrent.Callable;
 
-    @CommandLine.Command(name = "add")
-    void addS3Resource() {
+@CommandLine.Command(name = "add")
+public class S3StorageAddSubCommand implements Callable<Integer> {
+
+    @CommandLine.Option(names = {"-n", "--name"}, description = "Storage Name")
+    private String remoteName;
+
+    @CommandLine.Option(names = {"-b", "--bucker"}, description = "Bucket Name")
+    private String bucket;
+
+    @CommandLine.Option(names = {"-r", "--region"}, description = "Region")
+    private String region;
+
+    @CommandLine.Option(names = {"-e", "--endpoint"}, description = "S3 API Endpoint")
+    private String endpoint;
+
+    @CommandLine.Option(names = {"-k", "--key"}, description = "Access Key")
+    private String accessKey;
+
+    @CommandLine.Option(names = {"-s", "--secret"}, description = "Access Secret")
+    private String accessSecret;
+
+    @Override
+    public Integer call() throws Exception {
 
         AuthToken authToken = AuthToken.newBuilder().build();
 
-        String remoteName = System.console().readLine("Remote Name: ");
-        String bucket = System.console().readLine("Bucket: ");
-        String region = System.console().readLine("Region: ");
-        String endpoint = System.console().readLine("S3 Endpoint: ");
-        String useTLS = System.console().readLine("Use TLS [Y/n]: ");
-
-        String accessKey = System.console().readLine("Access Key: ");
-        String accessSecret = System.console().readLine("Access Secret: ");
         System.out.println("Adding S3 Secret");
         MFTApiClient mftApiClient = MFTApiClient.MFTApiClientBuilder.newBuilder().build();
 
@@ -47,7 +57,6 @@ public class S3ResourceSubCommand {
                 .setName(remoteName)
                 .setEndpoint(endpoint)
                 .setBucketName(bucket)
-                .setUseTLS("Y".equals(useTLS))
                 .setRegion(region).build());
 
 
@@ -58,30 +67,11 @@ public class S3ResourceSubCommand {
                 .setSecretId(s3Secret.getSecretId())
                 .setType(StorageSecret.StorageType.S3).build());
 
+
+
         System.out.println("Created the storage secret " + storageSecret.getId());
 
-    }
-
-    @CommandLine.Command(name = "delete")
-    void deleteS3Resource(@CommandLine.Parameters(index = "0") String resourceId) {
-        System.out.println("Deleting S3 Resource " + resourceId);
-    }
-
-    @CommandLine.Command(name = "list")
-    void listS3Resource() {
-        System.out.println("Listing S3 Resource");
-        MFTApiClient mftApiClient = MFTApiClient.MFTApiClientBuilder.newBuilder().build();
-
-        S3StorageListResponse s3StorageListResponse = mftApiClient.getStorageServiceClient().s3()
-                .listS3Storage(S3StorageListRequest.newBuilder().setOffset(0).setLimit(10).build());
-
-        s3StorageListResponse.getStoragesList().forEach(s -> {
-            System.out.println("Storage Id : " + s.getStorageId() + " Name : " + s.getName()+ " Bucket : " + s.getBucketName());
-        });
-    }
-
-    @CommandLine.Command(name = "get")
-    void getS3Resource(@CommandLine.Parameters(index = "0") String resourceId) {
-        System.out.println("Getting S3 Resource " + resourceId);
+        System.out.println("Added storage " + s3Storage.getStorageId());
+        return 0;
     }
 }

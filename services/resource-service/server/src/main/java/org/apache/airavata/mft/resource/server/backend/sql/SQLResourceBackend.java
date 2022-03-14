@@ -74,75 +74,79 @@ public class SQLResourceBackend implements ResourceBackend {
         logger.info("Destroying database resource backend");
     }
 
+
+    private GenericResource convertGenericResourceEntity(GenericResourceEntity resourceEty) throws Exception {
+        GenericResource.Builder builder = GenericResource.newBuilder();
+        builder.setResourceId(resourceEty.getResourceId());
+        switch (resourceEty.getResourceType()){
+            case DIRECTORY:
+                builder.setDirectory(DirectoryResource.newBuilder().setResourcePath(resourceEty.getResourcePath()).build());
+                break;
+            case FILE:
+                builder.setFile(FileResource.newBuilder().setResourcePath(resourceEty.getResourcePath()).build());
+                break;
+        }
+
+        switch (resourceEty.getStorageType()) {
+            case S3:
+                Optional<S3Storage> s3Storage = getS3Storage(S3StorageGetRequest.newBuilder()
+                        .setStorageId(resourceEty.getStorageId()).build());
+                builder.setS3Storage(s3Storage.orElseThrow(() -> new Exception("Could not find a S3 storage with id "
+                        + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
+                break;
+            case SCP:
+                Optional<SCPStorage> scpStorage = getSCPStorage(SCPStorageGetRequest.newBuilder()
+                        .setStorageId(resourceEty.getStorageId()).build());
+                builder.setScpStorage(scpStorage.orElseThrow(() -> new Exception("Could not find a SCP storage with id "
+                        + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
+                break;
+            case LOCAL:
+                Optional<LocalStorage> localStorage = getLocalStorage(LocalStorageGetRequest.newBuilder()
+                        .setStorageId(resourceEty.getStorageId()).build());
+                builder.setLocalStorage(localStorage.orElseThrow(() -> new Exception("Could not find a Local storage with id "
+                        + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
+                break;
+            case FTP:
+                Optional<FTPStorage> ftpStorage = getFTPStorage(FTPStorageGetRequest.newBuilder()
+                        .setStorageId(resourceEty.getStorageId()).build());
+                builder.setFtpStorage(ftpStorage.orElseThrow(() -> new Exception("Could not find a FTP storage with id "
+                        + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
+                break;
+            case BOX:
+                Optional<BoxStorage> boxStorage = getBoxStorage(BoxStorageGetRequest.newBuilder()
+                        .setStorageId(resourceEty.getStorageId()).build());
+                builder.setBoxStorage(boxStorage.orElseThrow(() -> new Exception("Could not find a Box storage with id "
+                        + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
+                break;
+            case DROPBOX:
+                Optional<DropboxStorage> dropBoxStorage = getDropboxStorage(DropboxStorageGetRequest.newBuilder()
+                        .setStorageId(resourceEty.getStorageId()).build());
+                builder.setDropboxStorage(dropBoxStorage.orElseThrow(() -> new Exception("Could not find a Dropbox storage with id "
+                        + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
+                break;
+            case GCS:
+                Optional<GCSStorage> gcsStorage = getGCSStorage(GCSStorageGetRequest.newBuilder()
+                        .setStorageId(resourceEty.getStorageId()).build());
+                builder.setGcsStorage(gcsStorage.orElseThrow(() -> new Exception("Could not find a GCS storage with id "
+                        + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
+                break;
+            case AZURE:
+                Optional<AzureStorage> azureStorage = getAzureStorage(AzureStorageGetRequest.newBuilder()
+                        .setStorageId(resourceEty.getStorageId()).build());
+                builder.setAzureStorage(azureStorage.orElseThrow(() -> new Exception("Could not find a Azure storage with id "
+                        + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
+                break;
+        }
+
+        return builder.build();
+    }
     @Override
     public Optional<GenericResource> getGenericResource(GenericResourceGetRequest request) throws Exception {
         Optional<GenericResourceEntity> resourceEtyOp = resourceRepository.findByResourceId(request.getResourceId());
         if (resourceEtyOp.isPresent()) {
 
             GenericResourceEntity resourceEty = resourceEtyOp.get();
-                    GenericResource.Builder builder = GenericResource.newBuilder();
-            builder.setResourceId(resourceEty.getResourceId());
-            switch (resourceEty.getResourceType()){
-                case DIRECTORY:
-                    builder.setDirectory(DirectoryResource.newBuilder().setResourcePath(resourceEty.getResourcePath()).build());
-                    break;
-                case FILE:
-                    builder.setFile(FileResource.newBuilder().setResourcePath(resourceEty.getResourcePath()).build());
-                    break;
-            }
-
-            switch (resourceEty.getStorageType()) {
-                case S3:
-                    Optional<S3Storage> s3Storage = getS3Storage(S3StorageGetRequest.newBuilder()
-                            .setStorageId(resourceEty.getStorageId()).build());
-                    builder.setS3Storage(s3Storage.orElseThrow(() -> new Exception("Could not find a S3 storage with id "
-                            + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
-                    break;
-                case SCP:
-                    Optional<SCPStorage> scpStorage = getSCPStorage(SCPStorageGetRequest.newBuilder()
-                            .setStorageId(resourceEty.getStorageId()).build());
-                    builder.setScpStorage(scpStorage.orElseThrow(() -> new Exception("Could not find a SCP storage with id "
-                            + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
-                    break;
-                case LOCAL:
-                    Optional<LocalStorage> localStorage = getLocalStorage(LocalStorageGetRequest.newBuilder()
-                            .setStorageId(resourceEty.getStorageId()).build());
-                    builder.setLocalStorage(localStorage.orElseThrow(() -> new Exception("Could not find a Local storage with id "
-                            + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
-                    break;
-                case FTP:
-                    Optional<FTPStorage> ftpStorage = getFTPStorage(FTPStorageGetRequest.newBuilder()
-                            .setStorageId(resourceEty.getStorageId()).build());
-                    builder.setFtpStorage(ftpStorage.orElseThrow(() -> new Exception("Could not find a FTP storage with id "
-                            + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
-                    break;
-                case BOX:
-                    Optional<BoxStorage> boxStorage = getBoxStorage(BoxStorageGetRequest.newBuilder()
-                            .setStorageId(resourceEty.getStorageId()).build());
-                    builder.setBoxStorage(boxStorage.orElseThrow(() -> new Exception("Could not find a Box storage with id "
-                            + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
-                    break;
-                case DROPBOX:
-                    Optional<DropboxStorage> dropBoxStorage = getDropboxStorage(DropboxStorageGetRequest.newBuilder()
-                            .setStorageId(resourceEty.getStorageId()).build());
-                    builder.setDropboxStorage(dropBoxStorage.orElseThrow(() -> new Exception("Could not find a Dropbox storage with id "
-                            + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
-                    break;
-                case GCS:
-                    Optional<GCSStorage> gcsStorage = getGCSStorage(GCSStorageGetRequest.newBuilder()
-                            .setStorageId(resourceEty.getStorageId()).build());
-                    builder.setGcsStorage(gcsStorage.orElseThrow(() -> new Exception("Could not find a GCS storage with id "
-                            + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
-                    break;
-                case AZURE:
-                    Optional<AzureStorage> azureStorage = getAzureStorage(AzureStorageGetRequest.newBuilder()
-                            .setStorageId(resourceEty.getStorageId()).build());
-                    builder.setAzureStorage(azureStorage.orElseThrow(() -> new Exception("Could not find a Azure storage with id "
-                            + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
-                    break;
-            }
-
-            return Optional.of(builder.build());
+            return Optional.of(convertGenericResourceEntity(resourceEty));
         } else {
             return Optional.empty();
         }
@@ -157,13 +161,18 @@ public class SQLResourceBackend implements ResourceBackend {
         switch (request.getResourceCase()) {
             case FILE:
                 entity.setResourcePath(request.getFile().getResourcePath());
+                entity.setResourceType(GenericResourceEntity.ResourceType.FILE);
                 break;
             case DIRECTORY:
                 entity.setResourcePath(request.getDirectory().getResourcePath());
+                entity.setResourceType(GenericResourceEntity.ResourceType.DIRECTORY);
                 break;
         }
 
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        entity.setStorageType(GenericResourceEntity.StorageType.valueOf(request.getStorageType().name()));
+
+        GenericResourceEntity saved = resourceRepository.save(entity);
+        return convertGenericResourceEntity(saved);
     }
 
     @Override
@@ -197,13 +206,17 @@ public class SQLResourceBackend implements ResourceBackend {
     @Override
     public boolean deleteStorageSecret(StorageSecretDeleteRequest request) throws Exception {
         resourceSecretRepository.deleteById(request.getId());
-        return false;
+        return true;
     }
 
     @Override
     public Optional<StorageSecret> searchStorageSecret(StorageSecretSearchRequest request) throws Exception {
-        //resourceSecretRepository.findByStorageId();
-        return Optional.empty();
+        Optional<StorageSecretEntity> ety = resourceSecretRepository.findByStorageId(request.getStorageId());
+        if (ety.isPresent()) {
+            return Optional.of(mapper.map(ety.get(), StorageSecret.newBuilder().getClass()).build());
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override

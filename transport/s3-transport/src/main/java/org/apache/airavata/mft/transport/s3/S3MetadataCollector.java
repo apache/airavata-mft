@@ -19,6 +19,7 @@ package org.apache.airavata.mft.transport.s3;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -75,8 +76,10 @@ public class S3MetadataCollector implements MetadataCollector {
         BasicAWSCredentials awsCreds = new BasicAWSCredentials(s3Secret.getAccessKey(), s3Secret.getSecretKey());
 
         AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
+                        s3Resource.getS3Storage().getEndpoint(),
+                        s3Resource.getS3Storage().getRegion()))
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                .withRegion(s3Resource.getS3Storage().getRegion())
                 .build();
 
         FileResourceMetadata metadata = new FileResourceMetadata();
@@ -135,6 +138,9 @@ public class S3MetadataCollector implements MetadataCollector {
         BasicAWSCredentials awsCreds = new BasicAWSCredentials(s3Secret.getAccessKey(), s3Secret.getSecretKey());
 
         AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
+                        s3Resource.getS3Storage().getEndpoint(),
+                        s3Resource.getS3Storage().getRegion()))
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
                 .withRegion(s3Resource.getS3Storage().getRegion())
                 .build();
