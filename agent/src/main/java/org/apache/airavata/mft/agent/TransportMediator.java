@@ -67,10 +67,10 @@ public class TransportMediator {
                 long start = System.currentTimeMillis();
 
                 onStatusCallback.accept(transferId, new TransferState()
-                        .setPercentage(100)
+                        .setPercentage(0)
                         .setState("RUNNING")
                         .setUpdateTimeMils(System.currentTimeMillis())
-                        .setDescription("Transfer successfully completed"));
+                        .setDescription("Transfer is ongoing"));
 
                 Optional<IncomingStreamingConnector> inStreamingConnectorOp = ConnectorResolver
                         .resolveIncomingStreamingConnector(request.getSourceType());
