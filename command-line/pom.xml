@@ -42,6 +42,12 @@
             <groupId>org.apache.airavata</groupId>
             <artifactId>mft-api-client</artifactId>
             <version>0.01-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>info.picocli</groupId>
@@ -63,10 +69,6 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <!--mainClass>MinIoS3SimpleExample</mainClass-->
-                            <!--mainClass>MinIOMultipartUpload</mainClass-->
-                            <!--mainClass>MinIOMultipartAdvanced</mainClass-->
-                            <!--mainClass>S3DownloadMultipartExample</mainClass-->
                             <mainClass>org.apache.airavata.mft.command.line.MainRunner</mainClass>
                         </manifest>
                     </archive>
