@@ -17,17 +17,17 @@
 # specific language governing permissions and limitations
 # under the License.
 
-PID_PATH_NAME="../build/consul/service-pid"
-LOG_FILE="../build/consul/consul.log"
+PID_PATH_NAME="../airavata-mft/consul/service-pid"
+LOG_FILE="../airavata-mft/consul/consul.log"
 
 case $1 in
     mac)
         if [ ! -f $PID_PATH_NAME ]; then
-            mkdir -p ../build/consul
+            mkdir -p ../airavata-mft/consul
             curl -O https://releases.hashicorp.com/consul/1.7.1/consul_1.7.1_darwin_amd64.zip
-            unzip -o consul_1.7.1_darwin_amd64.zip -d ../build/consul
+            unzip -o consul_1.7.1_darwin_amd64.zip -d ../airavata-mft/consul
             rm consul_1.7.1_darwin_amd64.zip
-            nohup ../build/consul/consul agent -dev > $LOG_FILE 2>&1 &
+            nohup ../airavata-mft/consul/consul agent -dev > $LOG_FILE 2>&1 &
             echo $! > $PID_PATH_NAME
             echo "Consul started"
         else
@@ -36,11 +36,11 @@ case $1 in
     ;;
     linux)
         if [ ! -f $PID_PATH_NAME ]; then
-            mkdir -p ../build/consul
+            mkdir -p ../airavata-mft/consul
             curl -O https://releases.hashicorp.com/consul/1.7.1/consul_1.7.1_linux_amd64.zip
-            unzip -o consul_1.7.1_linux_amd64.zip -d ../build/consul
+            unzip -o consul_1.7.1_linux_amd64.zip -d ../airavata-mft/consul
             rm consul_1.7.1_linux_amd64.zip
-            nohup ../build/consul/consul agent -dev > $LOG_FILE 2>&1 &
+            nohup ../airavata-mft/consul/consul agent -dev > $LOG_FILE 2>&1 &
             echo $! > $PID_PATH_NAME
             echo "Consul started"
         else

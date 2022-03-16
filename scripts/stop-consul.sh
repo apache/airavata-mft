@@ -17,7 +17,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-PID_PATH_NAME="../build/consul/service-pid"
+PID_PATH_NAME="../airavata-mft/consul/service-pid"
 
 if [ -f $PID_PATH_NAME ]; then
     PID=$(cat $PID_PATH_NAME);

@@ -18,28 +18,28 @@
 # under the License.
 
 cd ../
-mvn clean install
-rm -rf build
-mkdir -p build
-cp agent/target/MFT-Agent-0.01-bin.zip build/
-cp controller/target/MFT-Controller-0.01-bin.zip build/
-cp services/resource-service/server/target/Resource-Service-0.01-bin.zip build/
-cp services/secret-service/server/target/Secret-Service-0.01-bin.zip build/
-cp api/service/target/API-Service-0.01-bin.zip build/
-cp scripts/log.sh build/
-cp scripts/start-mft.sh build/
-cp scripts/stop-mft.sh build/
-cp scripts/start-consul.sh build/
-cp scripts/stop-consul.sh build/
-cp command-line/target/mft-command-line-0.01-SNAPSHOT-jar-with-dependencies.jar build/mft-client.jar
+#mvn clean install
+rm -rf airavata-mft
+mkdir -p airavata-mft
+cp agent/target/MFT-Agent-0.01-bin.zip airavata-mft/
+cp controller/target/MFT-Controller-0.01-bin.zip airavata-mft/
+cp services/resource-service/server/target/Resource-Service-0.01-bin.zip airavata-mft/
+cp services/secret-service/server/target/Secret-Service-0.01-bin.zip airavata-mft/
+cp api/service/target/API-Service-0.01-bin.zip airavata-mft/
+cp scripts/log.sh airavata-mft/
+cp scripts/start-mft.sh airavata-mft/
+cp scripts/stop-mft.sh airavata-mft/
+cp scripts/start-consul.sh airavata-mft/
+cp scripts/stop-consul.sh airavata-mft/
+cp command-line/target/mft-command-line-0.01-SNAPSHOT-jar-with-dependencies.jar airavata-mft/mft-client.jar
 
-unzip -o build/MFT-Agent-0.01-bin.zip -d build/
-rm build/MFT-Agent-0.01-bin.zip
-unzip -o build/MFT-Controller-0.01-bin.zip -d build/
-rm build/MFT-Controller-0.01-bin.zip
-unzip -o build/Resource-Service-0.01-bin.zip -d build/
-rm build/Resource-Service-0.01-bin.zip
-unzip -o build/Secret-Service-0.01-bin.zip -d build/
-rm build/Secret-Service-0.01-bin.zip
-unzip -o build/API-Service-0.01-bin.zip -d build/
-rm build/API-Service-0.01-bin.zip
+unzip -o airavata-mft/MFT-Agent-0.01-bin.zip -d airavata-mft/
+rm airavata-mft/MFT-Agent-0.01-bin.zip
+unzip -o airavata-mft/MFT-Controller-0.01-bin.zip -d airavata-mft/
+rm airavata-mft/MFT-Controller-0.01-bin.zip
+unzip -o airavata-mft/Resource-Service-0.01-bin.zip -d airavata-mft/
+rm airavata-mft/Resource-Service-0.01-bin.zip
+unzip -o airavata-mft/Secret-Service-0.01-bin.zip -d airavata-mft/
+rm airavata-mft/Secret-Service-0.01-bin.zip
+unzip -o airavata-mft/API-Service-0.01-bin.zip -d airavata-mft/
+rm airavata-mft/API-Service-0.01-bin.zip

@@ -19,22 +19,22 @@
 
 case $1 in
     agent)
-        tail -100f ../build/MFT-Agent-0.01/logs/airavata.log
+        tail -100f ../airavata-mft/MFT-Agent-0.01/logs/airavata.log
     ;;
     resource)
-        tail -100f ../build/Resource-Service-0.01/logs/airavata.log
+        tail -100f ../airavata-mft/Resource-Service-0.01/logs/airavata.log
     ;;
     secret)
-        tail -100f ../build/Secret-Service-0.01/logs/airavata.log
+        tail -100f ../airavata-mft/Secret-Service-0.01/logs/airavata.log
     ;;
     api)
-        tail -100f ../build/API-Service-0.01/logs/airavata.log
+        tail -100f ../airavata-mft/API-Service-0.01/logs/airavata.log
     ;;
     controller)
-        tail -100f ../build/MFT-Controller-0.01/logs/airavata.log
+        tail -100f ../airavata-mft/MFT-Controller-0.01/logs/airavata.log
     ;;
     consul)
-        tail -100f ../build/consul/consul.log
+        tail -100f ../airavata-mft/consul/consul.log
     ;;
     -h)
         echo "Usage: log.sh"
