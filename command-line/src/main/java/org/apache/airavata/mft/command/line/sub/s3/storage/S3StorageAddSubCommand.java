@@ -40,7 +40,6 @@ public class S3StorageAddSubCommand implements Callable<Integer> {
 
         AuthToken authToken = AuthToken.newBuilder().build();
 
-        System.out.println("Adding S3 Secret");
         MFTApiClient mftApiClient = MFTApiClient.MFTApiClientBuilder.newBuilder().build();
 
         S3Secret s3Secret = mftApiClient.getSecretServiceClient().s3()
@@ -49,7 +48,6 @@ public class S3StorageAddSubCommand implements Callable<Integer> {
                         .setSecretKey(accessSecret)
                         .setAuthzToken(authToken).build());
 
-        System.out.println("Adding S3 Storage");
         S3StorageServiceGrpc.S3StorageServiceBlockingStub s3StorageClient = mftApiClient.getStorageServiceClient().s3();
         StorageSecretServiceGrpc.StorageSecretServiceBlockingStub storageSecretClient = mftApiClient.getStorageServiceClient().storageSecret();
 
@@ -59,19 +57,12 @@ public class S3StorageAddSubCommand implements Callable<Integer> {
                 .setBucketName(bucket)
                 .setRegion(region).build());
 
-
-        System.out.println("Successfully created the remote " + remoteName);
-
         StorageSecret storageSecret = storageSecretClient.createStorageSecret(StorageSecretCreateRequest.newBuilder()
                 .setStorageId(s3Storage.getStorageId())
                 .setSecretId(s3Secret.getSecretId())
                 .setType(StorageSecret.StorageType.S3).build());
 
-
-
-        System.out.println("Created the storage secret " + storageSecret.getId());
-
-        System.out.println("Added storage " + s3Storage.getStorageId());
+        System.out.println("Storage Id " + s3Storage.getStorageId());
         return 0;
     }
 }
