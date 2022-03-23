@@ -101,6 +101,15 @@ public class MFTAgent implements CommandLineRunner {
     @org.springframework.beans.factory.annotation.Value("${secret.service.port}")
     private int secretServicePort;
 
+    @org.springframework.beans.factory.annotation.Value("${agent.concurrent.transfers}")
+    private int concurrentTransfers;
+
+    @org.springframework.beans.factory.annotation.Value("${agent.concurrent.chunked.threads}")
+    private int concurrentChunkedThreads;
+
+    @org.springframework.beans.factory.annotation.Value("${agent.chunk.size}")
+    private int chunkedSize;
+
     private final Semaphore mainHold = new Semaphore(0);
 
     private KVCache transferMessageCache;
@@ -131,7 +140,7 @@ public class MFTAgent implements CommandLineRunner {
     public void init() {
         transferMessageCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.AGENTS_TRANSFER_REQUEST_MESSAGE_PATH + agentId);
         rpcMessageCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.AGENTS_RPC_REQUEST_MESSAGE_PATH + agentId);
-        mediator = new TransportMediator(tempDataDir);
+        mediator = new TransportMediator(tempDataDir, concurrentTransfers, concurrentChunkedThreads, chunkedSize);
     }
 
     private void acceptRPCRequests() {

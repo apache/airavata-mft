@@ -41,14 +41,19 @@ public class TransportMediator {
     /*
     Number of maximum transfers handled at atime
      */
-    private final int concurrentTransfers = 10;
-    private final ExecutorService executor = Executors.newFixedThreadPool(concurrentTransfers * 2); // 2 connections per transfer
-    private final ExecutorService monitorPool = Executors.newFixedThreadPool(concurrentTransfers * 2); // 2 monitors per transfer
+    private final ExecutorService executor;
+    private final ExecutorService monitorPool;
 
     private String tempDataDir = "/tmp";
+    private final int concurrentChunkedThreads;
+    private final int chunkedSize;
 
-    public TransportMediator(String tempDataDir) {
+    public TransportMediator(String tempDataDir, int concurrentTransfers, int concurrentChunkedThreads, int chunkedSize) {
         this.tempDataDir = tempDataDir;
+        executor = Executors.newFixedThreadPool(concurrentTransfers);
+        monitorPool = Executors.newFixedThreadPool(concurrentTransfers);
+        this.concurrentChunkedThreads = concurrentChunkedThreads;
+        this.chunkedSize = chunkedSize;
     }
 
     public void transferSingleThread(String transferId,
@@ -88,9 +93,9 @@ public class TransportMediator {
 
                     logger.info("Starting the chunked transfer for transfer {}", transferId);
 
-                    long chunkSize = 20 * 1024 * 1024L;
+                    long chunkSize = chunkedSize * 1024 * 1024L;
 
-                    ExecutorService chunkedExecutorService = Executors.newFixedThreadPool(20);
+                    ExecutorService chunkedExecutorService = Executors.newFixedThreadPool(concurrentChunkedThreads);
 
                     CompletionService<Integer> completionService = new ExecutorCompletionService<Integer>(chunkedExecutorService);
 
