@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -92,7 +93,7 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
 
         UploadPartResult uploadResult = s3Client.uploadPart(uploadRequest);
         this.partETags.add(uploadResult.getPartETag());
-        logger.info("Uploaded S3 chunk to path {} for resource id {}", uploadFile, resource.getResourceId());
+        logger.debug("Uploaded S3 chunk to path {} for resource id {}", uploadFile, resource.getResourceId());
     }
 
 

@@ -8,6 +8,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.util.IOUtils;
 import org.apache.airavata.mft.core.api.ConnectorConfig;
 import org.apache.airavata.mft.core.api.IncomingChunkedConnector;
 import org.apache.airavata.mft.core.api.IncomingStreamingConnector;
@@ -23,6 +24,7 @@ import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 
@@ -88,7 +90,7 @@ public class S3IncomingConnector implements IncomingChunkedConnector, IncomingSt
                 resource.getFile().getResourcePath());
         rangeObjectRequest.setRange(startByte, endByte - 1);
         ObjectMetadata objectMetadata = s3Client.getObject(rangeObjectRequest, new File(downloadFile));
-        logger.info("Downloaded S3 chunk to path {} for resource id {}", downloadFile, resource.getResourceId());
+        logger.debug("Downloaded S3 chunk to path {} for resource id {}", downloadFile, resource.getResourceId());
     }
 
     @Override
