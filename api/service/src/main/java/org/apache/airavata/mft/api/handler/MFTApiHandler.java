@@ -19,6 +19,7 @@ package org.apache.airavata.mft.api.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.util.JsonFormat;
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.apache.airavata.mft.admin.MFTConsulClient;
 import org.apache.airavata.mft.admin.SyncRPCClient;
@@ -85,7 +86,9 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error in submitting transfer request", e);
-            responseObserver.onError(new Exception("Failed to submit transfer", e));
+            responseObserver.onError(Status.INTERNAL
+                    .withDescription("Failed to submit http download request. " + e.getMessage())
+                    .asException());
         }
     }
 
@@ -127,14 +130,19 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
                 case FAIL:
                     logger.error("Errored while processing the download request to resource {}. Error msg : {}",
                             request.getSourceResourceId(), rpcResponse.getErrorAsStr());
-                    responseObserver.onError(new Exception("Errored while processing the the fetch file metadata response. Error msg : " +
-                            rpcResponse.getErrorAsStr()));
+
+                    responseObserver.onError(Status.INTERNAL
+                            .withDescription("Errored while processing the the fetch file metadata response. Error msg : " +
+                                    rpcResponse.getErrorAsStr())
+                            .asException());
             }
 
         } catch (Exception e) {
             logger.error("Error while submitting http download request to resource {}",
                                                 request.getSourceResourceId() , e);
-            responseObserver.onError(new Exception("Failed to submit http download request", e));
+            responseObserver.onError(Status.INTERNAL
+                    .withDescription("Failed to submit http download request. " + e.getMessage())
+                    .asException());
         }
     }
 
@@ -149,7 +157,9 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error in fetching transfer states", e);
-            responseObserver.onError(new Exception("Failed to retrieve transfer states", e));
+            responseObserver.onError(Status.INTERNAL
+                    .withDescription("Failed to retrieve transfer states. " + e.getMessage())
+                    .asException());
         }
     }
 
@@ -162,13 +172,18 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
                 TransferStateApiResponse s = dozerBeanMapper.map(stateOp.get(),
                         TransferStateApiResponse.newBuilder().getClass()).build();
                 responseObserver.onNext(s);
+                responseObserver.onCompleted();
             } else {
-                responseObserver.onNext(TransferStateApiResponse.getDefaultInstance());
+                logger.error("There is no state for transfer " + request.getTransferId());
+                responseObserver.onError(Status.NOT_FOUND
+                        .withDescription("There is no state for transfer " + request.getTransferId())
+                        .asRuntimeException());
             }
-            responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error in fetching transfer state", e);
-            responseObserver.onError(new Exception("Failed to retrieve transfer state", e));
+            responseObserver.onError(Status.INTERNAL
+                    .withDescription("Failed to retrieve transfer state. " + e.getMessage())
+                    .asException());
         }
     }
 
@@ -187,7 +202,9 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
 
         } catch (Exception e) {
             logger.error("Error while checking availability of resource " + request.getResourceId(), e);
-            responseObserver.onError(new Exception("Failed to check the availability", e));
+            responseObserver.onError(Status.INTERNAL
+                    .withDescription("Failed to check the availability. " + e.getMessage())
+                    .asException());
         }
     }
 
@@ -235,12 +252,16 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
                 case FAIL:
                     logger.error("Errored while processing the fetch file metadata response for resource id {}. Error msg : {}",
                             request.getResourceId(), rpcResponse.getErrorAsStr());
-                    responseObserver.onError(new Exception("Errored while processing the the fetch file metadata response. Error msg : " +
-                            rpcResponse.getErrorAsStr()));
+                    responseObserver.onError(Status.INTERNAL
+                            .withDescription("Errored while processing the the fetch file metadata response. Error msg : " +
+                                    rpcResponse.getErrorAsStr())
+                            .asException());
             }
         } catch (Exception e) {
             logger.error("Error while fetching resource metadata for file resource " + request.getResourceId(), e);
-            responseObserver.onError(new Exception("Failed to fetch file resource metadata", e));
+            responseObserver.onError(Status.INTERNAL
+                    .withDescription("Failed to fetch file resource metadata. " + e.getMessage())
+                    .asException());
         }
     }
 
@@ -301,12 +322,16 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
                 case FAIL:
                     logger.error("Errored while processing the fetch directory metadata response for resource id {}. Error msg : {}",
                             request.getResourceId(), rpcResponse.getErrorAsStr());
-                    responseObserver.onError(new Exception("Errored while processing the the fetch directory metadata response. Error msg : " +
-                            rpcResponse.getErrorAsStr()));
+                    responseObserver.onError(Status.INTERNAL
+                            .withDescription("Errored while processing the the fetch directory metadata response. Error msg : " +
+                                    rpcResponse.getErrorAsStr())
+                            .asException());
             }
         } catch (Exception e) {
             logger.error("Error while fetching directory resource metadata for resource " + request.getResourceId(), e);
-            responseObserver.onError(new Exception("Failed to fetch directory resource metadata", e));
+            responseObserver.onError(Status.INTERNAL
+                    .withDescription("Failed to fetch directory resource metadata. " + e.getMessage())
+                    .asException());
         }
     }
 
