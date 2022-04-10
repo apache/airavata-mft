@@ -1,5 +1,5 @@
 import grpc
-import airavata_mft_sdk.airavata_mft_sdk.airavata_mft_sdk.airavata_mft_sdk.mft_sdk.MFTTransferApi_pb2_grpc as transfer_grpc
+import airavata_mft_sdk.MFTTransferApi_pb2_grpc as transfer_grpc
 
 
 class MFTClient:
