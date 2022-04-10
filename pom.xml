@@ -143,7 +143,7 @@
         <grpc.spring.boot>3.5.1</grpc.spring.boot>
         <spring.boot.data.jpa>2.2.1.RELEASE</spring.boot.data.jpa>
         <org.slf4j.version>1.7.25</org.slf4j.version>
-        <log4j2.version>2.16.0</log4j2.version>
+        <log4j2.version>2.17.1</log4j2.version>
         <dozer>5.5.1</dozer>
         <jsch>0.1.55</jsch>
         <sshj>0.27.0</sshj>
