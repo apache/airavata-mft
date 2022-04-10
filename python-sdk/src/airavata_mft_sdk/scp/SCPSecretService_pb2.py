@@ -12,9 +12,9 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
-from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
-from scp import SCPCredential_pb2 as scp_dot_SCPCredential__pb2
+from airavata_mft_sdk.google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
+from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
+from airavata_mft_sdk.scp import SCPCredential_pb2 as scp_dot_SCPCredential__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1ascp/SCPSecretService.proto\x12.org.apache.airavata.mft.credential.service.scp\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x17scp/SCPCredential.proto2\xfe\x04\n\x10SCPSecretService\x12\xa4\x01\n\x0cgetSCPSecret\x12\x41.org.apache.airavata.mft.credential.stubs.scp.SCPSecretGetRequest\x1a\x37.org.apache.airavata.mft.credential.stubs.scp.SCPSecret\"\x18\x82\xd3\xe4\x93\x02\x12\x12\x10/v1.0/secret/scp\x12\xaa\x01\n\x0f\x63reateSCPSecret\x12\x44.org.apache.airavata.mft.credential.stubs.scp.SCPSecretCreateRequest\x1a\x37.org.apache.airavata.mft.credential.stubs.scp.SCPSecret\"\x18\x82\xd3\xe4\x93\x02\x12\"\x10/v1.0/secret/scp\x12\x89\x01\n\x0fupdateSCPSecret\x12\x44.org.apache.airavata.mft.credential.stubs.scp.SCPSecretUpdateRequest\x1a\x16.google.protobuf.Empty\"\x18\x82\xd3\xe4\x93\x02\x12\x1a\x10/v1.0/secret/scp\x12\x89\x01\n\x0f\x64\x65leteSCPSecret\x12\x44.org.apache.airavata.mft.credential.stubs.scp.SCPSecretDeleteRequest\x1a\x16.google.protobuf.Empty\"\x18\x82\xd3\xe4\x93\x02\x12*\x10/v1.0/secret/scpB\x02P\x01\x62\x06proto3')

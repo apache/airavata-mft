@@ -2,8 +2,8 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
-from resource import ResourceService_pb2 as resource_dot_ResourceService__pb2
+from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
+from airavata_mft_sdk.resource import ResourceService_pb2 as resource_dot_ResourceService__pb2
 
 
 class GenericResourceServiceStub(object):

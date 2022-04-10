@@ -12,7 +12,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-import CredCommon_pb2 as CredCommon__pb2
+import airavata_mft_sdk.CredCommon_pb2 as CredCommon__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17scp/SCPCredential.proto\x12,org.apache.airavata.mft.credential.stubs.scp\x1a\x10\x43redCommon.proto\"f\n\tSCPSecret\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x12\n\nprivateKey\x18\x02 \x01(\t\x12\x11\n\tpublicKey\x18\x03 \x01(\t\x12\x12\n\npassphrase\x18\x04 \x01(\t\x12\x0c\n\x04user\x18\x05 \x01(\t\"f\n\x13SCPSecretGetRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\xa0\x01\n\x16SCPSecretCreateRequest\x12\x12\n\nprivateKey\x18\x01 \x01(\t\x12\x11\n\tpublicKey\x18\x02 \x01(\t\x12\x12\n\npassphrase\x18\x03 \x01(\t\x12\x0c\n\x04user\x18\x04 \x01(\t\x12=\n\nauthzToken\x18\x05 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\xb2\x01\n\x16SCPSecretUpdateRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x12\n\nprivateKey\x18\x02 \x01(\t\x12\x11\n\tpublicKey\x18\x03 \x01(\t\x12\x12\n\npassphrase\x18\x04 \x01(\t\x12\x0c\n\x04user\x18\x05 \x01(\t\x12=\n\nauthzToken\x18\x06 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"i\n\x16SCPSecretDeleteRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthTokenB\x02P\x01\x62\x06proto3')

@@ -2,8 +2,8 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from dropbox import DropboxStorage_pb2 as dropbox_dot_DropboxStorage__pb2
-from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
+from airavata_mft_sdk.dropbox import DropboxStorage_pb2 as dropbox_dot_DropboxStorage__pb2
+from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
 class DropboxStorageServiceStub(object):

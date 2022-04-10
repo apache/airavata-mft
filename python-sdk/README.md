@@ -4,7 +4,7 @@
 virtualenv -p python3 env
 source env/bin/activate
 pip install grpcio grpcio-tools
-cd mft-sdk
+cd src/airavata_mft_sdk
 ./generate-stubs.sh
 ```
 

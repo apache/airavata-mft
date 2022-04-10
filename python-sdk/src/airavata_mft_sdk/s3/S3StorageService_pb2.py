@@ -12,9 +12,9 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
-from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
-from s3 import S3Storage_pb2 as s3_dot_S3Storage__pb2
+from airavata_mft_sdk.google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
+from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
+from airavata_mft_sdk.s3 import S3Storage_pb2 as s3_dot_S3Storage__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x19s3/S3StorageService.proto\x12+org.apache.airavata.mft.resource.service.s3\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x12s3/S3Storage.proto2\x88\x07\n\x10S3StorageService\x12\xc5\x01\n\rlistS3Storage\x12G.org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageListRequest\x1aH.org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageListResponse\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/v1.0/resource/s3/storage\x12\xb7\x01\n\x0cgetS3Storage\x12\x46.org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageGetRequest\x1a<.org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/v1.0/resource/s3/storage\x12\xbd\x01\n\x0f\x63reateS3Storage\x12I.org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageCreateRequest\x1a<.org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage\"!\x82\xd3\xe4\x93\x02\x1b\"\x19/v1.0/resource/s3/storage\x12\x97\x01\n\x0fupdateS3Storage\x12I.org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageUpdateRequest\x1a\x16.google.protobuf.Empty\"!\x82\xd3\xe4\x93\x02\x1b\x1a\x19/v1.0/resource/s3/storage\x12\x97\x01\n\x0f\x64\x65leteS3Storage\x12I.org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageDeleteRequest\x1a\x16.google.protobuf.Empty\"!\x82\xd3\xe4\x93\x02\x1b*\x19/v1.0/resource/s3/storageB\x02P\x01\x62\x06proto3')

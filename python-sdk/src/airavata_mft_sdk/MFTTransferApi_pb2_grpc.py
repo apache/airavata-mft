@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import MFTTransferApi_pb2 as MFTTransferApi__pb2
+import airavata_mft_sdk.MFTTransferApi_pb2 as MFTTransferApi__pb2
 
 
 class MFTTransferServiceStub(object):

@@ -12,9 +12,9 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
-from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
-from ftp import FTPStorage_pb2 as ftp_dot_FTPStorage__pb2
+from airavata_mft_sdk.google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
+from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
+from airavata_mft_sdk.ftp import FTPStorage_pb2 as ftp_dot_FTPStorage__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1b\x66tp/FTPStorageService.proto\x12,org.apache.airavata.mft.resource.service.ftp\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x14\x66tp/FTPStorage.proto2\xa3\x07\n\x11\x46TPStorageService\x12\xcb\x01\n\x0elistFTPStorage\x12I.org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageListRequest\x1aJ.org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageListResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/v1.0/resource/ftp/storage\x12\xbd\x01\n\rgetFTPStorage\x12H.org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageGetRequest\x1a>.org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorage\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/v1.0/resource/ftp/storage\x12\xc3\x01\n\x10\x63reateFTPStorage\x12K.org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageCreateRequest\x1a>.org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorage\"\"\x82\xd3\xe4\x93\x02\x1c\"\x1a/v1.0/resource/ftp/storage\x12\x9b\x01\n\x10updateFTPStorage\x12K.org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageUpdateRequest\x1a\x16.google.protobuf.Empty\"\"\x82\xd3\xe4\x93\x02\x1c\x1a\x1a/v1.0/resource/ftp/storage\x12\x9b\x01\n\x10\x64\x65leteFTPStorage\x12K.org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageDeleteRequest\x1a\x16.google.protobuf.Empty\"\"\x82\xd3\xe4\x93\x02\x1c*\x1a/v1.0/resource/ftp/storageB\x02P\x01\x62\x06proto3')

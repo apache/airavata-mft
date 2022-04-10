@@ -12,7 +12,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-import CredCommon_pb2 as CredCommon__pb2
+import airavata_mft_sdk.CredCommon_pb2 as CredCommon__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1b\x61zure/AzureCredential.proto\x12.org.apache.airavata.mft.credential.stubs.azure\x1a\x10\x43redCommon.proto\"9\n\x0b\x41zureSecret\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x18\n\x10\x63onnectionString\x18\x02 \x01(\t\"h\n\x15\x41zureSecretGetRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"s\n\x18\x41zureSecretCreateRequest\x12\x18\n\x10\x63onnectionString\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\x85\x01\n\x18\x41zureSecretUpdateRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x18\n\x10\x63onnectionString\x18\x02 \x01(\t\x12=\n\nauthzToken\x18\x03 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"k\n\x18\x41zureSecretDeleteRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthTokenB\x02P\x01\x62\x06proto3')

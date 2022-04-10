@@ -12,9 +12,9 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
-from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
-from dropbox import DropboxStorage_pb2 as dropbox_dot_DropboxStorage__pb2
+from airavata_mft_sdk.google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
+from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
+from airavata_mft_sdk.dropbox import DropboxStorage_pb2 as dropbox_dot_DropboxStorage__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n#dropbox/DropboxStorageService.proto\x12\x30org.apache.airavata.mft.resource.service.dropbox\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1c\x64ropbox/DropboxStorage.proto2\x8f\x08\n\x15\x44ropboxStorageService\x12\xe3\x01\n\x12listDropboxStorage\x12Q.org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageListRequest\x1aR.org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageListResponse\"&\x82\xd3\xe4\x93\x02 \x12\x1e/v1.0/resource/dropbox/storage\x12\xd5\x01\n\x11getDropboxStorage\x12P.org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageGetRequest\x1a\x46.org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorage\"&\x82\xd3\xe4\x93\x02 \x12\x1e/v1.0/resource/dropbox/storage\x12\xdb\x01\n\x14\x63reateDropboxStorage\x12S.org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageCreateRequest\x1a\x46.org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorage\"&\x82\xd3\xe4\x93\x02 \"\x1e/v1.0/resource/dropbox/storage\x12\xab\x01\n\x14updateDropboxStorage\x12S.org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageUpdateRequest\x1a\x16.google.protobuf.Empty\"&\x82\xd3\xe4\x93\x02 \x1a\x1e/v1.0/resource/dropbox/storage\x12\xab\x01\n\x14\x64\x65leteDropboxStorage\x12S.org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageDeleteRequest\x1a\x16.google.protobuf.Empty\"&\x82\xd3\xe4\x93\x02 *\x1e/v1.0/resource/dropbox/storageB\x02P\x01\x62\x06proto3')

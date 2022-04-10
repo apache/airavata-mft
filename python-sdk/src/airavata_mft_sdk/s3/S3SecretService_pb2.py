@@ -12,9 +12,9 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
-from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
-from s3 import S3Credential_pb2 as s3_dot_S3Credential__pb2
+from airavata_mft_sdk.google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
+from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
+from airavata_mft_sdk.s3 import S3Credential_pb2 as s3_dot_S3Credential__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18s3/S3SecretService.proto\x12-org.apache.airavata.mft.credential.service.s3\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x15s3/S3Credential.proto2\xe9\x04\n\x0fS3SecretService\x12\x9e\x01\n\x0bgetS3Secret\x12?.org.apache.airavata.mft.credential.stubs.s3.S3SecretGetRequest\x1a\x35.org.apache.airavata.mft.credential.stubs.s3.S3Secret\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/v1.0/secret/s3\x12\xa4\x01\n\x0e\x63reateS3Secret\x12\x42.org.apache.airavata.mft.credential.stubs.s3.S3SecretCreateRequest\x1a\x35.org.apache.airavata.mft.credential.stubs.s3.S3Secret\"\x17\x82\xd3\xe4\x93\x02\x11\"\x0f/v1.0/secret/s3\x12\x85\x01\n\x0eupdateS3Secret\x12\x42.org.apache.airavata.mft.credential.stubs.s3.S3SecretUpdateRequest\x1a\x16.google.protobuf.Empty\"\x17\x82\xd3\xe4\x93\x02\x11\x1a\x0f/v1.0/secret/s3\x12\x85\x01\n\x0e\x64\x65leteS3Secret\x12\x42.org.apache.airavata.mft.credential.stubs.s3.S3SecretDeleteRequest\x1a\x16.google.protobuf.Empty\"\x17\x82\xd3\xe4\x93\x02\x11*\x0f/v1.0/secret/s3B\x02P\x01\x62\x06proto3')

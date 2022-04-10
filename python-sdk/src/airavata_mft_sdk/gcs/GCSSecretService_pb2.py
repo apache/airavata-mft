@@ -12,9 +12,9 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
-from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
-from gcs import GCSCredential_pb2 as gcs_dot_GCSCredential__pb2
+from airavata_mft_sdk.google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
+from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
+from airavata_mft_sdk.gcs import GCSCredential_pb2 as gcs_dot_GCSCredential__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1agcs/GCSSecretService.proto\x12.org.apache.airavata.mft.credential.service.gcs\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x17gcs/GCSCredential.proto2\xfe\x04\n\x10GCSSecretService\x12\xa4\x01\n\x0cgetGCSSecret\x12\x41.org.apache.airavata.mft.credential.stubs.gcs.GCSSecretGetRequest\x1a\x37.org.apache.airavata.mft.credential.stubs.gcs.GCSSecret\"\x18\x82\xd3\xe4\x93\x02\x12\x12\x10/v1.0/secret/gcs\x12\xaa\x01\n\x0f\x63reateGCSSecret\x12\x44.org.apache.airavata.mft.credential.stubs.gcs.GCSSecretCreateRequest\x1a\x37.org.apache.airavata.mft.credential.stubs.gcs.GCSSecret\"\x18\x82\xd3\xe4\x93\x02\x12\"\x10/v1.0/secret/gcs\x12\x89\x01\n\x0fupdateGCSSecret\x12\x44.org.apache.airavata.mft.credential.stubs.gcs.GCSSecretUpdateRequest\x1a\x16.google.protobuf.Empty\"\x18\x82\xd3\xe4\x93\x02\x12\x1a\x10/v1.0/secret/gcs\x12\x89\x01\n\x0f\x64\x65leteGCSSecret\x12\x44.org.apache.airavata.mft.credential.stubs.gcs.GCSSecretDeleteRequest\x1a\x16.google.protobuf.Empty\"\x18\x82\xd3\xe4\x93\x02\x12*\x10/v1.0/secret/gcsB\x02P\x01\x62\x06proto3')

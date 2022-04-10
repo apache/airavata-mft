@@ -2,8 +2,8 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
-from resourcesecretmap import StorageSecretMap_pb2 as resourcesecretmap_dot_StorageSecretMap__pb2
+from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
+from airavata_mft_sdk.resourcesecretmap import StorageSecretMap_pb2 as resourcesecretmap_dot_StorageSecretMap__pb2
 
 
 class StorageSecretServiceStub(object):
