@@ -78,8 +78,28 @@ touch s3/__init__.py
 touch scp/__init__.py
 
 
-sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' */*.py
-sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' *.py
+sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' azure/*.py
+sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' box/*.py
+sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' dropbox/*.py
+sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' ftp/*.py
+sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' gcs/*.py
+sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' local/*.py
+sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' resource/*.py
+sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' resourcesecretmap/*.py
+sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' s3/*.py
+sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' scp/*.py
+sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' *pb2.py
+sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' *pb2_grpc.py
 
-sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' */*.py
-sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' *.py
+sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' azure/*.py
+sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' box/*.py
+sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' dropbox/*.py
+sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' ftp/*.py
+sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' gcs/*.py
+sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' local/*.py
+sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' resource/*.py
+sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' resourcesecretmap/*.py
+sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' s3/*.py
+sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' scp/*.py
+sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' *pb2.py
+sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' *pb2_grpc.py
