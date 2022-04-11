@@ -59,7 +59,9 @@ public class GCSServiceHandler extends GCSSecretServiceGrpc.GCSSecretServiceImpl
     @Override
     public void createGCSSecret(GCSSecretCreateRequest request, StreamObserver<GCSSecret> responseObserver) {
         try {
-            this.backend.createGCSSecret(request);
+            GCSSecret gcsSecret = this.backend.createGCSSecret(request);
+            responseObserver.onNext(gcsSecret);
+            responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error in creating GCS Secret", e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -69,9 +71,10 @@ public class GCSServiceHandler extends GCSSecretServiceGrpc.GCSSecretServiceImpl
     }
 
     @Override
-    public void updateGCSSecret(GCSSecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
+    public void updateGCSSecret(GCSSecretUpdateRequest request, StreamObserver<GCSSecretUpdateResponse> responseObserver) {
         try {
             this.backend.updateGCSSecret(request);
+            responseObserver.onNext(GCSSecretUpdateResponse.newBuilder().setSecretId(request.getSecretId()).build());
         } catch (Exception e) {
             logger.error("Error in updating GCS Secret with id {}", request.getSecretId(), e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -81,9 +84,11 @@ public class GCSServiceHandler extends GCSSecretServiceGrpc.GCSSecretServiceImpl
     }
 
     @Override
-    public void deleteGCSSecret(GCSSecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
+    public void deleteGCSSecret(GCSSecretDeleteRequest request, StreamObserver<GCSSecretDeleteResponse> responseObserver) {
         try {
             this.backend.deleteGCSSecret(request);
+            responseObserver.onNext(GCSSecretDeleteResponse.newBuilder().setStatus(true).build());
+            responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error in deleting GCS Secret with id {}", request.getSecretId(), e);
             responseObserver.onError(Status.INTERNAL.withCause(e)

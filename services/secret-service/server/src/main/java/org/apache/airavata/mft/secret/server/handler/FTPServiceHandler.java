@@ -57,7 +57,9 @@ public class FTPServiceHandler extends FTPSecretServiceGrpc.FTPSecretServiceImpl
     @Override
     public void createFTPSecret(FTPSecretCreateRequest request, StreamObserver<FTPSecret> responseObserver) {
         try {
-            this.backend.createFTPSecret(request);
+            FTPSecret ftpSecret = this.backend.createFTPSecret(request);
+            responseObserver.onNext(ftpSecret);
+            responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error in creating FTP Secret", e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -67,9 +69,11 @@ public class FTPServiceHandler extends FTPSecretServiceGrpc.FTPSecretServiceImpl
     }
 
     @Override
-    public void updateFTPSecret(FTPSecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
+    public void updateFTPSecret(FTPSecretUpdateRequest request, StreamObserver<FTPSecretUpdateResponse> responseObserver) {
         try {
             this.backend.updateFTPSecret(request);
+            responseObserver.onNext(FTPSecretUpdateResponse.newBuilder().setSecretId(request.getSecretId()).build());
+            responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error in updating FTP Secret with id {}", request.getSecretId(), e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -79,9 +83,11 @@ public class FTPServiceHandler extends FTPSecretServiceGrpc.FTPSecretServiceImpl
     }
 
     @Override
-    public void deleteFTPSecret(FTPSecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
+    public void deleteFTPSecret(FTPSecretDeleteRequest request, StreamObserver<FTPSecretDeleteResponse> responseObserver) {
         try {
             this.backend.deleteFTPSecret(request);
+            responseObserver.onNext(FTPSecretDeleteResponse.newBuilder().setStatus(true).build());
+            responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error in deleting FTP Secret with id {}", request.getSecretId(), e);
             responseObserver.onError(Status.INTERNAL.withCause(e)

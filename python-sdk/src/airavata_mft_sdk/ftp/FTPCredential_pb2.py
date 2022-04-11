@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 import airavata_mft_sdk.CredCommon_pb2 as CredCommon__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17\x66tp/FTPCredential.proto\x12,org.apache.airavata.mft.credential.stubs.ftp\x1a\x10\x43redCommon.proto\"?\n\tFTPSecret\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x0e\n\x06userId\x18\x02 \x01(\t\x12\x10\n\x08password\x18\x03 \x01(\t\"f\n\x13\x46TPSecretGetRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"y\n\x16\x46TPSecretCreateRequest\x12\x0e\n\x06userId\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12=\n\nauthzToken\x18\x03 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\x8b\x01\n\x16\x46TPSecretUpdateRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x0e\n\x06userId\x18\x02 \x01(\t\x12\x10\n\x08password\x18\x03 \x01(\t\x12=\n\nauthzToken\x18\x04 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"i\n\x16\x46TPSecretDeleteRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x04 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthTokenB\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17\x66tp/FTPCredential.proto\x12,org.apache.airavata.mft.credential.stubs.ftp\x1a\x10\x43redCommon.proto\"?\n\tFTPSecret\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x0e\n\x06userId\x18\x02 \x01(\t\x12\x10\n\x08password\x18\x03 \x01(\t\"f\n\x13\x46TPSecretGetRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"y\n\x16\x46TPSecretCreateRequest\x12\x0e\n\x06userId\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12=\n\nauthzToken\x18\x03 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\x8b\x01\n\x16\x46TPSecretUpdateRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x0e\n\x06userId\x18\x02 \x01(\t\x12\x10\n\x08password\x18\x03 \x01(\t\x12=\n\nauthzToken\x18\x04 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"+\n\x17\x46TPSecretUpdateResponse\x12\x10\n\x08secretId\x18\x01 \x01(\t\"i\n\x16\x46TPSecretDeleteRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x04 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\")\n\x17\x46TPSecretDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x42\x02P\x01\x62\x06proto3')
 
 
 
@@ -23,7 +23,9 @@ _FTPSECRET = DESCRIPTOR.message_types_by_name['FTPSecret']
 _FTPSECRETGETREQUEST = DESCRIPTOR.message_types_by_name['FTPSecretGetRequest']
 _FTPSECRETCREATEREQUEST = DESCRIPTOR.message_types_by_name['FTPSecretCreateRequest']
 _FTPSECRETUPDATEREQUEST = DESCRIPTOR.message_types_by_name['FTPSecretUpdateRequest']
+_FTPSECRETUPDATERESPONSE = DESCRIPTOR.message_types_by_name['FTPSecretUpdateResponse']
 _FTPSECRETDELETEREQUEST = DESCRIPTOR.message_types_by_name['FTPSecretDeleteRequest']
+_FTPSECRETDELETERESPONSE = DESCRIPTOR.message_types_by_name['FTPSecretDeleteResponse']
 FTPSecret = _reflection.GeneratedProtocolMessageType('FTPSecret', (_message.Message,), {
   'DESCRIPTOR' : _FTPSECRET,
   '__module__' : 'ftp.FTPCredential_pb2'
@@ -52,12 +54,26 @@ FTPSecretUpdateRequest = _reflection.GeneratedProtocolMessageType('FTPSecretUpda
   })
 _sym_db.RegisterMessage(FTPSecretUpdateRequest)
 
+FTPSecretUpdateResponse = _reflection.GeneratedProtocolMessageType('FTPSecretUpdateResponse', (_message.Message,), {
+  'DESCRIPTOR' : _FTPSECRETUPDATERESPONSE,
+  '__module__' : 'ftp.FTPCredential_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.ftp.FTPSecretUpdateResponse)
+  })
+_sym_db.RegisterMessage(FTPSecretUpdateResponse)
+
 FTPSecretDeleteRequest = _reflection.GeneratedProtocolMessageType('FTPSecretDeleteRequest', (_message.Message,), {
   'DESCRIPTOR' : _FTPSECRETDELETEREQUEST,
   '__module__' : 'ftp.FTPCredential_pb2'
   # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.ftp.FTPSecretDeleteRequest)
   })
 _sym_db.RegisterMessage(FTPSecretDeleteRequest)
+
+FTPSecretDeleteResponse = _reflection.GeneratedProtocolMessageType('FTPSecretDeleteResponse', (_message.Message,), {
+  'DESCRIPTOR' : _FTPSECRETDELETERESPONSE,
+  '__module__' : 'ftp.FTPCredential_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.ftp.FTPSecretDeleteResponse)
+  })
+_sym_db.RegisterMessage(FTPSecretDeleteResponse)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
@@ -71,6 +87,10 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _FTPSECRETCREATEREQUEST._serialized_end=381
   _FTPSECRETUPDATEREQUEST._serialized_start=384
   _FTPSECRETUPDATEREQUEST._serialized_end=523
-  _FTPSECRETDELETEREQUEST._serialized_start=525
-  _FTPSECRETDELETEREQUEST._serialized_end=630
+  _FTPSECRETUPDATERESPONSE._serialized_start=525
+  _FTPSECRETUPDATERESPONSE._serialized_end=568
+  _FTPSECRETDELETEREQUEST._serialized_start=570
+  _FTPSECRETDELETEREQUEST._serialized_end=675
+  _FTPSECRETDELETERESPONSE._serialized_start=677
+  _FTPSECRETDELETERESPONSE._serialized_end=718
 # @@protoc_insertion_point(module_scope)

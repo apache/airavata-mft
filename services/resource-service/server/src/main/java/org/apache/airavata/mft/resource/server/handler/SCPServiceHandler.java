@@ -88,9 +88,10 @@ public class SCPServiceHandler extends SCPStorageServiceGrpc.SCPStorageServiceIm
     }
 
     @Override
-    public void updateSCPStorage(SCPStorageUpdateRequest request, StreamObserver<Empty> responseObserver) {
+    public void updateSCPStorage(SCPStorageUpdateRequest request, StreamObserver<SCPStorageUpdateResponse> responseObserver) {
         try {
             this.backend.updateSCPStorage(request);
+            responseObserver.onNext(SCPStorageUpdateResponse.newBuilder().setStorageId(request.getStorageId()).build());
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in updating the scp storage {}", request.getStorageId(), e);
@@ -103,11 +104,12 @@ public class SCPServiceHandler extends SCPStorageServiceGrpc.SCPStorageServiceIm
     }
 
     @Override
-    public void deleteSCPStorage(SCPStorageDeleteRequest request, StreamObserver<Empty> responseObserver) {
+    public void deleteSCPStorage(SCPStorageDeleteRequest request, StreamObserver<SCPStorageDeleteResponse> responseObserver) {
 
         try {
             boolean res = this.backend.deleteSCPStorage(request);
             if (res) {
+                responseObserver.onNext(SCPStorageDeleteResponse.newBuilder().setStatus(true).build());
                 responseObserver.onCompleted();
             } else {
                 logger.error("Failed to delete SCP Storage with id " + request.getStorageId());

@@ -51,8 +51,15 @@ message LocalStorageUpdateRequest {
     string name = 3;
 }
 
+message LocalStorageUpdateResponse {
+    string storageId = 1;
+}
+
 message LocalStorageDeleteRequest {
     string storageId = 1;
 }
 
+message LocalStorageDeleteResponse {
+    bool status = 1;
+}
 

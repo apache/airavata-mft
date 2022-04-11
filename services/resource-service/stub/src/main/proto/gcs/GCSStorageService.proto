@@ -20,41 +20,22 @@ syntax = "proto3";
 option java_multiple_files = true;
 package org.apache.airavata.mft.resource.service.gcs;
 
-import "google/api/annotations.proto";
-import "google/protobuf/empty.proto";
 import "gcs/GCSStorage.proto";
 
 service GCSStorageService {
 
-    rpc listGCSStorage (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageListRequest) returns (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageListResponse) {
-        option (google.api.http) = {
-           get: "/v1.0/resource/gcs/storage"
-        };
-    }
+    rpc listGCSStorage (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageListRequest) returns
+    (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageListResponse);
     
     rpc getGCSStorage (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageGetRequest) returns
-                                                    (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorage) {
-        option (google.api.http) = {
-           get: "/v1.0/resource/gcs/storage"
-        };
-    }
+                                                    (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorage);
 
     rpc createGCSStorage (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageCreateRequest) returns
-                                                    (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorage) {
-        option (google.api.http) = {
-           post: "/v1.0/resource/gcs/storage"
-        };
-    }
+                                                    (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorage);
 
-    rpc updateGCSStorage (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageUpdateRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-           put: "/v1.0/resource/gcs/storage"
-        };
-    }
+    rpc updateGCSStorage (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageUpdateRequest) returns
+    (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageUpdateResponse);
 
-    rpc deleteGCSStorage (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageDeleteRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-           delete: "/v1.0/resource/gcs/storage"
-        };
-    }
+    rpc deleteGCSStorage (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageDeleteRequest) returns
+    (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageDeleteResponse);
 }

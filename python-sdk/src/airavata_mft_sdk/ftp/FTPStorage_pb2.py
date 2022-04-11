@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14\x66tp/FTPStorage.proto\x12\x32org.apache.airavata.mft.resource.stubs.ftp.storage\"I\n\nFTPStorage\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0c\n\x04host\x18\x02 \x01(\t\x12\x0c\n\x04port\x18\x03 \x01(\x05\x12\x0c\n\x04name\x18\x04 \x01(\t\"6\n\x15\x46TPStorageListRequest\x12\x0e\n\x06offset\x18\x01 \x01(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\"j\n\x16\x46TPStorageListResponse\x12P\n\x08storages\x18\x01 \x03(\x0b\x32>.org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorage\")\n\x14\x46TPStorageGetRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"V\n\x17\x46TPStorageCreateRequest\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x12\x11\n\tstorageId\x18\x03 \x01(\t\x12\x0c\n\x04name\x18\x04 \x01(\t\"V\n\x17\x46TPStorageUpdateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0c\n\x04host\x18\x02 \x01(\t\x12\x0c\n\x04port\x18\x03 \x01(\x05\x12\x0c\n\x04name\x18\x04 \x01(\t\",\n\x17\x46TPStorageDeleteRequest\x12\x11\n\tstorageId\x18\x01 \x01(\tB\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14\x66tp/FTPStorage.proto\x12\x32org.apache.airavata.mft.resource.stubs.ftp.storage\"I\n\nFTPStorage\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0c\n\x04host\x18\x02 \x01(\t\x12\x0c\n\x04port\x18\x03 \x01(\x05\x12\x0c\n\x04name\x18\x04 \x01(\t\"6\n\x15\x46TPStorageListRequest\x12\x0e\n\x06offset\x18\x01 \x01(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\"j\n\x16\x46TPStorageListResponse\x12P\n\x08storages\x18\x01 \x03(\x0b\x32>.org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorage\")\n\x14\x46TPStorageGetRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"V\n\x17\x46TPStorageCreateRequest\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x12\x11\n\tstorageId\x18\x03 \x01(\t\x12\x0c\n\x04name\x18\x04 \x01(\t\"V\n\x17\x46TPStorageUpdateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0c\n\x04host\x18\x02 \x01(\t\x12\x0c\n\x04port\x18\x03 \x01(\x05\x12\x0c\n\x04name\x18\x04 \x01(\t\"-\n\x18\x46TPStorageUpdateResponse\x12\x11\n\tstorageId\x18\x01 \x01(\t\",\n\x17\x46TPStorageDeleteRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"*\n\x18\x46TPStorageDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x42\x02P\x01\x62\x06proto3')
 
 
 
@@ -24,7 +24,9 @@ _FTPSTORAGELISTRESPONSE = DESCRIPTOR.message_types_by_name['FTPStorageListRespon
 _FTPSTORAGEGETREQUEST = DESCRIPTOR.message_types_by_name['FTPStorageGetRequest']
 _FTPSTORAGECREATEREQUEST = DESCRIPTOR.message_types_by_name['FTPStorageCreateRequest']
 _FTPSTORAGEUPDATEREQUEST = DESCRIPTOR.message_types_by_name['FTPStorageUpdateRequest']
+_FTPSTORAGEUPDATERESPONSE = DESCRIPTOR.message_types_by_name['FTPStorageUpdateResponse']
 _FTPSTORAGEDELETEREQUEST = DESCRIPTOR.message_types_by_name['FTPStorageDeleteRequest']
+_FTPSTORAGEDELETERESPONSE = DESCRIPTOR.message_types_by_name['FTPStorageDeleteResponse']
 FTPStorage = _reflection.GeneratedProtocolMessageType('FTPStorage', (_message.Message,), {
   'DESCRIPTOR' : _FTPSTORAGE,
   '__module__' : 'ftp.FTPStorage_pb2'
@@ -67,12 +69,26 @@ FTPStorageUpdateRequest = _reflection.GeneratedProtocolMessageType('FTPStorageUp
   })
 _sym_db.RegisterMessage(FTPStorageUpdateRequest)
 
+FTPStorageUpdateResponse = _reflection.GeneratedProtocolMessageType('FTPStorageUpdateResponse', (_message.Message,), {
+  'DESCRIPTOR' : _FTPSTORAGEUPDATERESPONSE,
+  '__module__' : 'ftp.FTPStorage_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageUpdateResponse)
+  })
+_sym_db.RegisterMessage(FTPStorageUpdateResponse)
+
 FTPStorageDeleteRequest = _reflection.GeneratedProtocolMessageType('FTPStorageDeleteRequest', (_message.Message,), {
   'DESCRIPTOR' : _FTPSTORAGEDELETEREQUEST,
   '__module__' : 'ftp.FTPStorage_pb2'
   # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageDeleteRequest)
   })
 _sym_db.RegisterMessage(FTPStorageDeleteRequest)
+
+FTPStorageDeleteResponse = _reflection.GeneratedProtocolMessageType('FTPStorageDeleteResponse', (_message.Message,), {
+  'DESCRIPTOR' : _FTPSTORAGEDELETERESPONSE,
+  '__module__' : 'ftp.FTPStorage_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageDeleteResponse)
+  })
+_sym_db.RegisterMessage(FTPStorageDeleteResponse)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
@@ -90,6 +106,10 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _FTPSTORAGECREATEREQUEST._serialized_end=444
   _FTPSTORAGEUPDATEREQUEST._serialized_start=446
   _FTPSTORAGEUPDATEREQUEST._serialized_end=532
-  _FTPSTORAGEDELETEREQUEST._serialized_start=534
-  _FTPSTORAGEDELETEREQUEST._serialized_end=578
+  _FTPSTORAGEUPDATERESPONSE._serialized_start=534
+  _FTPSTORAGEUPDATERESPONSE._serialized_end=579
+  _FTPSTORAGEDELETEREQUEST._serialized_start=581
+  _FTPSTORAGEDELETEREQUEST._serialized_end=625
+  _FTPSTORAGEDELETERESPONSE._serialized_start=627
+  _FTPSTORAGEDELETERESPONSE._serialized_end=669
 # @@protoc_insertion_point(module_scope)

@@ -2,7 +2,6 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from airavata_mft_sdk.local import LocalStorage_pb2 as local_dot_LocalStorage__pb2
 
 
@@ -33,12 +32,12 @@ class LocalStorageServiceStub(object):
         self.updateLocalStorage = channel.unary_unary(
                 '/org.apache.airavata.mft.resource.service.local.LocalStorageService/updateLocalStorage',
                 request_serializer=local_dot_LocalStorage__pb2.LocalStorageUpdateRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=local_dot_LocalStorage__pb2.LocalStorageUpdateResponse.FromString,
                 )
         self.deleteLocalStorage = channel.unary_unary(
                 '/org.apache.airavata.mft.resource.service.local.LocalStorageService/deleteLocalStorage',
                 request_serializer=local_dot_LocalStorage__pb2.LocalStorageDeleteRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=local_dot_LocalStorage__pb2.LocalStorageDeleteResponse.FromString,
                 )
 
 
@@ -97,12 +96,12 @@ def add_LocalStorageServiceServicer_to_server(servicer, server):
             'updateLocalStorage': grpc.unary_unary_rpc_method_handler(
                     servicer.updateLocalStorage,
                     request_deserializer=local_dot_LocalStorage__pb2.LocalStorageUpdateRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=local_dot_LocalStorage__pb2.LocalStorageUpdateResponse.SerializeToString,
             ),
             'deleteLocalStorage': grpc.unary_unary_rpc_method_handler(
                     servicer.deleteLocalStorage,
                     request_deserializer=local_dot_LocalStorage__pb2.LocalStorageDeleteRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=local_dot_LocalStorage__pb2.LocalStorageDeleteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -178,7 +177,7 @@ class LocalStorageService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.service.local.LocalStorageService/updateLocalStorage',
             local_dot_LocalStorage__pb2.LocalStorageUpdateRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            local_dot_LocalStorage__pb2.LocalStorageUpdateResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -195,6 +194,6 @@ class LocalStorageService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.service.local.LocalStorageService/deleteLocalStorage',
             local_dot_LocalStorage__pb2.LocalStorageDeleteRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            local_dot_LocalStorage__pb2.LocalStorageDeleteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

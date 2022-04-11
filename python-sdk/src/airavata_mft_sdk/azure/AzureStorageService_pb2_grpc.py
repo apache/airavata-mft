@@ -3,7 +3,6 @@
 import grpc
 
 from airavata_mft_sdk.azure import AzureStorage_pb2 as azure_dot_AzureStorage__pb2
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
 class AzureStorageServiceStub(object):
@@ -33,12 +32,12 @@ class AzureStorageServiceStub(object):
         self.updateAzureStorage = channel.unary_unary(
                 '/org.apache.airavata.mft.resource.service.azure.AzureStorageService/updateAzureStorage',
                 request_serializer=azure_dot_AzureStorage__pb2.AzureStorageUpdateRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=azure_dot_AzureStorage__pb2.AzureStorageUpdateResponse.FromString,
                 )
         self.deleteAzureStorage = channel.unary_unary(
                 '/org.apache.airavata.mft.resource.service.azure.AzureStorageService/deleteAzureStorage',
                 request_serializer=azure_dot_AzureStorage__pb2.AzureStorageDeleteRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=azure_dot_AzureStorage__pb2.AzureStorageDeleteResponse.FromString,
                 )
 
 
@@ -98,12 +97,12 @@ def add_AzureStorageServiceServicer_to_server(servicer, server):
             'updateAzureStorage': grpc.unary_unary_rpc_method_handler(
                     servicer.updateAzureStorage,
                     request_deserializer=azure_dot_AzureStorage__pb2.AzureStorageUpdateRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=azure_dot_AzureStorage__pb2.AzureStorageUpdateResponse.SerializeToString,
             ),
             'deleteAzureStorage': grpc.unary_unary_rpc_method_handler(
                     servicer.deleteAzureStorage,
                     request_deserializer=azure_dot_AzureStorage__pb2.AzureStorageDeleteRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=azure_dot_AzureStorage__pb2.AzureStorageDeleteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -179,7 +178,7 @@ class AzureStorageService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.service.azure.AzureStorageService/updateAzureStorage',
             azure_dot_AzureStorage__pb2.AzureStorageUpdateRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            azure_dot_AzureStorage__pb2.AzureStorageUpdateResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -196,6 +195,6 @@ class AzureStorageService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.service.azure.AzureStorageService/deleteAzureStorage',
             azure_dot_AzureStorage__pb2.AzureStorageDeleteRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            azure_dot_AzureStorage__pb2.AzureStorageDeleteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

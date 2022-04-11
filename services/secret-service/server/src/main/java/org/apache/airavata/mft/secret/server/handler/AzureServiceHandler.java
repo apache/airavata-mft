@@ -60,7 +60,9 @@ public class AzureServiceHandler extends AzureSecretServiceGrpc.AzureSecretServi
     @Override
     public void createAzureSecret(AzureSecretCreateRequest request, StreamObserver<AzureSecret> responseObserver) {
         try {
-            this.backend.createAzureSecret(request);
+            AzureSecret azureSecret = this.backend.createAzureSecret(request);
+            responseObserver.onNext(azureSecret);
+            responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error in creating Azure Secret", e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -70,9 +72,11 @@ public class AzureServiceHandler extends AzureSecretServiceGrpc.AzureSecretServi
     }
 
     @Override
-    public void updateAzureSecret(AzureSecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
+    public void updateAzureSecret(AzureSecretUpdateRequest request, StreamObserver<AzureSecretUpdateResponse> responseObserver) {
         try {
             this.backend.updateAzureSecret(request);
+            responseObserver.onNext(AzureSecretUpdateResponse.newBuilder().setSecretId(request.getSecretId()).build());
+            responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error in updating Azure Secret with id {}", request.getSecretId(), e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -82,9 +86,11 @@ public class AzureServiceHandler extends AzureSecretServiceGrpc.AzureSecretServi
     }
 
     @Override
-    public void deleteAzureSecret(AzureSecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
+    public void deleteAzureSecret(AzureSecretDeleteRequest request, StreamObserver<AzureSecretDeleteResponse> responseObserver) {
         try {
             this.backend.deleteAzureSecret(request);
+            responseObserver.onNext(AzureSecretDeleteResponse.newBuilder().setStatus(true).build());
+            responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error in deleting Azure Secret with id {}", request.getSecretId(), e);
             responseObserver.onError(Status.INTERNAL.withCause(e)

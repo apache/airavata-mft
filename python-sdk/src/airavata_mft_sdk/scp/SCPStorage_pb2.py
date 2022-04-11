@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14scp/SCPStorage.proto\x12\x32org.apache.airavata.mft.resource.stubs.scp.storage\"I\n\nSCPStorage\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0c\n\x04host\x18\x02 \x01(\t\x12\x0c\n\x04port\x18\x03 \x01(\x05\x12\x0c\n\x04name\x18\x04 \x01(\t\"6\n\x15SCPStorageListRequest\x12\x0e\n\x06offset\x18\x01 \x01(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\"j\n\x16SCPStorageListResponse\x12P\n\x08storages\x18\x01 \x03(\x0b\x32>.org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorage\")\n\x14SCPStorageGetRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"d\n\x17SCPStorageCreateRequest\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x12\x0c\n\x04user\x18\x03 \x01(\t\x12\x11\n\tstorageId\x18\x04 \x01(\t\x12\x0c\n\x04name\x18\x05 \x01(\t\"V\n\x17SCPStorageUpdateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0c\n\x04host\x18\x02 \x01(\t\x12\x0c\n\x04port\x18\x03 \x01(\x05\x12\x0c\n\x04name\x18\x04 \x01(\t\",\n\x17SCPStorageDeleteRequest\x12\x11\n\tstorageId\x18\x01 \x01(\tB\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14scp/SCPStorage.proto\x12\x32org.apache.airavata.mft.resource.stubs.scp.storage\"I\n\nSCPStorage\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0c\n\x04host\x18\x02 \x01(\t\x12\x0c\n\x04port\x18\x03 \x01(\x05\x12\x0c\n\x04name\x18\x04 \x01(\t\"6\n\x15SCPStorageListRequest\x12\x0e\n\x06offset\x18\x01 \x01(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\"j\n\x16SCPStorageListResponse\x12P\n\x08storages\x18\x01 \x03(\x0b\x32>.org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorage\")\n\x14SCPStorageGetRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"d\n\x17SCPStorageCreateRequest\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x12\x0c\n\x04user\x18\x03 \x01(\t\x12\x11\n\tstorageId\x18\x04 \x01(\t\x12\x0c\n\x04name\x18\x05 \x01(\t\"V\n\x17SCPStorageUpdateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0c\n\x04host\x18\x02 \x01(\t\x12\x0c\n\x04port\x18\x03 \x01(\x05\x12\x0c\n\x04name\x18\x04 \x01(\t\"-\n\x18SCPStorageUpdateResponse\x12\x11\n\tstorageId\x18\x01 \x01(\t\",\n\x17SCPStorageDeleteRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"*\n\x18SCPStorageDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x42\x02P\x01\x62\x06proto3')
 
 
 
@@ -24,7 +24,9 @@ _SCPSTORAGELISTRESPONSE = DESCRIPTOR.message_types_by_name['SCPStorageListRespon
 _SCPSTORAGEGETREQUEST = DESCRIPTOR.message_types_by_name['SCPStorageGetRequest']
 _SCPSTORAGECREATEREQUEST = DESCRIPTOR.message_types_by_name['SCPStorageCreateRequest']
 _SCPSTORAGEUPDATEREQUEST = DESCRIPTOR.message_types_by_name['SCPStorageUpdateRequest']
+_SCPSTORAGEUPDATERESPONSE = DESCRIPTOR.message_types_by_name['SCPStorageUpdateResponse']
 _SCPSTORAGEDELETEREQUEST = DESCRIPTOR.message_types_by_name['SCPStorageDeleteRequest']
+_SCPSTORAGEDELETERESPONSE = DESCRIPTOR.message_types_by_name['SCPStorageDeleteResponse']
 SCPStorage = _reflection.GeneratedProtocolMessageType('SCPStorage', (_message.Message,), {
   'DESCRIPTOR' : _SCPSTORAGE,
   '__module__' : 'scp.SCPStorage_pb2'
@@ -67,12 +69,26 @@ SCPStorageUpdateRequest = _reflection.GeneratedProtocolMessageType('SCPStorageUp
   })
 _sym_db.RegisterMessage(SCPStorageUpdateRequest)
 
+SCPStorageUpdateResponse = _reflection.GeneratedProtocolMessageType('SCPStorageUpdateResponse', (_message.Message,), {
+  'DESCRIPTOR' : _SCPSTORAGEUPDATERESPONSE,
+  '__module__' : 'scp.SCPStorage_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageUpdateResponse)
+  })
+_sym_db.RegisterMessage(SCPStorageUpdateResponse)
+
 SCPStorageDeleteRequest = _reflection.GeneratedProtocolMessageType('SCPStorageDeleteRequest', (_message.Message,), {
   'DESCRIPTOR' : _SCPSTORAGEDELETEREQUEST,
   '__module__' : 'scp.SCPStorage_pb2'
   # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageDeleteRequest)
   })
 _sym_db.RegisterMessage(SCPStorageDeleteRequest)
+
+SCPStorageDeleteResponse = _reflection.GeneratedProtocolMessageType('SCPStorageDeleteResponse', (_message.Message,), {
+  'DESCRIPTOR' : _SCPSTORAGEDELETERESPONSE,
+  '__module__' : 'scp.SCPStorage_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageDeleteResponse)
+  })
+_sym_db.RegisterMessage(SCPStorageDeleteResponse)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
@@ -90,6 +106,10 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _SCPSTORAGECREATEREQUEST._serialized_end=458
   _SCPSTORAGEUPDATEREQUEST._serialized_start=460
   _SCPSTORAGEUPDATEREQUEST._serialized_end=546
-  _SCPSTORAGEDELETEREQUEST._serialized_start=548
-  _SCPSTORAGEDELETEREQUEST._serialized_end=592
+  _SCPSTORAGEUPDATERESPONSE._serialized_start=548
+  _SCPSTORAGEUPDATERESPONSE._serialized_end=593
+  _SCPSTORAGEDELETEREQUEST._serialized_start=595
+  _SCPSTORAGEDELETEREQUEST._serialized_end=639
+  _SCPSTORAGEDELETERESPONSE._serialized_start=641
+  _SCPSTORAGEDELETERESPONSE._serialized_end=683
 # @@protoc_insertion_point(module_scope)

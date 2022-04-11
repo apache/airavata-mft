@@ -71,9 +71,10 @@ public class GCSServiceHandler extends GCSStorageServiceGrpc.GCSStorageServiceIm
     }
 
     @Override
-    public void updateGCSStorage(GCSStorageUpdateRequest request, StreamObserver<Empty> responseObserver) {
+    public void updateGCSStorage(GCSStorageUpdateRequest request, StreamObserver<GCSStorageUpdateResponse> responseObserver) {
         try {
             this.backend.updateGCSStorage(request);
+            responseObserver.onNext(GCSStorageUpdateResponse.newBuilder().setStorageId(request.getStorageId()).build());
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in updating the GCS storage {}", request.getStorageId(), e);
@@ -85,10 +86,11 @@ public class GCSServiceHandler extends GCSStorageServiceGrpc.GCSStorageServiceIm
     }
 
     @Override
-    public void deleteGCSStorage(GCSStorageDeleteRequest request, StreamObserver<Empty> responseObserver) {
+    public void deleteGCSStorage(GCSStorageDeleteRequest request, StreamObserver<GCSStorageDeleteResponse> responseObserver) {
         try {
             boolean res = this.backend.deleteGCSStorage(request);
             if (res) {
+                responseObserver.onNext(GCSStorageDeleteResponse.newBuilder().setStatus(true).build());
                 responseObserver.onCompleted();
             } else {
                 responseObserver.onError(new Exception("Failed to delete GCS storage with id " + request.getStorageId()));

@@ -3,8 +3,6 @@ syntax = "proto3";
 option java_multiple_files = true;
 package org.apache.airavata.mft.api.service;
 
-import "google/api/annotations.proto";
-import "google/protobuf/empty.proto";
 import "CredCommon.proto";
 
 message CallbackEndpoint {
@@ -126,47 +124,19 @@ message FetchResourceMetadataRequest {
 
 service  MFTTransferService {
 
-    rpc submitTransfer(TransferApiRequest) returns (TransferApiResponse) {
-        option (google.api.http) = {
-           post: "/v1.0/api/transfer"
-        };
-    }
+    rpc submitTransfer(TransferApiRequest) returns (TransferApiResponse);
 
-    rpc submitHttpUpload(HttpUploadApiRequest) returns (HttpUploadApiResponse) {
-        option (google.api.http) = {
-           post: "/v1.0/api/http-upload"
-        };
-    }
+    rpc submitHttpUpload(HttpUploadApiRequest) returns (HttpUploadApiResponse);
 
-    rpc submitHttpDownload(HttpDownloadApiRequest) returns (HttpDownloadApiResponse) {
-        option (google.api.http) = {
-           post: "/v1.0/api/http-download"
-        };
-    }
+    rpc submitHttpDownload(HttpDownloadApiRequest) returns (HttpDownloadApiResponse);
 
-    rpc getTransferStates(TransferStateApiRequest) returns (stream TransferStateApiResponse) {
-        option (google.api.http) = {
-           get: "/v1.0/api/transfer/states"
-        };
-    }
+    rpc getTransferStates(TransferStateApiRequest) returns (stream TransferStateApiResponse);
 
-    rpc getTransferState(TransferStateApiRequest) returns (TransferStateApiResponse) {
-        option (google.api.http) = {
-           get: "/v1.0/api/transfer/state"
-        };
-    }
+    rpc getTransferState(TransferStateApiRequest) returns (TransferStateApiResponse);
 
-    rpc getResourceAvailability(ResourceAvailabilityRequest) returns (ResourceAvailabilityResponse) {}
+    rpc getResourceAvailability(ResourceAvailabilityRequest) returns (ResourceAvailabilityResponse);
 
-    rpc getFileResourceMetadata(FetchResourceMetadataRequest) returns (FileMetadataResponse) {
-        option (google.api.http) = {
-           get: "/v1.0/api/resource/metadata/file"
-        };
-    }
+    rpc getFileResourceMetadata(FetchResourceMetadataRequest) returns (FileMetadataResponse);
 
-    rpc getDirectoryResourceMetadata(FetchResourceMetadataRequest) returns (DirectoryMetadataResponse) {
-        option (google.api.http) = {
-           get: "/v1.0/api/resource/metadata/directory"
-        };
-    }
+    rpc getDirectoryResourceMetadata(FetchResourceMetadataRequest) returns (DirectoryMetadataResponse);
 }

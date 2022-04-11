@@ -3,7 +3,6 @@
 import grpc
 
 from airavata_mft_sdk.gcs import GCSStorage_pb2 as gcs_dot_GCSStorage__pb2
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
 class GCSStorageServiceStub(object):
@@ -33,12 +32,12 @@ class GCSStorageServiceStub(object):
         self.updateGCSStorage = channel.unary_unary(
                 '/org.apache.airavata.mft.resource.service.gcs.GCSStorageService/updateGCSStorage',
                 request_serializer=gcs_dot_GCSStorage__pb2.GCSStorageUpdateRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=gcs_dot_GCSStorage__pb2.GCSStorageUpdateResponse.FromString,
                 )
         self.deleteGCSStorage = channel.unary_unary(
                 '/org.apache.airavata.mft.resource.service.gcs.GCSStorageService/deleteGCSStorage',
                 request_serializer=gcs_dot_GCSStorage__pb2.GCSStorageDeleteRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=gcs_dot_GCSStorage__pb2.GCSStorageDeleteResponse.FromString,
                 )
 
 
@@ -96,12 +95,12 @@ def add_GCSStorageServiceServicer_to_server(servicer, server):
             'updateGCSStorage': grpc.unary_unary_rpc_method_handler(
                     servicer.updateGCSStorage,
                     request_deserializer=gcs_dot_GCSStorage__pb2.GCSStorageUpdateRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=gcs_dot_GCSStorage__pb2.GCSStorageUpdateResponse.SerializeToString,
             ),
             'deleteGCSStorage': grpc.unary_unary_rpc_method_handler(
                     servicer.deleteGCSStorage,
                     request_deserializer=gcs_dot_GCSStorage__pb2.GCSStorageDeleteRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=gcs_dot_GCSStorage__pb2.GCSStorageDeleteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -177,7 +176,7 @@ class GCSStorageService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.service.gcs.GCSStorageService/updateGCSStorage',
             gcs_dot_GCSStorage__pb2.GCSStorageUpdateRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            gcs_dot_GCSStorage__pb2.GCSStorageUpdateResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -194,6 +193,6 @@ class GCSStorageService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.service.gcs.GCSStorageService/deleteGCSStorage',
             gcs_dot_GCSStorage__pb2.GCSStorageDeleteRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            gcs_dot_GCSStorage__pb2.GCSStorageDeleteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

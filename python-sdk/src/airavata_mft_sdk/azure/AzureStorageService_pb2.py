@@ -12,12 +12,10 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from airavata_mft_sdk.google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from airavata_mft_sdk.azure import AzureStorage_pb2 as azure_dot_AzureStorage__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1f\x61zure/AzureStorageService.proto\x12.org.apache.airavata.mft.resource.service.azure\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x18\x61zure/AzureStorage.proto2\xd9\x07\n\x13\x41zureStorageService\x12\xd7\x01\n\x10listAzureStorage\x12M.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageListRequest\x1aN.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageListResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/v1.0/resource/azure/storage\x12\xc9\x01\n\x0fgetAzureStorage\x12L.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageGetRequest\x1a\x42.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/v1.0/resource/azure/storage\x12\xcf\x01\n\x12\x63reateAzureStorage\x12O.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageCreateRequest\x1a\x42.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage\"$\x82\xd3\xe4\x93\x02\x1e\"\x1c/v1.0/resource/azure/storage\x12\xa3\x01\n\x12updateAzureStorage\x12O.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageUpdateRequest\x1a\x16.google.protobuf.Empty\"$\x82\xd3\xe4\x93\x02\x1e\x1a\x1c/v1.0/resource/azure/storage\x12\xa3\x01\n\x12\x64\x65leteAzureStorage\x12O.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageDeleteRequest\x1a\x16.google.protobuf.Empty\"$\x82\xd3\xe4\x93\x02\x1e*\x1c/v1.0/resource/azure/storageB\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1f\x61zure/AzureStorageService.proto\x12.org.apache.airavata.mft.resource.service.azure\x1a\x18\x61zure/AzureStorage.proto2\x8f\x07\n\x13\x41zureStorageService\x12\xb1\x01\n\x10listAzureStorage\x12M.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageListRequest\x1aN.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageListResponse\x12\xa3\x01\n\x0fgetAzureStorage\x12L.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageGetRequest\x1a\x42.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage\x12\xa9\x01\n\x12\x63reateAzureStorage\x12O.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageCreateRequest\x1a\x42.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage\x12\xb7\x01\n\x12updateAzureStorage\x12O.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageUpdateRequest\x1aP.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageUpdateResponse\x12\xb7\x01\n\x12\x64\x65leteAzureStorage\x12O.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageDeleteRequest\x1aP.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageDeleteResponseB\x02P\x01\x62\x06proto3')
 
 
 
@@ -26,16 +24,6 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'P\001'
-  _AZURESTORAGESERVICE.methods_by_name['listAzureStorage']._options = None
-  _AZURESTORAGESERVICE.methods_by_name['listAzureStorage']._serialized_options = b'\202\323\344\223\002\036\022\034/v1.0/resource/azure/storage'
-  _AZURESTORAGESERVICE.methods_by_name['getAzureStorage']._options = None
-  _AZURESTORAGESERVICE.methods_by_name['getAzureStorage']._serialized_options = b'\202\323\344\223\002\036\022\034/v1.0/resource/azure/storage'
-  _AZURESTORAGESERVICE.methods_by_name['createAzureStorage']._options = None
-  _AZURESTORAGESERVICE.methods_by_name['createAzureStorage']._serialized_options = b'\202\323\344\223\002\036\"\034/v1.0/resource/azure/storage'
-  _AZURESTORAGESERVICE.methods_by_name['updateAzureStorage']._options = None
-  _AZURESTORAGESERVICE.methods_by_name['updateAzureStorage']._serialized_options = b'\202\323\344\223\002\036\032\034/v1.0/resource/azure/storage'
-  _AZURESTORAGESERVICE.methods_by_name['deleteAzureStorage']._options = None
-  _AZURESTORAGESERVICE.methods_by_name['deleteAzureStorage']._serialized_options = b'\202\323\344\223\002\036*\034/v1.0/resource/azure/storage'
-  _AZURESTORAGESERVICE._serialized_start=169
-  _AZURESTORAGESERVICE._serialized_end=1154
+  _AZURESTORAGESERVICE._serialized_start=110
+  _AZURESTORAGESERVICE._serialized_end=1021
 # @@protoc_insertion_point(module_scope)

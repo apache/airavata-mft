@@ -3,7 +3,6 @@
 import grpc
 
 from airavata_mft_sdk.ftp import FTPCredential_pb2 as ftp_dot_FTPCredential__pb2
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
 class FTPSecretServiceStub(object):
@@ -28,12 +27,12 @@ class FTPSecretServiceStub(object):
         self.updateFTPSecret = channel.unary_unary(
                 '/org.apache.airavata.mft.credential.service.ftp.FTPSecretService/updateFTPSecret',
                 request_serializer=ftp_dot_FTPCredential__pb2.FTPSecretUpdateRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=ftp_dot_FTPCredential__pb2.FTPSecretUpdateResponse.FromString,
                 )
         self.deleteFTPSecret = channel.unary_unary(
                 '/org.apache.airavata.mft.credential.service.ftp.FTPSecretService/deleteFTPSecret',
                 request_serializer=ftp_dot_FTPCredential__pb2.FTPSecretDeleteRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=ftp_dot_FTPCredential__pb2.FTPSecretDeleteResponse.FromString,
                 )
 
 
@@ -80,12 +79,12 @@ def add_FTPSecretServiceServicer_to_server(servicer, server):
             'updateFTPSecret': grpc.unary_unary_rpc_method_handler(
                     servicer.updateFTPSecret,
                     request_deserializer=ftp_dot_FTPCredential__pb2.FTPSecretUpdateRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=ftp_dot_FTPCredential__pb2.FTPSecretUpdateResponse.SerializeToString,
             ),
             'deleteFTPSecret': grpc.unary_unary_rpc_method_handler(
                     servicer.deleteFTPSecret,
                     request_deserializer=ftp_dot_FTPCredential__pb2.FTPSecretDeleteRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=ftp_dot_FTPCredential__pb2.FTPSecretDeleteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -144,7 +143,7 @@ class FTPSecretService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.credential.service.ftp.FTPSecretService/updateFTPSecret',
             ftp_dot_FTPCredential__pb2.FTPSecretUpdateRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            ftp_dot_FTPCredential__pb2.FTPSecretUpdateResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -161,6 +160,6 @@ class FTPSecretService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.credential.service.ftp.FTPSecretService/deleteFTPSecret',
             ftp_dot_FTPCredential__pb2.FTPSecretDeleteRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            ftp_dot_FTPCredential__pb2.FTPSecretDeleteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

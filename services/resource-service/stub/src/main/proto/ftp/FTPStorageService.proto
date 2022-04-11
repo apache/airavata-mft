@@ -20,41 +20,22 @@ syntax = "proto3";
 option java_multiple_files = true;
 package org.apache.airavata.mft.resource.service.ftp;
 
-import "google/api/annotations.proto";
-import "google/protobuf/empty.proto";
 import "ftp/FTPStorage.proto";
 
 service FTPStorageService {
 
-    rpc listFTPStorage (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageListRequest) returns (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageListResponse) {
-        option (google.api.http) = {
-           get: "/v1.0/resource/ftp/storage"
-        };
-    }
+    rpc listFTPStorage (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageListRequest) returns
+    (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageListResponse);
     
     rpc getFTPStorage (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageGetRequest) returns
-                                                        (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorage) {
-        option (google.api.http) = {
-           get: "/v1.0/resource/ftp/storage"
-        };
-    }
+                                                        (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorage);
 
     rpc createFTPStorage (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageCreateRequest) returns
-                                                        (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorage) {
-        option (google.api.http) = {
-           post: "/v1.0/resource/ftp/storage"
-        };
-    }
+                                                        (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorage);
 
-    rpc updateFTPStorage (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageUpdateRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-           put: "/v1.0/resource/ftp/storage"
-        };
-    }
+    rpc updateFTPStorage (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageUpdateRequest) returns
+    (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageUpdateResponse);
 
-    rpc deleteFTPStorage (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageDeleteRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-           delete: "/v1.0/resource/ftp/storage"
-        };
-    }
+    rpc deleteFTPStorage (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageDeleteRequest) returns
+    (org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageDeleteResponse);
 }

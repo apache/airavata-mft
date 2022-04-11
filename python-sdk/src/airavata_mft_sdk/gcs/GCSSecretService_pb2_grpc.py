@@ -3,7 +3,6 @@
 import grpc
 
 from airavata_mft_sdk.gcs import GCSCredential_pb2 as gcs_dot_GCSCredential__pb2
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
 class GCSSecretServiceStub(object):
@@ -28,12 +27,12 @@ class GCSSecretServiceStub(object):
         self.updateGCSSecret = channel.unary_unary(
                 '/org.apache.airavata.mft.credential.service.gcs.GCSSecretService/updateGCSSecret',
                 request_serializer=gcs_dot_GCSCredential__pb2.GCSSecretUpdateRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=gcs_dot_GCSCredential__pb2.GCSSecretUpdateResponse.FromString,
                 )
         self.deleteGCSSecret = channel.unary_unary(
                 '/org.apache.airavata.mft.credential.service.gcs.GCSSecretService/deleteGCSSecret',
                 request_serializer=gcs_dot_GCSCredential__pb2.GCSSecretDeleteRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=gcs_dot_GCSCredential__pb2.GCSSecretDeleteResponse.FromString,
                 )
 
 
@@ -80,12 +79,12 @@ def add_GCSSecretServiceServicer_to_server(servicer, server):
             'updateGCSSecret': grpc.unary_unary_rpc_method_handler(
                     servicer.updateGCSSecret,
                     request_deserializer=gcs_dot_GCSCredential__pb2.GCSSecretUpdateRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=gcs_dot_GCSCredential__pb2.GCSSecretUpdateResponse.SerializeToString,
             ),
             'deleteGCSSecret': grpc.unary_unary_rpc_method_handler(
                     servicer.deleteGCSSecret,
                     request_deserializer=gcs_dot_GCSCredential__pb2.GCSSecretDeleteRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=gcs_dot_GCSCredential__pb2.GCSSecretDeleteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -144,7 +143,7 @@ class GCSSecretService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.credential.service.gcs.GCSSecretService/updateGCSSecret',
             gcs_dot_GCSCredential__pb2.GCSSecretUpdateRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            gcs_dot_GCSCredential__pb2.GCSSecretUpdateResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -161,6 +160,6 @@ class GCSSecretService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.credential.service.gcs.GCSSecretService/deleteGCSSecret',
             gcs_dot_GCSCredential__pb2.GCSSecretDeleteRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            gcs_dot_GCSCredential__pb2.GCSSecretDeleteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

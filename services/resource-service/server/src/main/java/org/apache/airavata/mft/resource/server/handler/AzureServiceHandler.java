@@ -71,9 +71,10 @@ public class AzureServiceHandler extends AzureStorageServiceGrpc.AzureStorageSer
     }
 
     @Override
-    public void updateAzureStorage(AzureStorageUpdateRequest request, StreamObserver<Empty> responseObserver) {
+    public void updateAzureStorage(AzureStorageUpdateRequest request, StreamObserver<AzureStorageUpdateResponse> responseObserver) {
         try {
             this.backend.updateAzureStorage(request);
+            responseObserver.onNext(AzureStorageUpdateResponse.newBuilder().setStorageId(request.getStorageId()).build());
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in updating the Azure storage {}", request.getStorageId(), e);
@@ -85,10 +86,11 @@ public class AzureServiceHandler extends AzureStorageServiceGrpc.AzureStorageSer
     }
 
     @Override
-    public void deleteAzureStorage(AzureStorageDeleteRequest request, StreamObserver<Empty> responseObserver) {
+    public void deleteAzureStorage(AzureStorageDeleteRequest request, StreamObserver<AzureStorageDeleteResponse> responseObserver) {
         try {
             boolean res = this.backend.deleteAzureStorage(request);
             if (res) {
+                responseObserver.onNext(AzureStorageDeleteResponse.newBuilder().setStatus(true).build());
                 responseObserver.onCompleted();
             } else {
                 responseObserver.onError(new Exception("Failed to delete Azure storage with id " + request.getStorageId()));

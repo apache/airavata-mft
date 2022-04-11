@@ -2,7 +2,6 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from airavata_mft_sdk.scp import SCPCredential_pb2 as scp_dot_SCPCredential__pb2
 
 
@@ -28,12 +27,12 @@ class SCPSecretServiceStub(object):
         self.updateSCPSecret = channel.unary_unary(
                 '/org.apache.airavata.mft.credential.service.scp.SCPSecretService/updateSCPSecret',
                 request_serializer=scp_dot_SCPCredential__pb2.SCPSecretUpdateRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=scp_dot_SCPCredential__pb2.SCPSecretUpdateResponse.FromString,
                 )
         self.deleteSCPSecret = channel.unary_unary(
                 '/org.apache.airavata.mft.credential.service.scp.SCPSecretService/deleteSCPSecret',
                 request_serializer=scp_dot_SCPCredential__pb2.SCPSecretDeleteRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=scp_dot_SCPCredential__pb2.SCPSecretDeleteResponse.FromString,
                 )
 
 
@@ -80,12 +79,12 @@ def add_SCPSecretServiceServicer_to_server(servicer, server):
             'updateSCPSecret': grpc.unary_unary_rpc_method_handler(
                     servicer.updateSCPSecret,
                     request_deserializer=scp_dot_SCPCredential__pb2.SCPSecretUpdateRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=scp_dot_SCPCredential__pb2.SCPSecretUpdateResponse.SerializeToString,
             ),
             'deleteSCPSecret': grpc.unary_unary_rpc_method_handler(
                     servicer.deleteSCPSecret,
                     request_deserializer=scp_dot_SCPCredential__pb2.SCPSecretDeleteRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=scp_dot_SCPCredential__pb2.SCPSecretDeleteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -144,7 +143,7 @@ class SCPSecretService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.credential.service.scp.SCPSecretService/updateSCPSecret',
             scp_dot_SCPCredential__pb2.SCPSecretUpdateRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            scp_dot_SCPCredential__pb2.SCPSecretUpdateResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -161,6 +160,6 @@ class SCPSecretService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.credential.service.scp.SCPSecretService/deleteSCPSecret',
             scp_dot_SCPCredential__pb2.SCPSecretDeleteRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            scp_dot_SCPCredential__pb2.SCPSecretDeleteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

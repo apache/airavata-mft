@@ -3,7 +3,6 @@
 import grpc
 
 from airavata_mft_sdk.box import BoxCredential_pb2 as box_dot_BoxCredential__pb2
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
 class BoxSecretServiceStub(object):
@@ -28,12 +27,12 @@ class BoxSecretServiceStub(object):
         self.updateBoxSecret = channel.unary_unary(
                 '/org.apache.airavata.mft.credential.service.box.BoxSecretService/updateBoxSecret',
                 request_serializer=box_dot_BoxCredential__pb2.BoxSecretUpdateRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=box_dot_BoxCredential__pb2.BoxSecretUpdateResponse.FromString,
                 )
         self.deleteBoxSecret = channel.unary_unary(
                 '/org.apache.airavata.mft.credential.service.box.BoxSecretService/deleteBoxSecret',
                 request_serializer=box_dot_BoxCredential__pb2.BoxSecretDeleteRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=box_dot_BoxCredential__pb2.BoxSecretDeleteResponse.FromString,
                 )
 
 
@@ -80,12 +79,12 @@ def add_BoxSecretServiceServicer_to_server(servicer, server):
             'updateBoxSecret': grpc.unary_unary_rpc_method_handler(
                     servicer.updateBoxSecret,
                     request_deserializer=box_dot_BoxCredential__pb2.BoxSecretUpdateRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=box_dot_BoxCredential__pb2.BoxSecretUpdateResponse.SerializeToString,
             ),
             'deleteBoxSecret': grpc.unary_unary_rpc_method_handler(
                     servicer.deleteBoxSecret,
                     request_deserializer=box_dot_BoxCredential__pb2.BoxSecretDeleteRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=box_dot_BoxCredential__pb2.BoxSecretDeleteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -144,7 +143,7 @@ class BoxSecretService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.credential.service.box.BoxSecretService/updateBoxSecret',
             box_dot_BoxCredential__pb2.BoxSecretUpdateRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            box_dot_BoxCredential__pb2.BoxSecretUpdateResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -161,6 +160,6 @@ class BoxSecretService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.credential.service.box.BoxSecretService/deleteBoxSecret',
             box_dot_BoxCredential__pb2.BoxSecretDeleteRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            box_dot_BoxCredential__pb2.BoxSecretDeleteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

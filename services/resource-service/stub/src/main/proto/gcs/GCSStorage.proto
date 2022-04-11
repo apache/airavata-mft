@@ -51,8 +51,16 @@ message GCSStorageUpdateRequest {
     string name = 3;
 }
 
+message GCSStorageUpdateResponse {
+    string storageId = 1;
+}
+
 message GCSStorageDeleteRequest {
     string storageId = 1;
+}
+
+message GCSStorageDeleteResponse {
+    bool status = 1;
 }
 
 

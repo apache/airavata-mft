@@ -53,9 +53,10 @@ public class GenericResourceServiceHandler extends GenericResourceServiceGrpc.Ge
     }
 
     @Override
-    public void updateGenericResource(GenericResourceUpdateRequest request, StreamObserver<Empty> responseObserver) {
+    public void updateGenericResource(GenericResourceUpdateRequest request, StreamObserver<GenericResourceUpdateResponse> responseObserver) {
         try {
             this.backend.updateGenericResource(request);
+            responseObserver.onNext(GenericResourceUpdateResponse.newBuilder().setResourceId(request.getResourceId()).build());
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in updating the GCS resource {}", request.getResourceId(), e);
@@ -67,10 +68,11 @@ public class GenericResourceServiceHandler extends GenericResourceServiceGrpc.Ge
     }
 
     @Override
-    public void deleteGenericResource(GenericResourceDeleteRequest request, StreamObserver<Empty> responseObserver) {
+    public void deleteGenericResource(GenericResourceDeleteRequest request, StreamObserver<GenericResourceDeleteResponse> responseObserver) {
         try {
             boolean res = this.backend.deleteGenericResource(request);
             if (res) {
+                responseObserver.onNext(GenericResourceDeleteResponse.newBuilder().setStatus(true).build());
                 responseObserver.onCompleted();
             } else {
                 responseObserver.onError(new Exception("Failed to delete GCS Resource with id " + request.getResourceId()));

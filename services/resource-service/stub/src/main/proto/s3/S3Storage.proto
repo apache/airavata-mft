@@ -60,8 +60,17 @@ message S3StorageUpdateRequest {
     string name = 6;
 }
 
+message S3StorageUpdateResponse {
+    string storageId = 1;
+}
+
+
 message S3StorageDeleteRequest {
     string storageId = 1;
+}
+
+message S3StorageDeleteResponse {
+    bool status = 1;
 }
 
 

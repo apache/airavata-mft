@@ -55,8 +55,17 @@ message SCPStorageUpdateRequest {
     string name = 4;
 }
 
+message SCPStorageUpdateResponse {
+    string storageId = 1;
+}
+
 message SCPStorageDeleteRequest {
     string storageId = 1;
 }
+
+message SCPStorageDeleteResponse {
+    bool status = 1;
+}
+
 
 

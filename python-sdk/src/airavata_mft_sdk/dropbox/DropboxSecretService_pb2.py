@@ -12,12 +12,10 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from airavata_mft_sdk.google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from airavata_mft_sdk.dropbox import DropboxCredential_pb2 as dropbox_dot_DropboxCredential__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\"dropbox/DropboxSecretService.proto\x12\x32org.apache.airavata.mft.credential.service.dropbox\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1f\x64ropbox/DropboxCredential.proto2\xd2\x05\n\x14\x44ropboxSecretService\x12\xbc\x01\n\x10getDropboxSecret\x12I.org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretGetRequest\x1a?.org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecret\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/v1.0/secret/dropbox\x12\xc2\x01\n\x13\x63reateDropboxSecret\x12L.org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretCreateRequest\x1a?.org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecret\"\x1c\x82\xd3\xe4\x93\x02\x16\"\x14/v1.0/secret/dropbox\x12\x99\x01\n\x13updateDropboxSecret\x12L.org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretUpdateRequest\x1a\x16.google.protobuf.Empty\"\x1c\x82\xd3\xe4\x93\x02\x16\x1a\x14/v1.0/secret/dropbox\x12\x99\x01\n\x13\x64\x65leteDropboxSecret\x12L.org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretDeleteRequest\x1a\x16.google.protobuf.Empty\"\x1c\x82\xd3\xe4\x93\x02\x16*\x14/v1.0/secret/dropboxB\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\"dropbox/DropboxSecretService.proto\x12\x32org.apache.airavata.mft.credential.service.dropbox\x1a\x1f\x64ropbox/DropboxCredential.proto2\xc8\x05\n\x14\x44ropboxSecretService\x12\x9e\x01\n\x10getDropboxSecret\x12I.org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretGetRequest\x1a?.org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecret\x12\xa4\x01\n\x13\x63reateDropboxSecret\x12L.org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretCreateRequest\x1a?.org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecret\x12\xb2\x01\n\x13updateDropboxSecret\x12L.org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretUpdateRequest\x1aM.org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretUpdateResponse\x12\xb2\x01\n\x13\x64\x65leteDropboxSecret\x12L.org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretDeleteRequest\x1aM.org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretDeleteResponseB\x02P\x01\x62\x06proto3')
 
 
 
@@ -26,14 +24,6 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'P\001'
-  _DROPBOXSECRETSERVICE.methods_by_name['getDropboxSecret']._options = None
-  _DROPBOXSECRETSERVICE.methods_by_name['getDropboxSecret']._serialized_options = b'\202\323\344\223\002\026\022\024/v1.0/secret/dropbox'
-  _DROPBOXSECRETSERVICE.methods_by_name['createDropboxSecret']._options = None
-  _DROPBOXSECRETSERVICE.methods_by_name['createDropboxSecret']._serialized_options = b'\202\323\344\223\002\026\"\024/v1.0/secret/dropbox'
-  _DROPBOXSECRETSERVICE.methods_by_name['updateDropboxSecret']._options = None
-  _DROPBOXSECRETSERVICE.methods_by_name['updateDropboxSecret']._serialized_options = b'\202\323\344\223\002\026\032\024/v1.0/secret/dropbox'
-  _DROPBOXSECRETSERVICE.methods_by_name['deleteDropboxSecret']._options = None
-  _DROPBOXSECRETSERVICE.methods_by_name['deleteDropboxSecret']._serialized_options = b'\202\323\344\223\002\026*\024/v1.0/secret/dropbox'
-  _DROPBOXSECRETSERVICE._serialized_start=183
-  _DROPBOXSECRETSERVICE._serialized_end=905
+  _DROPBOXSECRETSERVICE._serialized_start=124
+  _DROPBOXSECRETSERVICE._serialized_end=836
 # @@protoc_insertion_point(module_scope)

@@ -3,7 +3,6 @@
 import grpc
 
 from airavata_mft_sdk.ftp import FTPStorage_pb2 as ftp_dot_FTPStorage__pb2
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
 class FTPStorageServiceStub(object):
@@ -33,12 +32,12 @@ class FTPStorageServiceStub(object):
         self.updateFTPStorage = channel.unary_unary(
                 '/org.apache.airavata.mft.resource.service.ftp.FTPStorageService/updateFTPStorage',
                 request_serializer=ftp_dot_FTPStorage__pb2.FTPStorageUpdateRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=ftp_dot_FTPStorage__pb2.FTPStorageUpdateResponse.FromString,
                 )
         self.deleteFTPStorage = channel.unary_unary(
                 '/org.apache.airavata.mft.resource.service.ftp.FTPStorageService/deleteFTPStorage',
                 request_serializer=ftp_dot_FTPStorage__pb2.FTPStorageDeleteRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=ftp_dot_FTPStorage__pb2.FTPStorageDeleteResponse.FromString,
                 )
 
 
@@ -96,12 +95,12 @@ def add_FTPStorageServiceServicer_to_server(servicer, server):
             'updateFTPStorage': grpc.unary_unary_rpc_method_handler(
                     servicer.updateFTPStorage,
                     request_deserializer=ftp_dot_FTPStorage__pb2.FTPStorageUpdateRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=ftp_dot_FTPStorage__pb2.FTPStorageUpdateResponse.SerializeToString,
             ),
             'deleteFTPStorage': grpc.unary_unary_rpc_method_handler(
                     servicer.deleteFTPStorage,
                     request_deserializer=ftp_dot_FTPStorage__pb2.FTPStorageDeleteRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=ftp_dot_FTPStorage__pb2.FTPStorageDeleteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -177,7 +176,7 @@ class FTPStorageService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.service.ftp.FTPStorageService/updateFTPStorage',
             ftp_dot_FTPStorage__pb2.FTPStorageUpdateRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            ftp_dot_FTPStorage__pb2.FTPStorageUpdateResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -194,6 +193,6 @@ class FTPStorageService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.service.ftp.FTPStorageService/deleteFTPStorage',
             ftp_dot_FTPStorage__pb2.FTPStorageDeleteRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            ftp_dot_FTPStorage__pb2.FTPStorageDeleteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

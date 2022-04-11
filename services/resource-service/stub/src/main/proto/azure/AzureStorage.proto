@@ -51,6 +51,14 @@ message AzureStorageUpdateRequest {
     string name = 3;
 }
 
+message AzureStorageUpdateResponse {
+    string storageId = 1;
+}
+
 message AzureStorageDeleteRequest {
     string storageId = 1;
+}
+
+message AzureStorageDeleteResponse {
+    bool status = 1;
 }

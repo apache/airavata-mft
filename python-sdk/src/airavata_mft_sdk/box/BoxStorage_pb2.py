@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14\x62ox/BoxStorage.proto\x12\x32org.apache.airavata.mft.resource.stubs.box.storage\"-\n\nBoxStorage\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"6\n\x15\x42oxStorageListRequest\x12\x0e\n\x06offset\x18\x01 \x01(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\"j\n\x16\x42oxStorageListResponse\x12P\n\x08storages\x18\x01 \x03(\x0b\x32>.org.apache.airavata.mft.resource.stubs.box.storage.BoxStorage\")\n\x14\x42oxStorageGetRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\":\n\x17\x42oxStorageCreateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\":\n\x17\x42oxStorageUpdateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\",\n\x17\x42oxStorageDeleteRequest\x12\x11\n\tstorageId\x18\x01 \x01(\tB\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14\x62ox/BoxStorage.proto\x12\x32org.apache.airavata.mft.resource.stubs.box.storage\"-\n\nBoxStorage\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"6\n\x15\x42oxStorageListRequest\x12\x0e\n\x06offset\x18\x01 \x01(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\"j\n\x16\x42oxStorageListResponse\x12P\n\x08storages\x18\x01 \x03(\x0b\x32>.org.apache.airavata.mft.resource.stubs.box.storage.BoxStorage\")\n\x14\x42oxStorageGetRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\":\n\x17\x42oxStorageCreateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\":\n\x17\x42oxStorageUpdateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"-\n\x18\x42oxStorageUpdateResponse\x12\x11\n\tstorageId\x18\x01 \x01(\t\",\n\x17\x42oxStorageDeleteRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"*\n\x18\x42oxStorageDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x42\x02P\x01\x62\x06proto3')
 
 
 
@@ -24,7 +24,9 @@ _BOXSTORAGELISTRESPONSE = DESCRIPTOR.message_types_by_name['BoxStorageListRespon
 _BOXSTORAGEGETREQUEST = DESCRIPTOR.message_types_by_name['BoxStorageGetRequest']
 _BOXSTORAGECREATEREQUEST = DESCRIPTOR.message_types_by_name['BoxStorageCreateRequest']
 _BOXSTORAGEUPDATEREQUEST = DESCRIPTOR.message_types_by_name['BoxStorageUpdateRequest']
+_BOXSTORAGEUPDATERESPONSE = DESCRIPTOR.message_types_by_name['BoxStorageUpdateResponse']
 _BOXSTORAGEDELETEREQUEST = DESCRIPTOR.message_types_by_name['BoxStorageDeleteRequest']
+_BOXSTORAGEDELETERESPONSE = DESCRIPTOR.message_types_by_name['BoxStorageDeleteResponse']
 BoxStorage = _reflection.GeneratedProtocolMessageType('BoxStorage', (_message.Message,), {
   'DESCRIPTOR' : _BOXSTORAGE,
   '__module__' : 'box.BoxStorage_pb2'
@@ -67,12 +69,26 @@ BoxStorageUpdateRequest = _reflection.GeneratedProtocolMessageType('BoxStorageUp
   })
 _sym_db.RegisterMessage(BoxStorageUpdateRequest)
 
+BoxStorageUpdateResponse = _reflection.GeneratedProtocolMessageType('BoxStorageUpdateResponse', (_message.Message,), {
+  'DESCRIPTOR' : _BOXSTORAGEUPDATERESPONSE,
+  '__module__' : 'box.BoxStorage_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.resource.stubs.box.storage.BoxStorageUpdateResponse)
+  })
+_sym_db.RegisterMessage(BoxStorageUpdateResponse)
+
 BoxStorageDeleteRequest = _reflection.GeneratedProtocolMessageType('BoxStorageDeleteRequest', (_message.Message,), {
   'DESCRIPTOR' : _BOXSTORAGEDELETEREQUEST,
   '__module__' : 'box.BoxStorage_pb2'
   # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.resource.stubs.box.storage.BoxStorageDeleteRequest)
   })
 _sym_db.RegisterMessage(BoxStorageDeleteRequest)
+
+BoxStorageDeleteResponse = _reflection.GeneratedProtocolMessageType('BoxStorageDeleteResponse', (_message.Message,), {
+  'DESCRIPTOR' : _BOXSTORAGEDELETERESPONSE,
+  '__module__' : 'box.BoxStorage_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.resource.stubs.box.storage.BoxStorageDeleteResponse)
+  })
+_sym_db.RegisterMessage(BoxStorageDeleteResponse)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
@@ -90,6 +106,10 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _BOXSTORAGECREATEREQUEST._serialized_end=388
   _BOXSTORAGEUPDATEREQUEST._serialized_start=390
   _BOXSTORAGEUPDATEREQUEST._serialized_end=448
-  _BOXSTORAGEDELETEREQUEST._serialized_start=450
-  _BOXSTORAGEDELETEREQUEST._serialized_end=494
+  _BOXSTORAGEUPDATERESPONSE._serialized_start=450
+  _BOXSTORAGEUPDATERESPONSE._serialized_end=495
+  _BOXSTORAGEDELETEREQUEST._serialized_start=497
+  _BOXSTORAGEDELETEREQUEST._serialized_end=541
+  _BOXSTORAGEDELETERESPONSE._serialized_start=543
+  _BOXSTORAGEDELETERESPONSE._serialized_end=585
 # @@protoc_insertion_point(module_scope)

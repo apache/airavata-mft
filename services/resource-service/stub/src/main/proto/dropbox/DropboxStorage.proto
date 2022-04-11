@@ -48,8 +48,15 @@ message DropboxStorageUpdateRequest {
     string name = 2;
 }
 
+message DropboxStorageUpdateResponse {
+    string storageId = 1;
+}
+
 message DropboxStorageDeleteRequest {
     string storageId = 1;
 }
 
+message DropboxStorageDeleteResponse {
+    bool status = 1;
+}
 

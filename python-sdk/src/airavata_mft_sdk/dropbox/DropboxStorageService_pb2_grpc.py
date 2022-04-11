@@ -3,7 +3,6 @@
 import grpc
 
 from airavata_mft_sdk.dropbox import DropboxStorage_pb2 as dropbox_dot_DropboxStorage__pb2
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
 class DropboxStorageServiceStub(object):
@@ -33,12 +32,12 @@ class DropboxStorageServiceStub(object):
         self.updateDropboxStorage = channel.unary_unary(
                 '/org.apache.airavata.mft.resource.service.dropbox.DropboxStorageService/updateDropboxStorage',
                 request_serializer=dropbox_dot_DropboxStorage__pb2.DropboxStorageUpdateRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=dropbox_dot_DropboxStorage__pb2.DropboxStorageUpdateResponse.FromString,
                 )
         self.deleteDropboxStorage = channel.unary_unary(
                 '/org.apache.airavata.mft.resource.service.dropbox.DropboxStorageService/deleteDropboxStorage',
                 request_serializer=dropbox_dot_DropboxStorage__pb2.DropboxStorageDeleteRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=dropbox_dot_DropboxStorage__pb2.DropboxStorageDeleteResponse.FromString,
                 )
 
 
@@ -97,12 +96,12 @@ def add_DropboxStorageServiceServicer_to_server(servicer, server):
             'updateDropboxStorage': grpc.unary_unary_rpc_method_handler(
                     servicer.updateDropboxStorage,
                     request_deserializer=dropbox_dot_DropboxStorage__pb2.DropboxStorageUpdateRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=dropbox_dot_DropboxStorage__pb2.DropboxStorageUpdateResponse.SerializeToString,
             ),
             'deleteDropboxStorage': grpc.unary_unary_rpc_method_handler(
                     servicer.deleteDropboxStorage,
                     request_deserializer=dropbox_dot_DropboxStorage__pb2.DropboxStorageDeleteRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=dropbox_dot_DropboxStorage__pb2.DropboxStorageDeleteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -178,7 +177,7 @@ class DropboxStorageService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.service.dropbox.DropboxStorageService/updateDropboxStorage',
             dropbox_dot_DropboxStorage__pb2.DropboxStorageUpdateRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            dropbox_dot_DropboxStorage__pb2.DropboxStorageUpdateResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -195,6 +194,6 @@ class DropboxStorageService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.service.dropbox.DropboxStorageService/deleteDropboxStorage',
             dropbox_dot_DropboxStorage__pb2.DropboxStorageDeleteRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            dropbox_dot_DropboxStorage__pb2.DropboxStorageDeleteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

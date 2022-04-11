@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 import airavata_mft_sdk.CredCommon_pb2 as CredCommon__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17gcs/GCSCredential.proto\x12,org.apache.airavata.mft.credential.stubs.gcs\x1a\x10\x43redCommon.proto\"6\n\tGCSSecret\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x17\n\x0f\x63redentialsJson\x18\x02 \x01(\t\"f\n\x13GCSSecretGetRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"p\n\x16GCSSecretCreateRequest\x12\x17\n\x0f\x63redentialsJson\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\x82\x01\n\x16GCSSecretUpdateRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x17\n\x0f\x63redentialsJson\x18\x02 \x01(\t\x12=\n\nauthzToken\x18\x03 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"i\n\x16GCSSecretDeleteRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthTokenB\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17gcs/GCSCredential.proto\x12,org.apache.airavata.mft.credential.stubs.gcs\x1a\x10\x43redCommon.proto\"6\n\tGCSSecret\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x17\n\x0f\x63redentialsJson\x18\x02 \x01(\t\"f\n\x13GCSSecretGetRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"p\n\x16GCSSecretCreateRequest\x12\x17\n\x0f\x63redentialsJson\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\x82\x01\n\x16GCSSecretUpdateRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x17\n\x0f\x63redentialsJson\x18\x02 \x01(\t\x12=\n\nauthzToken\x18\x03 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"+\n\x17GCSSecretUpdateResponse\x12\x10\n\x08secretId\x18\x01 \x01(\t\"i\n\x16GCSSecretDeleteRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\")\n\x17GCSSecretDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x42\x02P\x01\x62\x06proto3')
 
 
 
@@ -23,7 +23,9 @@ _GCSSECRET = DESCRIPTOR.message_types_by_name['GCSSecret']
 _GCSSECRETGETREQUEST = DESCRIPTOR.message_types_by_name['GCSSecretGetRequest']
 _GCSSECRETCREATEREQUEST = DESCRIPTOR.message_types_by_name['GCSSecretCreateRequest']
 _GCSSECRETUPDATEREQUEST = DESCRIPTOR.message_types_by_name['GCSSecretUpdateRequest']
+_GCSSECRETUPDATERESPONSE = DESCRIPTOR.message_types_by_name['GCSSecretUpdateResponse']
 _GCSSECRETDELETEREQUEST = DESCRIPTOR.message_types_by_name['GCSSecretDeleteRequest']
+_GCSSECRETDELETERESPONSE = DESCRIPTOR.message_types_by_name['GCSSecretDeleteResponse']
 GCSSecret = _reflection.GeneratedProtocolMessageType('GCSSecret', (_message.Message,), {
   'DESCRIPTOR' : _GCSSECRET,
   '__module__' : 'gcs.GCSCredential_pb2'
@@ -52,12 +54,26 @@ GCSSecretUpdateRequest = _reflection.GeneratedProtocolMessageType('GCSSecretUpda
   })
 _sym_db.RegisterMessage(GCSSecretUpdateRequest)
 
+GCSSecretUpdateResponse = _reflection.GeneratedProtocolMessageType('GCSSecretUpdateResponse', (_message.Message,), {
+  'DESCRIPTOR' : _GCSSECRETUPDATERESPONSE,
+  '__module__' : 'gcs.GCSCredential_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.gcs.GCSSecretUpdateResponse)
+  })
+_sym_db.RegisterMessage(GCSSecretUpdateResponse)
+
 GCSSecretDeleteRequest = _reflection.GeneratedProtocolMessageType('GCSSecretDeleteRequest', (_message.Message,), {
   'DESCRIPTOR' : _GCSSECRETDELETEREQUEST,
   '__module__' : 'gcs.GCSCredential_pb2'
   # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.gcs.GCSSecretDeleteRequest)
   })
 _sym_db.RegisterMessage(GCSSecretDeleteRequest)
+
+GCSSecretDeleteResponse = _reflection.GeneratedProtocolMessageType('GCSSecretDeleteResponse', (_message.Message,), {
+  'DESCRIPTOR' : _GCSSECRETDELETERESPONSE,
+  '__module__' : 'gcs.GCSCredential_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.gcs.GCSSecretDeleteResponse)
+  })
+_sym_db.RegisterMessage(GCSSecretDeleteResponse)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
@@ -71,6 +87,10 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _GCSSECRETCREATEREQUEST._serialized_end=363
   _GCSSECRETUPDATEREQUEST._serialized_start=366
   _GCSSECRETUPDATEREQUEST._serialized_end=496
-  _GCSSECRETDELETEREQUEST._serialized_start=498
-  _GCSSECRETDELETEREQUEST._serialized_end=603
+  _GCSSECRETUPDATERESPONSE._serialized_start=498
+  _GCSSECRETUPDATERESPONSE._serialized_end=541
+  _GCSSECRETDELETEREQUEST._serialized_start=543
+  _GCSSECRETDELETEREQUEST._serialized_end=648
+  _GCSSECRETDELETERESPONSE._serialized_start=650
+  _GCSSECRETDELETERESPONSE._serialized_end=691
 # @@protoc_insertion_point(module_scope)

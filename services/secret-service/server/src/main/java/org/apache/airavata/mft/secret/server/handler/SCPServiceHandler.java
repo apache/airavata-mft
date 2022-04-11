@@ -63,15 +63,17 @@ public class SCPServiceHandler extends SCPSecretServiceGrpc.SCPSecretServiceImpl
     }
 
     @Override
-    public void updateSCPSecret(SCPSecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
+    public void updateSCPSecret(SCPSecretUpdateRequest request, StreamObserver<SCPSecretUpdateResponse> responseObserver) {
         this.backend.updateSCPSecret(request);
+        responseObserver.onNext(SCPSecretUpdateResponse.newBuilder().setSecretId(request.getSecretId()).build());
         responseObserver.onCompleted();
     }
 
     @Override
-    public void deleteSCPSecret(SCPSecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
+    public void deleteSCPSecret(SCPSecretDeleteRequest request, StreamObserver<SCPSecretDeleteResponse> responseObserver) {
         boolean res = this.backend.deleteSCPSecret(request);
         if (res) {
+            responseObserver.onNext(SCPSecretDeleteResponse.newBuilder().setStatus(true).build());
             responseObserver.onCompleted();
         } else {
             responseObserver.onError(Status.INTERNAL

@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 import airavata_mft_sdk.CredCommon_pb2 as CredCommon__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1f\x64ropbox/DropboxCredential.proto\x12\x30org.apache.airavata.mft.credential.stubs.dropbox\x1a\x10\x43redCommon.proto\"6\n\rDropboxSecret\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x13\n\x0b\x61\x63\x63\x65ssToken\x18\x02 \x01(\t\"j\n\x17\x44ropboxSecretGetRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"p\n\x1a\x44ropboxSecretCreateRequest\x12\x13\n\x0b\x61\x63\x63\x65ssToken\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\x82\x01\n\x1a\x44ropboxSecretUpdateRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x13\n\x0b\x61\x63\x63\x65ssToken\x18\x02 \x01(\t\x12=\n\nauthzToken\x18\x03 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"m\n\x1a\x44ropboxSecretDeleteRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthTokenB\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1f\x64ropbox/DropboxCredential.proto\x12\x30org.apache.airavata.mft.credential.stubs.dropbox\x1a\x10\x43redCommon.proto\"6\n\rDropboxSecret\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x13\n\x0b\x61\x63\x63\x65ssToken\x18\x02 \x01(\t\"j\n\x17\x44ropboxSecretGetRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"p\n\x1a\x44ropboxSecretCreateRequest\x12\x13\n\x0b\x61\x63\x63\x65ssToken\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\x82\x01\n\x1a\x44ropboxSecretUpdateRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x13\n\x0b\x61\x63\x63\x65ssToken\x18\x02 \x01(\t\x12=\n\nauthzToken\x18\x03 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"/\n\x1b\x44ropboxSecretUpdateResponse\x12\x10\n\x08secretId\x18\x01 \x01(\t\"m\n\x1a\x44ropboxSecretDeleteRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"-\n\x1b\x44ropboxSecretDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x42\x02P\x01\x62\x06proto3')
 
 
 
@@ -23,7 +23,9 @@ _DROPBOXSECRET = DESCRIPTOR.message_types_by_name['DropboxSecret']
 _DROPBOXSECRETGETREQUEST = DESCRIPTOR.message_types_by_name['DropboxSecretGetRequest']
 _DROPBOXSECRETCREATEREQUEST = DESCRIPTOR.message_types_by_name['DropboxSecretCreateRequest']
 _DROPBOXSECRETUPDATEREQUEST = DESCRIPTOR.message_types_by_name['DropboxSecretUpdateRequest']
+_DROPBOXSECRETUPDATERESPONSE = DESCRIPTOR.message_types_by_name['DropboxSecretUpdateResponse']
 _DROPBOXSECRETDELETEREQUEST = DESCRIPTOR.message_types_by_name['DropboxSecretDeleteRequest']
+_DROPBOXSECRETDELETERESPONSE = DESCRIPTOR.message_types_by_name['DropboxSecretDeleteResponse']
 DropboxSecret = _reflection.GeneratedProtocolMessageType('DropboxSecret', (_message.Message,), {
   'DESCRIPTOR' : _DROPBOXSECRET,
   '__module__' : 'dropbox.DropboxCredential_pb2'
@@ -52,12 +54,26 @@ DropboxSecretUpdateRequest = _reflection.GeneratedProtocolMessageType('DropboxSe
   })
 _sym_db.RegisterMessage(DropboxSecretUpdateRequest)
 
+DropboxSecretUpdateResponse = _reflection.GeneratedProtocolMessageType('DropboxSecretUpdateResponse', (_message.Message,), {
+  'DESCRIPTOR' : _DROPBOXSECRETUPDATERESPONSE,
+  '__module__' : 'dropbox.DropboxCredential_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretUpdateResponse)
+  })
+_sym_db.RegisterMessage(DropboxSecretUpdateResponse)
+
 DropboxSecretDeleteRequest = _reflection.GeneratedProtocolMessageType('DropboxSecretDeleteRequest', (_message.Message,), {
   'DESCRIPTOR' : _DROPBOXSECRETDELETEREQUEST,
   '__module__' : 'dropbox.DropboxCredential_pb2'
   # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretDeleteRequest)
   })
 _sym_db.RegisterMessage(DropboxSecretDeleteRequest)
+
+DropboxSecretDeleteResponse = _reflection.GeneratedProtocolMessageType('DropboxSecretDeleteResponse', (_message.Message,), {
+  'DESCRIPTOR' : _DROPBOXSECRETDELETERESPONSE,
+  '__module__' : 'dropbox.DropboxCredential_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretDeleteResponse)
+  })
+_sym_db.RegisterMessage(DropboxSecretDeleteResponse)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
@@ -71,6 +87,10 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _DROPBOXSECRETCREATEREQUEST._serialized_end=379
   _DROPBOXSECRETUPDATEREQUEST._serialized_start=382
   _DROPBOXSECRETUPDATEREQUEST._serialized_end=512
-  _DROPBOXSECRETDELETEREQUEST._serialized_start=514
-  _DROPBOXSECRETDELETEREQUEST._serialized_end=623
+  _DROPBOXSECRETUPDATERESPONSE._serialized_start=514
+  _DROPBOXSECRETUPDATERESPONSE._serialized_end=561
+  _DROPBOXSECRETDELETEREQUEST._serialized_start=563
+  _DROPBOXSECRETDELETEREQUEST._serialized_end=672
+  _DROPBOXSECRETDELETERESPONSE._serialized_start=674
+  _DROPBOXSECRETDELETERESPONSE._serialized_end=719
 # @@protoc_insertion_point(module_scope)

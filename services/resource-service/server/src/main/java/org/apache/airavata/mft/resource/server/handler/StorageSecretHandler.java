@@ -75,9 +75,10 @@ public class StorageSecretHandler extends StorageSecretServiceGrpc.StorageSecret
     }
 
     @Override
-    public void updateStorageSecret(StorageSecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
+    public void updateStorageSecret(StorageSecretUpdateRequest request, StreamObserver<StorageSecretUpdateResponse> responseObserver) {
         try {
             this.backend.updateStorageSecret(request);
+            responseObserver.onNext(StorageSecretUpdateResponse.newBuilder().setStorageSecret(request.getStorageSecret()).build());
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in updating the storage secret {}", request.getStorageSecret().getId(), e);
@@ -89,10 +90,11 @@ public class StorageSecretHandler extends StorageSecretServiceGrpc.StorageSecret
     }
 
     @Override
-    public void deleteStorageSecret(StorageSecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
+    public void deleteStorageSecret(StorageSecretDeleteRequest request, StreamObserver<StorageSecretDeleteResponse> responseObserver) {
         try {
             boolean res = this.backend.deleteStorageSecret(request);
             if (res) {
+                responseObserver.onNext(StorageSecretDeleteResponse.newBuilder().setStatus(true).build());
                 responseObserver.onCompleted();
             } else {
                 responseObserver.onError(new Exception("Failed to delete storage secret with id " + request.getId()));

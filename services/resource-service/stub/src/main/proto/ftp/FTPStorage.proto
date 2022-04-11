@@ -54,6 +54,14 @@ message FTPStorageUpdateRequest {
     string name = 4;
 }
 
+message FTPStorageUpdateResponse {
+    string storageId = 1;
+}
+
 message FTPStorageDeleteRequest {
     string storageId = 1;
+}
+
+message FTPStorageDeleteResponse {
+    bool status = 1;
 }

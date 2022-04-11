@@ -20,43 +20,23 @@ syntax = "proto3";
 option java_multiple_files = true;
 package org.apache.airavata.mft.resource.service.azure;
 
-import "google/api/annotations.proto";
-import "google/protobuf/empty.proto";
 import "azure/AzureStorage.proto";
 
 service AzureStorageService {
     
     // Storage
 
-    rpc listAzureStorage (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageListRequest) returns (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageListResponse) {
-        option (google.api.http) = {
-           get: "/v1.0/resource/azure/storage"
-        };
-    }
-    
+    rpc listAzureStorage (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageListRequest) returns (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageListResponse);
+
     rpc getAzureStorage (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageGetRequest) returns
-    (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage) {
-        option (google.api.http) = {
-           get: "/v1.0/resource/azure/storage"
-        };
-    }
+    (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage);
 
     rpc createAzureStorage (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageCreateRequest) returns
-    (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage) {
-        option (google.api.http) = {
-           post: "/v1.0/resource/azure/storage"
-        };
-    }
+    (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage);
 
-    rpc updateAzureStorage (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageUpdateRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-           put: "/v1.0/resource/azure/storage"
-        };
-    }
+    rpc updateAzureStorage (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageUpdateRequest) returns
+    (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageUpdateResponse);
 
-    rpc deleteAzureStorage (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageDeleteRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-           delete: "/v1.0/resource/azure/storage"
-        };
-    }
+    rpc deleteAzureStorage (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageDeleteRequest) returns
+    (org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageDeleteResponse);
 }

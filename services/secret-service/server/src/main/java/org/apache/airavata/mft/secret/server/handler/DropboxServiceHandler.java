@@ -59,7 +59,9 @@ public class DropboxServiceHandler extends DropboxSecretServiceGrpc.DropboxSecre
     @Override
     public void createDropboxSecret(DropboxSecretCreateRequest request, StreamObserver<DropboxSecret> responseObserver) {
         try {
-            this.backend.createDropboxSecret(request);
+            DropboxSecret dropboxSecret = this.backend.createDropboxSecret(request);
+            responseObserver.onNext(dropboxSecret);
+            responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error in creating Dropbox Secret", e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -69,9 +71,11 @@ public class DropboxServiceHandler extends DropboxSecretServiceGrpc.DropboxSecre
     }
 
     @Override
-    public void updateDropboxSecret(DropboxSecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
+    public void updateDropboxSecret(DropboxSecretUpdateRequest request, StreamObserver<DropboxSecretUpdateResponse> responseObserver) {
         try {
             this.backend.updateDropboxSecret(request);
+            responseObserver.onNext(DropboxSecretUpdateResponse.newBuilder().setSecretId(request.getSecretId()).build());
+            responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error in updating Dropbox Secret with id {}", request.getSecretId(), e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -81,9 +85,11 @@ public class DropboxServiceHandler extends DropboxSecretServiceGrpc.DropboxSecre
     }
 
     @Override
-    public void deleteDropboxSecret(DropboxSecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
+    public void deleteDropboxSecret(DropboxSecretDeleteRequest request, StreamObserver<DropboxSecretDeleteResponse> responseObserver) {
         try {
             this.backend.deleteDropboxSecret(request);
+            responseObserver.onNext(DropboxSecretDeleteResponse.newBuilder().setStatus(true).build());
+            responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error in deleting Dropbox Secret with id {}", request.getSecretId(), e);
             responseObserver.onError(Status.INTERNAL.withCause(e)

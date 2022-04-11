@@ -2,7 +2,6 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from airavata_mft_sdk.resource import ResourceService_pb2 as resource_dot_ResourceService__pb2
 
 
@@ -28,12 +27,12 @@ class GenericResourceServiceStub(object):
         self.updateGenericResource = channel.unary_unary(
                 '/org.apache.airavata.mft.resource.stubs.common.GenericResourceService/updateGenericResource',
                 request_serializer=resource_dot_ResourceService__pb2.GenericResourceUpdateRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=resource_dot_ResourceService__pb2.GenericResourceUpdateResponse.FromString,
                 )
         self.deleteGenericResource = channel.unary_unary(
                 '/org.apache.airavata.mft.resource.stubs.common.GenericResourceService/deleteGenericResource',
                 request_serializer=resource_dot_ResourceService__pb2.GenericResourceDeleteRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=resource_dot_ResourceService__pb2.GenericResourceDeleteResponse.FromString,
                 )
 
 
@@ -80,12 +79,12 @@ def add_GenericResourceServiceServicer_to_server(servicer, server):
             'updateGenericResource': grpc.unary_unary_rpc_method_handler(
                     servicer.updateGenericResource,
                     request_deserializer=resource_dot_ResourceService__pb2.GenericResourceUpdateRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=resource_dot_ResourceService__pb2.GenericResourceUpdateResponse.SerializeToString,
             ),
             'deleteGenericResource': grpc.unary_unary_rpc_method_handler(
                     servicer.deleteGenericResource,
                     request_deserializer=resource_dot_ResourceService__pb2.GenericResourceDeleteRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=resource_dot_ResourceService__pb2.GenericResourceDeleteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -144,7 +143,7 @@ class GenericResourceService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.stubs.common.GenericResourceService/updateGenericResource',
             resource_dot_ResourceService__pb2.GenericResourceUpdateRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            resource_dot_ResourceService__pb2.GenericResourceUpdateResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -161,6 +160,6 @@ class GenericResourceService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.stubs.common.GenericResourceService/deleteGenericResource',
             resource_dot_ResourceService__pb2.GenericResourceDeleteRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            resource_dot_ResourceService__pb2.GenericResourceDeleteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

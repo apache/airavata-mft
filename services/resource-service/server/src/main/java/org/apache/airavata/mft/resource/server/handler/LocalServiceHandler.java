@@ -87,9 +87,10 @@ public class LocalServiceHandler extends LocalStorageServiceGrpc.LocalStorageSer
     }
 
     @Override
-    public void updateLocalStorage(LocalStorageUpdateRequest request, StreamObserver<Empty> responseObserver) {
+    public void updateLocalStorage(LocalStorageUpdateRequest request, StreamObserver<LocalStorageUpdateResponse> responseObserver) {
         try {
             this.backend.updateLocalStorage(request);
+            responseObserver.onNext(LocalStorageUpdateResponse.newBuilder().setStorageId(request.getStorageId()).build());
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in updating the local storage {}", request.getStorageId(), e);
@@ -101,10 +102,11 @@ public class LocalServiceHandler extends LocalStorageServiceGrpc.LocalStorageSer
     }
 
     @Override
-    public void deleteLocalStorage(LocalStorageDeleteRequest request, StreamObserver<Empty> responseObserver) {
+    public void deleteLocalStorage(LocalStorageDeleteRequest request, StreamObserver<LocalStorageDeleteResponse> responseObserver) {
         try {
             boolean res = this.backend.deleteLocalStorage(request);
             if (res) {
+                responseObserver.onNext(LocalStorageDeleteResponse.newBuilder().setStatus(true).build());
                 responseObserver.onCompleted();
             } else {
                 responseObserver.onError(new Exception("Failed to delete Local storage with id " + request.getStorageId()));

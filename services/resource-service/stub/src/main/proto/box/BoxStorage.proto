@@ -48,8 +48,16 @@ message BoxStorageUpdateRequest {
     string name = 2;
 }
 
+message BoxStorageUpdateResponse {
+    string storageId = 1;
+}
+
 message BoxStorageDeleteRequest {
     string storageId = 1;
+}
+
+message BoxStorageDeleteResponse {
+    bool status = 1;
 }
 
 

@@ -60,7 +60,9 @@ public class BoxServiceHandler extends BoxSecretServiceGrpc.BoxSecretServiceImpl
     @Override
     public void createBoxSecret(BoxSecretCreateRequest request, StreamObserver<BoxSecret> responseObserver) {
         try {
-            this.backend.createBoxSecret(request);
+            BoxSecret boxSecret = this.backend.createBoxSecret(request);
+            responseObserver.onNext(boxSecret);
+            responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error in creating Box Secret", e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -70,9 +72,11 @@ public class BoxServiceHandler extends BoxSecretServiceGrpc.BoxSecretServiceImpl
     }
 
     @Override
-    public void updateBoxSecret(BoxSecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
+    public void updateBoxSecret(BoxSecretUpdateRequest request, StreamObserver<BoxSecretUpdateResponse> responseObserver) {
         try {
             this.backend.updateBoxSecret(request);
+            responseObserver.onNext(BoxSecretUpdateResponse.newBuilder().setSecretId(request.getSecretId()).build());
+            responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error in updating Box Secret with id {}", request.getSecretId(), e);
             responseObserver.onError(Status.INTERNAL.withCause(e)
@@ -82,9 +86,11 @@ public class BoxServiceHandler extends BoxSecretServiceGrpc.BoxSecretServiceImpl
     }
 
     @Override
-    public void deleteBoxSecret(BoxSecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
+    public void deleteBoxSecret(BoxSecretDeleteRequest request, StreamObserver<BoxSecretDeleteResponse> responseObserver) {
         try {
             this.backend.deleteBoxSecret(request);
+            responseObserver.onNext(BoxSecretDeleteResponse.newBuilder().setStatus(true).build());
+            responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error in deleting Box Secret with id {}", request.getSecretId(), e);
             responseObserver.onError(Status.INTERNAL.withCause(e)

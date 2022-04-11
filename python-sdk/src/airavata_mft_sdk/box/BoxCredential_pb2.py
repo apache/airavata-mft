@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 import airavata_mft_sdk.CredCommon_pb2 as CredCommon__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17\x62ox/BoxCredential.proto\x12,org.apache.airavata.mft.credential.stubs.box\x1a\x10\x43redCommon.proto\"2\n\tBoxSecret\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x13\n\x0b\x61\x63\x63\x65ssToken\x18\x02 \x01(\t\"f\n\x13\x42oxSecretGetRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"l\n\x16\x42oxSecretCreateRequest\x12\x13\n\x0b\x61\x63\x63\x65ssToken\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"~\n\x16\x42oxSecretUpdateRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x13\n\x0b\x61\x63\x63\x65ssToken\x18\x02 \x01(\t\x12=\n\nauthzToken\x18\x03 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"i\n\x16\x42oxSecretDeleteRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthTokenB\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17\x62ox/BoxCredential.proto\x12,org.apache.airavata.mft.credential.stubs.box\x1a\x10\x43redCommon.proto\"2\n\tBoxSecret\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x13\n\x0b\x61\x63\x63\x65ssToken\x18\x02 \x01(\t\"f\n\x13\x42oxSecretGetRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"l\n\x16\x42oxSecretCreateRequest\x12\x13\n\x0b\x61\x63\x63\x65ssToken\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"~\n\x16\x42oxSecretUpdateRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x13\n\x0b\x61\x63\x63\x65ssToken\x18\x02 \x01(\t\x12=\n\nauthzToken\x18\x03 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"+\n\x17\x42oxSecretUpdateResponse\x12\x10\n\x08secretId\x18\x01 \x01(\t\"i\n\x16\x42oxSecretDeleteRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\")\n\x17\x42oxSecretDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x42\x02P\x01\x62\x06proto3')
 
 
 
@@ -23,7 +23,9 @@ _BOXSECRET = DESCRIPTOR.message_types_by_name['BoxSecret']
 _BOXSECRETGETREQUEST = DESCRIPTOR.message_types_by_name['BoxSecretGetRequest']
 _BOXSECRETCREATEREQUEST = DESCRIPTOR.message_types_by_name['BoxSecretCreateRequest']
 _BOXSECRETUPDATEREQUEST = DESCRIPTOR.message_types_by_name['BoxSecretUpdateRequest']
+_BOXSECRETUPDATERESPONSE = DESCRIPTOR.message_types_by_name['BoxSecretUpdateResponse']
 _BOXSECRETDELETEREQUEST = DESCRIPTOR.message_types_by_name['BoxSecretDeleteRequest']
+_BOXSECRETDELETERESPONSE = DESCRIPTOR.message_types_by_name['BoxSecretDeleteResponse']
 BoxSecret = _reflection.GeneratedProtocolMessageType('BoxSecret', (_message.Message,), {
   'DESCRIPTOR' : _BOXSECRET,
   '__module__' : 'box.BoxCredential_pb2'
@@ -52,12 +54,26 @@ BoxSecretUpdateRequest = _reflection.GeneratedProtocolMessageType('BoxSecretUpda
   })
 _sym_db.RegisterMessage(BoxSecretUpdateRequest)
 
+BoxSecretUpdateResponse = _reflection.GeneratedProtocolMessageType('BoxSecretUpdateResponse', (_message.Message,), {
+  'DESCRIPTOR' : _BOXSECRETUPDATERESPONSE,
+  '__module__' : 'box.BoxCredential_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.box.BoxSecretUpdateResponse)
+  })
+_sym_db.RegisterMessage(BoxSecretUpdateResponse)
+
 BoxSecretDeleteRequest = _reflection.GeneratedProtocolMessageType('BoxSecretDeleteRequest', (_message.Message,), {
   'DESCRIPTOR' : _BOXSECRETDELETEREQUEST,
   '__module__' : 'box.BoxCredential_pb2'
   # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.box.BoxSecretDeleteRequest)
   })
 _sym_db.RegisterMessage(BoxSecretDeleteRequest)
+
+BoxSecretDeleteResponse = _reflection.GeneratedProtocolMessageType('BoxSecretDeleteResponse', (_message.Message,), {
+  'DESCRIPTOR' : _BOXSECRETDELETERESPONSE,
+  '__module__' : 'box.BoxCredential_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.box.BoxSecretDeleteResponse)
+  })
+_sym_db.RegisterMessage(BoxSecretDeleteResponse)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
@@ -71,6 +87,10 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _BOXSECRETCREATEREQUEST._serialized_end=355
   _BOXSECRETUPDATEREQUEST._serialized_start=357
   _BOXSECRETUPDATEREQUEST._serialized_end=483
-  _BOXSECRETDELETEREQUEST._serialized_start=485
-  _BOXSECRETDELETEREQUEST._serialized_end=590
+  _BOXSECRETUPDATERESPONSE._serialized_start=485
+  _BOXSECRETUPDATERESPONSE._serialized_end=528
+  _BOXSECRETDELETEREQUEST._serialized_start=530
+  _BOXSECRETDELETEREQUEST._serialized_end=635
+  _BOXSECRETDELETERESPONSE._serialized_start=637
+  _BOXSECRETDELETERESPONSE._serialized_end=678
 # @@protoc_insertion_point(module_scope)

@@ -2,7 +2,6 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from airavata_mft_sdk.s3 import S3Credential_pb2 as s3_dot_S3Credential__pb2
 
 
@@ -28,12 +27,12 @@ class S3SecretServiceStub(object):
         self.updateS3Secret = channel.unary_unary(
                 '/org.apache.airavata.mft.credential.service.s3.S3SecretService/updateS3Secret',
                 request_serializer=s3_dot_S3Credential__pb2.S3SecretUpdateRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=s3_dot_S3Credential__pb2.S3SecretUpdateResponse.FromString,
                 )
         self.deleteS3Secret = channel.unary_unary(
                 '/org.apache.airavata.mft.credential.service.s3.S3SecretService/deleteS3Secret',
                 request_serializer=s3_dot_S3Credential__pb2.S3SecretDeleteRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=s3_dot_S3Credential__pb2.S3SecretDeleteResponse.FromString,
                 )
 
 
@@ -80,12 +79,12 @@ def add_S3SecretServiceServicer_to_server(servicer, server):
             'updateS3Secret': grpc.unary_unary_rpc_method_handler(
                     servicer.updateS3Secret,
                     request_deserializer=s3_dot_S3Credential__pb2.S3SecretUpdateRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=s3_dot_S3Credential__pb2.S3SecretUpdateResponse.SerializeToString,
             ),
             'deleteS3Secret': grpc.unary_unary_rpc_method_handler(
                     servicer.deleteS3Secret,
                     request_deserializer=s3_dot_S3Credential__pb2.S3SecretDeleteRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=s3_dot_S3Credential__pb2.S3SecretDeleteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -144,7 +143,7 @@ class S3SecretService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.credential.service.s3.S3SecretService/updateS3Secret',
             s3_dot_S3Credential__pb2.S3SecretUpdateRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            s3_dot_S3Credential__pb2.S3SecretUpdateResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -161,6 +160,6 @@ class S3SecretService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.credential.service.s3.S3SecretService/deleteS3Secret',
             s3_dot_S3Credential__pb2.S3SecretDeleteRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            s3_dot_S3Credential__pb2.S3SecretDeleteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -2,7 +2,6 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from airavata_mft_sdk.scp import SCPStorage_pb2 as scp_dot_SCPStorage__pb2
 
 
@@ -33,12 +32,12 @@ class SCPStorageServiceStub(object):
         self.updateSCPStorage = channel.unary_unary(
                 '/org.apache.airavata.mft.resource.service.scp.SCPStorageService/updateSCPStorage',
                 request_serializer=scp_dot_SCPStorage__pb2.SCPStorageUpdateRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=scp_dot_SCPStorage__pb2.SCPStorageUpdateResponse.FromString,
                 )
         self.deleteSCPStorage = channel.unary_unary(
                 '/org.apache.airavata.mft.resource.service.scp.SCPStorageService/deleteSCPStorage',
                 request_serializer=scp_dot_SCPStorage__pb2.SCPStorageDeleteRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=scp_dot_SCPStorage__pb2.SCPStorageDeleteResponse.FromString,
                 )
 
 
@@ -96,12 +95,12 @@ def add_SCPStorageServiceServicer_to_server(servicer, server):
             'updateSCPStorage': grpc.unary_unary_rpc_method_handler(
                     servicer.updateSCPStorage,
                     request_deserializer=scp_dot_SCPStorage__pb2.SCPStorageUpdateRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=scp_dot_SCPStorage__pb2.SCPStorageUpdateResponse.SerializeToString,
             ),
             'deleteSCPStorage': grpc.unary_unary_rpc_method_handler(
                     servicer.deleteSCPStorage,
                     request_deserializer=scp_dot_SCPStorage__pb2.SCPStorageDeleteRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=scp_dot_SCPStorage__pb2.SCPStorageDeleteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -177,7 +176,7 @@ class SCPStorageService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.service.scp.SCPStorageService/updateSCPStorage',
             scp_dot_SCPStorage__pb2.SCPStorageUpdateRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            scp_dot_SCPStorage__pb2.SCPStorageUpdateResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -194,6 +193,6 @@ class SCPStorageService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.service.scp.SCPStorageService/deleteSCPStorage',
             scp_dot_SCPStorage__pb2.SCPStorageDeleteRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            scp_dot_SCPStorage__pb2.SCPStorageDeleteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

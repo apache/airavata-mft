@@ -2,7 +2,6 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from airavata_mft_sdk.resourcesecretmap import StorageSecretMap_pb2 as resourcesecretmap_dot_StorageSecretMap__pb2
 
 
@@ -33,12 +32,12 @@ class StorageSecretServiceStub(object):
         self.updateStorageSecret = channel.unary_unary(
                 '/org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretService/updateStorageSecret',
                 request_serializer=resourcesecretmap_dot_StorageSecretMap__pb2.StorageSecretUpdateRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=resourcesecretmap_dot_StorageSecretMap__pb2.StorageSecretUpdateResponse.FromString,
                 )
         self.deleteStorageSecret = channel.unary_unary(
                 '/org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretService/deleteStorageSecret',
                 request_serializer=resourcesecretmap_dot_StorageSecretMap__pb2.StorageSecretDeleteRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=resourcesecretmap_dot_StorageSecretMap__pb2.StorageSecretDeleteResponse.FromString,
                 )
 
 
@@ -96,12 +95,12 @@ def add_StorageSecretServiceServicer_to_server(servicer, server):
             'updateStorageSecret': grpc.unary_unary_rpc_method_handler(
                     servicer.updateStorageSecret,
                     request_deserializer=resourcesecretmap_dot_StorageSecretMap__pb2.StorageSecretUpdateRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=resourcesecretmap_dot_StorageSecretMap__pb2.StorageSecretUpdateResponse.SerializeToString,
             ),
             'deleteStorageSecret': grpc.unary_unary_rpc_method_handler(
                     servicer.deleteStorageSecret,
                     request_deserializer=resourcesecretmap_dot_StorageSecretMap__pb2.StorageSecretDeleteRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=resourcesecretmap_dot_StorageSecretMap__pb2.StorageSecretDeleteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -177,7 +176,7 @@ class StorageSecretService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretService/updateStorageSecret',
             resourcesecretmap_dot_StorageSecretMap__pb2.StorageSecretUpdateRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            resourcesecretmap_dot_StorageSecretMap__pb2.StorageSecretUpdateResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -194,6 +193,6 @@ class StorageSecretService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretService/deleteStorageSecret',
             resourcesecretmap_dot_StorageSecretMap__pb2.StorageSecretDeleteRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            resourcesecretmap_dot_StorageSecretMap__pb2.StorageSecretDeleteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

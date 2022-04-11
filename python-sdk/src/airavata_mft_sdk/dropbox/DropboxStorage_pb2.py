@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1c\x64ropbox/DropboxStorage.proto\x12\x36org.apache.airavata.mft.resource.stubs.dropbox.storage\"1\n\x0e\x44ropboxStorage\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\":\n\x19\x44ropboxStorageListRequest\x12\x0e\n\x06offset\x18\x01 \x01(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\"v\n\x1a\x44ropboxStorageListResponse\x12X\n\x08storages\x18\x01 \x03(\x0b\x32\x46.org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorage\"-\n\x18\x44ropboxStorageGetRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\">\n\x1b\x44ropboxStorageCreateRequest\x12\x11\n\tstorageId\x18\x04 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\">\n\x1b\x44ropboxStorageUpdateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"0\n\x1b\x44ropboxStorageDeleteRequest\x12\x11\n\tstorageId\x18\x01 \x01(\tB\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1c\x64ropbox/DropboxStorage.proto\x12\x36org.apache.airavata.mft.resource.stubs.dropbox.storage\"1\n\x0e\x44ropboxStorage\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\":\n\x19\x44ropboxStorageListRequest\x12\x0e\n\x06offset\x18\x01 \x01(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\"v\n\x1a\x44ropboxStorageListResponse\x12X\n\x08storages\x18\x01 \x03(\x0b\x32\x46.org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorage\"-\n\x18\x44ropboxStorageGetRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\">\n\x1b\x44ropboxStorageCreateRequest\x12\x11\n\tstorageId\x18\x04 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\">\n\x1b\x44ropboxStorageUpdateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"1\n\x1c\x44ropboxStorageUpdateResponse\x12\x11\n\tstorageId\x18\x01 \x01(\t\"0\n\x1b\x44ropboxStorageDeleteRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\".\n\x1c\x44ropboxStorageDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x42\x02P\x01\x62\x06proto3')
 
 
 
@@ -24,7 +24,9 @@ _DROPBOXSTORAGELISTRESPONSE = DESCRIPTOR.message_types_by_name['DropboxStorageLi
 _DROPBOXSTORAGEGETREQUEST = DESCRIPTOR.message_types_by_name['DropboxStorageGetRequest']
 _DROPBOXSTORAGECREATEREQUEST = DESCRIPTOR.message_types_by_name['DropboxStorageCreateRequest']
 _DROPBOXSTORAGEUPDATEREQUEST = DESCRIPTOR.message_types_by_name['DropboxStorageUpdateRequest']
+_DROPBOXSTORAGEUPDATERESPONSE = DESCRIPTOR.message_types_by_name['DropboxStorageUpdateResponse']
 _DROPBOXSTORAGEDELETEREQUEST = DESCRIPTOR.message_types_by_name['DropboxStorageDeleteRequest']
+_DROPBOXSTORAGEDELETERESPONSE = DESCRIPTOR.message_types_by_name['DropboxStorageDeleteResponse']
 DropboxStorage = _reflection.GeneratedProtocolMessageType('DropboxStorage', (_message.Message,), {
   'DESCRIPTOR' : _DROPBOXSTORAGE,
   '__module__' : 'dropbox.DropboxStorage_pb2'
@@ -67,12 +69,26 @@ DropboxStorageUpdateRequest = _reflection.GeneratedProtocolMessageType('DropboxS
   })
 _sym_db.RegisterMessage(DropboxStorageUpdateRequest)
 
+DropboxStorageUpdateResponse = _reflection.GeneratedProtocolMessageType('DropboxStorageUpdateResponse', (_message.Message,), {
+  'DESCRIPTOR' : _DROPBOXSTORAGEUPDATERESPONSE,
+  '__module__' : 'dropbox.DropboxStorage_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageUpdateResponse)
+  })
+_sym_db.RegisterMessage(DropboxStorageUpdateResponse)
+
 DropboxStorageDeleteRequest = _reflection.GeneratedProtocolMessageType('DropboxStorageDeleteRequest', (_message.Message,), {
   'DESCRIPTOR' : _DROPBOXSTORAGEDELETEREQUEST,
   '__module__' : 'dropbox.DropboxStorage_pb2'
   # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageDeleteRequest)
   })
 _sym_db.RegisterMessage(DropboxStorageDeleteRequest)
+
+DropboxStorageDeleteResponse = _reflection.GeneratedProtocolMessageType('DropboxStorageDeleteResponse', (_message.Message,), {
+  'DESCRIPTOR' : _DROPBOXSTORAGEDELETERESPONSE,
+  '__module__' : 'dropbox.DropboxStorage_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageDeleteResponse)
+  })
+_sym_db.RegisterMessage(DropboxStorageDeleteResponse)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
@@ -90,6 +106,10 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _DROPBOXSTORAGECREATEREQUEST._serialized_end=428
   _DROPBOXSTORAGEUPDATEREQUEST._serialized_start=430
   _DROPBOXSTORAGEUPDATEREQUEST._serialized_end=492
-  _DROPBOXSTORAGEDELETEREQUEST._serialized_start=494
-  _DROPBOXSTORAGEDELETEREQUEST._serialized_end=542
+  _DROPBOXSTORAGEUPDATERESPONSE._serialized_start=494
+  _DROPBOXSTORAGEUPDATERESPONSE._serialized_end=543
+  _DROPBOXSTORAGEDELETEREQUEST._serialized_start=545
+  _DROPBOXSTORAGEDELETEREQUEST._serialized_end=593
+  _DROPBOXSTORAGEDELETERESPONSE._serialized_start=595
+  _DROPBOXSTORAGEDELETERESPONSE._serialized_end=641
 # @@protoc_insertion_point(module_scope)

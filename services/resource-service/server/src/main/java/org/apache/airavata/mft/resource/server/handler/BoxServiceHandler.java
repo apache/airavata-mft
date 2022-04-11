@@ -71,9 +71,10 @@ public class BoxServiceHandler extends BoxStorageServiceGrpc.BoxStorageServiceIm
     }
 
     @Override
-    public void updateBoxStorage(BoxStorageUpdateRequest request, StreamObserver<Empty> responseObserver) {
+    public void updateBoxStorage(BoxStorageUpdateRequest request, StreamObserver<BoxStorageUpdateResponse> responseObserver) {
         try {
             this.backend.updateBoxStorage(request);
+            responseObserver.onNext(BoxStorageUpdateResponse.newBuilder().setStorageId(request.getStorageId()).build());
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in updating the Box storage {}", request.getStorageId(), e);
@@ -85,10 +86,11 @@ public class BoxServiceHandler extends BoxStorageServiceGrpc.BoxStorageServiceIm
     }
 
     @Override
-    public void deleteBoxStorage(BoxStorageDeleteRequest request, StreamObserver<Empty> responseObserver) {
+    public void deleteBoxStorage(BoxStorageDeleteRequest request, StreamObserver<BoxStorageDeleteResponse> responseObserver) {
         try {
             boolean res = this.backend.deleteBoxStorage(request);
             if (res) {
+                responseObserver.onNext(BoxStorageDeleteResponse.newBuilder().setStatus(true).build());
                 responseObserver.onCompleted();
             } else {
                 responseObserver.onError(new Exception("Failed to delete Box storage with id " + request.getStorageId()));

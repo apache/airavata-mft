@@ -20,39 +20,22 @@ syntax = "proto3";
 option java_multiple_files = true;
 package org.apache.airavata.mft.resource.service.scp;
 
-import "google/api/annotations.proto";
-import "google/protobuf/empty.proto";
 import "scp/SCPStorage.proto";
 
 service SCPStorageService {
 
-    rpc listSCPStorage (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageListRequest) returns (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageListResponse) {
-        option (google.api.http) = {
-           get: "/v1.0/resource/scp/storage"
-        };
-    }
+    rpc listSCPStorage (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageListRequest) returns
+    (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageListResponse);
 
-    rpc getSCPStorage (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageGetRequest) returns (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorage) {
-        option (google.api.http) = {
-           get: "/v1.0/resource/scp/storage"
-        };
-    }
+    rpc getSCPStorage (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageGetRequest) returns
+    (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorage);
 
-    rpc createSCPStorage (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageCreateRequest) returns (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorage) {
-        option (google.api.http) = {
-           post: "/v1.0/resource/scp/storage"
-        };
-    }
+    rpc createSCPStorage (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageCreateRequest) returns
+    (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorage);
 
-    rpc updateSCPStorage (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageUpdateRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-           put: "/v1.0/resource/scp/storage"
-        };
-    }
+    rpc updateSCPStorage (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageUpdateRequest) returns
+    (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageUpdateResponse);
 
-    rpc deleteSCPStorage (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageDeleteRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-           delete: "/v1.0/resource/scp/storage"
-        };
-    }
+    rpc deleteSCPStorage (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageDeleteRequest) returns
+    (org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageDeleteResponse);
 }

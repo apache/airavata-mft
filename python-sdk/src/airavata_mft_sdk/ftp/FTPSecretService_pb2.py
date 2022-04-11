@@ -12,12 +12,10 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from airavata_mft_sdk.google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from airavata_mft_sdk.ftp import FTPCredential_pb2 as ftp_dot_FTPCredential__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1a\x66tp/FTPSecretService.proto\x12.org.apache.airavata.mft.credential.service.ftp\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x17\x66tp/FTPCredential.proto2\xfe\x04\n\x10\x46TPSecretService\x12\xa4\x01\n\x0cgetFTPSecret\x12\x41.org.apache.airavata.mft.credential.stubs.ftp.FTPSecretGetRequest\x1a\x37.org.apache.airavata.mft.credential.stubs.ftp.FTPSecret\"\x18\x82\xd3\xe4\x93\x02\x12\x12\x10/v1.0/secret/ftp\x12\xaa\x01\n\x0f\x63reateFTPSecret\x12\x44.org.apache.airavata.mft.credential.stubs.ftp.FTPSecretCreateRequest\x1a\x37.org.apache.airavata.mft.credential.stubs.ftp.FTPSecret\"\x18\x82\xd3\xe4\x93\x02\x12\"\x10/v1.0/secret/ftp\x12\x89\x01\n\x0fupdateFTPSecret\x12\x44.org.apache.airavata.mft.credential.stubs.ftp.FTPSecretUpdateRequest\x1a\x16.google.protobuf.Empty\"\x18\x82\xd3\xe4\x93\x02\x12\x1a\x10/v1.0/secret/ftp\x12\x89\x01\n\x0f\x64\x65leteFTPSecret\x12\x44.org.apache.airavata.mft.credential.stubs.ftp.FTPSecretDeleteRequest\x1a\x16.google.protobuf.Empty\"\x18\x82\xd3\xe4\x93\x02\x12*\x10/v1.0/secret/ftpB\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1a\x66tp/FTPSecretService.proto\x12.org.apache.airavata.mft.credential.service.ftp\x1a\x17\x66tp/FTPCredential.proto2\xf4\x04\n\x10\x46TPSecretService\x12\x8a\x01\n\x0cgetFTPSecret\x12\x41.org.apache.airavata.mft.credential.stubs.ftp.FTPSecretGetRequest\x1a\x37.org.apache.airavata.mft.credential.stubs.ftp.FTPSecret\x12\x90\x01\n\x0f\x63reateFTPSecret\x12\x44.org.apache.airavata.mft.credential.stubs.ftp.FTPSecretCreateRequest\x1a\x37.org.apache.airavata.mft.credential.stubs.ftp.FTPSecret\x12\x9e\x01\n\x0fupdateFTPSecret\x12\x44.org.apache.airavata.mft.credential.stubs.ftp.FTPSecretUpdateRequest\x1a\x45.org.apache.airavata.mft.credential.stubs.ftp.FTPSecretUpdateResponse\x12\x9e\x01\n\x0f\x64\x65leteFTPSecret\x12\x44.org.apache.airavata.mft.credential.stubs.ftp.FTPSecretDeleteRequest\x1a\x45.org.apache.airavata.mft.credential.stubs.ftp.FTPSecretDeleteResponseB\x02P\x01\x62\x06proto3')
 
 
 
@@ -26,14 +24,6 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'P\001'
-  _FTPSECRETSERVICE.methods_by_name['getFTPSecret']._options = None
-  _FTPSECRETSERVICE.methods_by_name['getFTPSecret']._serialized_options = b'\202\323\344\223\002\022\022\020/v1.0/secret/ftp'
-  _FTPSECRETSERVICE.methods_by_name['createFTPSecret']._options = None
-  _FTPSECRETSERVICE.methods_by_name['createFTPSecret']._serialized_options = b'\202\323\344\223\002\022\"\020/v1.0/secret/ftp'
-  _FTPSECRETSERVICE.methods_by_name['updateFTPSecret']._options = None
-  _FTPSECRETSERVICE.methods_by_name['updateFTPSecret']._serialized_options = b'\202\323\344\223\002\022\032\020/v1.0/secret/ftp'
-  _FTPSECRETSERVICE.methods_by_name['deleteFTPSecret']._options = None
-  _FTPSECRETSERVICE.methods_by_name['deleteFTPSecret']._serialized_options = b'\202\323\344\223\002\022*\020/v1.0/secret/ftp'
-  _FTPSECRETSERVICE._serialized_start=163
-  _FTPSECRETSERVICE._serialized_end=801
+  _FTPSECRETSERVICE._serialized_start=104
+  _FTPSECRETSERVICE._serialized_end=732
 # @@protoc_insertion_point(module_scope)

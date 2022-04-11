@@ -3,7 +3,6 @@
 import grpc
 
 from airavata_mft_sdk.box import BoxStorage_pb2 as box_dot_BoxStorage__pb2
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
 class BoxStorageServiceStub(object):
@@ -33,12 +32,12 @@ class BoxStorageServiceStub(object):
         self.updateBoxStorage = channel.unary_unary(
                 '/org.apache.airavata.mft.resource.service.box.BoxStorageService/updateBoxStorage',
                 request_serializer=box_dot_BoxStorage__pb2.BoxStorageUpdateRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=box_dot_BoxStorage__pb2.BoxStorageUpdateResponse.FromString,
                 )
         self.deleteBoxStorage = channel.unary_unary(
                 '/org.apache.airavata.mft.resource.service.box.BoxStorageService/deleteBoxStorage',
                 request_serializer=box_dot_BoxStorage__pb2.BoxStorageDeleteRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=box_dot_BoxStorage__pb2.BoxStorageDeleteResponse.FromString,
                 )
 
 
@@ -97,12 +96,12 @@ def add_BoxStorageServiceServicer_to_server(servicer, server):
             'updateBoxStorage': grpc.unary_unary_rpc_method_handler(
                     servicer.updateBoxStorage,
                     request_deserializer=box_dot_BoxStorage__pb2.BoxStorageUpdateRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=box_dot_BoxStorage__pb2.BoxStorageUpdateResponse.SerializeToString,
             ),
             'deleteBoxStorage': grpc.unary_unary_rpc_method_handler(
                     servicer.deleteBoxStorage,
                     request_deserializer=box_dot_BoxStorage__pb2.BoxStorageDeleteRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=box_dot_BoxStorage__pb2.BoxStorageDeleteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -178,7 +177,7 @@ class BoxStorageService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.service.box.BoxStorageService/updateBoxStorage',
             box_dot_BoxStorage__pb2.BoxStorageUpdateRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            box_dot_BoxStorage__pb2.BoxStorageUpdateResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -195,6 +194,6 @@ class BoxStorageService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.service.box.BoxStorageService/deleteBoxStorage',
             box_dot_BoxStorage__pb2.BoxStorageDeleteRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            box_dot_BoxStorage__pb2.BoxStorageDeleteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

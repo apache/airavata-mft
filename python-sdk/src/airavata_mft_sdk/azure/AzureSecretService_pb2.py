@@ -12,12 +12,10 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from airavata_mft_sdk.google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from airavata_mft_sdk.azure import AzureCredential_pb2 as azure_dot_AzureCredential__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1e\x61zure/AzureSecretService.proto\x12\x30org.apache.airavata.mft.credential.service.azure\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1b\x61zure/AzureCredential.proto2\xa8\x05\n\x12\x41zureSecretService\x12\xb0\x01\n\x0egetAzureSecret\x12\x45.org.apache.airavata.mft.credential.stubs.azure.AzureSecretGetRequest\x1a;.org.apache.airavata.mft.credential.stubs.azure.AzureSecret\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/v1.0/secret/azure\x12\xb6\x01\n\x11\x63reateAzureSecret\x12H.org.apache.airavata.mft.credential.stubs.azure.AzureSecretCreateRequest\x1a;.org.apache.airavata.mft.credential.stubs.azure.AzureSecret\"\x1a\x82\xd3\xe4\x93\x02\x14\"\x12/v1.0/secret/azure\x12\x91\x01\n\x11updateAzureSecret\x12H.org.apache.airavata.mft.credential.stubs.azure.AzureSecretUpdateRequest\x1a\x16.google.protobuf.Empty\"\x1a\x82\xd3\xe4\x93\x02\x14\x1a\x12/v1.0/secret/azure\x12\x91\x01\n\x11\x64\x65leteAzureSecret\x12H.org.apache.airavata.mft.credential.stubs.azure.AzureSecretDeleteRequest\x1a\x16.google.protobuf.Empty\"\x1a\x82\xd3\xe4\x93\x02\x14*\x12/v1.0/secret/azureB\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1e\x61zure/AzureSecretService.proto\x12\x30org.apache.airavata.mft.credential.service.azure\x1a\x1b\x61zure/AzureCredential.proto2\x9e\x05\n\x12\x41zureSecretService\x12\x94\x01\n\x0egetAzureSecret\x12\x45.org.apache.airavata.mft.credential.stubs.azure.AzureSecretGetRequest\x1a;.org.apache.airavata.mft.credential.stubs.azure.AzureSecret\x12\x9a\x01\n\x11\x63reateAzureSecret\x12H.org.apache.airavata.mft.credential.stubs.azure.AzureSecretCreateRequest\x1a;.org.apache.airavata.mft.credential.stubs.azure.AzureSecret\x12\xa8\x01\n\x11updateAzureSecret\x12H.org.apache.airavata.mft.credential.stubs.azure.AzureSecretUpdateRequest\x1aI.org.apache.airavata.mft.credential.stubs.azure.AzureSecretUpdateResponse\x12\xa8\x01\n\x11\x64\x65leteAzureSecret\x12H.org.apache.airavata.mft.credential.stubs.azure.AzureSecretDeleteRequest\x1aI.org.apache.airavata.mft.credential.stubs.azure.AzureSecretDeleteResponseB\x02P\x01\x62\x06proto3')
 
 
 
@@ -26,14 +24,6 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'P\001'
-  _AZURESECRETSERVICE.methods_by_name['getAzureSecret']._options = None
-  _AZURESECRETSERVICE.methods_by_name['getAzureSecret']._serialized_options = b'\202\323\344\223\002\024\022\022/v1.0/secret/azure'
-  _AZURESECRETSERVICE.methods_by_name['createAzureSecret']._options = None
-  _AZURESECRETSERVICE.methods_by_name['createAzureSecret']._serialized_options = b'\202\323\344\223\002\024\"\022/v1.0/secret/azure'
-  _AZURESECRETSERVICE.methods_by_name['updateAzureSecret']._options = None
-  _AZURESECRETSERVICE.methods_by_name['updateAzureSecret']._serialized_options = b'\202\323\344\223\002\024\032\022/v1.0/secret/azure'
-  _AZURESECRETSERVICE.methods_by_name['deleteAzureSecret']._options = None
-  _AZURESECRETSERVICE.methods_by_name['deleteAzureSecret']._serialized_options = b'\202\323\344\223\002\024*\022/v1.0/secret/azure'
-  _AZURESECRETSERVICE._serialized_start=173
-  _AZURESECRETSERVICE._serialized_end=853
+  _AZURESECRETSERVICE._serialized_start=114
+  _AZURESECRETSERVICE._serialized_end=784
 # @@protoc_insertion_point(module_scope)

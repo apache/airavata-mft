@@ -71,9 +71,10 @@ public class DropboxServiceHandler extends DropboxStorageServiceGrpc.DropboxStor
     }
 
     @Override
-    public void updateDropboxStorage(DropboxStorageUpdateRequest request, StreamObserver<Empty> responseObserver) {
+    public void updateDropboxStorage(DropboxStorageUpdateRequest request, StreamObserver<DropboxStorageUpdateResponse> responseObserver) {
         try {
             this.backend.updateDropboxStorage(request);
+            responseObserver.onNext(DropboxStorageUpdateResponse.newBuilder().setStorageId(request.getStorageId()).build());
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in updating the dropbox storage {}", request.getStorageId(), e);
@@ -85,10 +86,11 @@ public class DropboxServiceHandler extends DropboxStorageServiceGrpc.DropboxStor
     }
 
     @Override
-    public void deleteDropboxStorage(DropboxStorageDeleteRequest request, StreamObserver<Empty> responseObserver) {
+    public void deleteDropboxStorage(DropboxStorageDeleteRequest request, StreamObserver<DropboxStorageDeleteResponse> responseObserver) {
         try {
             boolean res = this.backend.deleteDropboxStorage(request);
             if (res) {
+                responseObserver.onNext(DropboxStorageDeleteResponse.newBuilder().setStatus(true).build());
                 responseObserver.onCompleted();
             } else {
                 responseObserver.onError(new Exception("Failed to delete dropbox storage with id " + request.getStorageId()));

@@ -2,7 +2,6 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from airavata_mft_sdk.s3 import S3Storage_pb2 as s3_dot_S3Storage__pb2
 
 
@@ -33,12 +32,12 @@ class S3StorageServiceStub(object):
         self.updateS3Storage = channel.unary_unary(
                 '/org.apache.airavata.mft.resource.service.s3.S3StorageService/updateS3Storage',
                 request_serializer=s3_dot_S3Storage__pb2.S3StorageUpdateRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=s3_dot_S3Storage__pb2.S3StorageUpdateResponse.FromString,
                 )
         self.deleteS3Storage = channel.unary_unary(
                 '/org.apache.airavata.mft.resource.service.s3.S3StorageService/deleteS3Storage',
                 request_serializer=s3_dot_S3Storage__pb2.S3StorageDeleteRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=s3_dot_S3Storage__pb2.S3StorageDeleteResponse.FromString,
                 )
 
 
@@ -97,12 +96,12 @@ def add_S3StorageServiceServicer_to_server(servicer, server):
             'updateS3Storage': grpc.unary_unary_rpc_method_handler(
                     servicer.updateS3Storage,
                     request_deserializer=s3_dot_S3Storage__pb2.S3StorageUpdateRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=s3_dot_S3Storage__pb2.S3StorageUpdateResponse.SerializeToString,
             ),
             'deleteS3Storage': grpc.unary_unary_rpc_method_handler(
                     servicer.deleteS3Storage,
                     request_deserializer=s3_dot_S3Storage__pb2.S3StorageDeleteRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=s3_dot_S3Storage__pb2.S3StorageDeleteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -178,7 +177,7 @@ class S3StorageService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.service.s3.S3StorageService/updateS3Storage',
             s3_dot_S3Storage__pb2.S3StorageUpdateRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            s3_dot_S3Storage__pb2.S3StorageUpdateResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -195,6 +194,6 @@ class S3StorageService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.service.s3.S3StorageService/deleteS3Storage',
             s3_dot_S3Storage__pb2.S3StorageDeleteRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            s3_dot_S3Storage__pb2.S3StorageDeleteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

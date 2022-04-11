@@ -3,7 +3,6 @@
 import grpc
 
 from airavata_mft_sdk.dropbox import DropboxCredential_pb2 as dropbox_dot_DropboxCredential__pb2
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
 class DropboxSecretServiceStub(object):
@@ -28,12 +27,12 @@ class DropboxSecretServiceStub(object):
         self.updateDropboxSecret = channel.unary_unary(
                 '/org.apache.airavata.mft.credential.service.dropbox.DropboxSecretService/updateDropboxSecret',
                 request_serializer=dropbox_dot_DropboxCredential__pb2.DropboxSecretUpdateRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=dropbox_dot_DropboxCredential__pb2.DropboxSecretUpdateResponse.FromString,
                 )
         self.deleteDropboxSecret = channel.unary_unary(
                 '/org.apache.airavata.mft.credential.service.dropbox.DropboxSecretService/deleteDropboxSecret',
                 request_serializer=dropbox_dot_DropboxCredential__pb2.DropboxSecretDeleteRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=dropbox_dot_DropboxCredential__pb2.DropboxSecretDeleteResponse.FromString,
                 )
 
 
@@ -80,12 +79,12 @@ def add_DropboxSecretServiceServicer_to_server(servicer, server):
             'updateDropboxSecret': grpc.unary_unary_rpc_method_handler(
                     servicer.updateDropboxSecret,
                     request_deserializer=dropbox_dot_DropboxCredential__pb2.DropboxSecretUpdateRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=dropbox_dot_DropboxCredential__pb2.DropboxSecretUpdateResponse.SerializeToString,
             ),
             'deleteDropboxSecret': grpc.unary_unary_rpc_method_handler(
                     servicer.deleteDropboxSecret,
                     request_deserializer=dropbox_dot_DropboxCredential__pb2.DropboxSecretDeleteRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=dropbox_dot_DropboxCredential__pb2.DropboxSecretDeleteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -144,7 +143,7 @@ class DropboxSecretService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.credential.service.dropbox.DropboxSecretService/updateDropboxSecret',
             dropbox_dot_DropboxCredential__pb2.DropboxSecretUpdateRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            dropbox_dot_DropboxCredential__pb2.DropboxSecretUpdateResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -161,6 +160,6 @@ class DropboxSecretService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.credential.service.dropbox.DropboxSecretService/deleteDropboxSecret',
             dropbox_dot_DropboxCredential__pb2.DropboxSecretDeleteRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            dropbox_dot_DropboxCredential__pb2.DropboxSecretDeleteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

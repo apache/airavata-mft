@@ -3,7 +3,6 @@
 import grpc
 
 from airavata_mft_sdk.azure import AzureCredential_pb2 as azure_dot_AzureCredential__pb2
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
 class AzureSecretServiceStub(object):
@@ -28,12 +27,12 @@ class AzureSecretServiceStub(object):
         self.updateAzureSecret = channel.unary_unary(
                 '/org.apache.airavata.mft.credential.service.azure.AzureSecretService/updateAzureSecret',
                 request_serializer=azure_dot_AzureCredential__pb2.AzureSecretUpdateRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=azure_dot_AzureCredential__pb2.AzureSecretUpdateResponse.FromString,
                 )
         self.deleteAzureSecret = channel.unary_unary(
                 '/org.apache.airavata.mft.credential.service.azure.AzureSecretService/deleteAzureSecret',
                 request_serializer=azure_dot_AzureCredential__pb2.AzureSecretDeleteRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=azure_dot_AzureCredential__pb2.AzureSecretDeleteResponse.FromString,
                 )
 
 
@@ -80,12 +79,12 @@ def add_AzureSecretServiceServicer_to_server(servicer, server):
             'updateAzureSecret': grpc.unary_unary_rpc_method_handler(
                     servicer.updateAzureSecret,
                     request_deserializer=azure_dot_AzureCredential__pb2.AzureSecretUpdateRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=azure_dot_AzureCredential__pb2.AzureSecretUpdateResponse.SerializeToString,
             ),
             'deleteAzureSecret': grpc.unary_unary_rpc_method_handler(
                     servicer.deleteAzureSecret,
                     request_deserializer=azure_dot_AzureCredential__pb2.AzureSecretDeleteRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=azure_dot_AzureCredential__pb2.AzureSecretDeleteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -144,7 +143,7 @@ class AzureSecretService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.credential.service.azure.AzureSecretService/updateAzureSecret',
             azure_dot_AzureCredential__pb2.AzureSecretUpdateRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            azure_dot_AzureCredential__pb2.AzureSecretUpdateResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -161,6 +160,6 @@ class AzureSecretService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.credential.service.azure.AzureSecretService/deleteAzureSecret',
             azure_dot_AzureCredential__pb2.AzureSecretDeleteRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            azure_dot_AzureCredential__pb2.AzureSecretDeleteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

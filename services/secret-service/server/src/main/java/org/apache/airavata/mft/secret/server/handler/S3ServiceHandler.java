@@ -71,9 +71,10 @@ public class S3ServiceHandler extends S3SecretServiceGrpc.S3SecretServiceImplBas
     }
 
     @Override
-    public void updateS3Secret(S3SecretUpdateRequest request, StreamObserver<Empty> responseObserver) {
+    public void updateS3Secret(S3SecretUpdateRequest request, StreamObserver<S3SecretUpdateResponse> responseObserver) {
         try {
             this.backend.updateS3Secret(request);
+            responseObserver.onNext(S3SecretUpdateResponse.newBuilder().setSecretId(request.getSecretId()).build());
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error in updating S3 Secret with id {}", request.getSecretId(), e);
@@ -84,9 +85,10 @@ public class S3ServiceHandler extends S3SecretServiceGrpc.S3SecretServiceImplBas
     }
 
     @Override
-    public void deleteS3Secret(S3SecretDeleteRequest request, StreamObserver<Empty> responseObserver) {
+    public void deleteS3Secret(S3SecretDeleteRequest request, StreamObserver<S3SecretDeleteResponse> responseObserver) {
         try {
             this.backend.deleteS3Secret(request);
+            responseObserver.onNext(S3SecretDeleteResponse.newBuilder().setStatus(true).build());
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Error in deleting S3 Secret with id {}", request.getSecretId(), e);

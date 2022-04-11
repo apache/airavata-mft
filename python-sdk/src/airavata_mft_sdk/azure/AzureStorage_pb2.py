@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18\x61zure/AzureStorage.proto\x12\x34org.apache.airavata.mft.resource.stubs.azure.storage\"B\n\x0c\x41zureStorage\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x11\n\tcontainer\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\"8\n\x17\x41zureStorageListRequest\x12\x0e\n\x06offset\x18\x01 \x01(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\"p\n\x18\x41zureStorageListResponse\x12T\n\x08storages\x18\x01 \x03(\x0b\x32\x42.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage\"+\n\x16\x41zureStorageGetRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"O\n\x19\x41zureStorageCreateRequest\x12\x11\n\tcontainer\x18\x01 \x01(\t\x12\x11\n\tstorageId\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\"O\n\x19\x41zureStorageUpdateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x11\n\tcontainer\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\".\n\x19\x41zureStorageDeleteRequest\x12\x11\n\tstorageId\x18\x01 \x01(\tB\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18\x61zure/AzureStorage.proto\x12\x34org.apache.airavata.mft.resource.stubs.azure.storage\"B\n\x0c\x41zureStorage\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x11\n\tcontainer\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\"8\n\x17\x41zureStorageListRequest\x12\x0e\n\x06offset\x18\x01 \x01(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\"p\n\x18\x41zureStorageListResponse\x12T\n\x08storages\x18\x01 \x03(\x0b\x32\x42.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage\"+\n\x16\x41zureStorageGetRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"O\n\x19\x41zureStorageCreateRequest\x12\x11\n\tcontainer\x18\x01 \x01(\t\x12\x11\n\tstorageId\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\"O\n\x19\x41zureStorageUpdateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x11\n\tcontainer\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\"/\n\x1a\x41zureStorageUpdateResponse\x12\x11\n\tstorageId\x18\x01 \x01(\t\".\n\x19\x41zureStorageDeleteRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\",\n\x1a\x41zureStorageDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x42\x02P\x01\x62\x06proto3')
 
 
 
@@ -24,7 +24,9 @@ _AZURESTORAGELISTRESPONSE = DESCRIPTOR.message_types_by_name['AzureStorageListRe
 _AZURESTORAGEGETREQUEST = DESCRIPTOR.message_types_by_name['AzureStorageGetRequest']
 _AZURESTORAGECREATEREQUEST = DESCRIPTOR.message_types_by_name['AzureStorageCreateRequest']
 _AZURESTORAGEUPDATEREQUEST = DESCRIPTOR.message_types_by_name['AzureStorageUpdateRequest']
+_AZURESTORAGEUPDATERESPONSE = DESCRIPTOR.message_types_by_name['AzureStorageUpdateResponse']
 _AZURESTORAGEDELETEREQUEST = DESCRIPTOR.message_types_by_name['AzureStorageDeleteRequest']
+_AZURESTORAGEDELETERESPONSE = DESCRIPTOR.message_types_by_name['AzureStorageDeleteResponse']
 AzureStorage = _reflection.GeneratedProtocolMessageType('AzureStorage', (_message.Message,), {
   'DESCRIPTOR' : _AZURESTORAGE,
   '__module__' : 'azure.AzureStorage_pb2'
@@ -67,12 +69,26 @@ AzureStorageUpdateRequest = _reflection.GeneratedProtocolMessageType('AzureStora
   })
 _sym_db.RegisterMessage(AzureStorageUpdateRequest)
 
+AzureStorageUpdateResponse = _reflection.GeneratedProtocolMessageType('AzureStorageUpdateResponse', (_message.Message,), {
+  'DESCRIPTOR' : _AZURESTORAGEUPDATERESPONSE,
+  '__module__' : 'azure.AzureStorage_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageUpdateResponse)
+  })
+_sym_db.RegisterMessage(AzureStorageUpdateResponse)
+
 AzureStorageDeleteRequest = _reflection.GeneratedProtocolMessageType('AzureStorageDeleteRequest', (_message.Message,), {
   'DESCRIPTOR' : _AZURESTORAGEDELETEREQUEST,
   '__module__' : 'azure.AzureStorage_pb2'
   # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageDeleteRequest)
   })
 _sym_db.RegisterMessage(AzureStorageDeleteRequest)
+
+AzureStorageDeleteResponse = _reflection.GeneratedProtocolMessageType('AzureStorageDeleteResponse', (_message.Message,), {
+  'DESCRIPTOR' : _AZURESTORAGEDELETERESPONSE,
+  '__module__' : 'azure.AzureStorage_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageDeleteResponse)
+  })
+_sym_db.RegisterMessage(AzureStorageDeleteResponse)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
@@ -90,6 +106,10 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _AZURESTORAGECREATEREQUEST._serialized_end=446
   _AZURESTORAGEUPDATEREQUEST._serialized_start=448
   _AZURESTORAGEUPDATEREQUEST._serialized_end=527
-  _AZURESTORAGEDELETEREQUEST._serialized_start=529
-  _AZURESTORAGEDELETEREQUEST._serialized_end=575
+  _AZURESTORAGEUPDATERESPONSE._serialized_start=529
+  _AZURESTORAGEUPDATERESPONSE._serialized_end=576
+  _AZURESTORAGEDELETEREQUEST._serialized_start=578
+  _AZURESTORAGEDELETEREQUEST._serialized_end=624
+  _AZURESTORAGEDELETERESPONSE._serialized_start=626
+  _AZURESTORAGEDELETERESPONSE._serialized_end=670
 # @@protoc_insertion_point(module_scope)

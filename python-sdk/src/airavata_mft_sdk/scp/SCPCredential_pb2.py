@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 import airavata_mft_sdk.CredCommon_pb2 as CredCommon__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17scp/SCPCredential.proto\x12,org.apache.airavata.mft.credential.stubs.scp\x1a\x10\x43redCommon.proto\"f\n\tSCPSecret\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x12\n\nprivateKey\x18\x02 \x01(\t\x12\x11\n\tpublicKey\x18\x03 \x01(\t\x12\x12\n\npassphrase\x18\x04 \x01(\t\x12\x0c\n\x04user\x18\x05 \x01(\t\"f\n\x13SCPSecretGetRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\xa0\x01\n\x16SCPSecretCreateRequest\x12\x12\n\nprivateKey\x18\x01 \x01(\t\x12\x11\n\tpublicKey\x18\x02 \x01(\t\x12\x12\n\npassphrase\x18\x03 \x01(\t\x12\x0c\n\x04user\x18\x04 \x01(\t\x12=\n\nauthzToken\x18\x05 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\xb2\x01\n\x16SCPSecretUpdateRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x12\n\nprivateKey\x18\x02 \x01(\t\x12\x11\n\tpublicKey\x18\x03 \x01(\t\x12\x12\n\npassphrase\x18\x04 \x01(\t\x12\x0c\n\x04user\x18\x05 \x01(\t\x12=\n\nauthzToken\x18\x06 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"i\n\x16SCPSecretDeleteRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthTokenB\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17scp/SCPCredential.proto\x12,org.apache.airavata.mft.credential.stubs.scp\x1a\x10\x43redCommon.proto\"f\n\tSCPSecret\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x12\n\nprivateKey\x18\x02 \x01(\t\x12\x11\n\tpublicKey\x18\x03 \x01(\t\x12\x12\n\npassphrase\x18\x04 \x01(\t\x12\x0c\n\x04user\x18\x05 \x01(\t\"f\n\x13SCPSecretGetRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\xa0\x01\n\x16SCPSecretCreateRequest\x12\x12\n\nprivateKey\x18\x01 \x01(\t\x12\x11\n\tpublicKey\x18\x02 \x01(\t\x12\x12\n\npassphrase\x18\x03 \x01(\t\x12\x0c\n\x04user\x18\x04 \x01(\t\x12=\n\nauthzToken\x18\x05 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\xb2\x01\n\x16SCPSecretUpdateRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x12\n\nprivateKey\x18\x02 \x01(\t\x12\x11\n\tpublicKey\x18\x03 \x01(\t\x12\x12\n\npassphrase\x18\x04 \x01(\t\x12\x0c\n\x04user\x18\x05 \x01(\t\x12=\n\nauthzToken\x18\x06 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"+\n\x17SCPSecretUpdateResponse\x12\x10\n\x08secretId\x18\x01 \x01(\t\"i\n\x16SCPSecretDeleteRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\")\n\x17SCPSecretDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x42\x02P\x01\x62\x06proto3')
 
 
 
@@ -23,7 +23,9 @@ _SCPSECRET = DESCRIPTOR.message_types_by_name['SCPSecret']
 _SCPSECRETGETREQUEST = DESCRIPTOR.message_types_by_name['SCPSecretGetRequest']
 _SCPSECRETCREATEREQUEST = DESCRIPTOR.message_types_by_name['SCPSecretCreateRequest']
 _SCPSECRETUPDATEREQUEST = DESCRIPTOR.message_types_by_name['SCPSecretUpdateRequest']
+_SCPSECRETUPDATERESPONSE = DESCRIPTOR.message_types_by_name['SCPSecretUpdateResponse']
 _SCPSECRETDELETEREQUEST = DESCRIPTOR.message_types_by_name['SCPSecretDeleteRequest']
+_SCPSECRETDELETERESPONSE = DESCRIPTOR.message_types_by_name['SCPSecretDeleteResponse']
 SCPSecret = _reflection.GeneratedProtocolMessageType('SCPSecret', (_message.Message,), {
   'DESCRIPTOR' : _SCPSECRET,
   '__module__' : 'scp.SCPCredential_pb2'
@@ -52,12 +54,26 @@ SCPSecretUpdateRequest = _reflection.GeneratedProtocolMessageType('SCPSecretUpda
   })
 _sym_db.RegisterMessage(SCPSecretUpdateRequest)
 
+SCPSecretUpdateResponse = _reflection.GeneratedProtocolMessageType('SCPSecretUpdateResponse', (_message.Message,), {
+  'DESCRIPTOR' : _SCPSECRETUPDATERESPONSE,
+  '__module__' : 'scp.SCPCredential_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.scp.SCPSecretUpdateResponse)
+  })
+_sym_db.RegisterMessage(SCPSecretUpdateResponse)
+
 SCPSecretDeleteRequest = _reflection.GeneratedProtocolMessageType('SCPSecretDeleteRequest', (_message.Message,), {
   'DESCRIPTOR' : _SCPSECRETDELETEREQUEST,
   '__module__' : 'scp.SCPCredential_pb2'
   # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.scp.SCPSecretDeleteRequest)
   })
 _sym_db.RegisterMessage(SCPSecretDeleteRequest)
+
+SCPSecretDeleteResponse = _reflection.GeneratedProtocolMessageType('SCPSecretDeleteResponse', (_message.Message,), {
+  'DESCRIPTOR' : _SCPSECRETDELETERESPONSE,
+  '__module__' : 'scp.SCPCredential_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.scp.SCPSecretDeleteResponse)
+  })
+_sym_db.RegisterMessage(SCPSecretDeleteResponse)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
@@ -71,6 +87,10 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _SCPSECRETCREATEREQUEST._serialized_end=460
   _SCPSECRETUPDATEREQUEST._serialized_start=463
   _SCPSECRETUPDATEREQUEST._serialized_end=641
-  _SCPSECRETDELETEREQUEST._serialized_start=643
-  _SCPSECRETDELETEREQUEST._serialized_end=748
+  _SCPSECRETUPDATERESPONSE._serialized_start=643
+  _SCPSECRETUPDATERESPONSE._serialized_end=686
+  _SCPSECRETDELETEREQUEST._serialized_start=688
+  _SCPSECRETDELETEREQUEST._serialized_end=793
+  _SCPSECRETDELETERESPONSE._serialized_start=795
+  _SCPSECRETDELETERESPONSE._serialized_end=836
 # @@protoc_insertion_point(module_scope)

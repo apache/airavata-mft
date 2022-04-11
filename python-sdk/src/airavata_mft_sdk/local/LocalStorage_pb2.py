@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18local/LocalStorage.proto\x12\x34org.apache.airavata.mft.resource.stubs.local.storage\"@\n\x0cLocalStorage\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0f\n\x07\x61gentId\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\"8\n\x17LocalStorageListRequest\x12\x0e\n\x06offset\x18\x01 \x01(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\"p\n\x18LocalStorageListResponse\x12T\n\x08storages\x18\x01 \x03(\x0b\x32\x42.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorage\"+\n\x16LocalStorageGetRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"M\n\x19LocalStorageCreateRequest\x12\x0f\n\x07\x61gentId\x18\x01 \x01(\t\x12\x11\n\tstorageId\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\"M\n\x19LocalStorageUpdateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0f\n\x07\x61gentId\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\".\n\x19LocalStorageDeleteRequest\x12\x11\n\tstorageId\x18\x01 \x01(\tB\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18local/LocalStorage.proto\x12\x34org.apache.airavata.mft.resource.stubs.local.storage\"@\n\x0cLocalStorage\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0f\n\x07\x61gentId\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\"8\n\x17LocalStorageListRequest\x12\x0e\n\x06offset\x18\x01 \x01(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\"p\n\x18LocalStorageListResponse\x12T\n\x08storages\x18\x01 \x03(\x0b\x32\x42.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorage\"+\n\x16LocalStorageGetRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"M\n\x19LocalStorageCreateRequest\x12\x0f\n\x07\x61gentId\x18\x01 \x01(\t\x12\x11\n\tstorageId\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\"M\n\x19LocalStorageUpdateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x0f\n\x07\x61gentId\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\"/\n\x1aLocalStorageUpdateResponse\x12\x11\n\tstorageId\x18\x01 \x01(\t\".\n\x19LocalStorageDeleteRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\",\n\x1aLocalStorageDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x42\x02P\x01\x62\x06proto3')
 
 
 
@@ -24,7 +24,9 @@ _LOCALSTORAGELISTRESPONSE = DESCRIPTOR.message_types_by_name['LocalStorageListRe
 _LOCALSTORAGEGETREQUEST = DESCRIPTOR.message_types_by_name['LocalStorageGetRequest']
 _LOCALSTORAGECREATEREQUEST = DESCRIPTOR.message_types_by_name['LocalStorageCreateRequest']
 _LOCALSTORAGEUPDATEREQUEST = DESCRIPTOR.message_types_by_name['LocalStorageUpdateRequest']
+_LOCALSTORAGEUPDATERESPONSE = DESCRIPTOR.message_types_by_name['LocalStorageUpdateResponse']
 _LOCALSTORAGEDELETEREQUEST = DESCRIPTOR.message_types_by_name['LocalStorageDeleteRequest']
+_LOCALSTORAGEDELETERESPONSE = DESCRIPTOR.message_types_by_name['LocalStorageDeleteResponse']
 LocalStorage = _reflection.GeneratedProtocolMessageType('LocalStorage', (_message.Message,), {
   'DESCRIPTOR' : _LOCALSTORAGE,
   '__module__' : 'local.LocalStorage_pb2'
@@ -67,12 +69,26 @@ LocalStorageUpdateRequest = _reflection.GeneratedProtocolMessageType('LocalStora
   })
 _sym_db.RegisterMessage(LocalStorageUpdateRequest)
 
+LocalStorageUpdateResponse = _reflection.GeneratedProtocolMessageType('LocalStorageUpdateResponse', (_message.Message,), {
+  'DESCRIPTOR' : _LOCALSTORAGEUPDATERESPONSE,
+  '__module__' : 'local.LocalStorage_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageUpdateResponse)
+  })
+_sym_db.RegisterMessage(LocalStorageUpdateResponse)
+
 LocalStorageDeleteRequest = _reflection.GeneratedProtocolMessageType('LocalStorageDeleteRequest', (_message.Message,), {
   'DESCRIPTOR' : _LOCALSTORAGEDELETEREQUEST,
   '__module__' : 'local.LocalStorage_pb2'
   # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageDeleteRequest)
   })
 _sym_db.RegisterMessage(LocalStorageDeleteRequest)
+
+LocalStorageDeleteResponse = _reflection.GeneratedProtocolMessageType('LocalStorageDeleteResponse', (_message.Message,), {
+  'DESCRIPTOR' : _LOCALSTORAGEDELETERESPONSE,
+  '__module__' : 'local.LocalStorage_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageDeleteResponse)
+  })
+_sym_db.RegisterMessage(LocalStorageDeleteResponse)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
@@ -90,6 +106,10 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _LOCALSTORAGECREATEREQUEST._serialized_end=442
   _LOCALSTORAGEUPDATEREQUEST._serialized_start=444
   _LOCALSTORAGEUPDATEREQUEST._serialized_end=521
-  _LOCALSTORAGEDELETEREQUEST._serialized_start=523
-  _LOCALSTORAGEDELETEREQUEST._serialized_end=569
+  _LOCALSTORAGEUPDATERESPONSE._serialized_start=523
+  _LOCALSTORAGEUPDATERESPONSE._serialized_end=570
+  _LOCALSTORAGEDELETEREQUEST._serialized_start=572
+  _LOCALSTORAGEDELETEREQUEST._serialized_end=618
+  _LOCALSTORAGEDELETERESPONSE._serialized_start=620
+  _LOCALSTORAGEDELETERESPONSE._serialized_end=664
 # @@protoc_insertion_point(module_scope)

@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 import airavata_mft_sdk.CredCommon_pb2 as CredCommon__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15s3/S3Credential.proto\x12+org.apache.airavata.mft.credential.stubs.s3\x1a\x10\x43redCommon.proto\"B\n\x08S3Secret\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x11\n\taccessKey\x18\x02 \x01(\t\x12\x11\n\tsecretKey\x18\x03 \x01(\t\"e\n\x12S3SecretGetRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"|\n\x15S3SecretCreateRequest\x12\x11\n\taccessKey\x18\x01 \x01(\t\x12\x11\n\tsecretKey\x18\x02 \x01(\t\x12=\n\nauthzToken\x18\x03 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\x8e\x01\n\x15S3SecretUpdateRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x11\n\taccessKey\x18\x02 \x01(\t\x12\x11\n\tsecretKey\x18\x03 \x01(\t\x12=\n\nauthzToken\x18\x04 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"h\n\x15S3SecretDeleteRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthTokenB\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15s3/S3Credential.proto\x12+org.apache.airavata.mft.credential.stubs.s3\x1a\x10\x43redCommon.proto\"B\n\x08S3Secret\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x11\n\taccessKey\x18\x02 \x01(\t\x12\x11\n\tsecretKey\x18\x03 \x01(\t\"e\n\x12S3SecretGetRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"|\n\x15S3SecretCreateRequest\x12\x11\n\taccessKey\x18\x01 \x01(\t\x12\x11\n\tsecretKey\x18\x02 \x01(\t\x12=\n\nauthzToken\x18\x03 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\x8e\x01\n\x15S3SecretUpdateRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x11\n\taccessKey\x18\x02 \x01(\t\x12\x11\n\tsecretKey\x18\x03 \x01(\t\x12=\n\nauthzToken\x18\x04 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"*\n\x16S3SecretUpdateResponse\x12\x10\n\x08secretId\x18\x01 \x01(\t\"h\n\x15S3SecretDeleteRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"(\n\x16S3SecretDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x42\x02P\x01\x62\x06proto3')
 
 
 
@@ -23,7 +23,9 @@ _S3SECRET = DESCRIPTOR.message_types_by_name['S3Secret']
 _S3SECRETGETREQUEST = DESCRIPTOR.message_types_by_name['S3SecretGetRequest']
 _S3SECRETCREATEREQUEST = DESCRIPTOR.message_types_by_name['S3SecretCreateRequest']
 _S3SECRETUPDATEREQUEST = DESCRIPTOR.message_types_by_name['S3SecretUpdateRequest']
+_S3SECRETUPDATERESPONSE = DESCRIPTOR.message_types_by_name['S3SecretUpdateResponse']
 _S3SECRETDELETEREQUEST = DESCRIPTOR.message_types_by_name['S3SecretDeleteRequest']
+_S3SECRETDELETERESPONSE = DESCRIPTOR.message_types_by_name['S3SecretDeleteResponse']
 S3Secret = _reflection.GeneratedProtocolMessageType('S3Secret', (_message.Message,), {
   'DESCRIPTOR' : _S3SECRET,
   '__module__' : 's3.S3Credential_pb2'
@@ -52,12 +54,26 @@ S3SecretUpdateRequest = _reflection.GeneratedProtocolMessageType('S3SecretUpdate
   })
 _sym_db.RegisterMessage(S3SecretUpdateRequest)
 
+S3SecretUpdateResponse = _reflection.GeneratedProtocolMessageType('S3SecretUpdateResponse', (_message.Message,), {
+  'DESCRIPTOR' : _S3SECRETUPDATERESPONSE,
+  '__module__' : 's3.S3Credential_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.s3.S3SecretUpdateResponse)
+  })
+_sym_db.RegisterMessage(S3SecretUpdateResponse)
+
 S3SecretDeleteRequest = _reflection.GeneratedProtocolMessageType('S3SecretDeleteRequest', (_message.Message,), {
   'DESCRIPTOR' : _S3SECRETDELETEREQUEST,
   '__module__' : 's3.S3Credential_pb2'
   # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.s3.S3SecretDeleteRequest)
   })
 _sym_db.RegisterMessage(S3SecretDeleteRequest)
+
+S3SecretDeleteResponse = _reflection.GeneratedProtocolMessageType('S3SecretDeleteResponse', (_message.Message,), {
+  'DESCRIPTOR' : _S3SECRETDELETERESPONSE,
+  '__module__' : 's3.S3Credential_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.s3.S3SecretDeleteResponse)
+  })
+_sym_db.RegisterMessage(S3SecretDeleteResponse)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
@@ -71,6 +87,10 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _S3SECRETCREATEREQUEST._serialized_end=383
   _S3SECRETUPDATEREQUEST._serialized_start=386
   _S3SECRETUPDATEREQUEST._serialized_end=528
-  _S3SECRETDELETEREQUEST._serialized_start=530
-  _S3SECRETDELETEREQUEST._serialized_end=634
+  _S3SECRETUPDATERESPONSE._serialized_start=530
+  _S3SECRETUPDATERESPONSE._serialized_end=572
+  _S3SECRETDELETEREQUEST._serialized_start=574
+  _S3SECRETDELETEREQUEST._serialized_end=678
+  _S3SECRETDELETERESPONSE._serialized_start=680
+  _S3SECRETDELETERESPONSE._serialized_end=720
 # @@protoc_insertion_point(module_scope)

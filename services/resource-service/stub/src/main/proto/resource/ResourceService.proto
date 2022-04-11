@@ -20,8 +20,6 @@ syntax = "proto3";
 option java_multiple_files = true;
 package org.apache.airavata.mft.resource.stubs.common;
 
-import "google/api/annotations.proto";
-import "google/protobuf/empty.proto";
 import "azure/AzureStorage.proto";
 import "box/BoxStorage.proto";
 import "dropbox/DropboxStorage.proto";
@@ -97,35 +95,27 @@ message GenericResourceUpdateRequest {
     org.apache.airavata.mft.common.AuthToken authzToken = 5;
 }
 
+message GenericResourceUpdateResponse {
+    string resourceId = 1;
+}
+
 message GenericResourceDeleteRequest {
     string resourceId = 1;
     org.apache.airavata.mft.common.AuthToken authzToken = 2;
 }
 
+message GenericResourceDeleteResponse {
+    bool status = 1;
+}
+
 service GenericResourceService {
     rpc getGenericResource (GenericResourceGetRequest) returns
-    (org.apache.airavata.mft.resource.stubs.common.GenericResource) {
-        option (google.api.http) = {
-           get: "/v1.0/resource"
-        };
-    }
+    (org.apache.airavata.mft.resource.stubs.common.GenericResource);
 
     rpc createGenericResource (GenericResourceCreateRequest) returns
-    (org.apache.airavata.mft.resource.stubs.common.GenericResource) {
-        option (google.api.http) = {
-           post: "/v1.0/resource"
-        };
-    }
+    (org.apache.airavata.mft.resource.stubs.common.GenericResource);
 
-    rpc updateGenericResource (GenericResourceUpdateRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-           put: "/v1.0/resource"
-        };
-    }
+    rpc updateGenericResource (GenericResourceUpdateRequest) returns (GenericResourceUpdateResponse);
 
-    rpc deleteGenericResource (GenericResourceDeleteRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-           delete: "/v1.0/resource"
-        };
-    }
+    rpc deleteGenericResource (GenericResourceDeleteRequest) returns (GenericResourceDeleteResponse);
 }

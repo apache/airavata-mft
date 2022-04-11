@@ -86,9 +86,10 @@ public class S3ServiceHandler extends S3StorageServiceGrpc.S3StorageServiceImplB
     }
 
     @Override
-    public void updateS3Storage(S3StorageUpdateRequest request, StreamObserver<Empty> responseObserver) {
+    public void updateS3Storage(S3StorageUpdateRequest request, StreamObserver<S3StorageUpdateResponse> responseObserver) {
         try {
             this.backend.updateS3Storage(request);
+            responseObserver.onNext(S3StorageUpdateResponse.newBuilder().setStorageId(request.getStorageId()).build());
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in updating the S3 storage {}", request.getStorageId(), e);
@@ -100,10 +101,11 @@ public class S3ServiceHandler extends S3StorageServiceGrpc.S3StorageServiceImplB
     }
 
     @Override
-    public void deleteS3Storage(S3StorageDeleteRequest request, StreamObserver<Empty> responseObserver) {
+    public void deleteS3Storage(S3StorageDeleteRequest request, StreamObserver<S3StorageDeleteResponse> responseObserver) {
         try {
             boolean res = this.backend.deleteS3Storage(request);
             if (res) {
+                responseObserver.onNext(S3StorageDeleteResponse.newBuilder().setStatus(true).build());
                 responseObserver.onCompleted();
             } else {
                 responseObserver.onError(new Exception("Failed to delete S3 storage with id " + request.getStorageId()));

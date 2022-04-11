@@ -85,9 +85,10 @@ public class FTPServiceHandler extends FTPStorageServiceGrpc.FTPStorageServiceIm
     }
 
     @Override
-    public void updateFTPStorage(FTPStorageUpdateRequest request, StreamObserver<Empty> responseObserver) {
+    public void updateFTPStorage(FTPStorageUpdateRequest request, StreamObserver<FTPStorageUpdateResponse> responseObserver) {
         try {
             this.backend.updateFTPStorage(request);
+            responseObserver.onNext(FTPStorageUpdateResponse.newBuilder().setStorageId(request.getStorageId()).build());
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("Failed in updating the FTP storage {}", request.getStorageId(), e);
@@ -99,10 +100,11 @@ public class FTPServiceHandler extends FTPStorageServiceGrpc.FTPStorageServiceIm
     }
 
     @Override
-    public void deleteFTPStorage(FTPStorageDeleteRequest request, StreamObserver<Empty> responseObserver) {
+    public void deleteFTPStorage(FTPStorageDeleteRequest request, StreamObserver<FTPStorageDeleteResponse> responseObserver) {
         try {
             boolean res = this.backend.deleteFTPStorage(request);
             if (res) {
+                responseObserver.onNext(FTPStorageDeleteResponse.newBuilder().setStatus(true).build());
                 responseObserver.onCompleted();
             } else {
                 logger.error("Failed to delete FTP Storage with id " + request.getStorageId());

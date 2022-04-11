@@ -12,12 +12,10 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from airavata_mft_sdk.google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
-from airavata_mft_sdk.google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from airavata_mft_sdk.local import LocalStorage_pb2 as local_dot_LocalStorage__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1flocal/LocalStorageService.proto\x12.org.apache.airavata.mft.resource.service.local\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x18local/LocalStorage.proto2\xd9\x07\n\x13LocalStorageService\x12\xd7\x01\n\x10listLocalStorage\x12M.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageListRequest\x1aN.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageListResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/v1.0/resource/local/storage\x12\xc9\x01\n\x0fgetLocalStorage\x12L.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageGetRequest\x1a\x42.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorage\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/v1.0/resource/local/storage\x12\xcf\x01\n\x12\x63reateLocalStorage\x12O.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageCreateRequest\x1a\x42.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorage\"$\x82\xd3\xe4\x93\x02\x1e\"\x1c/v1.0/resource/local/storage\x12\xa3\x01\n\x12updateLocalStorage\x12O.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageUpdateRequest\x1a\x16.google.protobuf.Empty\"$\x82\xd3\xe4\x93\x02\x1e\x1a\x1c/v1.0/resource/local/storage\x12\xa3\x01\n\x12\x64\x65leteLocalStorage\x12O.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageDeleteRequest\x1a\x16.google.protobuf.Empty\"$\x82\xd3\xe4\x93\x02\x1e*\x1c/v1.0/resource/local/storageB\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1flocal/LocalStorageService.proto\x12.org.apache.airavata.mft.resource.service.local\x1a\x18local/LocalStorage.proto2\x8f\x07\n\x13LocalStorageService\x12\xb1\x01\n\x10listLocalStorage\x12M.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageListRequest\x1aN.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageListResponse\x12\xa3\x01\n\x0fgetLocalStorage\x12L.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageGetRequest\x1a\x42.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorage\x12\xa9\x01\n\x12\x63reateLocalStorage\x12O.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageCreateRequest\x1a\x42.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorage\x12\xb7\x01\n\x12updateLocalStorage\x12O.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageUpdateRequest\x1aP.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageUpdateResponse\x12\xb7\x01\n\x12\x64\x65leteLocalStorage\x12O.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageDeleteRequest\x1aP.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageDeleteResponseB\x02P\x01\x62\x06proto3')
 
 
 
@@ -26,16 +24,6 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'P\001'
-  _LOCALSTORAGESERVICE.methods_by_name['listLocalStorage']._options = None
-  _LOCALSTORAGESERVICE.methods_by_name['listLocalStorage']._serialized_options = b'\202\323\344\223\002\036\022\034/v1.0/resource/local/storage'
-  _LOCALSTORAGESERVICE.methods_by_name['getLocalStorage']._options = None
-  _LOCALSTORAGESERVICE.methods_by_name['getLocalStorage']._serialized_options = b'\202\323\344\223\002\036\022\034/v1.0/resource/local/storage'
-  _LOCALSTORAGESERVICE.methods_by_name['createLocalStorage']._options = None
-  _LOCALSTORAGESERVICE.methods_by_name['createLocalStorage']._serialized_options = b'\202\323\344\223\002\036\"\034/v1.0/resource/local/storage'
-  _LOCALSTORAGESERVICE.methods_by_name['updateLocalStorage']._options = None
-  _LOCALSTORAGESERVICE.methods_by_name['updateLocalStorage']._serialized_options = b'\202\323\344\223\002\036\032\034/v1.0/resource/local/storage'
-  _LOCALSTORAGESERVICE.methods_by_name['deleteLocalStorage']._options = None
-  _LOCALSTORAGESERVICE.methods_by_name['deleteLocalStorage']._serialized_options = b'\202\323\344\223\002\036*\034/v1.0/resource/local/storage'
-  _LOCALSTORAGESERVICE._serialized_start=169
-  _LOCALSTORAGESERVICE._serialized_end=1154
+  _LOCALSTORAGESERVICE._serialized_start=110
+  _LOCALSTORAGESERVICE._serialized_end=1021
 # @@protoc_insertion_point(module_scope)
