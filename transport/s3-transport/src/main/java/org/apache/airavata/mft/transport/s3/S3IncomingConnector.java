@@ -94,6 +94,16 @@ public class S3IncomingConnector implements IncomingChunkedConnector, IncomingSt
     }
 
     @Override
+    public InputStream downloadChunk(int chunkId, long startByte, long endByte) throws Exception {
+        GetObjectRequest rangeObjectRequest = new GetObjectRequest(resource.getS3Storage().getBucketName(),
+                resource.getFile().getResourcePath());
+        rangeObjectRequest.setRange(startByte, endByte - 1);
+        logger.debug("Fetching input stream for chunk {} in resource {}", chunkId, resource.getResourceId());
+        S3Object object = s3Client.getObject(rangeObjectRequest);
+        return object.getObjectContent();
+    }
+
+    @Override
     public void complete() throws Exception {
 
     }

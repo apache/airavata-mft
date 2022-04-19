@@ -45,14 +45,20 @@ public class TransportMediator {
 
     private String tempDataDir = "/tmp";
     private final int chunkedSize;
+    private final boolean doChunkStreaming;
 
     private final ExecutorService chunkedExecutorService;
 
-    public TransportMediator(String tempDataDir, int concurrentTransfers, int concurrentChunkedThreads, int chunkedSize) {
+    public TransportMediator(String tempDataDir,
+                             int concurrentTransfers,
+                             int concurrentChunkedThreads,
+                             int chunkedSize,
+                             boolean doChunkStreaming) {
         this.tempDataDir = tempDataDir;
         monitorPool = Executors.newFixedThreadPool(concurrentTransfers);
         this.chunkedSize = chunkedSize;
         chunkedExecutorService = Executors.newFixedThreadPool(concurrentChunkedThreads);
+        this.doChunkStreaming = doChunkStreaming;
     }
 
     public void transferSingleThread(String transferId,
@@ -115,8 +121,10 @@ public class TransportMediator {
                         endPos = fileLength;
                     }
 
-                    String tempFile = tempDataDir + File.separator + transferId + "-" + chunkIdx;
-                    completionService.submit(new ChunkMover(inConnector, outConnector, uploadLength, endPos, chunkIdx, tempFile));
+
+                    completionService.submit(new ChunkMover(inConnector,
+                            outConnector, uploadLength, endPos, chunkIdx,
+                            transferId, doChunkStreaming));
 
                     uploadLength = endPos;
                     chunkIdx++;
@@ -221,30 +229,38 @@ public class TransportMediator {
         monitorPool.shutdown();
     }
 
-    private static class ChunkMover implements Callable<Integer> {
+    private class ChunkMover implements Callable<Integer> {
 
         IncomingChunkedConnector downloader;
         OutgoingChunkedConnector uploader;
         long startPos;
         long endPos;
         int chunkIdx;
-        String tempFile;
+        String transferId;
+        boolean useStreaming;
 
         public ChunkMover(IncomingChunkedConnector downloader, OutgoingChunkedConnector uploader, long startPos,
-                          long endPos, int chunkIdx, String tempFile) {
+                          long endPos, int chunkIdx, String transferId, boolean useStreaming) {
             this.downloader = downloader;
             this.uploader = uploader;
             this.startPos = startPos;
             this.endPos = endPos;
             this.chunkIdx = chunkIdx;
-            this.tempFile = tempFile;
+            this.transferId = transferId;
+            this.useStreaming = useStreaming;
         }
 
         @Override
         public Integer call() throws Exception {
-            downloader.downloadChunk(chunkIdx, startPos, endPos, tempFile);
-            uploader.uploadChunk(chunkIdx, startPos, endPos, tempFile);
-            new File(tempFile).delete();
+            if (useStreaming) {
+                InputStream inputStream = downloader.downloadChunk(chunkIdx, startPos, endPos);
+                uploader.uploadChunk(chunkIdx, startPos, endPos,inputStream);
+            } else {
+                String tempFile = tempDataDir + File.separator + transferId + "-" + chunkIdx;
+                downloader.downloadChunk(chunkIdx, startPos, endPos, tempFile);
+                uploader.uploadChunk(chunkIdx, startPos, endPos, tempFile);
+                new File(tempFile).delete();
+            }
             return chunkIdx;
         }
     }

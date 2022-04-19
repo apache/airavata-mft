@@ -96,6 +96,21 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
         logger.debug("Uploaded S3 chunk to path {} for resource id {}", uploadFile, resource.getResourceId());
     }
 
+    @Override
+    public void uploadChunk(int chunkId, long startByte, long endByte, InputStream inputStream) throws Exception {
+        UploadPartRequest uploadRequest = new UploadPartRequest()
+                .withBucketName(resource.getS3Storage().getBucketName())
+                .withKey(resource.getFile().getResourcePath())
+                .withUploadId(initResponse.getUploadId())
+                .withPartNumber(chunkId + 1)
+                .withFileOffset(0)
+                .withInputStream(inputStream)
+                .withPartSize(endByte - startByte);
+
+        UploadPartResult uploadResult = s3Client.uploadPart(uploadRequest);
+        this.partETags.add(uploadResult.getPartETag());
+        logger.debug("Uploaded S3 chunk {} for resource id {} using stream", chunkId, resource.getResourceId());
+    }
 
     @Override
     public void complete() throws Exception {
