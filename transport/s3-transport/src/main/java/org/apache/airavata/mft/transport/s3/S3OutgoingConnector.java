@@ -108,6 +108,7 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
                 .withPartSize(endByte - startByte);
 
         UploadPartResult uploadResult = s3Client.uploadPart(uploadRequest);
+        inputStream.close();
         this.partETags.add(uploadResult.getPartETag());
         logger.debug("Uploaded S3 chunk {} for resource id {} using stream", chunkId, resource.getResourceId());
     }

@@ -73,13 +73,6 @@ public class TransportMediator {
         try {
 
             logger.info("Stating transfer {}", transferId);
-            long start = System.currentTimeMillis();
-
-            onStatusCallback.accept(transferId, new TransferState()
-                    .setPercentage(0)
-                    .setState("RUNNING")
-                    .setUpdateTimeMils(System.currentTimeMillis())
-                    .setDescription("Transfer is ongoing"));
 
             Optional<IncomingStreamingConnector> inStreamingConnectorOp = ConnectorResolver
                     .resolveIncomingStreamingConnector(request.getSourceType());
@@ -90,6 +83,16 @@ public class TransportMediator {
                     .resolveIncomingChunkedConnector(request.getSourceType());
             Optional<OutgoingChunkedConnector> outChunkedConnectorOp = ConnectorResolver
                     .resolveOutgoingChunkedConnector(request.getDestinationType());
+
+
+
+            onStatusCallback.accept(transferId, new TransferState()
+                    .setPercentage(0)
+                    .setState("RUNNING")
+                    .setUpdateTimeMils(System.currentTimeMillis())
+                    .setDescription("Transfer is ongoing"));
+
+            long start = System.currentTimeMillis();
 
             // Give priority for chunked transfers.
             // TODO: Provide a preference at the API level
@@ -198,7 +201,9 @@ public class TransportMediator {
                 throw new Exception("No matching connector found to perform the transfer");
             }
 
-            long time = (System.currentTimeMillis() - start) / 1000;
+            long endTime = System.currentTimeMillis();
+
+            double time = (endTime - start) / 1000.0;
 
             logger.info("Transfer {} completed. Time {} S.  Speed {} MB/s", transferId, time,
                     (srcCC.getMetadata().getResourceSize() * 1.0 / time) / (1024 * 1024));
@@ -206,7 +211,7 @@ public class TransportMediator {
             onStatusCallback.accept(transferId, new TransferState()
                     .setPercentage(100)
                     .setState("COMPLETED")
-                    .setUpdateTimeMils(System.currentTimeMillis())
+                    .setUpdateTimeMils(endTime)
                     .setDescription("Transfer successfully completed"));
 
             exitingCallback.accept(transferId, true);
@@ -252,16 +257,21 @@ public class TransportMediator {
 
         @Override
         public Integer call() throws Exception {
-            if (useStreaming) {
-                InputStream inputStream = downloader.downloadChunk(chunkIdx, startPos, endPos);
-                uploader.uploadChunk(chunkIdx, startPos, endPos,inputStream);
-            } else {
-                String tempFile = tempDataDir + File.separator + transferId + "-" + chunkIdx;
-                downloader.downloadChunk(chunkIdx, startPos, endPos, tempFile);
-                uploader.uploadChunk(chunkIdx, startPos, endPos, tempFile);
-                new File(tempFile).delete();
+            try {
+                if (useStreaming) {
+                    InputStream inputStream = downloader.downloadChunk(chunkIdx, startPos, endPos);
+                    uploader.uploadChunk(chunkIdx, startPos, endPos, inputStream);
+                } else {
+                    String tempFile = tempDataDir + File.separator + transferId + "-" + chunkIdx;
+                    downloader.downloadChunk(chunkIdx, startPos, endPos, tempFile);
+                    uploader.uploadChunk(chunkIdx, startPos, endPos, tempFile);
+                    new File(tempFile).delete();
+                }
+                return chunkIdx;
+            } catch (Exception e) {
+                logger.error("Failed to transfer ", e);
+                throw e;
             }
-            return chunkIdx;
         }
     }
 }
