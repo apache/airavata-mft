@@ -25,6 +25,7 @@ import org.apache.airavata.mft.credential.service.ftp.FTPSecretServiceGrpc;
 import org.apache.airavata.mft.credential.service.gcs.GCSSecretServiceGrpc;
 import org.apache.airavata.mft.credential.service.s3.S3SecretServiceGrpc;
 import org.apache.airavata.mft.credential.service.scp.SCPSecretServiceGrpc;
+import org.apache.airavata.mft.credential.service.swift.SwiftSecretServiceGrpc;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -65,6 +66,9 @@ public class SecretServiceClient implements Closeable {
         return DropboxSecretServiceGrpc.newBlockingStub(channel);
     }
 
+    public SwiftSecretServiceGrpc.SwiftSecretServiceBlockingStub swift() {
+        return SwiftSecretServiceGrpc.newBlockingStub(channel);
+    }
 
     @Override
     public void close() throws IOException {

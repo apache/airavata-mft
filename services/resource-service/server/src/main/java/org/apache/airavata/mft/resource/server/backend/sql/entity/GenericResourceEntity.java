@@ -15,7 +15,7 @@ public class GenericResourceEntity {
     }
 
     public enum StorageType {
-        S3, SCP, LOCAL, FTP, BOX, DROPBOX, GCS, AZURE;
+        S3, SCP, LOCAL, FTP, BOX, DROPBOX, GCS, AZURE, SWIFT;
     }
 
     @Id

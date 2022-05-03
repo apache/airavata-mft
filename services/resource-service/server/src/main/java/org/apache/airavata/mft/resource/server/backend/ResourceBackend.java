@@ -26,6 +26,7 @@ import org.apache.airavata.mft.resource.stubs.gcs.storage.*;
 import org.apache.airavata.mft.resource.stubs.local.storage.*;
 import org.apache.airavata.mft.resource.stubs.s3.storage.*;
 import org.apache.airavata.mft.resource.stubs.scp.storage.*;
+import org.apache.airavata.mft.resource.stubs.swift.storage.*;
 import org.apache.airavata.mft.storage.stubs.storagesecret.*;
 
 import java.util.Optional;
@@ -93,4 +94,10 @@ public interface ResourceBackend {
     FTPStorage createFTPStorage(FTPStorageCreateRequest request) throws Exception;
     boolean updateFTPStorage(FTPStorageUpdateRequest request) throws Exception;
     boolean deleteFTPStorage(FTPStorageDeleteRequest request) throws Exception;
+
+    public SwiftStorageListResponse listSwiftStorage(SwiftStorageListRequest request) throws Exception;
+    Optional<SwiftStorage> getSwiftStorage(SwiftStorageGetRequest request) throws Exception;
+    SwiftStorage createSwiftStorage(SwiftStorageCreateRequest request) throws Exception;
+    boolean updateSwiftStorage(SwiftStorageUpdateRequest request) throws Exception;
+    boolean deleteSwiftStorage(SwiftStorageDeleteRequest request) throws Exception;
 }

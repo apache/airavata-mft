@@ -29,6 +29,7 @@ import org.apache.airavata.mft.resource.stubs.gcs.storage.*;
 import org.apache.airavata.mft.resource.stubs.local.storage.*;
 import org.apache.airavata.mft.resource.stubs.s3.storage.*;
 import org.apache.airavata.mft.resource.stubs.scp.storage.*;
+import org.apache.airavata.mft.resource.stubs.swift.storage.*;
 import org.apache.airavata.mft.storage.stubs.storagesecret.*;
 import org.dozer.DozerBeanMapper;
 import org.slf4j.Logger;
@@ -52,6 +53,9 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Autowired
     private S3StorageRepository s3StorageRepository;
+
+    @Autowired
+    private SwiftStorageRepository swiftStorageRepository;
 
     @Autowired
     private FTPStorageRepository ftpStorageRepository;
@@ -451,4 +455,36 @@ public class SQLResourceBackend implements ResourceBackend {
         return true;
     }
 
+    @Override
+    public SwiftStorageListResponse listSwiftStorage(SwiftStorageListRequest request) throws Exception {
+        SwiftStorageListResponse.Builder respBuilder = SwiftStorageListResponse.newBuilder();
+        List<SwiftStorageEntity> all = swiftStorageRepository.findAll(PageRequest.of(request.getOffset(), request.getLimit()));
+        all.forEach(ety -> respBuilder.addStorages(mapper.map(ety, SwiftStorage.newBuilder().getClass())));
+        return respBuilder.build();
+    }
+
+    @Override
+    public Optional<SwiftStorage> getSwiftStorage(SwiftStorageGetRequest request) throws Exception {
+        Optional<SwiftStorageEntity> entity = swiftStorageRepository.findByStorageId(request.getStorageId());
+        return entity.map(e -> mapper.map(e, SwiftStorage.newBuilder().getClass()).build());
+    }
+
+    @Override
+    public SwiftStorage createSwiftStorage(SwiftStorageCreateRequest request) throws Exception {
+        SwiftStorageEntity savedEntity = swiftStorageRepository.save(mapper.map(request, SwiftStorageEntity.class));
+        return mapper.map(savedEntity, SwiftStorage.newBuilder().getClass()).build();
+    }
+
+    @Override
+    public boolean updateSwiftStorage(SwiftStorageUpdateRequest request) throws Exception {
+        swiftStorageRepository.save(mapper.map(request, SwiftStorageEntity.class));
+        return true;
+    }
+
+    @Override
+    public boolean deleteSwiftStorage(SwiftStorageDeleteRequest request) throws Exception {
+        swiftStorageRepository.deleteById(request.getStorageId());
+        resourceRepository.deleteByStorageIdAndStorageType(request.getStorageId(), GenericResourceEntity.StorageType.SWIFT);
+        return true;
+    }
 }

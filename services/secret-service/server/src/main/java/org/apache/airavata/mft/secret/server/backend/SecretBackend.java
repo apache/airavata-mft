@@ -24,6 +24,7 @@ import org.apache.airavata.mft.credential.stubs.ftp.*;
 import org.apache.airavata.mft.credential.stubs.gcs.*;
 import org.apache.airavata.mft.credential.stubs.s3.*;
 import org.apache.airavata.mft.credential.stubs.scp.*;
+import org.apache.airavata.mft.credential.stubs.swift.*;
 
 import java.util.Optional;
 
@@ -66,4 +67,9 @@ public interface SecretBackend {
     FTPSecret createFTPSecret(FTPSecretCreateRequest request) throws Exception;
     boolean updateFTPSecret(FTPSecretUpdateRequest request) throws Exception;
     boolean deleteFTPSecret(FTPSecretDeleteRequest request) throws Exception;
+
+    Optional<SwiftSecret> getSwiftSecret(SwiftSecretGetRequest request) throws Exception;
+    SwiftSecret createSwiftSecret(SwiftSecretCreateRequest request) throws Exception;
+    boolean updateSwiftSecret(SwiftSecretUpdateRequest request) throws Exception;
+    boolean deleteSwiftSecret(SwiftSecretDeleteRequest request) throws Exception;
 }

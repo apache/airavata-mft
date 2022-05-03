@@ -16,6 +16,7 @@ import org.apache.airavata.mft.credential.stubs.ftp.*;
 import org.apache.airavata.mft.credential.stubs.gcs.*;
 import org.apache.airavata.mft.credential.stubs.s3.*;
 import org.apache.airavata.mft.credential.stubs.scp.*;
+import org.apache.airavata.mft.credential.stubs.swift.*;
 import org.apache.airavata.mft.secret.server.backend.SecretBackend;
 import org.apache.airavata.mft.secret.server.backend.custos.auth.AgentAuthenticationHandler;
 import org.apache.airavata.mft.secret.server.backend.custos.auth.AuthConfig;
@@ -600,6 +601,26 @@ public class CustosSecretBackend implements SecretBackend {
     @Override
     public boolean deleteFTPSecret(FTPSecretDeleteRequest request) throws Exception {
         return false;
+    }
+
+    @Override
+    public Optional<SwiftSecret> getSwiftSecret(SwiftSecretGetRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public SwiftSecret createSwiftSecret(SwiftSecretCreateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean updateSwiftSecret(SwiftSecretUpdateRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public boolean deleteSwiftSecret(SwiftSecretDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 
 

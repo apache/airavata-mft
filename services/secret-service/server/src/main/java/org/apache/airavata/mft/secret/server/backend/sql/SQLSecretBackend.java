@@ -24,13 +24,20 @@ import org.apache.airavata.mft.credential.stubs.ftp.*;
 import org.apache.airavata.mft.credential.stubs.gcs.*;
 import org.apache.airavata.mft.credential.stubs.s3.*;
 import org.apache.airavata.mft.credential.stubs.scp.*;
+import org.apache.airavata.mft.credential.stubs.swift.*;
 import org.apache.airavata.mft.secret.server.backend.SecretBackend;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.FTPSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.S3SecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.SCPSecretEntity;
+import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftAuthCredentialSecretEntity;
+import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftPasswordSecretEntity;
+import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.FTPSecretRepository;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.S3SecretRepository;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.SCPSecretRepository;
+import org.apache.airavata.mft.secret.server.backend.sql.repository.swift.SwiftAuthCredentialSecretRepository;
+import org.apache.airavata.mft.secret.server.backend.sql.repository.swift.SwiftPasswordSecretRepository;
+import org.apache.airavata.mft.secret.server.backend.sql.repository.swift.SwiftSecretRepository;
 import org.dozer.DozerBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +57,15 @@ public class SQLSecretBackend implements SecretBackend {
 
     @Autowired
     private S3SecretRepository s3SecretRepository;
+
+    @Autowired
+    private SwiftSecretRepository swiftSecretRepository;
+
+    @Autowired
+    private SwiftPasswordSecretRepository swiftPasswordSecretRepository;
+
+    @Autowired
+    private SwiftAuthCredentialSecretRepository swiftAuthCredentialSecretRepository;
 
     private DozerBeanMapper mapper = new DozerBeanMapper();
 
@@ -189,6 +205,109 @@ public class SQLSecretBackend implements SecretBackend {
     @Override
     public boolean deleteDropboxSecret(DropboxSecretDeleteRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public Optional<SwiftSecret> getSwiftSecret(SwiftSecretGetRequest request) throws Exception {
+        Optional<SwiftSecretEntity> secEtyOp = swiftSecretRepository.findBySecretId(request.getSecretId());
+        if (secEtyOp.isPresent()) {
+            SwiftSecret.Builder secBuilder = SwiftSecret.newBuilder();
+            SwiftSecretEntity secEty = secEtyOp.get();
+            secBuilder.setSecretId(secEty.getSecretId());
+
+            switch (secEty.getInternalSecretType()) {
+                case PASSWORD:
+                    Optional<SwiftPasswordSecretEntity> passSec = swiftPasswordSecretRepository
+                            .findBySecretId(secEty.getInternalSecretId());
+                    if (passSec.isPresent()) {
+                        SwiftPasswordSecret.Builder passBuilder = SwiftPasswordSecret.newBuilder();
+                        mapper.map(passSec.get(), passBuilder);
+                        secBuilder.setPasswordSecret(passBuilder.build());
+                    } else {
+                        throw new Exception("Can not find a swift password secret with id " + secEty.getInternalSecretId());
+                    }
+                    break;
+                case AUTH_CREDENTIAL:
+                    Optional<SwiftAuthCredentialSecretEntity> authCredSec = swiftAuthCredentialSecretRepository
+                            .findBySecretId(secEty.getInternalSecretId());
+                    if (authCredSec.isPresent()) {
+                        SwiftAuthCredentialSecret.Builder authBuilder = SwiftAuthCredentialSecret.newBuilder();
+                        mapper.map(authCredSec.get(), authBuilder);
+                        secBuilder.setAuthCredentialSecret(authBuilder.build());
+                    } else {
+                        throw new Exception("Can not find a swift auth cred secret with id " + secEty.getInternalSecretId());
+                    }
+                    break;
+                default:
+                    throw new Exception("Non compatible internal secret type : " + secEty.getInternalSecretType());
+            }
+            return Optional.of(secBuilder.build());
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public SwiftSecret createSwiftSecret(SwiftSecretCreateRequest request) throws Exception {
+
+        SwiftSecretEntity secEty = new SwiftSecretEntity();
+        SwiftAuthCredentialSecretEntity authCredSaved = null;
+        SwiftPasswordSecretEntity passSecSaved = null;
+
+        switch (request.getSecretCase()) {
+            case PASSWORDSECRET:
+                passSecSaved = swiftPasswordSecretRepository
+                        .save(mapper.map(request.getPasswordSecret(), SwiftPasswordSecretEntity.class));
+                secEty.setInternalSecretId(passSecSaved.getSecretId());
+                secEty.setInternalSecretType(SwiftSecretEntity.InternalSecretType.PASSWORD);
+                break;
+            case AUTHCREDENTIALSECRET:
+                authCredSaved = swiftAuthCredentialSecretRepository
+                        .save(mapper.map(request.getAuthCredentialSecret(), SwiftAuthCredentialSecretEntity.class));
+                secEty.setInternalSecretId(authCredSaved.getSecretId());
+                secEty.setInternalSecretType(SwiftSecretEntity.InternalSecretType.AUTH_CREDENTIAL);
+                break;
+            case SECRET_NOT_SET:
+                throw new Exception("No internal secret is set");
+        }
+
+        SwiftSecretEntity savedEty = swiftSecretRepository.save(secEty);
+        SwiftSecret.Builder secBuilder = SwiftSecret.newBuilder();
+        secBuilder.setSecretId(savedEty.getSecretId());
+        switch (savedEty.getInternalSecretType()) {
+            case PASSWORD:
+                secBuilder.setPasswordSecret(mapper.map(passSecSaved, SwiftPasswordSecret.newBuilder().getClass()));
+                break;
+            case AUTH_CREDENTIAL:
+                secBuilder.setAuthCredentialSecret(mapper.map(authCredSaved, SwiftAuthCredentialSecret.newBuilder().getClass()));
+                break;
+        }
+
+        return secBuilder.build();
+    }
+
+    @Override
+    public boolean updateSwiftSecret(SwiftSecretUpdateRequest request) throws Exception {
+        return false;
+    }
+
+    @Override
+    public boolean deleteSwiftSecret(SwiftSecretDeleteRequest request) throws Exception {
+        Optional<SwiftSecretEntity> secOp = swiftSecretRepository.findBySecretId(request.getSecretId());
+        if (secOp.isPresent()) {
+            swiftSecretRepository.deleteById(request.getSecretId());
+            switch (secOp.get().getInternalSecretType()) {
+                case AUTH_CREDENTIAL:
+                    swiftAuthCredentialSecretRepository.deleteById(secOp.get().getInternalSecretId());
+                    break;
+                case PASSWORD:
+                    swiftPasswordSecretRepository.deleteById(secOp.get().getInternalSecretId());
+                    break;
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override

@@ -9,6 +9,7 @@ import org.apache.airavata.mft.resource.service.gcs.GCSStorageServiceGrpc;
 import org.apache.airavata.mft.resource.service.local.LocalStorageServiceGrpc;
 import org.apache.airavata.mft.resource.service.s3.S3StorageServiceGrpc;
 import org.apache.airavata.mft.resource.service.scp.SCPStorageServiceGrpc;
+import org.apache.airavata.mft.resource.service.swift.SwiftStorageServiceGrpc;
 import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretServiceGrpc;
 
 import java.io.Closeable;
@@ -56,6 +57,10 @@ public class StorageServiceClient implements Closeable {
 
     public DropboxStorageServiceGrpc.DropboxStorageServiceBlockingStub dropbox() {
         return DropboxStorageServiceGrpc.newBlockingStub(channel);
+    }
+
+    public SwiftStorageServiceGrpc.SwiftStorageServiceBlockingStub swift() {
+        return SwiftStorageServiceGrpc.newBlockingStub(channel);
     }
 
     @Override
