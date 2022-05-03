@@ -149,6 +149,8 @@
         <sshj>0.27.0</sshj>
         <mariadb.jdbc>2.5.1</mariadb.jdbc>
         <custos.clients.version>1.1-SNAPSHOT</custos.clients.version>
+        <jclouds.version>2.5.0</jclouds.version>
+        <commons.io.version>2.6</commons.io.version>
     </properties>
 
 </project>

@@ -51,6 +51,9 @@ public final class MetadataCollectorResolver {
             case "FTP":
                 className = "org.apache.airavata.mft.transport.ftp.FTPMetadataCollector";
                 break;
+            case "SWIFT":
+                className = "org.apache.airavata.mft.transport.swift.SwiftMetadataCollector";
+                break;
         }
 
         if (className != null) {

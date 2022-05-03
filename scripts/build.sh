@@ -18,7 +18,7 @@
 # under the License.
 
 cd ../
-#mvn clean install
+mvn clean install
 rm -rf airavata-mft
 mkdir -p airavata-mft
 cp agent/target/MFT-Agent-0.01-bin.zip airavata-mft/

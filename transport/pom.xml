@@ -41,6 +41,7 @@
         <module>gcp-transport</module>
         <module>ftp-transport</module>
         <module>dropbox-transport</module>
+        <module>swift-transport</module>
     </modules>
     <dependencies>
         <dependency>

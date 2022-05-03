@@ -36,7 +36,7 @@
         <dependency>
             <groupId>org.apache.airavata</groupId>
             <artifactId>mft-scp-transport</artifactId>
-            <version>0.01-SNAPSHOT</version>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.custos</groupId>
@@ -47,27 +47,27 @@
         <dependency>
             <groupId>org.apache.airavata</groupId>
             <artifactId>mft-local-transport</artifactId>
-            <version>0.01-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.airavata</groupId>
             <artifactId>mft-s3-transport</artifactId>
-            <version>0.01-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.airavata</groupId>
             <artifactId>mft-box-transport</artifactId>
-            <version>0.01-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.airavata</groupId>
             <artifactId>mft-azure-transport</artifactId>
-            <version>0.01-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.airavata</groupId>
             <artifactId>mft-gcp-transport</artifactId>
-            <version>0.01-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.airavata</groupId>
@@ -77,12 +77,17 @@
         <dependency>
             <groupId>org.apache.airavata</groupId>
             <artifactId>mft-ftp-transport</artifactId>
-            <version>0.01-SNAPSHOT</version>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
+            <artifactId>mft-swift-transport</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.airavata</groupId>
             <artifactId>mft-common-clients</artifactId>
-            <version>0.01-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.orbitz.consul</groupId>

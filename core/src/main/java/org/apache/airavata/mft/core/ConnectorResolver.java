@@ -70,6 +70,9 @@ public final class ConnectorResolver {
             case "S3":
                 className = "org.apache.airavata.mft.transport.s3.S3IncomingConnector";
                 break;
+            case "SWIFT":
+                className = "org.apache.airavata.mft.transport.swift.SwiftIncomingConnector";
+                break;
         }
 
         if (className != null) {
@@ -86,6 +89,9 @@ public final class ConnectorResolver {
         switch (type) {
             case "S3":
                 className = "org.apache.airavata.mft.transport.s3.S3OutgoingConnector";
+                break;
+            case "SWIFT":
+                className = "org.apache.airavata.mft.transport.swift.SwiftOutgoingConnector";
                 break;
         }
 
