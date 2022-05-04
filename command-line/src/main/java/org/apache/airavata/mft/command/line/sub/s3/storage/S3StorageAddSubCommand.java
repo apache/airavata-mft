@@ -20,7 +20,7 @@ public class S3StorageAddSubCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"-n", "--name"}, description = "Storage Name")
     private String remoteName;
 
-    @CommandLine.Option(names = {"-b", "--bucker"}, description = "Bucket Name")
+    @CommandLine.Option(names = {"-b", "--bucket"}, description = "Bucket Name")
     private String bucket;
 
     @CommandLine.Option(names = {"-r", "--region"}, description = "Region")
