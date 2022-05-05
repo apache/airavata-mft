@@ -140,6 +140,12 @@ public class SQLResourceBackend implements ResourceBackend {
                 builder.setAzureStorage(azureStorage.orElseThrow(() -> new Exception("Could not find a Azure storage with id "
                         + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
                 break;
+            case SWIFT:
+                Optional<SwiftStorage> swiftStorage = getSwiftStorage(SwiftStorageGetRequest.newBuilder()
+                        .setStorageId(resourceEty.getStorageId()).build());
+                builder.setSwiftStorage(swiftStorage.orElseThrow(() -> new Exception("Could not find a Swift storage with id "
+                        + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
+                break;
         }
 
         return builder.build();
