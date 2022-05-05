@@ -38,7 +38,7 @@ public class SwiftAddSubCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"-p", "--password"}, description = "Password (Password Credentials")
     private String password;
 
-    @CommandLine.Option(names = {"-p", "--projectId"}, description = "Project Id (Password Credentials")
+    @CommandLine.Option(names = {"-pid", "--projectId"}, description = "Project Id (Password Credentials")
     private String projectId;
 
     @CommandLine.Option(names = {"-d", "--domainId"}, description = "Domain Id (Password Credentials")

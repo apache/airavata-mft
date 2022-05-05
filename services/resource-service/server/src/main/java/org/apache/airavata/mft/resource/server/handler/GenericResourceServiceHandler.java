@@ -26,7 +26,7 @@ public class GenericResourceServiceHandler extends GenericResourceServiceGrpc.Ge
                 responseObserver.onCompleted();
             }, () -> {
                 responseObserver.onError(Status.INTERNAL
-                        .withDescription("No GCS Resource with id " + request.getResourceId())
+                        .withDescription("No Resource with id " + request.getResourceId())
                         .asRuntimeException());
             });
         } catch (Exception e) {
