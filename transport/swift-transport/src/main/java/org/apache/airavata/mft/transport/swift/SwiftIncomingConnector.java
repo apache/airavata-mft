@@ -126,14 +126,14 @@ public class SwiftIncomingConnector implements IncomingChunkedConnector {
 
         InputStream inputStream = swiftObject.getPayload().openStream();
 
-        File targetFile = new File("/tmp/targetFile.tmp");
+        File targetFile = new File(downloadFile);
 
         java.nio.file.Files.copy(
                 inputStream,
                 targetFile.toPath(),
                 StandardCopyOption.REPLACE_EXISTING);
 
-        IOUtils.closeQuietly(inputStream);
+        inputStream.close();
     }
 
     @Override
