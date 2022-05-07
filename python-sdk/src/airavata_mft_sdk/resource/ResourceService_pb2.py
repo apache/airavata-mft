@@ -20,10 +20,11 @@ from airavata_mft_sdk.gcs import GCSStorage_pb2 as gcs_dot_GCSStorage__pb2
 from airavata_mft_sdk.local import LocalStorage_pb2 as local_dot_LocalStorage__pb2
 from airavata_mft_sdk.s3 import S3Storage_pb2 as s3_dot_S3Storage__pb2
 from airavata_mft_sdk.scp import SCPStorage_pb2 as scp_dot_SCPStorage__pb2
+from airavata_mft_sdk.swift import SwiftStorage_pb2 as swift_dot_SwiftStorage__pb2
 import airavata_mft_sdk.CredCommon_pb2 as CredCommon__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1eresource/ResourceService.proto\x12-org.apache.airavata.mft.resource.stubs.common\x1a\x18\x61zure/AzureStorage.proto\x1a\x14\x62ox/BoxStorage.proto\x1a\x1c\x64ropbox/DropboxStorage.proto\x1a\x14\x66tp/FTPStorage.proto\x1a\x14gcs/GCSStorage.proto\x1a\x18local/LocalStorage.proto\x1a\x12s3/S3Storage.proto\x1a\x14scp/SCPStorage.proto\x1a\x10\x43redCommon.proto\"$\n\x0c\x46ileResource\x12\x14\n\x0cresourcePath\x18\x01 \x01(\t\")\n\x11\x44irectoryResource\x12\x14\n\x0cresourcePath\x18\x01 \x01(\t\"\xa5\x07\n\x0fGenericResource\x12\x12\n\nresourceId\x18\x01 \x01(\t\x12K\n\x04\x66ile\x18\x02 \x01(\x0b\x32;.org.apache.airavata.mft.resource.stubs.common.FileResourceH\x00\x12U\n\tdirectory\x18\x03 \x01(\x0b\x32@.org.apache.airavata.mft.resource.stubs.common.DirectoryResourceH\x00\x12`\n\x0e\x64ropboxStorage\x18\x04 \x01(\x0b\x32\x46.org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageH\x01\x12T\n\nftpStorage\x18\x05 \x01(\x0b\x32>.org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageH\x01\x12T\n\ngcsStorage\x18\x06 \x01(\x0b\x32>.org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageH\x01\x12Z\n\x0clocalStorage\x18\x07 \x01(\x0b\x32\x42.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageH\x01\x12Q\n\ts3Storage\x18\x08 \x01(\x0b\x32<.org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageH\x01\x12T\n\nscpStorage\x18\t \x01(\x0b\x32>.org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageH\x01\x12T\n\nboxStorage\x18\n \x01(\x0b\x32>.org.apache.airavata.mft.resource.stubs.box.storage.BoxStorageH\x01\x12Z\n\x0c\x61zureStorage\x18\x0b \x01(\x0b\x32\x42.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageH\x01\x42\n\n\x08resourceB\t\n\x07storage\"n\n\x19GenericResourceGetRequest\x12\x12\n\nresourceId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\xec\x03\n\x1cGenericResourceCreateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12K\n\x04\x66ile\x18\x02 \x01(\x0b\x32;.org.apache.airavata.mft.resource.stubs.common.FileResourceH\x00\x12U\n\tdirectory\x18\x03 \x01(\x0b\x32@.org.apache.airavata.mft.resource.stubs.common.DirectoryResourceH\x00\x12=\n\nauthzToken\x18\x04 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\x12l\n\x0bstorageType\x18\x05 \x01(\x0e\x32W.org.apache.airavata.mft.resource.stubs.common.GenericResourceCreateRequest.StorageType\"\\\n\x0bStorageType\x12\x06\n\x02S3\x10\x00\x12\x07\n\x03SCP\x10\x01\x12\x07\n\x03\x46TP\x10\x02\x12\t\n\x05LOCAL\x10\x03\x12\x07\n\x03\x42OX\x10\x04\x12\x0b\n\x07\x44ROPBOX\x10\x05\x12\x07\n\x03GCS\x10\x06\x12\t\n\x05\x41ZURE\x10\x07\x42\n\n\x08resource\"\xb4\x02\n\x1cGenericResourceUpdateRequest\x12\x12\n\nresourceId\x18\x01 \x01(\t\x12\x11\n\tstorageId\x18\x02 \x01(\t\x12K\n\x04\x66ile\x18\x03 \x01(\x0b\x32;.org.apache.airavata.mft.resource.stubs.common.FileResourceH\x00\x12U\n\tdirectory\x18\x04 \x01(\x0b\x32@.org.apache.airavata.mft.resource.stubs.common.DirectoryResourceH\x00\x12=\n\nauthzToken\x18\x05 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthTokenB\n\n\x08resource\"3\n\x1dGenericResourceUpdateResponse\x12\x12\n\nresourceId\x18\x01 \x01(\t\"q\n\x1cGenericResourceDeleteRequest\x12\x12\n\nresourceId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"/\n\x1dGenericResourceDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x32\xca\x05\n\x16GenericResourceService\x12\x9e\x01\n\x12getGenericResource\x12H.org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest\x1a>.org.apache.airavata.mft.resource.stubs.common.GenericResource\x12\xa4\x01\n\x15\x63reateGenericResource\x12K.org.apache.airavata.mft.resource.stubs.common.GenericResourceCreateRequest\x1a>.org.apache.airavata.mft.resource.stubs.common.GenericResource\x12\xb2\x01\n\x15updateGenericResource\x12K.org.apache.airavata.mft.resource.stubs.common.GenericResourceUpdateRequest\x1aL.org.apache.airavata.mft.resource.stubs.common.GenericResourceUpdateResponse\x12\xb2\x01\n\x15\x64\x65leteGenericResource\x12K.org.apache.airavata.mft.resource.stubs.common.GenericResourceDeleteRequest\x1aL.org.apache.airavata.mft.resource.stubs.common.GenericResourceDeleteResponseB\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1eresource/ResourceService.proto\x12-org.apache.airavata.mft.resource.stubs.common\x1a\x18\x61zure/AzureStorage.proto\x1a\x14\x62ox/BoxStorage.proto\x1a\x1c\x64ropbox/DropboxStorage.proto\x1a\x14\x66tp/FTPStorage.proto\x1a\x14gcs/GCSStorage.proto\x1a\x18local/LocalStorage.proto\x1a\x12s3/S3Storage.proto\x1a\x14scp/SCPStorage.proto\x1a\x18swift/SwiftStorage.proto\x1a\x10\x43redCommon.proto\"$\n\x0c\x46ileResource\x12\x14\n\x0cresourcePath\x18\x01 \x01(\t\")\n\x11\x44irectoryResource\x12\x14\n\x0cresourcePath\x18\x01 \x01(\t\"\x81\x08\n\x0fGenericResource\x12\x12\n\nresourceId\x18\x01 \x01(\t\x12K\n\x04\x66ile\x18\x02 \x01(\x0b\x32;.org.apache.airavata.mft.resource.stubs.common.FileResourceH\x00\x12U\n\tdirectory\x18\x03 \x01(\x0b\x32@.org.apache.airavata.mft.resource.stubs.common.DirectoryResourceH\x00\x12`\n\x0e\x64ropboxStorage\x18\x04 \x01(\x0b\x32\x46.org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageH\x01\x12T\n\nftpStorage\x18\x05 \x01(\x0b\x32>.org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageH\x01\x12T\n\ngcsStorage\x18\x06 \x01(\x0b\x32>.org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageH\x01\x12Z\n\x0clocalStorage\x18\x07 \x01(\x0b\x32\x42.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageH\x01\x12Q\n\ts3Storage\x18\x08 \x01(\x0b\x32<.org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageH\x01\x12T\n\nscpStorage\x18\t \x01(\x0b\x32>.org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageH\x01\x12T\n\nboxStorage\x18\n \x01(\x0b\x32>.org.apache.airavata.mft.resource.stubs.box.storage.BoxStorageH\x01\x12Z\n\x0c\x61zureStorage\x18\x0b \x01(\x0b\x32\x42.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageH\x01\x12Z\n\x0cswiftStorage\x18\x0c \x01(\x0b\x32\x42.org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorageH\x01\x42\n\n\x08resourceB\t\n\x07storage\"n\n\x19GenericResourceGetRequest\x12\x12\n\nresourceId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\xf7\x03\n\x1cGenericResourceCreateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12K\n\x04\x66ile\x18\x02 \x01(\x0b\x32;.org.apache.airavata.mft.resource.stubs.common.FileResourceH\x00\x12U\n\tdirectory\x18\x03 \x01(\x0b\x32@.org.apache.airavata.mft.resource.stubs.common.DirectoryResourceH\x00\x12=\n\nauthzToken\x18\x04 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\x12l\n\x0bstorageType\x18\x05 \x01(\x0e\x32W.org.apache.airavata.mft.resource.stubs.common.GenericResourceCreateRequest.StorageType\"g\n\x0bStorageType\x12\x06\n\x02S3\x10\x00\x12\x07\n\x03SCP\x10\x01\x12\x07\n\x03\x46TP\x10\x02\x12\t\n\x05LOCAL\x10\x03\x12\x07\n\x03\x42OX\x10\x04\x12\x0b\n\x07\x44ROPBOX\x10\x05\x12\x07\n\x03GCS\x10\x06\x12\t\n\x05\x41ZURE\x10\x07\x12\t\n\x05SWIFT\x10\x08\x42\n\n\x08resource\"\xb4\x02\n\x1cGenericResourceUpdateRequest\x12\x12\n\nresourceId\x18\x01 \x01(\t\x12\x11\n\tstorageId\x18\x02 \x01(\t\x12K\n\x04\x66ile\x18\x03 \x01(\x0b\x32;.org.apache.airavata.mft.resource.stubs.common.FileResourceH\x00\x12U\n\tdirectory\x18\x04 \x01(\x0b\x32@.org.apache.airavata.mft.resource.stubs.common.DirectoryResourceH\x00\x12=\n\nauthzToken\x18\x05 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthTokenB\n\n\x08resource\"3\n\x1dGenericResourceUpdateResponse\x12\x12\n\nresourceId\x18\x01 \x01(\t\"q\n\x1cGenericResourceDeleteRequest\x12\x12\n\nresourceId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"/\n\x1dGenericResourceDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x32\xca\x05\n\x16GenericResourceService\x12\x9e\x01\n\x12getGenericResource\x12H.org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest\x1a>.org.apache.airavata.mft.resource.stubs.common.GenericResource\x12\xa4\x01\n\x15\x63reateGenericResource\x12K.org.apache.airavata.mft.resource.stubs.common.GenericResourceCreateRequest\x1a>.org.apache.airavata.mft.resource.stubs.common.GenericResource\x12\xb2\x01\n\x15updateGenericResource\x12K.org.apache.airavata.mft.resource.stubs.common.GenericResourceUpdateRequest\x1aL.org.apache.airavata.mft.resource.stubs.common.GenericResourceUpdateResponse\x12\xb2\x01\n\x15\x64\x65leteGenericResource\x12K.org.apache.airavata.mft.resource.stubs.common.GenericResourceDeleteRequest\x1aL.org.apache.airavata.mft.resource.stubs.common.GenericResourceDeleteResponseB\x02P\x01\x62\x06proto3')
 
 
 
@@ -105,26 +106,26 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'P\001'
-  _FILERESOURCE._serialized_start=289
-  _FILERESOURCE._serialized_end=325
-  _DIRECTORYRESOURCE._serialized_start=327
-  _DIRECTORYRESOURCE._serialized_end=368
-  _GENERICRESOURCE._serialized_start=371
-  _GENERICRESOURCE._serialized_end=1304
-  _GENERICRESOURCEGETREQUEST._serialized_start=1306
-  _GENERICRESOURCEGETREQUEST._serialized_end=1416
-  _GENERICRESOURCECREATEREQUEST._serialized_start=1419
-  _GENERICRESOURCECREATEREQUEST._serialized_end=1911
-  _GENERICRESOURCECREATEREQUEST_STORAGETYPE._serialized_start=1807
-  _GENERICRESOURCECREATEREQUEST_STORAGETYPE._serialized_end=1899
-  _GENERICRESOURCEUPDATEREQUEST._serialized_start=1914
-  _GENERICRESOURCEUPDATEREQUEST._serialized_end=2222
-  _GENERICRESOURCEUPDATERESPONSE._serialized_start=2224
-  _GENERICRESOURCEUPDATERESPONSE._serialized_end=2275
-  _GENERICRESOURCEDELETEREQUEST._serialized_start=2277
-  _GENERICRESOURCEDELETEREQUEST._serialized_end=2390
-  _GENERICRESOURCEDELETERESPONSE._serialized_start=2392
-  _GENERICRESOURCEDELETERESPONSE._serialized_end=2439
-  _GENERICRESOURCESERVICE._serialized_start=2442
-  _GENERICRESOURCESERVICE._serialized_end=3156
+  _FILERESOURCE._serialized_start=315
+  _FILERESOURCE._serialized_end=351
+  _DIRECTORYRESOURCE._serialized_start=353
+  _DIRECTORYRESOURCE._serialized_end=394
+  _GENERICRESOURCE._serialized_start=397
+  _GENERICRESOURCE._serialized_end=1422
+  _GENERICRESOURCEGETREQUEST._serialized_start=1424
+  _GENERICRESOURCEGETREQUEST._serialized_end=1534
+  _GENERICRESOURCECREATEREQUEST._serialized_start=1537
+  _GENERICRESOURCECREATEREQUEST._serialized_end=2040
+  _GENERICRESOURCECREATEREQUEST_STORAGETYPE._serialized_start=1925
+  _GENERICRESOURCECREATEREQUEST_STORAGETYPE._serialized_end=2028
+  _GENERICRESOURCEUPDATEREQUEST._serialized_start=2043
+  _GENERICRESOURCEUPDATEREQUEST._serialized_end=2351
+  _GENERICRESOURCEUPDATERESPONSE._serialized_start=2353
+  _GENERICRESOURCEUPDATERESPONSE._serialized_end=2404
+  _GENERICRESOURCEDELETEREQUEST._serialized_start=2406
+  _GENERICRESOURCEDELETEREQUEST._serialized_end=2519
+  _GENERICRESOURCEDELETERESPONSE._serialized_start=2521
+  _GENERICRESOURCEDELETERESPONSE._serialized_end=2568
+  _GENERICRESOURCESERVICE._serialized_start=2571
+  _GENERICRESOURCESERVICE._serialized_end=3285
 # @@protoc_insertion_point(module_scope)

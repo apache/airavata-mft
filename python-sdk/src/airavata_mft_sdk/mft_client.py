@@ -1,6 +1,24 @@
 import grpc
 import airavata_mft_sdk.MFTTransferApi_pb2_grpc as transfer_grpc
+from airavata_mft_sdk.resource import ResourceService_pb2_grpc
+from airavata_mft_sdk.azure import AzureStorageService_pb2_grpc
+from airavata_mft_sdk.box import BoxStorageService_pb2_grpc
+from airavata_mft_sdk.dropbox import DropboxStorageService_pb2_grpc
+from airavata_mft_sdk.ftp import FTPStorageService_pb2_grpc
+from airavata_mft_sdk.gcs import GCSStorageService_pb2_grpc
+from airavata_mft_sdk.local import LocalStorageService_pb2_grpc
+from airavata_mft_sdk.s3 import S3StorageService_pb2_grpc
+from airavata_mft_sdk.scp import SCPStorageService_pb2_grpc
+from airavata_mft_sdk.resourcesecretmap import StorageSecretMap_pb2_grpc
 
+
+from airavata_mft_sdk.azure import AzureSecretService_pb2_grpc
+from airavata_mft_sdk.box import BoxSecretService_pb2_grpc
+from airavata_mft_sdk.dropbox import DropboxSecretService_pb2_grpc
+from airavata_mft_sdk.ftp import FTPSecretService_pb2_grpc
+from airavata_mft_sdk.gcs import GCSSecretService_pb2_grpc
+from airavata_mft_sdk.s3 import S3SecretService_pb2_grpc
+from airavata_mft_sdk.scp import SCPSecretService_pb2_grpc
 
 class MFTClient:
 

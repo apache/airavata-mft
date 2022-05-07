@@ -37,6 +37,8 @@ python3 -m grpc_tools.protoc --proto_path=../../../services/resource-service/stu
           ../../../services/resource-service/stub/src/main/proto/box/BoxStorage.proto \
           ../../../services/resource-service/stub/src/main/proto/azure/AzureStorageService.proto \
           ../../../services/resource-service/stub/src/main/proto/azure/AzureStorage.proto \
+          ../../../services/resource-service/stub/src/main/proto/swift/SwiftStorageService.proto \
+          ../../../services/resource-service/stub/src/main/proto/swift/SwiftStorage.proto \
           --python_out=$RESOURCE_DIR --grpc_python_out=$RESOURCE_DIR
 
 
@@ -57,6 +59,8 @@ python3 -m grpc_tools.protoc --proto_path=../../../services/secret-service/stub/
           ../../../services/secret-service/stub/src/main/proto/s3/S3SecretService.proto \
           ../../../services/secret-service/stub/src/main/proto/scp/SCPCredential.proto \
           ../../../services/secret-service/stub/src/main/proto/scp/SCPSecretService.proto \
+          ../../../services/secret-service/stub/src/main/proto/swift/SwiftCredential.proto \
+          ../../../services/secret-service/stub/src/main/proto/swift/SwiftSecretService.proto \
           --python_out=$SECRET_DIR --grpc_python_out=$SECRET_DIR
 
 python3 -m grpc_tools.protoc --proto_path=../../../api/stub/src/main/proto \
@@ -76,6 +80,7 @@ touch resource/__init__.py
 touch resourcesecretmap/__init__.py
 touch s3/__init__.py
 touch scp/__init__.py
+touch swift/__init__.py
 
 
 sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' azure/*.py
@@ -88,6 +93,7 @@ sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' resource/*.py
 sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' resourcesecretmap/*.py
 sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' s3/*.py
 sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' scp/*.py
+sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' swift/*.py
 sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' *pb2.py
 sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' *pb2_grpc.py
 
@@ -101,5 +107,6 @@ sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' resource/*.py
 sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' resourcesecretmap/*.py
 sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' s3/*.py
 sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' scp/*.py
+sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' swift/*.py
 sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' *pb2.py
 sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' *pb2_grpc.py
