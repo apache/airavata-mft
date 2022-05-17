@@ -24,6 +24,7 @@ public class AgentInfo {
     private String host;
     private String user;
     private boolean sudo;
+    private String sessionId;
     private List<String> supportedProtocols;
     private List<String> localStorages;
 
@@ -78,6 +79,15 @@ public class AgentInfo {
 
     public AgentInfo setLocalStorages(List<String> localStorages) {
         this.localStorages = localStorages;
+        return this;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public AgentInfo setSessionId(String sessionId) {
+        this.sessionId = sessionId;
         return this;
     }
 }

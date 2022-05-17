@@ -366,6 +366,7 @@ public class MFTAgent implements CommandLineRunner {
                     .setId(agentId)
                     .setHost(agentHost)
                     .setUser(agentUser)
+                    .setSessionId(this.session)
                     .setSupportedProtocols(Arrays.asList(supportedProtocols.split(",")))
                     .setLocalStorages(new ArrayList<>()));
         }

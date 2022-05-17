@@ -25,6 +25,7 @@ import com.orbitz.consul.cache.KVCache;
 import com.orbitz.consul.model.kv.Value;
 import org.apache.airavata.mft.admin.MFTConsulClient;
 import org.apache.airavata.mft.admin.MFTConsulClientException;
+import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.api.service.TransferApiRequest;
 import org.slf4j.Logger;
@@ -40,10 +41,12 @@ import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @SpringBootApplication()
 @ComponentScan(basePackages = {"org.apache.airavata.mft"})
@@ -247,7 +250,19 @@ public class MFTController implements CommandLineRunner {
                 selectedAgent = possibleAgent.get();
             }
         } else if (!transferRequest.getAffinityTransfer()){
-            selectedAgent = liveAgentIds.get(0);
+            List<Optional<AgentInfo>> agentInfos = liveAgentIds.stream().map(id -> mftConsulClient.getAgentInfo(id)).collect(Collectors.toList());
+            int transferCount = -1;
+            for (Optional<AgentInfo> agentInfo : agentInfos) {
+                if (agentInfo.isPresent()) {
+                    if (transferCount == -1) {
+                        transferCount = mftConsulClient.getAgentActiveTransferIds(agentInfo.get()).size();
+                        selectedAgent = agentInfo.get().getId();
+                    } else if (transferCount > mftConsulClient.getAgentActiveTransferIds(agentInfo.get()).size()) {
+                        transferCount = mftConsulClient.getAgentActiveTransferIds(agentInfo.get()).size();
+                        selectedAgent = agentInfo.get().getId();
+                    }
+                }
+            }
         }
 
         if (selectedAgent == null) {

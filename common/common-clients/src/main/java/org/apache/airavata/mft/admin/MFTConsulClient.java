@@ -208,6 +208,27 @@ public class MFTConsulClient {
     }
 
     /**
+     * Lists all currently processing transfer id for the given agent
+     *
+     * @param agentInfo
+     * @return
+     * @throws MFTConsulClientException
+     */
+    public List<String> getAgentActiveTransferIds(AgentInfo agentInfo) throws MFTConsulClientException {
+        try {
+            List<String> keys = kvClient.getKeys(MFTConsulClient.AGENTS_SCHEDULED_PATH + agentInfo.getId() + "/" + agentInfo.getSessionId());
+            return keys.stream().map(key -> key.substring(key.lastIndexOf("/") + 1)).collect(Collectors.toList());
+        } catch (ConsulException e) {
+            if (e.getCode() == 404) {
+                return Collections.emptyList();
+            }
+            throw new MFTConsulClientException("Error in fetching active transfers for agent " + agentInfo.getId(), e);
+        } catch (Exception e) {
+            throw new MFTConsulClientException("Error in fetching active transfers for agent " + agentInfo.getId(), e);
+        }
+    }
+
+    /**
      * Agents should call this method to submit {@link TransferState}. These status are received by the controller and reorder
      * status messages and put in the final status array.
      *
@@ -237,12 +258,8 @@ public class MFTConsulClient {
      */
     public void saveTransferState(String transferId, TransferState transferState) throws MFTConsulClientException {
         try {
-            List<TransferState> allStates = getTransferStates(transferId);
-            // TODO implement sequence consistency
-            allStates.add(transferState);
-            String asStr = mapper.writeValueAsString(allStates);
-            kvClient.putValue(TRANSFER_STATE_PATH + transferId, asStr);
-
+            String asStr = mapper.writeValueAsString(transferState);
+            kvClient.putValue(TRANSFER_STATE_PATH + transferId + "/" + UUID.randomUUID().toString(), asStr);
             logger.info("Saved transfer status " + asStr);
 
         } catch (Exception e) {
@@ -287,15 +304,20 @@ public class MFTConsulClient {
      * @throws IOException
      */
     public List<TransferState> getTransferStates(String transferId) throws IOException {
-        Optional<Value> valueOp = kvClient.getValue(TRANSFER_STATE_PATH + transferId);
-        List<TransferState> allStates;
-        if (valueOp.isPresent()) {
-            String prevStates = valueOp.get().getValueAsString().get();
-            allStates = new ArrayList<>(Arrays.asList(mapper.readValue(prevStates, TransferState[].class)));
-        } else {
-            allStates = new ArrayList<>();
+        List<String> keys = kvClient.getKeys(TRANSFER_STATE_PATH + transferId);
+
+        List<TransferState> allStates = new ArrayList<>();
+
+        for (String key: keys) {
+            Optional<Value> valueOp = kvClient.getValue(key);
+            String stateAsStr = valueOp.get().getValueAsString().get();
+            TransferState transferState = mapper.readValue(stateAsStr, TransferState.class);
+            allStates.add(transferState);
         }
-        return allStates;
+        List<TransferState> sortedStates = allStates.stream().sorted((o1, o2) ->
+                (o1.getUpdateTimeMils() - o2.getUpdateTimeMils()) < 0 ? -1 :
+                (o1.getUpdateTimeMils() - o2.getUpdateTimeMils()) == 0 ? 0 : 1).collect(Collectors.toList());
+        return sortedStates;
     }
 
     public List<AgentInfo> getLiveAgentInfos() throws MFTConsulClientException {
