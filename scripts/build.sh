@@ -19,6 +19,7 @@
 
 cd ../
 mvn clean install
+rm -rf build
 mkdir -p build
 cp agent/target/MFT-Agent-0.01-bin.zip build/
 cp controller/target/MFT-Controller-0.01-bin.zip build/

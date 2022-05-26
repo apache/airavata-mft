@@ -26,7 +26,7 @@ import java.util.Iterator;
 
 public class S3Example {
     public static void main(String args[]) throws Exception {
-        MFTApiServiceGrpc.MFTApiServiceBlockingStub client = MFTApiClient.buildClient("localhost", 7004);
+        MFTApiServiceGrpc.MFTApiServiceBlockingStub client = new MFTApiClient("localhost", 7004).get();
 
         String sourceResourceId = "remote-ssh-storage";
         String sourceResourcePath = "/tmp/1mb.txt";

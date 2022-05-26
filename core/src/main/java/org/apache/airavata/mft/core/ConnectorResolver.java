@@ -17,103 +17,84 @@
 
 package org.apache.airavata.mft.core;
 
-import org.apache.airavata.mft.core.api.Connector;
+import org.apache.airavata.mft.core.api.IncomingChunkedConnector;
+import org.apache.airavata.mft.core.api.IncomingStreamingConnector;
+import org.apache.airavata.mft.core.api.OutgoingChunkedConnector;
+import org.apache.airavata.mft.core.api.OutgoingStreamingConnector;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
 public final class ConnectorResolver {
-    public static Optional<Connector> resolveConnector(String type, String direction) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+
+    public static Optional<IncomingStreamingConnector> resolveIncomingStreamingConnector(String type) throws Exception {
 
         String className = null;
         switch (type) {
             case "SCP":
-                switch (direction) {
-                    case "IN":
-                        className = "org.apache.airavata.mft.transport.scp.SCPReceiver";
-                        break;
-                    case "OUT":
-                        className = "org.apache.airavata.mft.transport.scp.SCPSender";
-                        break;
-                }
-                break;
-            case "LOCAL":
-                switch (direction) {
-                    case "IN":
-                        className = "org.apache.airavata.mft.transport.local.LocalReceiver";
-                        break;
-                    case "OUT":
-                        className = "org.apache.airavata.mft.transport.local.LocalSender";
-                        break;
-                }
-                break;
-            case "S3":
-                switch (direction) {
-                    case "IN":
-                        className = "org.apache.airavata.mft.transport.s3.S3Receiver";
-                        break;
-                    case "OUT":
-                        className = "org.apache.airavata.mft.transport.s3.S3Sender";
-                        break;
-                }
-                break;
-            case "BOX":
-                switch (direction) {
-                    case "IN":
-                        className = "org.apache.airavata.mft.transport.box.BoxReceiver";
-                        break;
-                    case "OUT":
-                        className = "org.apache.airavata.mft.transport.box.BoxSender";
-                        break;
-                }
-                break;
-            case "AZURE":
-                switch (direction) {
-                    case "IN":
-                        className = "org.apache.airavata.mft.transport.azure.AzureReceiver";
-                        break;
-                    case "OUT":
-                        className = "org.apache.airavata.mft.transport.azure.AzureSender";
-                        break;
-                }
-                break;
-            case "GCS":
-                switch (direction) {
-                    case "IN":
-                        className = "org.apache.airavata.mft.transport.gcp.GCSReceiver";
-                        break;
-                    case "OUT":
-                        className = "org.apache.airavata.mft.transport.gcp.GCSSender";
-                        break;
-                }
-                break;
-            case "DROPBOX":
-                switch (direction) {
-                    case "IN":
-                        className = "org.apache.airavata.mft.transport.dropbox.DropboxReceiver";
-                        break;
-                    case "OUT":
-                        className = "org.apache.airavata.mft.transport.dropbox.DropboxSender";
-                        break;
-                }
-                break;
-            case "FTP":
-                switch (direction) {
-                    case "IN":
-                        className = "org.apache.airavata.mft.transport.ftp.FTPReceiver";
-                        break;
-                    case "OUT":
-                        className = "org.apache.airavata.mft.transport.ftp.FTPSender";
-                        break;
-                }
+                className = "org.apache.airavata.mft.transport.scp.SCPIncomingConnector";
                 break;
         }
 
         if (className != null) {
             Class<?> aClass = Class.forName(className);
-            return Optional.of((Connector) aClass.getDeclaredConstructor().newInstance());
+            return Optional.of((IncomingStreamingConnector) aClass.getDeclaredConstructor().newInstance());
         } else {
             return Optional.empty();
         }
     }
+
+    public static Optional<OutgoingStreamingConnector> resolveOutgoingStreamingConnector(String type) throws Exception {
+
+        String className = null;
+        switch (type) {
+            case "SCP":
+                className = "org.apache.airavata.mft.transport.scp.SCPOutgoingConnector";
+                break;
+            case "S3":
+                className = "org.apache.airavata.mft.transport.s3.S3IncomingConnector";
+                break;
+        }
+
+        if (className != null) {
+            Class<?> aClass = Class.forName(className);
+            return Optional.of((OutgoingStreamingConnector) aClass.getDeclaredConstructor().newInstance());
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    public static Optional<IncomingChunkedConnector> resolveIncomingChunkedConnector(String type) throws Exception {
+
+        String className = null;
+        switch (type) {
+            case "S3":
+                className = "org.apache.airavata.mft.transport.s3.S3IncomingConnector";
+                break;
+        }
+
+        if (className != null) {
+            Class<?> aClass = Class.forName(className);
+            return Optional.of((IncomingChunkedConnector) aClass.getDeclaredConstructor().newInstance());
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    public static Optional<OutgoingChunkedConnector> resolveOutgoingChunkedConnector(String type) throws Exception {
+
+        String className = null;
+        switch (type) {
+            case "S3":
+                className = "org.apache.airavata.mft.transport.s3.S3OutgoingConnector";
+                break;
+        }
+
+        if (className != null) {
+            Class<?> aClass = Class.forName(className);
+            return Optional.of((OutgoingChunkedConnector) aClass.getDeclaredConstructor().newInstance());
+        } else {
+            return Optional.empty();
+        }
+    }
+
 }

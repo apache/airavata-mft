@@ -35,9 +35,9 @@ import org.apache.airavata.mft.agent.http.HttpTransferRequestsStore;
 import org.apache.airavata.mft.agent.rpc.RPCParser;
 import org.apache.airavata.mft.api.service.CallbackEndpoint;
 import org.apache.airavata.mft.api.service.TransferApiRequest;
-import org.apache.airavata.mft.core.ConnectorResolver;
+import org.apache.airavata.mft.core.FileResourceMetadata;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
-import org.apache.airavata.mft.core.api.Connector;
+import org.apache.airavata.mft.core.api.ConnectorConfig;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -65,8 +65,6 @@ public class MFTAgent implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(MFTAgent.class);
 
-    private final TransportMediator mediator = new TransportMediator();
-
     @org.springframework.beans.factory.annotation.Value("${agent.id}")
     private String agentId;
 
@@ -87,6 +85,9 @@ public class MFTAgent implements CommandLineRunner {
 
     @org.springframework.beans.factory.annotation.Value("${agent.supported.protocols}")
     private String supportedProtocols;
+
+    @org.springframework.beans.factory.annotation.Value("${agent.temp.data.dir}")
+    private String tempDataDir = "/tmp";
 
     @org.springframework.beans.factory.annotation.Value("${resource.service.host}")
     private String resourceServiceHost;
@@ -113,6 +114,9 @@ public class MFTAgent implements CommandLineRunner {
     private long sessionTTLSeconds = 10;
     private String session;
 
+    private TransportMediator mediator;
+
+
     private ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
@@ -127,6 +131,7 @@ public class MFTAgent implements CommandLineRunner {
     public void init() {
         transferMessageCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.AGENTS_TRANSFER_REQUEST_MESSAGE_PATH + agentId);
         rpcMessageCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.AGENTS_RPC_REQUEST_MESSAGE_PATH + agentId);
+        mediator = new TransportMediator(tempDataDir);
     }
 
     private void acceptRPCRequests() {
@@ -172,14 +177,6 @@ public class MFTAgent implements CommandLineRunner {
                             .setPublisher(agentId)
                             .setDescription("Starting the transfer"));
 
-                        Optional<Connector> inConnectorOpt = ConnectorResolver.resolveConnector(request.getSourceType(), "IN");
-                        Connector inConnector = inConnectorOpt.orElseThrow(() -> new Exception("Could not find an in connector for given input"));
-                        inConnector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
-
-                        Optional<Connector> outConnectorOpt = ConnectorResolver.resolveConnector(request.getDestinationType(), "OUT");
-                        Connector outConnector = outConnectorOpt.orElseThrow(() -> new Exception("Could not find an out connector for given input"));
-                        outConnector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
-
                         Optional<MetadataCollector> srcMetadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(request.getSourceType());
                         MetadataCollector srcMetadataCollector = srcMetadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for source"));
                         srcMetadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
@@ -188,6 +185,34 @@ public class MFTAgent implements CommandLineRunner {
                         MetadataCollector dstMetadataCollector = dstMetadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for destination"));
                         dstMetadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
 
+                        FileResourceMetadata srcMetadata = srcMetadataCollector.getFileResourceMetadata(
+                                request.getMftAuthorizationToken(),
+                                request.getSourceResourceId(),
+                                request.getSourceToken());
+
+
+                        ConnectorConfig srcCC = ConnectorConfig.ConnectorConfigBuilder.newBuilder()
+                                .withAuthToken(request.getMftAuthorizationToken())
+                                .withResourceServiceHost(resourceServiceHost)
+                                .withResourceServicePort(resourceServicePort)
+                                .withSecretServiceHost(secretServiceHost)
+                                .withSecretServicePort(secretServicePort)
+                                .withTransferId(transferId)
+                                .withResourceId(request.getSourceResourceId())
+                                .withCredentialToken(request.getSourceToken())
+                                .withMetadata(srcMetadata).build();
+
+                        ConnectorConfig dstCC = ConnectorConfig.ConnectorConfigBuilder.newBuilder()
+                                .withAuthToken(request.getMftAuthorizationToken())
+                                .withResourceServiceHost(resourceServiceHost)
+                                .withResourceServicePort(resourceServicePort)
+                                .withSecretServiceHost(secretServiceHost)
+                                .withSecretServicePort(secretServicePort)
+                                .withTransferId(transferId)
+                                .withResourceId(request.getDestinationResourceId())
+                                .withCredentialToken(request.getDestinationToken())
+                                .withMetadata(srcMetadata).build();
+
                         mftConsulClient.submitTransferStateToProcess(transferId, agentId, new TransferState()
                             .setState("STARTED")
                             .setPercentage(0)
@@ -195,13 +220,11 @@ public class MFTAgent implements CommandLineRunner {
                             .setPublisher(agentId)
                             .setDescription("Started the transfer"));
 
-
-                        TransferApiRequest finalRequest = request;
-                        mediator.transfer(transferId, request, inConnector, outConnector, srcMetadataCollector, dstMetadataCollector,
+                        mediator.transferSingleThread(transferId, request, srcCC, dstCC,
                                 (id, st) -> {
                                     try {
                                         mftConsulClient.submitTransferStateToProcess(id, agentId, st.setPublisher(agentId));
-                                        handleCallbacks(finalRequest.getCallbackEndpointsList(), id, st);
+
                                     } catch (MFTConsulClientException e) {
                                         logger.error("Failed while updating transfer state", e);
                                     }
@@ -213,8 +236,7 @@ public class MFTAgent implements CommandLineRunner {
                                     } catch (Exception e) {
                                         logger.error("Failed while deleting scheduled path for transfer {}", id);
                                     }
-                                }
-                        );
+                        });
 
                         logger.info("Started the transfer " + transferId);
 

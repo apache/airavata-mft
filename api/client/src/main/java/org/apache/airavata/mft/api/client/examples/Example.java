@@ -8,7 +8,7 @@ import org.apache.airavata.mft.api.service.ResourceAvailabilityRequest;
 public class Example {
 
     public static void main(String a[]) {
-        MFTApiServiceGrpc.MFTApiServiceBlockingStub mftClient = MFTApiClient.buildClient("localhost", 7004);
+        MFTApiServiceGrpc.MFTApiServiceBlockingStub mftClient = new MFTApiClient("localhost", 7004).get();
         mftClient.getResourceAvailability(ResourceAvailabilityRequest.newBuilder()
                 .setResourceId("a")
                 .setResourceToken("b")

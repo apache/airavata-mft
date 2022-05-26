@@ -91,7 +91,7 @@ public class FileResourceMetadata {
         private Builder() {
         }
 
-        public static Builder getBuilder() {
+        public static Builder newBuilder() {
             return new Builder();
         }
 

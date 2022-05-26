@@ -22,17 +22,11 @@ import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.stream.ChunkedStream;
 import io.netty.util.CharsetUtil;
-import org.apache.airavata.mft.common.AuthToken;
-import org.apache.airavata.mft.core.*;
-import org.apache.airavata.mft.core.api.Connector;
-import org.apache.airavata.mft.core.api.MetadataCollector;
+import org.apache.airavata.mft.core.api.IncomingStreamingConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.activation.MimetypesFileTypeMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.io.InputStream;
 
 import static io.netty.handler.codec.http.HttpMethod.GET;
 import static io.netty.handler.codec.http.HttpResponseStatus.*;
@@ -43,7 +37,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static final Logger logger = LoggerFactory.getLogger(HttpServerHandler.class);
 
     private final HttpTransferRequestsStore transferRequestsStore;
-    private final ExecutorService executor = Executors.newFixedThreadPool(10);
 
     public HttpServerHandler(HttpTransferRequestsStore transferRequestsStore) {
         this.transferRequestsStore = transferRequestsStore;
@@ -51,111 +44,89 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
-        if (!request.decoderResult().isSuccess()) {
-            sendError(ctx, BAD_REQUEST);
-            return;
-        }
 
-        if (request.method() != GET) {
-            sendError(ctx, METHOD_NOT_ALLOWED);
-            return;
-        }
+        try {
+            if (!request.decoderResult().isSuccess()) {
+                sendError(ctx, BAD_REQUEST);
+                return;
+            }
 
-        final String uri = request.uri().substring(1);
-        logger.info("Received download request through url {}", uri);
+            if (request.method() != GET) {
+                sendError(ctx, METHOD_NOT_ALLOWED);
+                return;
+            }
 
-        HttpTransferRequest httpTransferRequest = transferRequestsStore.getDownloadRequest(uri);
+            final String uri = request.uri().substring(request.uri().lastIndexOf("/") + 1);
+            logger.info("Received download request through url {}", uri);
 
-        if (httpTransferRequest == null) {
-            logger.error("Couldn't find transfer request for uri {}", uri);
-            sendError(ctx, NOT_FOUND);
-            return;
-        }
+            AgentHttpDownloadData downloadData = transferRequestsStore.getDownloadRequest(uri);
 
-        Connector connector = httpTransferRequest.getOtherConnector();
-        MetadataCollector metadataCollector = httpTransferRequest.getOtherMetadataCollector();
+            if (downloadData == null) {
+                logger.error("Couldn't find transfer request for uri {}", uri);
+                sendError(ctx, NOT_FOUND);
+                return;
+            }
 
-        ConnectorParams params = httpTransferRequest.getConnectorParams();
+            long fileLength = downloadData.getConnectorConfig().getMetadata().getResourceSize();
 
-        // TODO Load from HTTP Headers
-        AuthToken authToken = httpTransferRequest.getAuthToken();
+            HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
+            HttpUtil.setContentLength(response, fileLength);
+            setContentTypeHeader(response, downloadData.getConnectorConfig().getMetadata().getFriendlyName());
 
-        connector.init(params.getResourceServiceHost(),
-                params.getResourceServicePort(), params.getSecretServiceHost(), params.getSecretServicePort());
+            if (HttpUtil.isKeepAlive(request)) {
+                response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+            }
 
-        metadataCollector.init(params.getResourceServiceHost(), params.getResourceServicePort(),
-                params.getSecretServiceHost(), params.getSecretServicePort());
+            // Write the initial line and the header.
+            ctx.write(response);
 
-        Boolean available = metadataCollector.isAvailable(authToken,
-                httpTransferRequest.getResourceId(), httpTransferRequest.getCredentialToken());
+            // Write the content.
+            ChannelFuture sendFileFuture;
+            ChannelFuture lastContentFuture;
 
+            // TODO: Support chunked streaming
+            if (downloadData.getIncomingStreamingConnector() == null && downloadData.getIncomingChunkedConnector() != null) {
+                logger.error("Chunked data download is not yes supported in Http transport");
+                throw new Exception("Chunked data download is not yes supported in Http transport");
+            }
 
-        if (!available) {
-            logger.error("File resource {} is not available", httpTransferRequest.getResourceId());
-            sendError(ctx, NOT_FOUND);
-            return;
-        }
+            IncomingStreamingConnector incomingStreamingConnector = downloadData.getIncomingStreamingConnector();
+            incomingStreamingConnector.init(downloadData.getConnectorConfig());
+            InputStream inputStream = downloadData.getChildResourcePath().equals("")?
+                    incomingStreamingConnector.fetchInputStream() :
+                    incomingStreamingConnector.fetchInputStream(downloadData.getChildResourcePath());
 
-        FileResourceMetadata fileResourceMetadata = metadataCollector.getFileResourceMetadata(authToken,
-                httpTransferRequest.getResourceId(),
-                httpTransferRequest.getChildResourcePath(),
-                httpTransferRequest.getCredentialToken());
+            sendFileFuture = ctx.writeAndFlush(new HttpChunkedInput(new ChunkedStream(inputStream)),
+                    ctx.newProgressivePromise());
 
-        long fileLength = fileResourceMetadata.getResourceSize();
+            // HttpChunkedInput will write the end marker (LastHttpContent) for us.
+            lastContentFuture = sendFileFuture;
 
-        HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
-        HttpUtil.setContentLength(response, fileLength);
-        setContentTypeHeader(response, httpTransferRequest.getResourceId());
-
-        if (HttpUtil.isKeepAlive(request)) {
-            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-        }
-
-        // Write the initial line and the header.
-        ctx.write(response);
-
-        // Write the content.
-        ChannelFuture sendFileFuture;
-        ChannelFuture lastContentFuture;
-
-        ConnectorContext connectorContext = new ConnectorContext();
-        connectorContext.setStreamBuffer(new DoubleStreamingBuffer());
-        connectorContext.setTransferId(uri);
-        connectorContext.setMetadata(new FileResourceMetadata()); // TODO Resolve
-
-        TransferTask pullTask = new TransferTask(authToken, httpTransferRequest.getResourceId(),
-                httpTransferRequest.getChildResourcePath(), httpTransferRequest.getCredentialToken(),
-                connectorContext, connector);
-
-        // TODO aggregate pullStatusFuture and sendFileFuture for keepalive test
-        Future<Integer> pullStatusFuture = executor.submit(pullTask);
-
-        sendFileFuture = ctx.writeAndFlush(new HttpChunkedInput(new ChunkedStream(connectorContext.getStreamBuffer().getInputStream())),
-                ctx.newProgressivePromise());
-
-        // HttpChunkedInput will write the end marker (LastHttpContent) for us.
-        lastContentFuture = sendFileFuture;
-
-        sendFileFuture.addListener(new ChannelProgressiveFutureListener() {
-            @Override
-            public void operationProgressed(ChannelProgressiveFuture future, long progress, long total) {
-                if (total < 0) { // total unknown
-                    logger.error(future.channel() + " Transfer progress: " + progress);
-                } else {
-                    logger.error(future.channel() + " Transfer progress: " + progress + " / " + total);
+            sendFileFuture.addListener(new ChannelProgressiveFutureListener() {
+                @Override
+                public void operationProgressed(ChannelProgressiveFuture future, long progress, long total) {
+                    if (total < 0) { // total unknown
+                        logger.debug(future.channel() + " Transfer progress: " + progress);
+                    } else {
+                        logger.debug(future.channel() + " Transfer progress: " + progress + " / " + total);
+                    }
                 }
+
+                @Override
+                public void operationComplete(ChannelProgressiveFuture future) {
+                    logger.info(future.channel() + " Transfer complete.");
+                }
+            });
+
+            // Decide whether to close the connection or not.
+            if (!HttpUtil.isKeepAlive(request)) {
+                // Close the connection when the whole content is written out.
+                lastContentFuture.addListener(ChannelFutureListener.CLOSE);
             }
 
-            @Override
-            public void operationComplete(ChannelProgressiveFuture future) {
-                System.err.println(future.channel() + " Transfer complete.");
-            }
-        });
-
-        // Decide whether to close the connection or not.
-        if (!HttpUtil.isKeepAlive(request)) {
-            // Close the connection when the whole content is written out.
-            lastContentFuture.addListener(ChannelFutureListener.CLOSE);
+        } catch (Exception e) {
+            logger.error("Errored while processing HTTP download request", e);
+            sendError(ctx, INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -185,7 +156,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     private static void setContentTypeHeader(HttpResponse response, String path) {
-        MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE, path);
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/octet-stream");
+        response.headers().set(HttpHeaderNames.CONTENT_DISPOSITION, "attachment; filename=\"" + path+ "\"");
     }
 }

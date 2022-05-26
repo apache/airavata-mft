@@ -8,7 +8,7 @@ import org.apache.airavata.mft.api.service.MFTApiServiceGrpc;
 
 public class SCPExample {
     public static void main(String args[]) throws Exception {
-        MFTApiServiceGrpc.MFTApiServiceBlockingStub client = MFTApiClient.buildClient("localhost", 7004);
+        MFTApiServiceGrpc.MFTApiServiceBlockingStub client = new MFTApiClient("localhost", 7004).get();
 
         // File metadata
         long startTime = System.currentTimeMillis();

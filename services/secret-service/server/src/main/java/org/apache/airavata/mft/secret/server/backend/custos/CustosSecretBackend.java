@@ -1,5 +1,13 @@
 package org.apache.airavata.mft.secret.server.backend.custos;
 
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import org.apache.airavata.datalake.drms.AuthCredentialType;
+import org.apache.airavata.datalake.drms.AuthenticatedUser;
+import org.apache.airavata.datalake.drms.DRMSServiceAuthToken;
+import org.apache.airavata.datalake.drms.storage.*;
+import org.apache.airavata.datalake.drms.storage.preference.ssh.SSHStoragePreference;
+import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.common.DelegateAuth;
 import org.apache.airavata.mft.credential.stubs.azure.*;
 import org.apache.airavata.mft.credential.stubs.box.*;
@@ -24,6 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
 
@@ -44,6 +54,12 @@ public class CustosSecretBackend implements SecretBackend {
 
     @Value("${custos.secret}")
     private String custosSecret;
+
+    @Value("${custos.backend.drms.host}")
+    private String drmsHost;
+
+    @Value("${custos.backend.drms.port}")
+    private int drmsPort;
 
     private AgentAuthenticationHandler handler;
 
@@ -88,18 +104,80 @@ public class CustosSecretBackend implements SecretBackend {
         }
     }
 
+    private AnyStoragePreference getStoragePreference(String storagePefId) {
+        return AnyStoragePreference.newBuilder().build();
+    }
+
+    private DRMSServiceAuthToken getDrmsToken(AuthToken authToken) {
+        switch (authToken.getAuthMechanismCase()) {
+            case USERTOKENAUTH:
+                return DRMSServiceAuthToken.newBuilder().setAccessToken(authToken.getUserTokenAuth().getToken()).build();
+
+            case DELEGATEAUTH:
+                DelegateAuth delegateAuth = authToken.getDelegateAuth();
+                return DRMSServiceAuthToken.newBuilder()
+                        .setAccessToken(Base64.getEncoder()
+                                .encodeToString((delegateAuth.getClientId() + ":" + delegateAuth.getClientSecret())
+                                        .getBytes(StandardCharsets.UTF_8)))
+                        .setAuthCredentialType(AuthCredentialType.AGENT_ACCOUNT_CREDENTIAL)
+                        .setAuthenticatedUser(AuthenticatedUser.newBuilder()
+                                .setUsername(delegateAuth.getUserId())
+                                .setTenantId(delegateAuth.getPropertiesOrThrow("TENANT_ID"))
+                                .build())
+                        .build();
+        }
+        return null;
+    }
+
+
     @Override
     public Optional<SCPSecret> getSCPSecret(SCPSecretGetRequest request) throws Exception {
+
+        DRMSServiceAuthToken drmsToken = getDrmsToken(request.getAuthzToken());
+
+        if (drmsToken == null) {
+            LOGGER.error("DRMS Token can not be null");
+            return Optional.empty();
+        }
+
+        String storagePrefId = request.getSecretId();
+
+        ManagedChannel channel = ManagedChannelBuilder.forAddress(drmsHost, drmsPort).usePlaintext().build();
+        AnyStoragePreference storagePreference;
+
+        try {
+            StoragePreferenceServiceGrpc.StoragePreferenceServiceBlockingStub spClient =
+                    StoragePreferenceServiceGrpc.newBlockingStub(channel);
+
+            StoragePreferenceFetchResponse storagePreferenceResp = spClient.
+                    fetchStoragePreference(StoragePreferenceFetchRequest.newBuilder().
+                            setAuthToken(drmsToken).setStoragePreferenceId(storagePrefId).build());
+
+            storagePreference = storagePreferenceResp.getStoragePreference();
+        } finally {
+            channel.shutdown();
+        }
+
+        SSHStoragePreference sshStoragePreference;
+        if (storagePreference.getStorageCase() == AnyStoragePreference.StorageCase.SSH_STORAGE_PREFERENCE) {
+            sshStoragePreference = storagePreference.getSshStoragePreference();
+        } else {
+            LOGGER.error("Invalid storage case {} for preference {}", storagePreference.getStorageCase(), storagePrefId);
+            return Optional.empty();
+        }
+
         switch (request.getAuthzToken().getAuthMechanismCase()) {
             case AGENTAUTH:
                 String agentId = request.getAuthzToken().getAgentAuth().getAgentId();
                 String secret = request.getAuthzToken().getAgentAuth().getAgentSecret();
+
                 Optional<AuthConfig> optionalAuthConfig = handler.authenticate(agentId, secret);
                 if (optionalAuthConfig.isPresent()) {
                     AuthConfig authConfig = optionalAuthConfig.get();
                     SSHCredential sshCredential = csAgentClient.getSSHCredential(request.getAuthzToken().getAgentAuth().getToken(),
-                            authConfig.getAccessToken(), request.getSecretId(), false);
+                            authConfig.getAccessToken(), sshStoragePreference.getCredentialToken(), false);
                     SCPSecret scpSecret = SCPSecret.newBuilder()
+                            .setUser(sshStoragePreference.getUserName())
                             .setSecretId(sshCredential.getMetadata().getToken())
                             .setPublicKey(sshCredential.getPublicKey())
                             .setPassphrase(sshCredential.getPassphrase())
@@ -110,8 +188,9 @@ public class CustosSecretBackend implements SecretBackend {
             case USERTOKENAUTH:
                 if (identityClient.isAuthenticated(request.getAuthzToken().getUserTokenAuth().getToken())) {
                     //custosId need to be replaced with actual gateway custos Id
-                    SSHCredential sshCredential = csClient.getSSHCredential(custosId, request.getSecretId(), false);
+                    SSHCredential sshCredential = csClient.getSSHCredential(custosId, sshStoragePreference.getCredentialToken(), false);
                     SCPSecret scpSecret = SCPSecret.newBuilder()
+                            .setUser(sshStoragePreference.getUserName())
                             .setSecretId(sshCredential.getMetadata().getToken())
                             .setPublicKey(sshCredential.getPublicKey())
                             .setPassphrase(sshCredential.getPassphrase())
@@ -122,9 +201,10 @@ public class CustosSecretBackend implements SecretBackend {
             case DELEGATEAUTH:
                 DelegateAuth delegateAuth = request.getAuthzToken().getDelegateAuth();
                 ResourceSecretManagementClient csClient = getTenantResourceSecretManagementClient(delegateAuth);
-                SSHCredential sshCredential = csClient.getSSHCredential(delegateAuth.getPropertiesMap().get("PORTAL_CUSTOS_ID"),
-                        request.getSecretId(), false);
+                SSHCredential sshCredential = csClient.getSSHCredential(delegateAuth.getPropertiesMap().get("TENANT_ID"),
+                        sshStoragePreference.getCredentialToken(), false);
                 SCPSecret scpSecret = SCPSecret.newBuilder()
+                        .setUser(sshStoragePreference.getUserName())
                         .setSecretId(sshCredential.getMetadata().getToken())
                         .setPublicKey(sshCredential.getPublicKey())
                         .setPassphrase(sshCredential.getPassphrase())
@@ -183,7 +263,7 @@ public class CustosSecretBackend implements SecretBackend {
             case DELEGATEAUTH:
                 DelegateAuth delegateAuth = request.getAuthzToken().getDelegateAuth();
                 ResourceSecretManagementClient csClient = getTenantResourceSecretManagementClient(delegateAuth);
-                CredentialMap credentialMap = csClient.getCredentialMap(delegateAuth.getPropertiesMap().get("PORTAL_CUSTOS_ID"),
+                CredentialMap credentialMap = csClient.getCredentialMap(delegateAuth.getPropertiesMap().get("TENANT_ID"),
                         request.getSecretId());
                 Map<String, String> secretValues = credentialMap.getCredentialMapMap();
                 S3Secret s3Secret = S3Secret.newBuilder()
@@ -242,7 +322,7 @@ public class CustosSecretBackend implements SecretBackend {
             case DELEGATEAUTH:
                 DelegateAuth delegateAuth = request.getAuthzToken().getDelegateAuth();
                 ResourceSecretManagementClient csClient = getTenantResourceSecretManagementClient(delegateAuth);
-                CredentialMap credentialMap = csClient.getCredentialMap(delegateAuth.getPropertiesMap().get("PORTAL_CUSTOS_ID"),
+                CredentialMap credentialMap = csClient.getCredentialMap(delegateAuth.getPropertiesMap().get("TENANT_ID"),
                         request.getSecretId());
                 Map<String, String> secretValues = credentialMap.getCredentialMapMap();
                 BoxSecret boxSecret = BoxSecret.newBuilder()
@@ -305,7 +385,7 @@ public class CustosSecretBackend implements SecretBackend {
             case DELEGATEAUTH:
                 DelegateAuth delegateAuth = request.getAuthzToken().getDelegateAuth();
                 ResourceSecretManagementClient csClient = getTenantResourceSecretManagementClient(delegateAuth);
-                CredentialMap credentialMap = csClient.getCredentialMap(delegateAuth.getPropertiesMap().get("PORTAL_CUSTOS_ID"),
+                CredentialMap credentialMap = csClient.getCredentialMap(delegateAuth.getPropertiesMap().get("TENANT_ID"),
                         request.getSecretId());
                 Map<String, String> secretValues = credentialMap.getCredentialMapMap();
                 AzureSecret azureSecret = AzureSecret.newBuilder()
@@ -367,7 +447,7 @@ public class CustosSecretBackend implements SecretBackend {
             case DELEGATEAUTH:
                 DelegateAuth delegateAuth = request.getAuthzToken().getDelegateAuth();
                 ResourceSecretManagementClient csClient = getTenantResourceSecretManagementClient(delegateAuth);
-                CredentialMap credentialMap = csClient.getCredentialMap(delegateAuth.getPropertiesMap().get("PORTAL_CUSTOS_ID"),
+                CredentialMap credentialMap = csClient.getCredentialMap(delegateAuth.getPropertiesMap().get("TENANT_ID"),
                         request.getSecretId());
                 Map<String, String> secretValues = credentialMap.getCredentialMapMap();
                 GCSSecret gcsSecret = GCSSecret.newBuilder()
@@ -429,7 +509,7 @@ public class CustosSecretBackend implements SecretBackend {
             case DELEGATEAUTH:
                 DelegateAuth delegateAuth = request.getAuthzToken().getDelegateAuth();
                 ResourceSecretManagementClient csClient = getTenantResourceSecretManagementClient(delegateAuth);
-                CredentialMap credentialMap = csClient.getCredentialMap(delegateAuth.getPropertiesMap().get("PORTAL_CUSTOS_ID"),
+                CredentialMap credentialMap = csClient.getCredentialMap(delegateAuth.getPropertiesMap().get("TENANT_ID"),
                         request.getSecretId());
                 Map<String, String> secretValues = credentialMap.getCredentialMapMap();
                 DropboxSecret dropboxSecret = DropboxSecret.newBuilder()
@@ -492,9 +572,10 @@ public class CustosSecretBackend implements SecretBackend {
                 break;
             case DELEGATEAUTH:
                 DelegateAuth delegateAuth = request.getAuthzToken().getDelegateAuth();
+                // TODO validate delegate auth token
                 ResourceSecretManagementClient csClient = getTenantResourceSecretManagementClient(delegateAuth);
                 PasswordCredential passwordCredential = csClient
-                        .getPasswordCredential(delegateAuth.getPropertiesMap().get("PORTAL_CUSTOS_ID"),
+                        .getPasswordCredential(delegateAuth.getPropertiesMap().get("TENANT_ID"),
                                 request.getSecretId());
                 FTPSecret ftpSecret = FTPSecret.newBuilder()
                         .setSecretId(request.getSecretId())
@@ -523,10 +604,8 @@ public class CustosSecretBackend implements SecretBackend {
 
 
     private ResourceSecretManagementClient getTenantResourceSecretManagementClient(DelegateAuth delegateAuth) throws IOException {
-        String adminCustosId = delegateAuth.getClientId();
-        String adminCustosSecret = delegateAuth.getClientSecret();
         CustosClientProvider custosClientProvider = custosClientsFactory
-                .getCustosClientProvider(adminCustosId, adminCustosSecret);
+                .getCustosClientProvider(custosId, custosSecret);
         return custosClientProvider
                 .getResourceSecretManagementClient();
     }

@@ -96,11 +96,13 @@ public class SyncRPCClient {
         this.responseQueueMap.put(request.getMessageId(), queue);
 
         try {
+            logger.info("Requesting sync request {} on agent {}", request.getRequestId(), request.getAgentId());
             this.mftConsulClient.sendSyncRPCToAgent(request.getAgentId(), request);
             SyncRPCResponse response = queue.poll(waitMs, TimeUnit.MILLISECONDS);
             if (response == null) {
                 throw new MFTConsulClientException("Timed out waiting for the response");
             }
+            logger.info("Completing sync request {} on agent {}", request.getRequestId(), request.getAgentId());
             return response;
         } finally {
             this.responseQueueMap.remove(request.getMessageId());
@@ -108,6 +110,6 @@ public class SyncRPCClient {
     }
 
     public SyncRPCResponse sendSyncRequest(SyncRPCRequest request) throws MFTConsulClientException, InterruptedException {
-        return sendSyncRequest(request, 10000);
+        return sendSyncRequest(request, 100000);
     }
 }

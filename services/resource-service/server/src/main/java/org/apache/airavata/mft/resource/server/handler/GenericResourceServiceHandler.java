@@ -33,7 +33,7 @@ public class GenericResourceServiceHandler extends GenericResourceServiceGrpc.Ge
             logger.error("Failed in retrieving generic resource with id {}", request.getResourceId(), e);
 
             responseObserver.onError(Status.INTERNAL.withCause(e)
-                    .withDescription("Failed in retrieving GCS resource with id " + request.getResourceId())
+                    .withDescription("Failed in retrieving Generic resource with id " + request.getResourceId())
                     .asRuntimeException());
         }
     }

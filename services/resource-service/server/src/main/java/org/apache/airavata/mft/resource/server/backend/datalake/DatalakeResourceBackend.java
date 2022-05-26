@@ -19,12 +19,16 @@ package org.apache.airavata.mft.resource.server.backend.datalake;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import org.apache.airavata.datalake.drms.AuthCredentialType;
+import org.apache.airavata.datalake.drms.AuthenticatedUser;
 import org.apache.airavata.datalake.drms.DRMSServiceAuthToken;
 import org.apache.airavata.datalake.drms.storage.ResourceFetchRequest;
 import org.apache.airavata.datalake.drms.storage.ResourceFetchResponse;
 import org.apache.airavata.datalake.drms.storage.ResourceServiceGrpc;
 import org.apache.airavata.datalake.drms.storage.ssh.SSHStorage;
 import org.apache.airavata.mft.common.AuthToken;
+import org.apache.airavata.mft.common.DelegateAuth;
+import org.apache.airavata.mft.common.PasswordAuth;
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
 import org.apache.airavata.mft.resource.stubs.azure.storage.*;
 import org.apache.airavata.mft.resource.stubs.box.storage.*;
@@ -38,6 +42,8 @@ import org.apache.airavata.mft.resource.stubs.scp.storage.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Optional;
 
 public class DatalakeResourceBackend implements ResourceBackend {
@@ -72,14 +78,44 @@ public class DatalakeResourceBackend implements ResourceBackend {
         }
     }
 
+    private DRMSServiceAuthToken getDrmsToken(AuthToken authToken) {
+        switch (authToken.getAuthMechanismCase()) {
+            case USERTOKENAUTH:
+                return DRMSServiceAuthToken.newBuilder().setAccessToken(authToken.getUserTokenAuth().getToken()).build();
+
+            case DELEGATEAUTH:
+                DelegateAuth delegateAuth = authToken.getDelegateAuth();
+                return DRMSServiceAuthToken.newBuilder()
+                        .setAccessToken(Base64.getEncoder()
+                                .encodeToString((delegateAuth.getClientId() + ":" + delegateAuth.getClientSecret())
+                                        .getBytes(StandardCharsets.UTF_8)))
+                        .setAuthCredentialType(AuthCredentialType.AGENT_ACCOUNT_CREDENTIAL)
+                        .setAuthenticatedUser(AuthenticatedUser.newBuilder()
+                                .setUsername(delegateAuth.getUserId())
+                                .setTenantId(delegateAuth.getPropertiesOrThrow("TENANT_ID"))
+                                .build())
+                        .build();
+
+        }
+        return null;
+
+    }
     @Override
     public Optional<GenericResource> getGenericResource(GenericResourceGetRequest request) throws Exception {
 
         AuthToken authzToken = request.getAuthzToken();
 
+        DRMSServiceAuthToken drmsServiceAuthToken = getDrmsToken(authzToken);
+
+        if (drmsServiceAuthToken == null) {
+            logger.error("DRMS Service auth token can not be null. Invalid token type {} specified",
+                    authzToken.getAuthMechanismCase());
+            throw new Exception("DRMS Service auth token can not be null. Invalid token type specified");
+        }
+
         ResourceServiceGrpc.ResourceServiceBlockingStub datalakeResourceStub = ResourceServiceGrpc.newBlockingStub(channel);
         ResourceFetchResponse resourceFetchResponse = datalakeResourceStub.fetchResource(ResourceFetchRequest.newBuilder()
-                .setAuthToken(DRMSServiceAuthToken.newBuilder().setAccessToken(authzToken.getUserTokenAuth().getToken()).build())
+                .setAuthToken(drmsServiceAuthToken)
                 .setResourceId(request.getResourceId())
                 .build());
 
@@ -105,10 +141,9 @@ public class DatalakeResourceBackend implements ResourceBackend {
         switch (resource.getStorageCase()) {
             case SSH_STORAGE:
                 SSHStorage storage = resource.getSshStorage();
-//                resourceBuilder.setScpStorage(SCPStorage.newBuilder()
-//                        .setStorageId(storage.getStorageId()).setHost(storage.getHostName())
-//                        .setPort(storage.getPort())
-//                        .setUser(sshPreference.getUserName()).build());
+                resourceBuilder.setScpStorage(SCPStorage.newBuilder()
+                        .setStorageId(storage.getStorageId()).setHost(storage.getHostName())
+                        .setPort(storage.getPort()).build());
                 break;
             case S3_STORAGE:
                 org.apache.airavata.datalake.drms.storage.s3.S3Storage s3Storage = resource.getS3Storage();
@@ -299,6 +334,4 @@ public class DatalakeResourceBackend implements ResourceBackend {
     public boolean deleteFTPStorage(FTPStorageDeleteRequest request) throws Exception {
         return false;
     }
-
-
 }
