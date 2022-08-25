@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+
+  consul-server:
+    image: hashicorp/consul:latest
+    container_name: consul
+    restart: always
+    network_mode: 'host'
+    command: "agent -dev"
+
+  mft-agent:
+    image: airavata/mft
+    restart: always
+    network_mode: 'host'
+    depends_on:
+      - consul-server
