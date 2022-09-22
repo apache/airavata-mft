@@ -35,6 +35,9 @@ public class S3StorageAddSubCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"-s", "--secret"}, description = "Access Secret")
     private String accessSecret;
 
+    @CommandLine.Option(names = {"-t", "--token"}, description = "Session Token", defaultValue = "")
+    private String sessionToken;
+
     @Override
     public Integer call() throws Exception {
 
@@ -46,6 +49,7 @@ public class S3StorageAddSubCommand implements Callable<Integer> {
                 .createS3Secret(S3SecretCreateRequest.newBuilder()
                         .setAccessKey(accessKey)
                         .setSecretKey(accessSecret)
+                        .setSessionToken(sessionToken)
                         .setAuthzToken(authToken).build());
 
         S3StorageServiceGrpc.S3StorageServiceBlockingStub s3StorageClient = mftApiClient.getStorageServiceClient().s3();

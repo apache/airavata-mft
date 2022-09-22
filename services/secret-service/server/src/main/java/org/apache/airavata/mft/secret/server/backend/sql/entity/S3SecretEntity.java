@@ -22,6 +22,9 @@ public class S3SecretEntity {
     @Column(name = "SECRET_KEY")
     private String secretKey;
 
+    @Column(name = "SESSION_TOKEN")
+    private String sessionToken;
+
     public String getSecretId() {
         return secretId;
     }
@@ -44,5 +47,13 @@ public class S3SecretEntity {
 
     public void setSecretKey(String secretKey) {
         this.secretKey = secretKey;
+    }
+
+    public String getSessionToken() {
+        return sessionToken;
+    }
+
+    public void setSessionToken(String sessionToken) {
+        this.sessionToken = sessionToken;
     }
 }
