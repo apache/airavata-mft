@@ -17,14 +17,7 @@
 
 package org.apache.airavata.mft.secret.server;
 
-import org.apache.airavata.mft.secret.server.backend.custos.CustosClientsFactory;
-import org.apache.airavata.mft.secret.server.backend.custos.auth.AgentAuthenticationHandler;
-import org.apache.custos.clients.CustosClientProvider;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.io.IOException;
 
 @Configuration
 public class AppConfig {

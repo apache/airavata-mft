@@ -1202,6 +1202,8 @@ healthchecksdb
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
 
+logs/
+airavata-mft/
 # End of https://www.gitignore.io/api/visualstudiocode,macos,c,c++,code,code-java,database,dbeaver,eclipse,flask,git,go,helm,intellij,intellij+all,intellij+iml,java,java-web,jmeter,kotlin,linux,osx,pycharm,pycharm+all,pycharm+iml,pydev,python,visualstudio,web,windows
 
 # Custom rules (everything added below won't be overriden by 'Generate .gitignore File' if you use 'Update' option)
