@@ -6,19 +6,10 @@ RUN apt-get install git -y
 RUN mkdir airavata
 WORKDIR /airavata
 
-RUN git clone https://github.com/apache/airavata-custos.git
-RUN git clone https://github.com/apache/airavata-data-lake.git
 RUN git clone https://github.com/apache/airavata-mft.git
 
-WORKDIR /airavata/airavata-custos
-RUN git checkout develop
-RUN mvn install
-
 WORKDIR /airavata/airavata-mft/
-RUN ! mvn install --fail-at-end
-
-WORKDIR /airavata/airavata-data-lake/
-RUN ! mvn install --fail-at-end
+RUN mvn install
 
 WORKDIR /airavata/airavata-mft/scripts
 RUN ["./build.sh"]
