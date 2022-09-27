@@ -24,6 +24,7 @@ import org.apache.airavata.mft.resource.stubs.dropbox.storage.*;
 import org.apache.airavata.mft.resource.stubs.ftp.storage.*;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.*;
 import org.apache.airavata.mft.resource.stubs.local.storage.*;
+import org.apache.airavata.mft.resource.stubs.odata.storage.*;
 import org.apache.airavata.mft.resource.stubs.s3.storage.*;
 import org.apache.airavata.mft.resource.stubs.scp.storage.*;
 import org.apache.airavata.mft.resource.stubs.swift.storage.*;
@@ -100,4 +101,10 @@ public interface ResourceBackend {
     SwiftStorage createSwiftStorage(SwiftStorageCreateRequest request) throws Exception;
     boolean updateSwiftStorage(SwiftStorageUpdateRequest request) throws Exception;
     boolean deleteSwiftStorage(SwiftStorageDeleteRequest request) throws Exception;
+
+    public ODataStorageListResponse listODataStorage(ODataStorageListRequest request) throws Exception;
+    Optional<ODataStorage> getODataStorage(ODataStorageGetRequest request) throws Exception;
+    ODataStorage createODataStorage(ODataStorageCreateRequest request) throws Exception;
+    boolean updateODataStorage(ODataStorageUpdateRequest request) throws Exception;
+    boolean deleteODataStorage(ODataStorageDeleteRequest request) throws Exception;
 }

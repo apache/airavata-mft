@@ -150,6 +150,7 @@
         <mariadb.jdbc>2.5.1</mariadb.jdbc>
         <jclouds.version>2.5.0</jclouds.version>
         <commons.io.version>2.6</commons.io.version>
+        <apache.http.client.version>4.5.13</apache.http.client.version>
     </properties>
 
 </project>

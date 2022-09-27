@@ -22,17 +22,20 @@ import org.apache.airavata.mft.credential.stubs.box.*;
 import org.apache.airavata.mft.credential.stubs.dropbox.*;
 import org.apache.airavata.mft.credential.stubs.ftp.*;
 import org.apache.airavata.mft.credential.stubs.gcs.*;
+import org.apache.airavata.mft.credential.stubs.odata.*;
 import org.apache.airavata.mft.credential.stubs.s3.*;
 import org.apache.airavata.mft.credential.stubs.scp.*;
 import org.apache.airavata.mft.credential.stubs.swift.*;
 import org.apache.airavata.mft.secret.server.backend.SecretBackend;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.FTPSecretEntity;
+import org.apache.airavata.mft.secret.server.backend.sql.entity.ODataSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.S3SecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.SCPSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftAuthCredentialSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftPasswordSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.FTPSecretRepository;
+import org.apache.airavata.mft.secret.server.backend.sql.repository.ODataSecretRepository;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.S3SecretRepository;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.SCPSecretRepository;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.swift.SwiftAuthCredentialSecretRepository;
@@ -66,6 +69,9 @@ public class SQLSecretBackend implements SecretBackend {
 
     @Autowired
     private SwiftAuthCredentialSecretRepository swiftAuthCredentialSecretRepository;
+
+    @Autowired
+    private ODataSecretRepository odataSecretRepository;
 
     private DozerBeanMapper mapper = new DozerBeanMapper();
 
@@ -331,6 +337,30 @@ public class SQLSecretBackend implements SecretBackend {
     @Override
     public boolean deleteFTPSecret(FTPSecretDeleteRequest request) {
         ftpSecretRepository.deleteById(request.getSecretId());
+        return true;
+    }
+
+    @Override
+    public Optional<ODataSecret> getODataSecret(ODataSecretGetRequest request) throws Exception {
+        Optional<ODataSecretEntity> secretEty = odataSecretRepository.findBySecretId(request.getSecretId());
+        return secretEty.map(odataSecretEntity -> mapper.map(odataSecretEntity, ODataSecret.newBuilder().getClass()).build());
+    }
+
+    @Override
+    public ODataSecret createODataSecret(ODataSecretCreateRequest request) throws Exception {
+        ODataSecretEntity savedEntity = odataSecretRepository.save(mapper.map(request, ODataSecretEntity.class));
+        return mapper.map(savedEntity, ODataSecret.newBuilder().getClass()).build();
+    }
+
+    @Override
+    public boolean updateODataSecret(ODataSecretUpdateRequest request) throws Exception {
+        odataSecretRepository.save(mapper.map(request, ODataSecretEntity.class));
+        return true;
+    }
+
+    @Override
+    public boolean deleteODataSecret(ODataSecretDeleteRequest request) throws Exception {
+        odataSecretRepository.deleteById(request.getSecretId());
         return true;
     }
 }
