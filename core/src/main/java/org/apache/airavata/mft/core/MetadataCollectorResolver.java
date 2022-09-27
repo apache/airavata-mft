@@ -54,6 +54,9 @@ public final class MetadataCollectorResolver {
             case "SWIFT":
                 className = "org.apache.airavata.mft.transport.swift.SwiftMetadataCollector";
                 break;
+            case "ODATA":
+                className = "org.apache.airavata.mft.transport.odata.ODataMetadataCollector";
+                break;
         }
 
         if (className != null) {

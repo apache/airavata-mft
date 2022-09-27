@@ -22,6 +22,7 @@ import org.apache.airavata.mft.credential.stubs.box.*;
 import org.apache.airavata.mft.credential.stubs.dropbox.*;
 import org.apache.airavata.mft.credential.stubs.ftp.*;
 import org.apache.airavata.mft.credential.stubs.gcs.*;
+import org.apache.airavata.mft.credential.stubs.odata.*;
 import org.apache.airavata.mft.credential.stubs.s3.*;
 import org.apache.airavata.mft.credential.stubs.scp.*;
 import org.apache.airavata.mft.credential.stubs.swift.*;
@@ -72,4 +73,9 @@ public interface SecretBackend {
     SwiftSecret createSwiftSecret(SwiftSecretCreateRequest request) throws Exception;
     boolean updateSwiftSecret(SwiftSecretUpdateRequest request) throws Exception;
     boolean deleteSwiftSecret(SwiftSecretDeleteRequest request) throws Exception;
+
+    Optional<ODataSecret> getODataSecret(ODataSecretGetRequest request) throws Exception;
+    ODataSecret createODataSecret(ODataSecretCreateRequest request) throws Exception;
+    boolean updateODataSecret(ODataSecretUpdateRequest request) throws Exception;
+    boolean deleteODataSecret(ODataSecretDeleteRequest request) throws Exception;
 }

@@ -24,38 +24,30 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>airavata-mft</artifactId>
+        <artifactId>mft-transport</artifactId>
         <groupId>org.apache.airavata</groupId>
         <version>0.01-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>mft-transport</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>scp-transport</module>
-        <module>local-transport</module>
-        <module>s3-transport</module>
-        <module>box-transport</module>
-        <module>azure-transport</module>
-        <module>gcp-transport</module>
-        <module>ftp-transport</module>
-        <module>dropbox-transport</module>
-        <module>swift-transport</module>
-        <module>odata-transport</module>
-    </modules>
+    <artifactId>mft-odata-transport</artifactId>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.airavata</groupId>
-            <artifactId>mft-resource-service-client</artifactId>
-            <version>0.01-SNAPSHOT</version>
+            <artifactId>mft-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
+
         <dependency>
-            <groupId>org.apache.airavata</groupId>
-            <artifactId>mft-secret-service-client</artifactId>
-            <version>0.01-SNAPSHOT</version>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${apache.http.client.version}</version>
         </dependency>
     </dependencies>
-
-
 </project>

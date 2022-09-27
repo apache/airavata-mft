@@ -29,6 +29,7 @@ import "local/LocalStorage.proto";
 import "s3/S3Storage.proto";
 import "scp/SCPStorage.proto";
 import "swift/SwiftStorage.proto";
+import "odata/ODataStorage.proto";
 import "CredCommon.proto";
 
 message FileResource {
@@ -58,6 +59,7 @@ message GenericResource {
         org.apache.airavata.mft.resource.stubs.box.storage.BoxStorage boxStorage = 10;
         org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage azureStorage = 11;
         org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorage swiftStorage = 12;
+        org.apache.airavata.mft.resource.stubs.odata.storage.ODataStorage odataStorage = 13;
     }
 }
 
@@ -83,6 +85,7 @@ message GenericResourceCreateRequest {
         GCS = 6;
         AZURE = 7;
         SWIFT = 8;
+        ODATA = 9;
     }
 
     StorageType storageType = 5;

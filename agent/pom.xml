@@ -86,6 +86,11 @@
         </dependency>
         <dependency>
             <groupId>org.apache.airavata</groupId>
+            <artifactId>mft-odata-transport</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
             <artifactId>mft-common-clients</artifactId>
             <version>${project.version}</version>
         </dependency>

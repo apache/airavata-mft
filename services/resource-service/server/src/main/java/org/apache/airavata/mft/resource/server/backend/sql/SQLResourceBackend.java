@@ -27,6 +27,7 @@ import org.apache.airavata.mft.resource.stubs.dropbox.storage.*;
 import org.apache.airavata.mft.resource.stubs.ftp.storage.*;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.*;
 import org.apache.airavata.mft.resource.stubs.local.storage.*;
+import org.apache.airavata.mft.resource.stubs.odata.storage.*;
 import org.apache.airavata.mft.resource.stubs.s3.storage.*;
 import org.apache.airavata.mft.resource.stubs.scp.storage.*;
 import org.apache.airavata.mft.resource.stubs.swift.storage.*;
@@ -65,6 +66,9 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Autowired
     private StorageSecretRepository resourceSecretRepository;
+
+    @Autowired
+    private ODataStorageRepository odataStorageRepository;
 
     private DozerBeanMapper mapper = new DozerBeanMapper();
 
@@ -144,6 +148,12 @@ public class SQLResourceBackend implements ResourceBackend {
                 Optional<SwiftStorage> swiftStorage = getSwiftStorage(SwiftStorageGetRequest.newBuilder()
                         .setStorageId(resourceEty.getStorageId()).build());
                 builder.setSwiftStorage(swiftStorage.orElseThrow(() -> new Exception("Could not find a Swift storage with id "
+                        + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
+                break;
+            case ODATA:
+                Optional<ODataStorage> odataStorage = getODataStorage(ODataStorageGetRequest.newBuilder()
+                        .setStorageId(resourceEty.getStorageId()).build());
+                builder.setOdataStorage(odataStorage.orElseThrow(() -> new Exception("Could not find a OData storage with id "
                         + resourceEty.getStorageId() + " for resource " + resourceEty.getResourceId())));
                 break;
         }
@@ -490,6 +500,39 @@ public class SQLResourceBackend implements ResourceBackend {
     @Override
     public boolean deleteSwiftStorage(SwiftStorageDeleteRequest request) throws Exception {
         swiftStorageRepository.deleteById(request.getStorageId());
+        resourceRepository.deleteByStorageIdAndStorageType(request.getStorageId(), GenericResourceEntity.StorageType.SWIFT);
+        return true;
+    }
+
+    @Override
+    public ODataStorageListResponse listODataStorage(ODataStorageListRequest request) throws Exception {
+        ODataStorageListResponse.Builder respBuilder = ODataStorageListResponse.newBuilder();
+        List<ODataStorageEntity> all = odataStorageRepository.findAll(PageRequest.of(request.getOffset(), request.getLimit()));
+        all.forEach(ety -> respBuilder.addStorages(mapper.map(ety, ODataStorage.newBuilder().getClass())));
+        return respBuilder.build();
+    }
+
+    @Override
+    public Optional<ODataStorage> getODataStorage(ODataStorageGetRequest request) throws Exception {
+        Optional<ODataStorageEntity> entity = odataStorageRepository.findByStorageId(request.getStorageId());
+        return entity.map(e -> mapper.map(e, ODataStorage.newBuilder().getClass()).build());
+    }
+
+    @Override
+    public ODataStorage createODataStorage(ODataStorageCreateRequest request) throws Exception {
+        ODataStorageEntity savedEntity = odataStorageRepository.save(mapper.map(request, ODataStorageEntity.class));
+        return mapper.map(savedEntity, ODataStorage.newBuilder().getClass()).build();
+    }
+
+    @Override
+    public boolean updateODataStorage(ODataStorageUpdateRequest request) throws Exception {
+        odataStorageRepository.save(mapper.map(request, ODataStorageEntity.class));
+        return true;
+    }
+
+    @Override
+    public boolean deleteODataStorage(ODataStorageDeleteRequest request) throws Exception {
+        odataStorageRepository.deleteById(request.getStorageId());
         resourceRepository.deleteByStorageIdAndStorageType(request.getStorageId(), GenericResourceEntity.StorageType.SWIFT);
         return true;
     }

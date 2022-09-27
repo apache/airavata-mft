@@ -195,7 +195,7 @@ public class TransportMediator {
                 inConnector.complete();
                 outConnector.complete();
 
-                logger.info("Completed streaming ransfer for transfer {}", transferId);
+                logger.info("Completed streaming transfer for transfer {}", transferId);
 
             } else {
                 throw new Exception("No matching connector found to perform the transfer");
