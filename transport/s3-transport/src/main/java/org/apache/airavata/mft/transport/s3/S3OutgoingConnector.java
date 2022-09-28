@@ -130,4 +130,9 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
         logger.info("Completing the upload for file {} in bucket {}", resource.getFile().getResourcePath(),
                 resource.getS3Storage().getBucketName());
     }
+
+    @Override
+    public void failed() throws Exception {
+
+    }
 }

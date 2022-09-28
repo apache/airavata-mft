@@ -119,6 +119,11 @@ public class SwiftIncomingConnector implements IncomingChunkedConnector {
     }
 
     @Override
+    public void failed() throws Exception {
+
+    }
+
+    @Override
     public void downloadChunk(int chunkId, long startByte, long endByte, String downloadFile) throws Exception {
         SwiftObject swiftObject = objectApi.get(
                 resource.getFile().getResourcePath(),

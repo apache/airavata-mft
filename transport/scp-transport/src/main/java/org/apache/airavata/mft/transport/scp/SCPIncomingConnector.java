@@ -204,6 +204,11 @@ public final class SCPIncomingConnector implements IncomingStreamingConnector {
         session.disconnect();
     }
 
+    @Override
+    public void failed() throws Exception {
+
+    }
+
     private int checkAck(InputStream in) throws IOException {
         int b = in.read();
         // b may be 0 for success,

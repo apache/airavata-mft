@@ -109,6 +109,11 @@ public class S3OutgoingStreamingConnector implements OutgoingStreamingConnector 
     }
 
     @Override
+    public void failed() throws Exception {
+
+    }
+
+    @Override
     public OutputStream fetchOutputStream() throws Exception {
         this.s3OutputStream = S3OutputStream.builder()
                 .s3(s3)

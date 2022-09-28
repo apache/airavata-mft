@@ -19,9 +19,7 @@ package org.apache.airavata.mft.core.api;
 
 import java.io.InputStream;
 
-public interface IncomingStreamingConnector {
-    public void init(ConnectorConfig connectorConfig) throws Exception;
+public interface IncomingStreamingConnector extends BasicConnector {
     public InputStream fetchInputStream() throws Exception;
     public InputStream fetchInputStream(String childPath) throws Exception;
-    public void complete() throws Exception;
 }

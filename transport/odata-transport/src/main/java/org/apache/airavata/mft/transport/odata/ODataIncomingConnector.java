@@ -113,4 +113,9 @@ public class ODataIncomingConnector implements IncomingStreamingConnector {
             client.close();
         }
     }
+
+    @Override
+    public void failed() throws Exception {
+
+    }
 }

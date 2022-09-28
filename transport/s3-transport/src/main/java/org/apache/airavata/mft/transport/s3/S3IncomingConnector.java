@@ -116,4 +116,9 @@ public class S3IncomingConnector implements IncomingChunkedConnector, IncomingSt
     public void complete() throws Exception {
 
     }
+
+    @Override
+    public void failed() throws Exception {
+
+    }
 }

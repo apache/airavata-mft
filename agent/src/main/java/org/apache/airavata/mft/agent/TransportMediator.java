@@ -117,31 +117,37 @@ public class TransportMediator {
                 inConnector.init(srcCC);
                 outConnector.init(dstCC);
 
-                while(uploadLength < fileLength) {
+                try {
+                    while (uploadLength < fileLength) {
 
-                    long endPos = uploadLength + chunkSize;
-                    if (endPos > fileLength) {
-                        endPos = fileLength;
+                        long endPos = uploadLength + chunkSize;
+                        if (endPos > fileLength) {
+                            endPos = fileLength;
+                        }
+
+
+                        completionService.submit(new ChunkMover(inConnector,
+                                outConnector, uploadLength, endPos, chunkIdx,
+                                transferId, doChunkStreaming));
+
+                        uploadLength = endPos;
+                        chunkIdx++;
                     }
 
 
-                    completionService.submit(new ChunkMover(inConnector,
-                            outConnector, uploadLength, endPos, chunkIdx,
-                            transferId, doChunkStreaming));
+                    for (int i = 0; i < chunkIdx; i++) {
+                        Future<Integer> future = completionService.take();
+                    }
 
-                    uploadLength = endPos;
-                    chunkIdx++;
+                    inConnector.complete();
+                    outConnector.complete();
+                    logger.info("Completed chunked transfer for transfer {}", transferId);
+
+                } catch (Exception e) {
+                    inConnector.failed();
+                    outConnector.failed();
+                    throw e;
                 }
-
-
-                for (int i = 0; i < chunkIdx; i++) {
-                    Future<Integer> future = completionService.take();
-                }
-
-                inConnector.complete();
-                outConnector.complete();
-                logger.info("Completed chunked transfer for transfer {}", transferId);
-
             } else if (inStreamingConnectorOp.isPresent() && outStreamingConnectorOp.isPresent()) {
 
                 logger.info("Starting streaming transfer for transfer {}", transferId);
@@ -154,48 +160,54 @@ public class TransportMediator {
                 inConnector.init(srcCC);
                 outConnector.init(dstCC);
 
-                String srcChild = request.getSourceChildResourcePath();
-                String dstChild = request.getDestinationChildResourcePath();
+                try {
+                    String srcChild = request.getSourceChildResourcePath();
+                    String dstChild = request.getDestinationChildResourcePath();
 
-                InputStream inputStream = srcChild.equals("") ? inConnector.fetchInputStream() : inConnector.fetchInputStream(srcChild);
-                OutputStream outputStream = dstChild.equals("") ? outConnector.fetchOutputStream() : outConnector.fetchOutputStream(dstChild);
+                    InputStream inputStream = srcChild.equals("") ? inConnector.fetchInputStream() : inConnector.fetchInputStream(srcChild);
+                    OutputStream outputStream = dstChild.equals("") ? outConnector.fetchOutputStream() : outConnector.fetchOutputStream(dstChild);
 
-                long count = 0;
-                final AtomicLong countAtomic = new AtomicLong();
-                countAtomic.set(count);
-
-                monitorPool.submit(() -> {
-                    while (true) {
-                        try {
-                            Thread.sleep(2000);
-                        } catch (InterruptedException e) {
-                            // Ignore
-                        }
-                        if (!transferInProgress.get()) {
-                            logger.info("Status monitor is exiting for transfer {}", transferId);
-                            break;
-                        }
-                        double transferPercentage = countAtomic.get() * 100.0 / srcCC.getMetadata().getResourceSize();
-                        logger.info("Transfer percentage for transfer {} {}", transferId, transferPercentage);
-                        onStatusCallback.accept(transferId, new TransferState()
-                                .setPercentage(transferPercentage)
-                                .setState("RUNNING")
-                                .setUpdateTimeMils(System.currentTimeMillis())
-                                .setDescription("Transfer Progress Updated"));
-                    }
-                });
-
-                int n;
-                byte[] buffer = new byte[128 * 1024];
-                for (count = 0L; -1 != (n = inputStream.read(buffer)); count += (long) n) {
-                    outputStream.write(buffer, 0, n);
+                    long count = 0;
+                    final AtomicLong countAtomic = new AtomicLong();
                     countAtomic.set(count);
+
+                    monitorPool.submit(() -> {
+                        while (true) {
+                            try {
+                                Thread.sleep(2000);
+                            } catch (InterruptedException e) {
+                                // Ignore
+                            }
+                            if (!transferInProgress.get()) {
+                                logger.info("Status monitor is exiting for transfer {}", transferId);
+                                break;
+                            }
+                            double transferPercentage = countAtomic.get() * 100.0 / srcCC.getMetadata().getResourceSize();
+                            logger.info("Transfer percentage for transfer {} {}", transferId, transferPercentage);
+                            onStatusCallback.accept(transferId, new TransferState()
+                                    .setPercentage(transferPercentage)
+                                    .setState("RUNNING")
+                                    .setUpdateTimeMils(System.currentTimeMillis())
+                                    .setDescription("Transfer Progress Updated"));
+                        }
+                    });
+
+                    int n;
+                    byte[] buffer = new byte[128 * 1024];
+                    for (count = 0L; -1 != (n = inputStream.read(buffer)); count += (long) n) {
+                        outputStream.write(buffer, 0, n);
+                        countAtomic.set(count);
+                    }
+
+                    inConnector.complete();
+                    outConnector.complete();
+
+                    logger.info("Completed streaming transfer for transfer {}", transferId);
+                } catch (Exception e) {
+                    inConnector.failed();
+                    outConnector.failed();
+                    throw e;
                 }
-
-                inConnector.complete();
-                outConnector.complete();
-
-                logger.info("Completed streaming transfer for transfer {}", transferId);
 
             } else {
                 throw new Exception("No matching connector found to perform the transfer");
@@ -224,6 +236,7 @@ public class TransportMediator {
                     .setState("FAILED")
                     .setUpdateTimeMils(System.currentTimeMillis())
                     .setDescription("Transfer failed due to " + ExceptionUtils.getStackTrace(e)));
+            exitingCallback.accept(transferId, false);
         } finally {
             transferInProgress.set(false);
         }

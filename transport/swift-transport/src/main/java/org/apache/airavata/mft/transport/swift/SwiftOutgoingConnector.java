@@ -133,6 +133,11 @@ public class SwiftOutgoingConnector implements OutgoingChunkedConnector {
     }
 
     @Override
+    public void failed() throws Exception {
+
+    }
+
+    @Override
     public void uploadChunk(int chunkId, long startByte, long endByte, String uploadFile) throws Exception {
         InputStream fis = new FileInputStream(uploadFile);
         uploadChunk(chunkId, startByte, endByte, fis);
