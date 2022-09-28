@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 import airavata_mft_sdk.CredCommon_pb2 as CredCommon__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15s3/S3Credential.proto\x12+org.apache.airavata.mft.credential.stubs.s3\x1a\x10\x43redCommon.proto\"B\n\x08S3Secret\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x11\n\taccessKey\x18\x02 \x01(\t\x12\x11\n\tsecretKey\x18\x03 \x01(\t\"e\n\x12S3SecretGetRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"|\n\x15S3SecretCreateRequest\x12\x11\n\taccessKey\x18\x01 \x01(\t\x12\x11\n\tsecretKey\x18\x02 \x01(\t\x12=\n\nauthzToken\x18\x03 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\x8e\x01\n\x15S3SecretUpdateRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x11\n\taccessKey\x18\x02 \x01(\t\x12\x11\n\tsecretKey\x18\x03 \x01(\t\x12=\n\nauthzToken\x18\x04 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"*\n\x16S3SecretUpdateResponse\x12\x10\n\x08secretId\x18\x01 \x01(\t\"h\n\x15S3SecretDeleteRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"(\n\x16S3SecretDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x42\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15s3/S3Credential.proto\x12+org.apache.airavata.mft.credential.stubs.s3\x1a\x10\x43redCommon.proto\"X\n\x08S3Secret\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x11\n\taccessKey\x18\x02 \x01(\t\x12\x11\n\tsecretKey\x18\x03 \x01(\t\x12\x14\n\x0csessionToken\x18\x04 \x01(\t\"e\n\x12S3SecretGetRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\x92\x01\n\x15S3SecretCreateRequest\x12\x11\n\taccessKey\x18\x01 \x01(\t\x12\x11\n\tsecretKey\x18\x02 \x01(\t\x12\x14\n\x0csessionToken\x18\x03 \x01(\t\x12=\n\nauthzToken\x18\x04 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\xa4\x01\n\x15S3SecretUpdateRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12\x11\n\taccessKey\x18\x02 \x01(\t\x12\x11\n\tsecretKey\x18\x03 \x01(\t\x12\x14\n\x0csessionToken\x18\x04 \x01(\t\x12=\n\nauthzToken\x18\x05 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"*\n\x16S3SecretUpdateResponse\x12\x10\n\x08secretId\x18\x01 \x01(\t\"h\n\x15S3SecretDeleteRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"(\n\x16S3SecretDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x42\x02P\x01\x62\x06proto3')
 
 
 
@@ -80,17 +80,17 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'P\001'
   _S3SECRET._serialized_start=88
-  _S3SECRET._serialized_end=154
-  _S3SECRETGETREQUEST._serialized_start=156
-  _S3SECRETGETREQUEST._serialized_end=257
-  _S3SECRETCREATEREQUEST._serialized_start=259
-  _S3SECRETCREATEREQUEST._serialized_end=383
-  _S3SECRETUPDATEREQUEST._serialized_start=386
-  _S3SECRETUPDATEREQUEST._serialized_end=528
-  _S3SECRETUPDATERESPONSE._serialized_start=530
-  _S3SECRETUPDATERESPONSE._serialized_end=572
-  _S3SECRETDELETEREQUEST._serialized_start=574
-  _S3SECRETDELETEREQUEST._serialized_end=678
-  _S3SECRETDELETERESPONSE._serialized_start=680
-  _S3SECRETDELETERESPONSE._serialized_end=720
+  _S3SECRET._serialized_end=176
+  _S3SECRETGETREQUEST._serialized_start=178
+  _S3SECRETGETREQUEST._serialized_end=279
+  _S3SECRETCREATEREQUEST._serialized_start=282
+  _S3SECRETCREATEREQUEST._serialized_end=428
+  _S3SECRETUPDATEREQUEST._serialized_start=431
+  _S3SECRETUPDATEREQUEST._serialized_end=595
+  _S3SECRETUPDATERESPONSE._serialized_start=597
+  _S3SECRETUPDATERESPONSE._serialized_end=639
+  _S3SECRETDELETEREQUEST._serialized_start=641
+  _S3SECRETDELETEREQUEST._serialized_end=745
+  _S3SECRETDELETERESPONSE._serialized_start=747
+  _S3SECRETDELETERESPONSE._serialized_end=787
 # @@protoc_insertion_point(module_scope)
