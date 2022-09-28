@@ -39,6 +39,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -252,16 +253,27 @@ public class MFTController implements CommandLineRunner {
         } else if (!transferRequest.getAffinityTransfer()){
             List<Optional<AgentInfo>> agentInfos = liveAgentIds.stream().map(id -> mftConsulClient.getAgentInfo(id)).collect(Collectors.toList());
             int transferCount = -1;
+            List<String> candidates = new ArrayList<>();
             for (Optional<AgentInfo> agentInfo : agentInfos) {
                 if (agentInfo.isPresent()) {
+                    List<String> agentActiveTransferIds = mftConsulClient.getAgentActiveTransferIds(agentInfo.get());
+                    logger.info("Agent {} has transfers assigned {}", agentInfo.get().getId(), agentActiveTransferIds.size());
                     if (transferCount == -1) {
-                        transferCount = mftConsulClient.getAgentActiveTransferIds(agentInfo.get()).size();
-                        selectedAgent = agentInfo.get().getId();
-                    } else if (transferCount > mftConsulClient.getAgentActiveTransferIds(agentInfo.get()).size()) {
-                        transferCount = mftConsulClient.getAgentActiveTransferIds(agentInfo.get()).size();
-                        selectedAgent = agentInfo.get().getId();
+                        transferCount = agentActiveTransferIds.size();
+                        candidates.add(agentInfo.get().getId());
+                    } else if (transferCount == agentActiveTransferIds.size()) {
+                        candidates.add(agentInfo.get().getId());
+                    } else if (transferCount > agentActiveTransferIds.size()) {
+                        candidates = new ArrayList<>();
+                        transferCount = agentActiveTransferIds.size();
+                        candidates.add(agentInfo.get().getId());
                     }
                 }
+            }
+
+            if (candidates.size() > 0) {
+                Random rand = new Random();
+                selectedAgent = candidates.get(rand.nextInt(candidates.size()));
             }
         }
 
@@ -270,6 +282,7 @@ public class MFTController implements CommandLineRunner {
             return Optional.empty();
         }
 
+        logger.info("Selected agent {}", selectedAgent);
         return Optional.of(selectedAgent);
     }
 
