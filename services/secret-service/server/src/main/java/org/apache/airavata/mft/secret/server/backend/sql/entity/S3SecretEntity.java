@@ -22,7 +22,7 @@ public class S3SecretEntity {
     @Column(name = "SECRET_KEY")
     private String secretKey;
 
-    @Column(name = "SESSION_TOKEN")
+    @Column(name = "SESSION_TOKEN", length = 512)
     private String sessionToken;
 
     public String getSecretId() {
