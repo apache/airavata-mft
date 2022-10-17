@@ -25,7 +25,6 @@ public class AgentHttpDownloadData {
     private IncomingStreamingConnector incomingStreamingConnector;
     private IncomingChunkedConnector incomingChunkedConnector;
     private ConnectorConfig connectorConfig;
-    private String childResourcePath;
     private long createdTime = System.currentTimeMillis();
 
     public IncomingStreamingConnector getIncomingStreamingConnector() {
@@ -52,14 +51,6 @@ public class AgentHttpDownloadData {
         this.connectorConfig = connectorConfig;
     }
 
-    public String getChildResourcePath() {
-        return childResourcePath;
-    }
-
-    public void setChildResourcePath(String childResourcePath) {
-        this.childResourcePath = childResourcePath;
-    }
-
     public long getCreatedTime() {
         return createdTime;
     }
@@ -73,7 +64,6 @@ public class AgentHttpDownloadData {
         private IncomingStreamingConnector incomingStreamingConnector;
         private IncomingChunkedConnector incomingChunkedConnector;
         private ConnectorConfig connectorConfig;
-        private String childResourcePath;
         private long createdTime = System.currentTimeMillis();
 
         private AgentHttpDownloadDataBuilder() {
@@ -98,11 +88,6 @@ public class AgentHttpDownloadData {
             return this;
         }
 
-        public AgentHttpDownloadDataBuilder withChildResourcePath(String childResourcePath) {
-            this.childResourcePath = childResourcePath;
-            return this;
-        }
-
         public AgentHttpDownloadDataBuilder withCreatedTime(long createdTime) {
             this.createdTime = createdTime;
             return this;
@@ -114,7 +99,6 @@ public class AgentHttpDownloadData {
             agentHttpDownloadData.setIncomingStreamingConnector(incomingStreamingConnector);
             agentHttpDownloadData.setIncomingChunkedConnector(incomingChunkedConnector);
             agentHttpDownloadData.setConnectorConfig(connectorConfig);
-            agentHttpDownloadData.setChildResourcePath(childResourcePath);
             agentHttpDownloadData.setCreatedTime(createdTime);
             return agentHttpDownloadData;
         }

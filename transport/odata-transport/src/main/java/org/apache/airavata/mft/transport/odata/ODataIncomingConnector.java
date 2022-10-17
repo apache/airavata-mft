@@ -23,9 +23,12 @@ import org.apache.airavata.mft.credential.stubs.odata.ODataSecret;
 import org.apache.airavata.mft.credential.stubs.odata.ODataSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.client.StorageServiceClient;
+import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.common.GenericResource;
 import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.resource.stubs.odata.storage.ODataStorage;
+import org.apache.airavata.mft.resource.stubs.odata.storage.ODataStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.apache.http.HttpEntity;
@@ -49,25 +52,19 @@ public class ODataIncomingConnector implements IncomingStreamingConnector {
     private CloseableHttpResponse response;
     CloseableHttpClient client;
 
-    private GenericResource resource;
+    private String resourcePath;
     private ODataStorage odataStorage;
 
     @Override
     public void init(ConnectorConfig cc) throws Exception {
-        try (ResourceServiceClient resourceClient = ResourceServiceClientBuilder
+        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
                 .buildClient(cc.getResourceServiceHost(), cc.getResourceServicePort())) {
 
-            resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
-                    .setAuthzToken(cc.getAuthToken())
-                    .setResourceId(cc.getResourceId()).build());
+            odataStorage = storageServiceClient.odata()
+                    .getODataStorage(ODataStorageGetRequest.newBuilder().setStorageId(cc.getStorageId()).build());
         }
 
-        if (resource.getStorageCase() != GenericResource.StorageCase.ODATASTORAGE) {
-            logger.error("Invalid storage type {} specified for resource {}", resource.getStorageCase(), cc.getResourceId());
-            throw new Exception("Invalid storage type specified for resource " + cc.getResourceId());
-        }
-
-        odataStorage = resource.getOdataStorage();
+        this.resourcePath = cc.getResourcePath();
 
         try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
                 cc.getSecretServiceHost(), cc.getSecretServicePort())) {
@@ -87,20 +84,14 @@ public class ODataIncomingConnector implements IncomingStreamingConnector {
 
     @Override
     public InputStream fetchInputStream() throws Exception {
-
         HttpGet httpGet = new HttpGet(odataStorage.getBaseUrl() +
-                "/Products('" + resource.getFile().getResourcePath() +"')/$value");
+                "/Products('" + resourcePath +"')/$value");
         response = client.execute(httpGet);
         int statusCode = response.getStatusLine().getStatusCode();
-        logger.info("Received status code {} for resource path {}", statusCode, resource.getFile().getResourcePath());
+        logger.info("Received status code {} for resource path {}", statusCode, resourcePath);
 
         HttpEntity entity = response.getEntity();
         return entity.getContent();
-    }
-
-    @Override
-    public InputStream fetchInputStream(String childPath) throws Exception {
-        throw new UnsupportedOperationException("No child path structures available for OData");
     }
 
     @Override

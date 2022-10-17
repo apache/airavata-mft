@@ -16,24 +16,17 @@ import java.util.concurrent.Callable;
 @CommandLine.Command(name = "submit", description = "Submit a data transfer job")
 public class SubmitTransferSubCommand implements Callable<Integer> {
 
-    @CommandLine.Option(names = {"-st", "--source-type"}, description = "S3, SCP, LOCAL, FTP ...")
-    private String sourceType;
-
-    @CommandLine.Option(names = {"-dt", "--destination-type"}, description = "S3, SCP, LOCAL, FTP ...")
-    private String destinationType;
-
-    @CommandLine.Option(names = {"-s", "--source"}, description = "Source Storage Id")
+    @CommandLine.Option(names = {"-s", "--source"}, description = "Source Storage Id", required = true)
     private String sourceStorageId;
 
-    @CommandLine.Option(names = {"-d", "--destination"}, description = "Destination Storage Id")
+    @CommandLine.Option(names = {"-d", "--destination"}, description = "Destination Storage Id", required = true)
     private String destinationStorageId;
 
-    @CommandLine.Option(names = {"-sp", "--source-path"}, description = "Source Path")
+    @CommandLine.Option(names = {"-sp", "--source-path"}, description = "Source Path", required = true)
     private String sourcePath;
 
-    @CommandLine.Option(names = {"-dp", "--destination-path"}, description = "Destination Path")
+    @CommandLine.Option(names = {"-dp", "--destination-path"}, description = "Destination Path", required = true)
     private String destinationPath;
-
 
     @Override
     public Integer call() throws Exception {
@@ -51,25 +44,13 @@ public class SubmitTransferSubCommand implements Callable<Integer> {
                 .searchStorageSecret(StorageSecretSearchRequest.newBuilder()
                         .setAuthzToken(token).setStorageId(destinationStorageId).build());
 
-        GenericResource sourceResource = mftApiClient.getResourceClient().createGenericResource(GenericResourceCreateRequest.newBuilder()
-                .setAuthzToken(token)
-                .setFile(FileResource.newBuilder().setResourcePath(sourcePath).build())
-                .setStorageId(sourceStorageId)
-                .setStorageType(GenericResourceCreateRequest.StorageType.valueOf(sourceType)).build());
-
-        GenericResource destResource = mftApiClient.getResourceClient().createGenericResource(GenericResourceCreateRequest.newBuilder()
-                .setAuthzToken(token)
-                .setFile(FileResource.newBuilder().setResourcePath(destinationPath).build())
-                .setStorageId(destinationStorageId)
-                .setStorageType(GenericResourceCreateRequest.StorageType.valueOf(destinationType)).build());
-
         TransferApiResponse transferResp = mftApiClient.getTransferClient().submitTransfer(TransferApiRequest.newBuilder()
                 .setSourceToken(sourceSecret.getStorageSecret().getSecretId())
                 .setDestinationToken(destSecret.getStorageSecret().getSecretId())
-                .setDestinationResourceId(destResource.getResourceId())
-                .setSourceResourceId(sourceResource.getResourceId())
-                .setSourceType(sourceType)
-                .setDestinationType(destinationType).build());
+                .setDestinationStorageId(destinationStorageId)
+                .setDestinationPath(destinationPath)
+                .setSourceStorageId(sourceStorageId)
+                .setSourcePath(sourcePath).build());
 
         System.out.println("Submitted Transfer " + transferResp.getTransferId());
         return 0;

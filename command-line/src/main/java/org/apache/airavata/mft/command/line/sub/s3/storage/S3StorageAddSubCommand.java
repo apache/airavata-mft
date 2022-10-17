@@ -17,22 +17,22 @@ import java.util.concurrent.Callable;
 @CommandLine.Command(name = "add")
 public class S3StorageAddSubCommand implements Callable<Integer> {
 
-    @CommandLine.Option(names = {"-n", "--name"}, description = "Storage Name")
+    @CommandLine.Option(names = {"-n", "--name"}, description = "Storage Name", required = true)
     private String remoteName;
 
-    @CommandLine.Option(names = {"-b", "--bucket"}, description = "Bucket Name")
+    @CommandLine.Option(names = {"-b", "--bucket"}, description = "Bucket Name", required = true)
     private String bucket;
 
-    @CommandLine.Option(names = {"-r", "--region"}, description = "Region")
+    @CommandLine.Option(names = {"-r", "--region"}, description = "Region", required = true)
     private String region;
 
-    @CommandLine.Option(names = {"-e", "--endpoint"}, description = "S3 API Endpoint")
+    @CommandLine.Option(names = {"-e", "--endpoint"}, description = "S3 API Endpoint. For AWS S3 use https://s3.<REGION>.amazonaws.com", required = true)
     private String endpoint;
 
-    @CommandLine.Option(names = {"-k", "--key"}, description = "Access Key")
+    @CommandLine.Option(names = {"-k", "--key"}, description = "Access Key", required = true)
     private String accessKey;
 
-    @CommandLine.Option(names = {"-s", "--secret"}, description = "Access Secret")
+    @CommandLine.Option(names = {"-s", "--secret"}, description = "Access Secret", required = true)
     private String accessSecret;
 
     @CommandLine.Option(names = {"-t", "--token"}, description = "Session Token", defaultValue = "")

@@ -23,11 +23,10 @@ import org.apache.airavata.mft.core.FileResourceMetadata;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.credential.stubs.swift.SwiftSecret;
 import org.apache.airavata.mft.credential.stubs.swift.SwiftSecretGetRequest;
-import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.common.GenericResource;
-import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
+import org.apache.airavata.mft.resource.client.StorageServiceClient;
+import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorage;
+import org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.jclouds.ContextBuilder;
@@ -92,20 +91,28 @@ public class SwiftMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
+    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
         checkInitialized();
 
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        GenericResource swiftResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        SwiftStorage swiftStorage;
+        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
+                .buildClient(resourceServiceHost, resourceServicePort)) {
 
-        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
-        SwiftSecret swiftSecret = secretClient.swift().getSwiftSecret(SwiftSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+            swiftStorage = storageServiceClient.swift()
+                    .getSwiftStorage(SwiftStorageGetRequest.newBuilder().setStorageId(storageId).build());
+        }
 
-        SwiftApi swiftApi = getSwiftApi(swiftResource.getSwiftStorage(), swiftSecret);
+        SwiftSecret swiftSecret;
+        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
+                secretServiceHost, secretServicePort)) {
+            swiftSecret = secretClient.swift().getSwiftSecret(SwiftSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        }
 
-        ObjectApi objectApi = swiftApi.getObjectApi(swiftResource.getSwiftStorage().getRegion(), swiftResource.getSwiftStorage().getContainer());
+        SwiftApi swiftApi = getSwiftApi(swiftStorage, swiftSecret);
 
-        SwiftObject swiftObject = objectApi.get(swiftResource.getFile().getResourcePath());
+        ObjectApi objectApi = swiftApi.getObjectApi(swiftStorage.getRegion(), swiftStorage.getContainer());
+
+        SwiftObject swiftObject = objectApi.get(resourcePath);
 
         FileResourceMetadata metadata = new FileResourceMetadata();
         metadata.setResourceSize(swiftObject.getPayload().getContentMetadata().getContentLength());
@@ -116,41 +123,35 @@ public class SwiftMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String resourcePath,
+                                                                  String storageId, String credentialToken) throws Exception {
         throw new UnsupportedOperationException("Method not implemented");
     }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
-        throw new UnsupportedOperationException("Method not implemented");
-    }
-
-    @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
-        throw new UnsupportedOperationException("Method not implemented");
-    }
-
-    @Override
-    public Boolean isAvailable(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
+    public Boolean isAvailable(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
         checkInitialized();
 
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        GenericResource swiftResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        SwiftStorage swiftStorage;
+        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
+                .buildClient(resourceServiceHost, resourceServicePort)) {
 
-        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
-        SwiftSecret swiftSecret = secretClient.swift().getSwiftSecret(SwiftSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+            swiftStorage = storageServiceClient.swift()
+                    .getSwiftStorage(SwiftStorageGetRequest.newBuilder().setStorageId(storageId).build());
+        }
 
-        SwiftApi swiftApi = getSwiftApi(swiftResource.getSwiftStorage(), swiftSecret);
+        SwiftSecret swiftSecret;
+        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
+                secretServiceHost, secretServicePort)) {
+            swiftSecret = secretClient.swift().getSwiftSecret(SwiftSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        }
 
-        ObjectApi objectApi = swiftApi.getObjectApi(swiftResource.getSwiftStorage().getRegion(), swiftResource.getSwiftStorage().getContainer());
+        SwiftApi swiftApi = getSwiftApi(swiftStorage, swiftSecret);
 
-        SwiftObject swiftObject = objectApi.get(swiftResource.getFile().getResourcePath());
+        ObjectApi objectApi = swiftApi.getObjectApi(swiftStorage.getRegion(), swiftStorage.getContainer());
+
+        SwiftObject swiftObject = objectApi.get(resourcePath);
 
         return swiftObject != null;
-    }
-
-    @Override
-    public Boolean isAvailable(AuthToken authToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
-        throw new UnsupportedOperationException("Method not implemented");
     }
 }

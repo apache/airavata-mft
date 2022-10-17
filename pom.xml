@@ -48,7 +48,6 @@
         <module>transport</module>
         <module>agent</module>
         <module>controller</module>
-        <module>examples</module>
         <module>command-line</module>
     </modules>
 

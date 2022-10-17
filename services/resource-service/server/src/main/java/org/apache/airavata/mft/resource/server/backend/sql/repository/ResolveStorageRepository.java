@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.examples.transfer;
+package org.apache.airavata.mft.resource.server.backend.sql.repository;
 
-public class BoxExample {
+import org.apache.airavata.mft.resource.server.backend.sql.entity.ResolveStorageEntity;
+import org.springframework.data.repository.CrudRepository;
+
+public interface ResolveStorageRepository extends CrudRepository<ResolveStorageEntity, String> {
+    public ResolveStorageEntity getByStorageId(String storageID);
 }

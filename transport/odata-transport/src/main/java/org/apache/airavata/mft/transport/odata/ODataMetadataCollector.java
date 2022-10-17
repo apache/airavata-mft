@@ -23,11 +23,10 @@ import org.apache.airavata.mft.core.FileResourceMetadata;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.credential.stubs.odata.ODataSecret;
 import org.apache.airavata.mft.credential.stubs.odata.ODataSecretGetRequest;
-import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.common.GenericResource;
-import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
+import org.apache.airavata.mft.resource.client.StorageServiceClient;
+import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.odata.storage.ODataStorage;
+import org.apache.airavata.mft.resource.stubs.odata.storage.ODataStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.apache.http.HttpEntity;
@@ -80,55 +79,46 @@ public class ODataMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
-        return findFileResourceMetadata(authZToken, resourceId, credentialToken)
-                .orElseThrow(() -> new Exception("Could not find a file resource entry for resource id " + resourceId));
+    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourcePath, String storageId,
+                                                        String credentialToken) throws Exception {
+        return findFileResourceMetadata(authZToken, resourcePath, storageId, credentialToken)
+                .orElseThrow(() -> new Exception("Could not find a file resource entry for resource path " + resourcePath));
     }
 
-    @Override
-    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
-        throw new UnsupportedOperationException("OData does not have hierarchical structures");
-    }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String resourcePath,
+                                                                  String storageId, String credentialToken) throws Exception {
         throw new UnsupportedOperationException("OData does not have directory structures");
     }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
-        throw new UnsupportedOperationException("OData does not have directory structures");
+    public Boolean isAvailable(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
+        return findFileResourceMetadata(authZToken, resourcePath, storageId, credentialToken).isPresent();
     }
 
-    @Override
-    public Boolean isAvailable(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
-        return findFileResourceMetadata(authZToken, resourceId, credentialToken).isPresent();
-    }
+    private Optional<FileResourceMetadata> findFileResourceMetadata(AuthToken authZToken, String resourcePath,
+                                                                    String storageId, String credentialToken) throws Exception {
 
-    @Override
-    public Boolean isAvailable(AuthToken authToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
-        throw new UnsupportedOperationException("OData does not have directory structures");
-    }
+        ODataStorage odataStorage;
+        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
+                .buildClient(resourceServiceHost, resourceServicePort)) {
 
-    private Optional<FileResourceMetadata> findFileResourceMetadata(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        GenericResource resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder().setResourceId(resourceId).build());
-
-        if (resource.getStorageCase() != GenericResource.StorageCase.ODATASTORAGE) {
-            logger.error("Invalid storage type {} specified for resource {}", resource.getStorageCase(), resourceId);
-            throw new Exception("Invalid storage type specified for resource " + resourceId);
+            odataStorage = storageServiceClient.odata()
+                    .getODataStorage(ODataStorageGetRequest.newBuilder().setStorageId(storageId).build());
         }
 
-        ODataStorage odataStorage = resource.getOdataStorage();
-
-        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
-        ODataSecret oDataSecret = secretClient.odata().getODataSecret(
-                ODataSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        ODataSecret oDataSecret;
+        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
+                secretServiceHost, secretServicePort)) {
+            oDataSecret = secretClient.odata().getODataSecret(
+                    ODataSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        }
 
         try (CloseableHttpClient httpClient = getHttpClient(oDataSecret)) {
 
             HttpGet httpGet = new HttpGet(odataStorage.getBaseUrl() +
-                    "/Products('" + resource.getFile().getResourcePath() +"')");
+                    "/Products('" + resourcePath +"')");
 
             try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
                 int statusCode = response.getStatusLine().getStatusCode();

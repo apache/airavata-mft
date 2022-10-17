@@ -30,6 +30,8 @@ import org.apache.airavata.mft.resource.stubs.local.storage.*;
 import org.apache.airavata.mft.resource.stubs.odata.storage.*;
 import org.apache.airavata.mft.resource.stubs.s3.storage.*;
 import org.apache.airavata.mft.resource.stubs.scp.storage.*;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeResolveRequest;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeResolveResponse;
 import org.apache.airavata.mft.resource.stubs.swift.storage.*;
 import org.apache.airavata.mft.storage.stubs.storagesecret.*;
 import org.dozer.DozerBeanMapper;
@@ -69,6 +71,9 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Autowired
     private ODataStorageRepository odataStorageRepository;
+
+    @Autowired
+    private ResolveStorageRepository resolveStorageRepository;
 
     private DozerBeanMapper mapper = new DozerBeanMapper();
 
@@ -256,6 +261,12 @@ public class SQLResourceBackend implements ResourceBackend {
     @Override
     public SCPStorage createSCPStorage(SCPStorageCreateRequest request) {
         SCPStorageEntity savedEntity = scpStorageRepository.save(mapper.map(request, SCPStorageEntity.class));
+
+        ResolveStorageEntity storageTypeEty = new ResolveStorageEntity();
+        storageTypeEty.setStorageId(savedEntity.getStorageId());
+        storageTypeEty.setStorageType(ResolveStorageEntity.StorageType.SCP);
+        resolveStorageRepository.save(storageTypeEty);
+
         return mapper.map(savedEntity, SCPStorage.newBuilder().getClass()).build();
     }
 
@@ -289,6 +300,12 @@ public class SQLResourceBackend implements ResourceBackend {
     @Override
     public LocalStorage createLocalStorage(LocalStorageCreateRequest request) throws Exception {
         LocalStorageEntity savedEntity = localStorageRepository.save(mapper.map(request, LocalStorageEntity.class));
+
+        ResolveStorageEntity storageTypeEty = new ResolveStorageEntity();
+        storageTypeEty.setStorageId(savedEntity.getStorageId());
+        storageTypeEty.setStorageType(ResolveStorageEntity.StorageType.LOCAL);
+        resolveStorageRepository.save(storageTypeEty);
+
         return mapper.map(savedEntity, LocalStorage.newBuilder().getClass()).build();
     }
 
@@ -322,6 +339,12 @@ public class SQLResourceBackend implements ResourceBackend {
     @Override
     public S3Storage createS3Storage(S3StorageCreateRequest request) throws Exception {
         S3StorageEntity savedEntity = s3StorageRepository.save(mapper.map(request, S3StorageEntity.class));
+
+        ResolveStorageEntity storageTypeEty = new ResolveStorageEntity();
+        storageTypeEty.setStorageId(savedEntity.getStorageId());
+        storageTypeEty.setStorageType(ResolveStorageEntity.StorageType.S3);
+        resolveStorageRepository.save(storageTypeEty);
+
         return mapper.map(savedEntity, S3Storage.newBuilder().getClass()).build();
     }
 
@@ -455,6 +478,12 @@ public class SQLResourceBackend implements ResourceBackend {
     @Override
     public FTPStorage createFTPStorage(FTPStorageCreateRequest request) {
         FTPStorageEntity savedEntity = ftpStorageRepository.save(mapper.map(request, FTPStorageEntity.class));
+
+        ResolveStorageEntity storageTypeEty = new ResolveStorageEntity();
+        storageTypeEty.setStorageId(savedEntity.getStorageId());
+        storageTypeEty.setStorageType(ResolveStorageEntity.StorageType.FTP);
+        resolveStorageRepository.save(storageTypeEty);
+
         return mapper.map(savedEntity, FTPStorage.newBuilder().getClass()).build();
     }
 
@@ -488,6 +517,12 @@ public class SQLResourceBackend implements ResourceBackend {
     @Override
     public SwiftStorage createSwiftStorage(SwiftStorageCreateRequest request) throws Exception {
         SwiftStorageEntity savedEntity = swiftStorageRepository.save(mapper.map(request, SwiftStorageEntity.class));
+
+        ResolveStorageEntity storageTypeEty = new ResolveStorageEntity();
+        storageTypeEty.setStorageId(savedEntity.getStorageId());
+        storageTypeEty.setStorageType(ResolveStorageEntity.StorageType.SWIFT);
+        resolveStorageRepository.save(storageTypeEty);
+
         return mapper.map(savedEntity, SwiftStorage.newBuilder().getClass()).build();
     }
 
@@ -521,6 +556,12 @@ public class SQLResourceBackend implements ResourceBackend {
     @Override
     public ODataStorage createODataStorage(ODataStorageCreateRequest request) throws Exception {
         ODataStorageEntity savedEntity = odataStorageRepository.save(mapper.map(request, ODataStorageEntity.class));
+
+        ResolveStorageEntity storageTypeEty = new ResolveStorageEntity();
+        storageTypeEty.setStorageId(savedEntity.getStorageId());
+        storageTypeEty.setStorageType(ResolveStorageEntity.StorageType.ODATA);
+        resolveStorageRepository.save(storageTypeEty);
+
         return mapper.map(savedEntity, ODataStorage.newBuilder().getClass()).build();
     }
 
@@ -535,5 +576,11 @@ public class SQLResourceBackend implements ResourceBackend {
         odataStorageRepository.deleteById(request.getStorageId());
         resourceRepository.deleteByStorageIdAndStorageType(request.getStorageId(), GenericResourceEntity.StorageType.SWIFT);
         return true;
+    }
+
+    @Override
+    public StorageTypeResolveResponse resolveStorageType(StorageTypeResolveRequest request) throws Exception {
+        ResolveStorageEntity resolveStorage = resolveStorageRepository.getByStorageId(request.getStorageId());
+        return StorageTypeResolveResponse.newBuilder().setStorageType(resolveStorage.getStorageType().name()).build();
     }
 }

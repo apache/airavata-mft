@@ -27,6 +27,8 @@ import org.apache.airavata.mft.resource.stubs.local.storage.*;
 import org.apache.airavata.mft.resource.stubs.odata.storage.*;
 import org.apache.airavata.mft.resource.stubs.s3.storage.*;
 import org.apache.airavata.mft.resource.stubs.scp.storage.*;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeResolveRequest;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeResolveResponse;
 import org.apache.airavata.mft.resource.stubs.swift.storage.*;
 import org.apache.airavata.mft.storage.stubs.storagesecret.*;
 
@@ -107,4 +109,6 @@ public interface ResourceBackend {
     ODataStorage createODataStorage(ODataStorageCreateRequest request) throws Exception;
     boolean updateODataStorage(ODataStorageUpdateRequest request) throws Exception;
     boolean deleteODataStorage(ODataStorageDeleteRequest request) throws Exception;
+
+    StorageTypeResolveResponse resolveStorageType(StorageTypeResolveRequest request) throws Exception;
 }

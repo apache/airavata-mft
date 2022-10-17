@@ -28,6 +28,8 @@ import org.apache.airavata.mft.resource.stubs.local.storage.*;
 import org.apache.airavata.mft.resource.stubs.odata.storage.*;
 import org.apache.airavata.mft.resource.stubs.s3.storage.*;
 import org.apache.airavata.mft.resource.stubs.scp.storage.*;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeResolveRequest;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeResolveResponse;
 import org.apache.airavata.mft.resource.stubs.swift.storage.*;
 import org.apache.airavata.mft.storage.stubs.storagesecret.*;
 import org.json.simple.JSONArray;
@@ -614,6 +616,11 @@ public class FileBasedResourceBackend implements ResourceBackend {
 
     @Override
     public boolean deleteODataStorage(ODataStorageDeleteRequest request) throws Exception {
+        throw new UnsupportedOperationException("Operation is not supported in backend");
+    }
+
+    @Override
+    public StorageTypeResolveResponse resolveStorageType(StorageTypeResolveRequest request) throws Exception {
         throw new UnsupportedOperationException("Operation is not supported in backend");
     }
 }

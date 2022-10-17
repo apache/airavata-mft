@@ -33,16 +33,16 @@ import java.util.concurrent.Callable;
 @CommandLine.Command(name = "add")
 public class ODataRemoteAddSubCommand implements Callable<Integer> {
 
-    @CommandLine.Option(names = {"-n", "--name"}, description = "Storage Name")
+    @CommandLine.Option(names = {"-n", "--name"}, description = "Storage Name", required = true)
     private String remoteName;
 
-    @CommandLine.Option(names = {"-U", "--url"}, description = "Base URL for OData Endpoint")
+    @CommandLine.Option(names = {"-U", "--url"}, description = "Base URL for OData Endpoint", required = true)
     private String baseURL;
 
-    @CommandLine.Option(names = {"-u", "--user"}, description = "User Name")
+    @CommandLine.Option(names = {"-u", "--user"}, description = "User Name", required = true)
     private String userName;
 
-    @CommandLine.Option(names = {"-p", "--password"}, description = "Password")
+    @CommandLine.Option(names = {"-p", "--password"}, description = "Password", required = true)
     private String password;
 
 

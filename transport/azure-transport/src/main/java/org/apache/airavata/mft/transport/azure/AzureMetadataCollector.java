@@ -31,11 +31,14 @@ import org.apache.airavata.mft.credential.stubs.azure.AzureSecret;
 import org.apache.airavata.mft.credential.stubs.azure.AzureSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.client.StorageServiceClient;
+import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage;
 import org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageGetRequest;
 import org.apache.airavata.mft.resource.stubs.common.FileResource;
 import org.apache.airavata.mft.resource.stubs.common.GenericResource;
 import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
+import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
@@ -63,23 +66,33 @@ public class AzureMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
+    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourcePath,
+                                                        String storageId, String credentialToken) throws Exception {
         checkInitialized();
 
-        if (!isAvailable(authZToken,resourceId, credentialToken)) {
-            throw new Exception("Azure blob can not find for resource id " + resourceId);
+        if (!isAvailable(authZToken, resourcePath, storageId, credentialToken)) {
+            throw new Exception("Azure blob can not find for resource path " + resourcePath);
         }
 
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        GenericResource azureResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        AzureStorage azureStorage;
+        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
+                .buildClient(resourceServiceHost, resourceServicePort)) {
 
-        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
-        AzureSecret azureSecret = secretClient.azure().getAzureSecret(AzureSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+            azureStorage = storageServiceClient.azure()
+                    .getAzureStorage(AzureStorageGetRequest.newBuilder().setStorageId(storageId).build());
+        }
+
+        AzureSecret azureSecret;
+        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
+                secretServiceHost, secretServicePort)) {
+            azureSecret = secretClient.azure().getAzureSecret(AzureSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+
+        }
 
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(azureSecret.getConnectionString()).buildClient();
 
-        BlobClient blobClient = blobServiceClient.getBlobContainerClient(azureResource.getAzureStorage().getContainer())
-                                                .getBlobClient(azureResource.getFile().getResourcePath());
+        BlobClient blobClient = blobServiceClient.getBlobContainerClient(azureStorage.getContainer())
+                                                .getBlobClient(resourcePath);
 
         BlobProperties properties = blobClient.getBlockBlobClient().getProperties();
         FileResourceMetadata metadata = new FileResourceMetadata();
@@ -99,58 +112,38 @@ public class AzureMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
         throw new UnsupportedOperationException("Method not implemented");
     }
 
-    @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
-        throw new UnsupportedOperationException("Method not implemented");    }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
-        throw new UnsupportedOperationException("Method not implemented");
-    }
-
-    @Override
-    public Boolean isAvailable(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
+    public Boolean isAvailable(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
         checkInitialized();
 
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        GenericResource azureResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
-                .setResourceId(resourceId).build());
+        AzureStorage storage;
+        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
+                .buildClient(resourceServiceHost, resourceServicePort)) {
 
-        return isAvailable(azureResource, credentialToken);
-    }
+            storage = storageServiceClient.azure()
+                    .getAzureStorage(AzureStorageGetRequest.newBuilder().setStorageId(storageId).build());
+        }
 
-    @Override
-    public Boolean isAvailable(AuthToken authToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        GenericResource genericResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder().setResourceId(parentResourceId).build());
+        AzureSecret azureSecret;
+        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
+                secretServiceHost, secretServicePort)) {
+            azureSecret = secretClient.azure().getAzureSecret(AzureSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
-        GenericResource azureResource = GenericResource.newBuilder().setFile(FileResource.newBuilder()
-                .setResourcePath(resourcePath).build()).setAzureStorage(genericResource.getAzureStorage()).build();
-        return isAvailable(azureResource, credentialToken);
-    }
-
-    public Boolean isAvailable(GenericResource azureResource, String credentialToken) throws Exception {
-
-        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
-        AzureSecret azureSecret = secretClient.azure().getAzureSecret(AzureSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        }
 
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(azureSecret.getConnectionString()).buildClient();
-        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(azureResource.getAzureStorage().getContainer());
+        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(storage.getContainer());
         boolean containerExists = containerClient.exists();
         if (!containerExists) {
             return false;
         }
-        switch (azureResource.getResourceCase().name()){
-            case ResourceTypes.FILE:
-                return containerClient.getBlobClient(azureResource.getFile().getResourcePath()).exists();
-            case ResourceTypes.DIRECTORY:
-                return containerClient.getBlobClient(azureResource.getDirectory().getResourcePath()).exists();
-        }
-        return false;
+        return containerClient.getBlobClient(resourcePath).exists();
     }
+
 
 }

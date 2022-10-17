@@ -11,6 +11,7 @@ import org.apache.airavata.mft.resource.service.odata.ODataStorageServiceGrpc;
 import org.apache.airavata.mft.resource.service.s3.S3StorageServiceGrpc;
 import org.apache.airavata.mft.resource.service.scp.SCPStorageServiceGrpc;
 import org.apache.airavata.mft.resource.service.swift.SwiftStorageServiceGrpc;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageCommonServiceGrpc;
 import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretServiceGrpc;
 
 import java.io.Closeable;
@@ -68,6 +69,9 @@ public class StorageServiceClient implements Closeable {
         return ODataStorageServiceGrpc.newBlockingStub(channel);
     }
 
+    public StorageCommonServiceGrpc.StorageCommonServiceBlockingStub common() {
+        return StorageCommonServiceGrpc.newBlockingStub(channel);
+    }
     @Override
     public void close() throws IOException {
 

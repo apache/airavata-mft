@@ -39,6 +39,9 @@ import org.apache.airavata.mft.core.FileResourceMetadata;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
 import org.apache.airavata.mft.core.api.ConnectorConfig;
 import org.apache.airavata.mft.core.api.MetadataCollector;
+import org.apache.airavata.mft.resource.client.StorageServiceClient;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeResolveRequest;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeResolveResponse;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,6 +140,9 @@ public class MFTAgent implements CommandLineRunner {
     @Autowired
     private HttpTransferRequestsStore transferRequestsStore;
 
+    @Autowired
+    private StorageServiceClient storageServiceClient;
+
     private final AtomicLong totalRunningTransfers = new AtomicLong(0);
     private final AtomicLong totalPendingTransfers = new AtomicLong(0);
 
@@ -190,17 +196,22 @@ public class MFTAgent implements CommandLineRunner {
                     .setPublisher(agentId)
                     .setDescription("Starting the transfer"));
 
-            Optional<MetadataCollector> srcMetadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(request.getSourceType());
+            StorageTypeResolveResponse sourceStorageType = storageServiceClient.common()
+                    .resolveStorageType(StorageTypeResolveRequest.newBuilder()
+                    .setStorageId(request.getSourceStorageId()).build());
+            Optional<MetadataCollector> srcMetadataCollectorOp = MetadataCollectorResolver
+                    .resolveMetadataCollector(sourceStorageType.getStorageType());
             MetadataCollector srcMetadataCollector = srcMetadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for source"));
             srcMetadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
 
-            Optional<MetadataCollector> dstMetadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(request.getDestinationType());
-            MetadataCollector dstMetadataCollector = dstMetadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for destination"));
-            dstMetadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
+            StorageTypeResolveResponse destStorageType = storageServiceClient.common()
+                    .resolveStorageType(StorageTypeResolveRequest.newBuilder()
+                    .setStorageId(request.getSourceStorageId()).build());
 
             FileResourceMetadata srcMetadata = srcMetadataCollector.getFileResourceMetadata(
                     request.getMftAuthorizationToken(),
-                    request.getSourceResourceId(),
+                    request.getSourcePath(),
+                    request.getSourceStorageId(),
                     request.getSourceToken());
 
 
@@ -211,7 +222,9 @@ public class MFTAgent implements CommandLineRunner {
                     .withSecretServiceHost(secretServiceHost)
                     .withSecretServicePort(secretServicePort)
                     .withTransferId(transferId)
-                    .withResourceId(request.getSourceResourceId())
+                    .withStorageId(request.getSourceStorageId())
+                    .withResourcePath(request.getSourcePath())
+                    .withStorageType(sourceStorageType.getStorageType())
                     .withCredentialToken(request.getSourceToken())
                     .withMetadata(srcMetadata).build();
 
@@ -222,7 +235,9 @@ public class MFTAgent implements CommandLineRunner {
                     .withSecretServiceHost(secretServiceHost)
                     .withSecretServicePort(secretServicePort)
                     .withTransferId(transferId)
-                    .withResourceId(request.getDestinationResourceId())
+                    .withStorageId(request.getDestinationStorageId())
+                    .withResourcePath(request.getDestinationPath())
+                    .withStorageType(destStorageType.getStorageType())
                     .withCredentialToken(request.getDestinationToken())
                     .withMetadata(srcMetadata).build();
 

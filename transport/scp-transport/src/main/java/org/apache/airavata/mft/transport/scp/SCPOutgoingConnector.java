@@ -26,9 +26,12 @@ import org.apache.airavata.mft.credential.stubs.scp.SCPSecret;
 import org.apache.airavata.mft.credential.stubs.scp.SCPSecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.client.StorageServiceClient;
+import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.common.GenericResource;
 import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorage;
+import org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
@@ -42,7 +45,6 @@ public final class SCPOutgoingConnector implements OutgoingStreamingConnector {
 
     private static final Logger logger = LoggerFactory.getLogger(SCPOutgoingConnector.class);
 
-    private GenericResource resource;
     private Session session;
     private OutputStream out;
     private InputStream in;
@@ -55,17 +57,12 @@ public final class SCPOutgoingConnector implements OutgoingStreamingConnector {
     public void init(ConnectorConfig cc) throws Exception {
 
         this.cc = cc;
-        try (ResourceServiceClient resourceClient = ResourceServiceClientBuilder
+        SCPStorage scpStorage;
+        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
                 .buildClient(cc.getResourceServiceHost(), cc.getResourceServicePort())) {
+            scpStorage = storageServiceClient.scp()
+                    .getSCPStorage(SCPStorageGetRequest.newBuilder().setStorageId(cc.getStorageId()).build());
 
-            resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
-                    .setAuthzToken(cc.getAuthToken())
-                    .setResourceId(cc.getResourceId()).build());
-        }
-
-        if (resource.getStorageCase() != GenericResource.StorageCase.SCPSTORAGE) {
-            logger.error("Invalid storage type {} specified for resource {}", resource.getStorageCase(), cc.getResourceId());
-            throw new Exception("Invalid storage type specified for resource " + cc.getResourceId());
         }
 
         SCPSecret scpSecret;
@@ -78,7 +75,6 @@ public final class SCPOutgoingConnector implements OutgoingStreamingConnector {
                     .setSecretId(cc.getCredentialToken()).build());
         }
 
-        SCPStorage scpStorage = resource.getScpStorage();
         logger.info("Creating a ssh session for {}@{}:{}", scpSecret.getUser(), scpStorage.getHost(), scpStorage.getPort());
 
         this.session = SCPTransportUtil.createSession(
@@ -101,38 +97,8 @@ public final class SCPOutgoingConnector implements OutgoingStreamingConnector {
 
     @Override
     public OutputStream fetchOutputStream() throws Exception {
-        String resourcePath = null;
-        switch (resource.getResourceCase()){
-            case FILE:
-                resourcePath = resource.getFile().getResourcePath();
-                break;
-            case DIRECTORY:
-                throw new Exception("A directory path can not be streamed");
-            case RESOURCE_NOT_SET:
-                throw new Exception("Resource was not set in resource with id " + resource.getResourceId());
-        }
 
-        return fetchOutputStreamJCraft(escapeSpecialChars(resourcePath), cc.getMetadata().getResourceSize());
-    }
-
-    @Override
-    public OutputStream fetchOutputStream(String childPath) throws Exception {
-        String resourcePath = null;
-        switch (resource.getResourceCase()){
-            case FILE:
-                throw new Exception("A child path can not be associated with a file parent");
-            case DIRECTORY:
-                resourcePath = resource.getDirectory().getResourcePath();
-                if (!childPath.startsWith(resourcePath)) {
-                    throw new Exception("Child path " + childPath + " is not in the parent path " + resourcePath);
-                }
-                resourcePath = childPath;
-                break;
-            case RESOURCE_NOT_SET:
-                throw new Exception("Resource was not set in resource with id " + resource.getResourceId());
-        }
-
-        return fetchOutputStreamJCraft(escapeSpecialChars(resourcePath), cc.getMetadata().getResourceSize());
+        return fetchOutputStreamJCraft(escapeSpecialChars(cc.getResourcePath()), cc.getMetadata().getResourceSize());
     }
 
     public OutputStream fetchOutputStreamJCraft(String resourcePath, long fileSize) throws Exception {

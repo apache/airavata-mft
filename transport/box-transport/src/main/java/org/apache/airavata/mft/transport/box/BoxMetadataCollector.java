@@ -23,15 +23,9 @@ import com.box.sdk.BoxFile;
 import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.core.DirectoryResourceMetadata;
 import org.apache.airavata.mft.core.FileResourceMetadata;
-import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.credential.stubs.box.BoxSecret;
 import org.apache.airavata.mft.credential.stubs.box.BoxSecretGetRequest;
-import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.common.FileResource;
-import org.apache.airavata.mft.resource.stubs.common.GenericResource;
-import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
@@ -59,18 +53,19 @@ public class BoxMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
+    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
 
         checkInitialized();
 
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        GenericResource boxResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder().setResourceId(resourceId).build());
+        BoxSecret boxSecret;
+        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
+                secretServiceHost, secretServicePort)) {
+            boxSecret = secretClient.box().getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
-        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
-        BoxSecret boxSecret = secretClient.box().getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        }
 
         BoxAPIConnection api = new BoxAPIConnection(boxSecret.getAccessToken());
-        BoxFile boxFile = new BoxFile(api, boxResource.getFile().getResourcePath());
+        BoxFile boxFile = new BoxFile(api, resourcePath);
         BoxFile.Info boxFileInfo = boxFile.getInfo();
 
         FileResourceMetadata metadata = new FileResourceMetadata();
@@ -86,57 +81,25 @@ public class BoxMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
         throw new UnsupportedOperationException("Method not implemented");
     }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
-        throw new UnsupportedOperationException("Method not implemented");    }
-
-    @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
-        throw new UnsupportedOperationException("Method not implemented");
-    }
-
-    @Override
-    public Boolean isAvailable(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
+    public Boolean isAvailable(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
 
         checkInitialized();
 
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        GenericResource boxResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
-                .setResourceId(resourceId).build());
-        return isAvailable(boxResource, credentialToken);
-    }
+        BoxSecret boxSecret;
+        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
+                secretServiceHost, secretServicePort)) {
+            boxSecret = secretClient.box().getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
 
-    @Override
-    public Boolean isAvailable(AuthToken authToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
-        checkInitialized();
-
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        GenericResource genericResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
-                .setResourceId(parentResourceId).build());
-
-        GenericResource boxResource = GenericResource.newBuilder().setFile(FileResource.newBuilder()
-                .setResourcePath(resourcePath).build()).setBoxStorage(genericResource.getBoxStorage()).build();
-
-        return isAvailable(boxResource, credentialToken);
-    }
-
-    private Boolean isAvailable(GenericResource boxResource, String credentialToken) throws Exception {
-        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
-        BoxSecret boxSecret = secretClient.box().getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        }
 
         BoxAPIConnection api = new BoxAPIConnection(boxSecret.getAccessToken());
-
-        BoxFile boxFile;
-        switch (boxResource.getResourceCase().name()){
-            case ResourceTypes.FILE:
-                boxFile = new BoxFile(api, boxResource.getFile().getResourcePath());
-            case ResourceTypes.DIRECTORY:
-                boxFile = new BoxFile(api, boxResource.getDirectory().getResourcePath());
-        }
+        BoxFile boxFile = new BoxFile(api, resourcePath);
+        // TODO Fix this. Need to figur out how to check if the file exists in box
         return true;
     }
 }

@@ -21,5 +21,4 @@ import java.io.OutputStream;
 
 public interface OutgoingStreamingConnector extends BasicConnector {
     public OutputStream fetchOutputStream() throws Exception;
-    public OutputStream fetchOutputStream(String childPath) throws Exception;
 }

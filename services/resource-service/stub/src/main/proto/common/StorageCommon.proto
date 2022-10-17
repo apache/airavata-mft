@@ -15,7 +15,19 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.examples.transfer;
+syntax = "proto3";
 
-public class DriveExample {
+option java_multiple_files = true;
+package org.apache.airavata.mft.resource.stubs.storage.common;
+
+message StorageTypeResolveRequest {
+    string storageId = 1;
+}
+
+message StorageTypeResolveResponse {
+    string storageType = 1;
+}
+
+service StorageCommonService {
+    rpc resolveStorageType (StorageTypeResolveRequest) returns (StorageTypeResolveResponse);
 }

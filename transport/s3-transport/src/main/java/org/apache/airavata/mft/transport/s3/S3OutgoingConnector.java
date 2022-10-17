@@ -12,11 +12,10 @@ import org.apache.airavata.mft.core.api.ConnectorConfig;
 import org.apache.airavata.mft.core.api.OutgoingChunkedConnector;
 import org.apache.airavata.mft.credential.stubs.s3.S3Secret;
 import org.apache.airavata.mft.credential.stubs.s3.S3SecretGetRequest;
-import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.common.GenericResource;
-import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
+import org.apache.airavata.mft.resource.client.StorageServiceClient;
+import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage;
+import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
@@ -24,7 +23,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,28 +31,24 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
 
     private static final Logger logger = LoggerFactory.getLogger(S3OutgoingConnector.class);
 
-    private GenericResource resource;
+    private S3Storage s3Storage;
     private AmazonS3 s3Client;
+    private String resourcePath;
 
     InitiateMultipartUploadResult initResponse;
     List<PartETag> partETags = Collections.synchronizedList(new ArrayList<>());
 
     @Override
     public void init(ConnectorConfig cc) throws Exception {
-        try (ResourceServiceClient resourceClient = ResourceServiceClientBuilder
+
+        this.resourcePath = cc.getResourcePath();
+
+        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
                 .buildClient(cc.getResourceServiceHost(), cc.getResourceServicePort())) {
 
-            resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
-                    .setAuthzToken(cc.getAuthToken())
-                    .setResourceId(cc.getResourceId()).build());
+            s3Storage = storageServiceClient.s3()
+                    .getS3Storage(S3StorageGetRequest.newBuilder().setStorageId(cc.getStorageId()).build());
         }
-
-        if (resource.getStorageCase() != GenericResource.StorageCase.S3STORAGE) {
-            logger.error("Invalid storage type {} specified for resource {}", resource.getStorageCase(), cc.getResourceId());
-            throw new Exception("Invalid storage type specified for resource " + cc.getResourceId());
-        }
-
-        S3Storage s3Storage = resource.getS3Storage();
 
         S3Secret s3Secret;
 
@@ -81,19 +75,19 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
                     .build();
         }
 
-        InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(resource.getS3Storage().getBucketName(),
-                resource.getFile().getResourcePath());
+        InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(s3Storage.getBucketName(),
+                resourcePath);
         initResponse = s3Client.initiateMultipartUpload(initRequest);
         logger.info("Initialized multipart upload for file {} in bucket {}",
-                resource.getFile().getResourcePath(), resource.getS3Storage().getBucketName());
+                resourcePath, s3Storage.getBucketName());
     }
 
     @Override
     public void uploadChunk(int chunkId, long startByte, long endByte, String uploadFile) throws Exception {
         File file = new File(uploadFile);
         UploadPartRequest uploadRequest = new UploadPartRequest()
-                .withBucketName(resource.getS3Storage().getBucketName())
-                .withKey(resource.getFile().getResourcePath())
+                .withBucketName(s3Storage.getBucketName())
+                .withKey(resourcePath)
                 .withUploadId(initResponse.getUploadId())
                 .withPartNumber(chunkId + 1)
                 .withFileOffset(0)
@@ -102,14 +96,14 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
 
         UploadPartResult uploadResult = s3Client.uploadPart(uploadRequest);
         this.partETags.add(uploadResult.getPartETag());
-        logger.debug("Uploaded S3 chunk to path {} for resource id {}", uploadFile, resource.getResourceId());
+        logger.debug("Uploaded S3 chunk to path {} for resource path {}", uploadFile, resourcePath);
     }
 
     @Override
     public void uploadChunk(int chunkId, long startByte, long endByte, InputStream inputStream) throws Exception {
         UploadPartRequest uploadRequest = new UploadPartRequest()
-                .withBucketName(resource.getS3Storage().getBucketName())
-                .withKey(resource.getFile().getResourcePath())
+                .withBucketName(s3Storage.getBucketName())
+                .withKey(resourcePath)
                 .withUploadId(initResponse.getUploadId())
                 .withPartNumber(chunkId + 1)
                 .withFileOffset(0)
@@ -119,16 +113,16 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
         UploadPartResult uploadResult = s3Client.uploadPart(uploadRequest);
         inputStream.close();
         this.partETags.add(uploadResult.getPartETag());
-        logger.debug("Uploaded S3 chunk {} for resource id {} using stream", chunkId, resource.getResourceId());
+        logger.debug("Uploaded S3 chunk {} for resource path {} using stream", chunkId, resourcePath);
     }
 
     @Override
     public void complete() throws Exception {
-        CompleteMultipartUploadRequest compRequest = new CompleteMultipartUploadRequest(resource.getS3Storage().getBucketName(),
-                resource.getFile().getResourcePath(), initResponse.getUploadId(), partETags);
+        CompleteMultipartUploadRequest compRequest = new CompleteMultipartUploadRequest(s3Storage.getBucketName(),
+                resourcePath, initResponse.getUploadId(), partETags);
         s3Client.completeMultipartUpload(compRequest);
-        logger.info("Completing the upload for file {} in bucket {}", resource.getFile().getResourcePath(),
-                resource.getS3Storage().getBucketName());
+        logger.info("Completing the upload for file {} in bucket {}", resourcePath,
+                s3Storage.getBucketName());
     }
 
     @Override

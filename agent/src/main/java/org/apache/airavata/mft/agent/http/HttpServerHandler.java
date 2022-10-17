@@ -92,9 +92,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
             IncomingStreamingConnector incomingStreamingConnector = downloadData.getIncomingStreamingConnector();
             incomingStreamingConnector.init(downloadData.getConnectorConfig());
-            InputStream inputStream = downloadData.getChildResourcePath().equals("")?
-                    incomingStreamingConnector.fetchInputStream() :
-                    incomingStreamingConnector.fetchInputStream(downloadData.getChildResourcePath());
+            InputStream inputStream = incomingStreamingConnector.fetchInputStream();
 
             sendFileFuture = ctx.writeAndFlush(new HttpChunkedInput(new ChunkedStream(inputStream)),
                     ctx.newProgressivePromise());

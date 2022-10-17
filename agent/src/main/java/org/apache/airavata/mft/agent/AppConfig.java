@@ -20,6 +20,8 @@ package org.apache.airavata.mft.agent;
 import org.apache.airavata.mft.admin.MFTConsulClient;
 import org.apache.airavata.mft.agent.http.HttpTransferRequestsStore;
 import org.apache.airavata.mft.agent.rpc.RPCParser;
+import org.apache.airavata.mft.resource.client.StorageServiceClient;
+import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,6 +33,12 @@ public class AppConfig {
 
     @org.springframework.beans.factory.annotation.Value("${consul.port}")
     Integer consulPort;
+
+    @org.springframework.beans.factory.annotation.Value("${resource.service.host}")
+    private String resourceServiceHost;
+
+    @org.springframework.beans.factory.annotation.Value("${resource.service.port}")
+    private int resourceServicePort;
 
     @Bean
     public MFTConsulClient mftConsulClient() {
@@ -46,4 +54,10 @@ public class AppConfig {
     public HttpTransferRequestsStore transferRequestStore() {
         return new HttpTransferRequestsStore();
     }
+
+    @Bean
+    public StorageServiceClient storageServiceClient() {
+        return StorageServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+    }
+
 }

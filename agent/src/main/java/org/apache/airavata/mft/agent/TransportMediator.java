@@ -75,14 +75,14 @@ public class TransportMediator {
             logger.info("Stating transfer {}", transferId);
 
             Optional<IncomingStreamingConnector> inStreamingConnectorOp = ConnectorResolver
-                    .resolveIncomingStreamingConnector(request.getSourceType());
+                    .resolveIncomingStreamingConnector(srcCC.getStorageType());
             Optional<OutgoingStreamingConnector> outStreamingConnectorOp = ConnectorResolver
-                    .resolveOutgoingStreamingConnector(request.getDestinationType());
+                    .resolveOutgoingStreamingConnector(dstCC.getStorageType());
 
             Optional<IncomingChunkedConnector> inChunkedConnectorOp = ConnectorResolver
-                    .resolveIncomingChunkedConnector(request.getSourceType());
+                    .resolveIncomingChunkedConnector(srcCC.getStorageType());
             Optional<OutgoingChunkedConnector> outChunkedConnectorOp = ConnectorResolver
-                    .resolveOutgoingChunkedConnector(request.getDestinationType());
+                    .resolveOutgoingChunkedConnector(dstCC.getStorageType());
 
 
 
@@ -109,10 +109,10 @@ public class TransportMediator {
                 int chunkIdx = 0;
 
                 IncomingChunkedConnector inConnector = inChunkedConnectorOp
-                        .orElseThrow(() -> new Exception("Could not find an in chunked connector for type " + request.getSourceType()));
+                        .orElseThrow(() -> new Exception("Could not find an in chunked connector for type " + srcCC.getStorageType()));
 
                 OutgoingChunkedConnector outConnector = outChunkedConnectorOp
-                        .orElseThrow(() -> new Exception("Could not find an out chunked connector for type " + request.getDestinationType()));
+                        .orElseThrow(() -> new Exception("Could not find an out chunked connector for type " + dstCC.getStorageType()));
 
                 inConnector.init(srcCC);
                 outConnector.init(dstCC);
@@ -152,20 +152,18 @@ public class TransportMediator {
 
                 logger.info("Starting streaming transfer for transfer {}", transferId);
                 IncomingStreamingConnector inConnector = inStreamingConnectorOp
-                        .orElseThrow(() -> new Exception("Could not find an in streaming connector for type " + request.getSourceType()));
+                        .orElseThrow(() -> new Exception("Could not find an in streaming connector for type " + srcCC.getStorageType()));
 
                 OutgoingStreamingConnector outConnector = outStreamingConnectorOp
-                        .orElseThrow(() -> new Exception("Could not find an out streaming connector for type " + request.getDestinationType()));
+                        .orElseThrow(() -> new Exception("Could not find an out streaming connector for type " + dstCC.getStorageType()));
 
                 inConnector.init(srcCC);
                 outConnector.init(dstCC);
 
                 try {
-                    String srcChild = request.getSourceChildResourcePath();
-                    String dstChild = request.getDestinationChildResourcePath();
 
-                    InputStream inputStream = srcChild.equals("") ? inConnector.fetchInputStream() : inConnector.fetchInputStream(srcChild);
-                    OutputStream outputStream = dstChild.equals("") ? outConnector.fetchOutputStream() : outConnector.fetchOutputStream(dstChild);
+                    InputStream inputStream = inConnector.fetchInputStream();
+                    OutputStream outputStream = outConnector.fetchOutputStream();
 
                     long count = 0;
                     final AtomicLong countAtomic = new AtomicLong();

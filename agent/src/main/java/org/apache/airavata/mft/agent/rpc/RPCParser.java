@@ -32,6 +32,9 @@ import org.apache.airavata.mft.core.api.ConnectorConfig;
 import org.apache.airavata.mft.core.api.IncomingChunkedConnector;
 import org.apache.airavata.mft.core.api.IncomingStreamingConnector;
 import org.apache.airavata.mft.core.api.MetadataCollector;
+import org.apache.airavata.mft.resource.client.StorageServiceClient;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeResolveRequest;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeResolveResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +63,9 @@ public class RPCParser {
     @Autowired
     private HttpTransferRequestsStore httpTransferRequestsStore;
 
+    @Autowired
+    private StorageServiceClient storageServiceClient;
+
     public String resolveRPCRequest(SyncRPCRequest request) throws Exception {
         // TODO implement using the reflection
         ObjectMapper mapper = new ObjectMapper();
@@ -67,96 +73,67 @@ public class RPCParser {
 
         switch (request.getMethod()) {
             case "getFileResourceMetadata":
-                String resourceId = request.getParameters().get("resourceId");
-                String resourceType = request.getParameters().get("resourceType");
+                String resourcePath = request.getParameters().get("resourcePath");
+                String storageId = request.getParameters().get("storageId");
                 String resourceToken = request.getParameters().get("resourceToken");
 
                 AuthToken.Builder tokenBuilder = AuthToken.newBuilder();
                 JsonFormat.parser().merge(request.getParameters().get("mftAuthorizationToken"), tokenBuilder);
                 AuthToken mftAuthorizationToken = tokenBuilder.build();
 
-                Optional<MetadataCollector> metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(resourceType);
+                StorageTypeResolveResponse storageType = storageServiceClient.common()
+                        .resolveStorageType(StorageTypeResolveRequest.newBuilder().setStorageId(storageId).build());
+
+                Optional<MetadataCollector> metadataCollectorOp = MetadataCollectorResolver
+                        .resolveMetadataCollector(storageType.getStorageType());
+
                 if (metadataCollectorOp.isPresent()) {
                     MetadataCollector metadataCollector = metadataCollectorOp.get();
                     metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
                     FileResourceMetadata fileResourceMetadata = metadataCollector
-                            .getFileResourceMetadata(mftAuthorizationToken, resourceId, resourceToken);
+                            .getFileResourceMetadata(mftAuthorizationToken, resourcePath, storageId, resourceToken);
                     return mapper.writeValueAsString(fileResourceMetadata);
                 }
                 break;
 
-            case "getChildFileResourceMetadata":
-                resourceId = request.getParameters().get("resourceId");
-                resourceType = request.getParameters().get("resourceType");
-                resourceToken = request.getParameters().get("resourceToken");
-                String childPath = request.getParameters().get("childPath");
-
-                tokenBuilder = AuthToken.newBuilder();
-                JsonFormat.parser().merge(request.getParameters().get("mftAuthorizationToken"), tokenBuilder);
-                mftAuthorizationToken = tokenBuilder.build();
-
-                metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(resourceType);
-                if (metadataCollectorOp.isPresent()) {
-                    MetadataCollector metadataCollector = metadataCollectorOp.get();
-                    metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
-                    FileResourceMetadata fileResourceMetadata = metadataCollector
-                            .getFileResourceMetadata(mftAuthorizationToken, resourceId, childPath, resourceToken);
-                    return mapper.writeValueAsString(fileResourceMetadata);
-                }
-                break;
 
             case "getDirectoryResourceMetadata":
-                resourceId = request.getParameters().get("resourceId");
-                resourceType = request.getParameters().get("resourceType");
+                resourcePath = request.getParameters().get("resourcePath");
+                storageId = request.getParameters().get("storageId");
                 resourceToken = request.getParameters().get("resourceToken");
 
                 tokenBuilder = AuthToken.newBuilder();
                 JsonFormat.parser().merge(request.getParameters().get("mftAuthorizationToken"), tokenBuilder);
                 mftAuthorizationToken = tokenBuilder.build();
 
-                metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(resourceType);
+                storageType = storageServiceClient.common()
+                        .resolveStorageType(StorageTypeResolveRequest.newBuilder().setStorageId(storageId).build());
+
+                metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(storageType.getStorageType());
                 if (metadataCollectorOp.isPresent()) {
                     MetadataCollector metadataCollector = metadataCollectorOp.get();
                     metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
                     DirectoryResourceMetadata dirResourceMetadata = metadataCollector
-                            .getDirectoryResourceMetadata(mftAuthorizationToken, resourceId, resourceToken);
-                    return mapper.writeValueAsString(dirResourceMetadata);
-                }
-                break;
-
-            case "getChildDirectoryResourceMetadata":
-                resourceId = request.getParameters().get("resourceId");
-                resourceType = request.getParameters().get("resourceType");
-                resourceToken = request.getParameters().get("resourceToken");
-                childPath = request.getParameters().get("childPath");
-
-                tokenBuilder = AuthToken.newBuilder();
-                JsonFormat.parser().merge(request.getParameters().get("mftAuthorizationToken"), tokenBuilder);
-                mftAuthorizationToken = tokenBuilder.build();
-
-                metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(resourceType);
-                if (metadataCollectorOp.isPresent()) {
-                    MetadataCollector metadataCollector = metadataCollectorOp.get();
-                    metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
-                    DirectoryResourceMetadata dirResourceMetadata = metadataCollector
-                            .getDirectoryResourceMetadata(mftAuthorizationToken, resourceId, childPath, resourceToken);
+                            .getDirectoryResourceMetadata(mftAuthorizationToken, resourcePath, storageId, resourceToken);
                     return mapper.writeValueAsString(dirResourceMetadata);
                 }
                 break;
 
             case "submitHttpDownload":
-                resourceId = request.getParameters().get("resourceId");
-                String childResourcePath = request.getParameters().get("childResourcePath");
+                resourcePath = request.getParameters().get("resourcePath");
+                String sourceStorageId = request.getParameters().get("sourceStorageId");
                 String sourceToken = request.getParameters().get("sourceToken");
-                String storeType = request.getParameters().get("storeType");
 
                 tokenBuilder = AuthToken.newBuilder();
                 JsonFormat.parser().merge(request.getParameters().get("mftAuthorizationToken"), tokenBuilder);
                 mftAuthorizationToken = tokenBuilder.build();
 
-                metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(storeType);
-                Optional<IncomingStreamingConnector> connectorStreamingOp = ConnectorResolver.resolveIncomingStreamingConnector(storeType);
-                Optional<IncomingChunkedConnector> connectorChunkedOp = ConnectorResolver.resolveIncomingChunkedConnector(storeType);
+                storageType = storageServiceClient.common()
+                        .resolveStorageType(StorageTypeResolveRequest.newBuilder().setStorageId(sourceStorageId).build());
+
+                metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(storageType.getStorageType());
+                Optional<IncomingStreamingConnector> connectorStreamingOp = ConnectorResolver.resolveIncomingStreamingConnector(storageType.getStorageType());
+                Optional<IncomingChunkedConnector> connectorChunkedOp = ConnectorResolver.resolveIncomingChunkedConnector(storageType.getStorageType());
 
                 if (metadataCollectorOp.isPresent() && (connectorStreamingOp.isPresent() || connectorChunkedOp.isPresent())) {
 
@@ -165,18 +142,19 @@ public class RPCParser {
 
                     FileResourceMetadata fileResourceMetadata = metadataCollector.getFileResourceMetadata(
                             mftAuthorizationToken,
-                            resourceId,
-                            childResourcePath,
+                            resourcePath,
+                            sourceStorageId,
                             sourceToken);
 
                     AgentHttpDownloadData.AgentHttpDownloadDataBuilder agentHttpDownloadDataBuilder = AgentHttpDownloadData.AgentHttpDownloadDataBuilder.newBuilder()
-                            .withChildResourcePath(childResourcePath)
                             .withConnectorConfig(ConnectorConfig.ConnectorConfigBuilder.newBuilder()
                                     .withResourceServiceHost(resourceServiceHost)
                                     .withResourceServicePort(resourceServicePort)
                                     .withSecretServiceHost(secretServiceHost)
                                     .withSecretServicePort(secretServicePort)
-                                    .withResourceId(resourceId)
+                                    .withStorageId(sourceStorageId)
+                                    .withStorageType(storageType.getStorageType())
+                                    .withResourcePath(resourcePath)
                                     .withCredentialToken(sourceToken)
                                     .withAuthToken(mftAuthorizationToken)
                                     .withMetadata(fileResourceMetadata).build());
@@ -190,8 +168,8 @@ public class RPCParser {
 
                     return (agentAdvertisedUrl.endsWith("/")? agentAdvertisedUrl : agentAdvertisedUrl + "/") + url;
                 } else {
-                    logger.error("Medata collector or connector is not available for store type {}", storeType);
-                    throw new Exception("Medata collector or connector is not available for store type " + storeType);
+                    logger.error("Medata collector or connector is not available for store type {}", storageType.getStorageType());
+                    throw new Exception("Medata collector or connector is not available for store type " + storageType.getStorageType());
                 }
         }
         logger.error("Unknown method type specified {}", request.getMethod());

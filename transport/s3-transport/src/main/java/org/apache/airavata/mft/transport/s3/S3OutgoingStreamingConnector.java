@@ -27,9 +27,12 @@ import org.apache.airavata.mft.credential.stubs.s3.S3Secret;
 import org.apache.airavata.mft.credential.stubs.s3.S3SecretGetRequest;
 import org.apache.airavata.mft.resource.client.ResourceServiceClient;
 import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
+import org.apache.airavata.mft.resource.client.StorageServiceClient;
+import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.common.GenericResource;
 import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage;
+import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
@@ -51,26 +54,22 @@ public class S3OutgoingStreamingConnector implements OutgoingStreamingConnector 
 
     private static final Logger logger = LoggerFactory.getLogger(S3OutgoingStreamingConnector.class);
 
-    private GenericResource resource;
     private S3OutputStream s3OutputStream;
     private S3ClientMultipartUpload s3;
+    private String resourcePath;
+    private S3Storage s3Storage;
 
     @Override
     public void init(ConnectorConfig cc) throws Exception {
-        try (ResourceServiceClient resourceClient = ResourceServiceClientBuilder
+
+        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
                 .buildClient(cc.getResourceServiceHost(), cc.getResourceServicePort())) {
 
-            resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
-                    .setAuthzToken(cc.getAuthToken())
-                    .setResourceId(cc.getResourceId()).build());
+            s3Storage = storageServiceClient.s3()
+                    .getS3Storage(S3StorageGetRequest.newBuilder().setStorageId(cc.getStorageId()).build());
         }
 
-        if (resource.getStorageCase() != GenericResource.StorageCase.S3STORAGE) {
-            logger.error("Invalid storage type {} specified for resource {}", resource.getStorageCase(), cc.getResourceId());
-            throw new Exception("Invalid storage type specified for resource " + cc.getResourceId());
-        }
-
-        S3Storage s3Storage = resource.getS3Storage();
+        this.resourcePath = cc.getResourcePath();
 
         S3Secret s3Secret;
 
@@ -118,28 +117,13 @@ public class S3OutgoingStreamingConnector implements OutgoingStreamingConnector 
         this.s3OutputStream = S3OutputStream.builder()
                 .s3(s3)
                 .uploadRequest(MultipartUploadRequest.builder()
-                        .bucket(resource.getS3Storage().getBucketName())
-                        .key(resource.getFile().getResourcePath()).build())
+                        .bucket(s3Storage.getBucketName())
+                        .key(resourcePath).build())
                 .autoComplete(false)
                 .build();
 
         logger.info("Initialized multipart upload for file {} in bucket {}",
-                resource.getFile().getResourcePath(), resource.getS3Storage().getBucketName());
-        return this.s3OutputStream;
-    }
-
-    @Override
-    public OutputStream fetchOutputStream(String childPath) throws Exception {
-        this.s3OutputStream = S3OutputStream.builder()
-                .s3(s3)
-                .uploadRequest(MultipartUploadRequest.builder()
-                        .bucket(resource.getS3Storage().getBucketName())
-                        .key(resource.getFile().getResourcePath() + "/" + childPath).build())
-                .autoComplete(false)
-                .build();
-
-        logger.info("Initialized multipart upload for file {} child path {} in bucket {}",
-                resource.getFile().getResourcePath(),  childPath, resource.getS3Storage().getBucketName());
+                resourcePath, s3Storage.getBucketName());
         return this.s3OutputStream;
     }
 }

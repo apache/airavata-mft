@@ -21,5 +21,4 @@ import java.io.InputStream;
 
 public interface IncomingStreamingConnector extends BasicConnector {
     public InputStream fetchInputStream() throws Exception;
-    public InputStream fetchInputStream(String childPath) throws Exception;
 }

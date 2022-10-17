@@ -102,7 +102,7 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
         try {
             // TODO : Automatically derive agent if the target agent is empty
 
-            logger.info("Processing submit http download for resource {}", request.getSourceResourceId());
+            logger.info("Processing submit http download for resource path {}", request.getResourcePath());
 
             String targetAgent = derriveTargetAgent(request.getTargetAgent());
 
@@ -110,10 +110,9 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
                     .withAgentId(targetAgent)
                     .withMessageId(UUID.randomUUID().toString())
                     .withMethod("submitHttpDownload")
-                    .withParameter("resourceId", request.getSourceResourceId())
-                    .withParameter("childResourcePath", request.getSourceResourceChildPath())
+                    .withParameter("resourcePath", request.getResourcePath())
+                    .withParameter("sourceStorageId", request.getSourceStorageId())
                     .withParameter("sourceToken", request.getSourceToken())
-                    .withParameter("storeType", request.getSourceType())
                     .withParameter("mftAuthorizationToken", JsonFormat.printer().print(request.getMftAuthorizationToken()));
 
             SyncRPCResponse rpcResponse = agentRPCClient.sendSyncRequest(requestBuilder.build());
@@ -128,8 +127,8 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
                     responseObserver.onCompleted();
                     return;
                 case FAIL:
-                    logger.error("Errored while processing the download request to resource {}. Error msg : {}",
-                            request.getSourceResourceId(), rpcResponse.getErrorAsStr());
+                    logger.error("Errored while processing the download request to resource path {}. Error msg : {}",
+                            request.getResourcePath(), rpcResponse.getErrorAsStr());
 
                     responseObserver.onError(Status.INTERNAL
                             .withDescription("Errored while processing the the fetch file metadata response. Error msg : " +
@@ -138,8 +137,8 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
             }
 
         } catch (Exception e) {
-            logger.error("Error while submitting http download request to resource {}",
-                                                request.getSourceResourceId() , e);
+            logger.error("Error while submitting http download request to resource path {}",
+                                                request.getResourcePath() , e);
             responseObserver.onError(Status.INTERNAL
                     .withDescription("Failed to submit http download request. " + e.getMessage())
                     .asException());
@@ -187,27 +186,6 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
         }
     }
 
-    @Override
-    public void getResourceAvailability(ResourceAvailabilityRequest request, StreamObserver<ResourceAvailabilityResponse> responseObserver) {
-        try {
-            Optional<MetadataCollector> metadataCollectorOp = MetadataCollectorResolver.resolveMetadataCollector(request.getResourceType());
-            MetadataCollector metadataCollector = metadataCollectorOp.orElseThrow(
-                    () -> new Exception("Could not find a metadata collector for resource " + request.getResourceId()));
-
-            metadataCollector.init(resourceServiceHost, resourceServicePort, secretServiceHost, secretServicePort);
-            Boolean available = metadataCollector.isAvailable(request.getMftAuthorizationToken(),
-                    request.getResourceId(), request.getResourceToken());
-            responseObserver.onNext(ResourceAvailabilityResponse.newBuilder().setAvailable(available).build());
-            responseObserver.onCompleted();
-
-        } catch (Exception e) {
-            logger.error("Error while checking availability of resource " + request.getResourceId(), e);
-            responseObserver.onError(Status.INTERNAL
-                    .withDescription("Failed to check the availability. " + e.getMessage())
-                    .asException());
-        }
-    }
-
     /**
      * Fetches metadata for a specified file resource.  This has 2 modes
      * 1. Fetch the metadata of the exact file pointed in the resourceId. This assumes resourceId is an id of a file resource
@@ -219,25 +197,19 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
 
         try {
 
-            logger.info("Calling get file resource metadata for resource {}", request.getResourceId());
+            logger.info("Calling get file resource metadata for resource path {}", request.getResourcePath());
 
             String targetAgent = derriveTargetAgent(request.getTargetAgentId());
 
             SyncRPCRequest.SyncRPCRequestBuilder requestBuilder = SyncRPCRequest.SyncRPCRequestBuilder.builder()
                     .withAgentId(targetAgent)
                     .withMessageId(UUID.randomUUID().toString())
-                    .withParameter("resourceId", request.getResourceId())
-                    .withParameter("resourceType", request.getResourceType())
+                    .withParameter("resourcePath", request.getResourcePath())
+                    .withParameter("storageId", request.getStorageId())
                     .withParameter("resourceToken", request.getResourceToken())
                     .withParameter("mftAuthorizationToken", JsonFormat.printer().print(request.getMftAuthorizationToken()));
 
-            if (request.getChildPath().isEmpty()) {
-                requestBuilder.withMethod("getFileResourceMetadata");
-            } else {
-                // If a childPath is specified, look for child directories in the given parent resource id
-                requestBuilder.withMethod("getChildFileResourceMetadata");
-                requestBuilder.withParameter("childPath", request.getChildPath());
-            }
+            requestBuilder.withMethod("getFileResourceMetadata");
 
             SyncRPCResponse rpcResponse = agentRPCClient.sendSyncRequest(requestBuilder.build());
 
@@ -250,15 +222,15 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
                     responseObserver.onCompleted();
                     return;
                 case FAIL:
-                    logger.error("Errored while processing the fetch file metadata response for resource id {}. Error msg : {}",
-                            request.getResourceId(), rpcResponse.getErrorAsStr());
+                    logger.error("Errored while processing the fetch file metadata response for resource path {}. Error msg : {}",
+                            request.getResourcePath(), rpcResponse.getErrorAsStr());
                     responseObserver.onError(Status.INTERNAL
                             .withDescription("Errored while processing the the fetch file metadata response. Error msg : " +
                                     rpcResponse.getErrorAsStr())
                             .asException());
             }
         } catch (Exception e) {
-            logger.error("Error while fetching resource metadata for file resource " + request.getResourceId(), e);
+            logger.error("Error while fetching resource metadata for file resource " + request.getResourcePath(), e);
             responseObserver.onError(Status.INTERNAL
                     .withDescription("Failed to fetch file resource metadata. " + e.getMessage())
                     .asException());
@@ -276,24 +248,18 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
     public void getDirectoryResourceMetadata(FetchResourceMetadataRequest request, StreamObserver<DirectoryMetadataResponse> responseObserver) {
         try {
 
-            logger.info("Calling get directory metadata for resource {}", request.getResourceId());
+            logger.info("Calling get directory metadata for resource path {}", request.getResourcePath());
             String targetAgent = derriveTargetAgent(request.getTargetAgentId());
 
             SyncRPCRequest.SyncRPCRequestBuilder requestBuilder = SyncRPCRequest.SyncRPCRequestBuilder.builder()
                     .withAgentId(targetAgent)
                     .withMessageId(UUID.randomUUID().toString())
-                    .withParameter("resourceId", request.getResourceId())
-                    .withParameter("resourceType", request.getResourceType())
+                    .withParameter("resourcePath", request.getResourcePath())
+                    .withParameter("storageId", request.getStorageId())
                     .withParameter("resourceToken", request.getResourceToken())
                     .withParameter("mftAuthorizationToken", JsonFormat.printer().print(request.getMftAuthorizationToken()));
 
-            if (request.getChildPath().isEmpty()) {
-                requestBuilder.withMethod("getDirectoryResourceMetadata");
-            } else {
-                // If a childPath is specified, look for child directories in the given parent resource id
-                requestBuilder.withMethod("getChildDirectoryResourceMetadata");
-                requestBuilder.withParameter("childPath", request.getChildPath());
-            }
+            requestBuilder.withMethod("getDirectoryResourceMetadata");
 
             SyncRPCResponse rpcResponse = agentRPCClient.sendSyncRequest(requestBuilder.build());
 
@@ -320,15 +286,15 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
                     responseObserver.onCompleted();
                     return;
                 case FAIL:
-                    logger.error("Errored while processing the fetch directory metadata response for resource id {}. Error msg : {}",
-                            request.getResourceId(), rpcResponse.getErrorAsStr());
+                    logger.error("Errored while processing the fetch directory metadata response for resource path {}. Error msg : {}",
+                            request.getResourcePath(), rpcResponse.getErrorAsStr());
                     responseObserver.onError(Status.INTERNAL
                             .withDescription("Errored while processing the the fetch directory metadata response. Error msg : " +
                                     rpcResponse.getErrorAsStr())
                             .asException());
             }
         } catch (Exception e) {
-            logger.error("Error while fetching directory resource metadata for resource " + request.getResourceId(), e);
+            logger.error("Error while fetching directory resource metadata for resource path {}", request.getResourcePath(), e);
             responseObserver.onError(Status.INTERNAL
                     .withDescription("Failed to fetch directory resource metadata. " + e.getMessage())
                     .asException());

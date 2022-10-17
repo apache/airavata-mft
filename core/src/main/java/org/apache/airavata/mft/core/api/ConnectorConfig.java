@@ -8,11 +8,13 @@ public class ConnectorConfig {
     private int resourceServicePort;
     private String secretServiceHost;
     private int secretServicePort;
-    private String resourceId;
+    private String storageId;
     private String credentialToken;
     private AuthToken authToken;
     private String transferId;
     private FileResourceMetadata metadata;
+    private String resourcePath;
+    private String storageType;
 
     public String getResourceServiceHost() {
         return resourceServiceHost;
@@ -46,12 +48,20 @@ public class ConnectorConfig {
         this.secretServicePort = secretServicePort;
     }
 
-    public String getResourceId() {
-        return resourceId;
+    public String getStorageId() {
+        return storageId;
     }
 
-    public void setResourceId(String resourceId) {
-        this.resourceId = resourceId;
+    public void setStorageId(String storageId) {
+        this.storageId = storageId;
+    }
+
+    public String getResourcePath() {
+        return resourcePath;
+    }
+
+    public void setResourcePath(String resourcePath) {
+        this.resourcePath = resourcePath;
     }
 
     public String getCredentialToken() {
@@ -86,17 +96,26 @@ public class ConnectorConfig {
         this.metadata = metadata;
     }
 
+    public String getStorageType() {
+        return storageType;
+    }
+
+    public void setStorageType(String storageType) {
+        this.storageType = storageType;
+    }
 
     public static final class ConnectorConfigBuilder {
         private String resourceServiceHost;
         private int resourceServicePort;
         private String secretServiceHost;
         private int secretServicePort;
-        private String resourceId;
+        private String stroageId;
         private String credentialToken;
         private AuthToken authToken;
         private String transferId;
+        private String resourcePath;
         private FileResourceMetadata metadata;
+        private String storageType;
 
         private ConnectorConfigBuilder() {
         }
@@ -125,8 +144,18 @@ public class ConnectorConfig {
             return this;
         }
 
-        public ConnectorConfigBuilder withResourceId(String resourceId) {
-            this.resourceId = resourceId;
+        public ConnectorConfigBuilder withStorageId(String storageId) {
+            this.stroageId = storageId;
+            return this;
+        }
+
+        public ConnectorConfigBuilder withResourcePath(String resourcePath) {
+            this.resourcePath = resourcePath;
+            return this;
+        }
+
+        public ConnectorConfigBuilder withStorageType(String storageType) {
+            this.storageType = storageType;
             return this;
         }
 
@@ -156,7 +185,8 @@ public class ConnectorConfig {
             connectorConfig.setResourceServicePort(resourceServicePort);
             connectorConfig.setSecretServiceHost(secretServiceHost);
             connectorConfig.setSecretServicePort(secretServicePort);
-            connectorConfig.setResourceId(resourceId);
+            connectorConfig.setStorageId(stroageId);
+            connectorConfig.setStorageType(storageType);
             connectorConfig.setCredentialToken(credentialToken);
             connectorConfig.setAuthToken(authToken);
             connectorConfig.setTransferId(transferId);

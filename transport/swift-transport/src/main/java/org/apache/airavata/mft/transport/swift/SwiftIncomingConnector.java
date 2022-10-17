@@ -21,15 +21,12 @@ import org.apache.airavata.mft.core.api.ConnectorConfig;
 import org.apache.airavata.mft.core.api.IncomingChunkedConnector;
 import org.apache.airavata.mft.credential.stubs.swift.SwiftSecret;
 import org.apache.airavata.mft.credential.stubs.swift.SwiftSecretGetRequest;
-import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.common.GenericResource;
-import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
-import org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage;
+import org.apache.airavata.mft.resource.client.StorageServiceClient;
+import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorage;
+import org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
-import org.apache.commons.io.IOUtils;
 import org.jclouds.ContextBuilder;
 import org.jclouds.http.options.GetOptions;
 import org.jclouds.openstack.keystone.auth.config.CredentialTypes;
@@ -49,26 +46,23 @@ public class SwiftIncomingConnector implements IncomingChunkedConnector {
 
     private static final Logger logger = LoggerFactory.getLogger(SwiftIncomingConnector.class);
 
-    private GenericResource resource;
     private SwiftApi swiftApi;
     private ObjectApi objectApi;
+    private String resourcePath;
 
     @Override
     public void init(ConnectorConfig cc) throws Exception {
-        try (ResourceServiceClient resourceClient = ResourceServiceClientBuilder
+
+        SwiftStorage swiftStorage;
+
+        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
                 .buildClient(cc.getResourceServiceHost(), cc.getResourceServicePort())) {
 
-            resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
-                    .setAuthzToken(cc.getAuthToken())
-                    .setResourceId(cc.getResourceId()).build());
+            swiftStorage = storageServiceClient.swift()
+                    .getSwiftStorage(SwiftStorageGetRequest.newBuilder().setStorageId(cc.getStorageId()).build());
         }
 
-        if (resource.getStorageCase() != GenericResource.StorageCase.SWIFTSTORAGE) {
-            logger.error("Invalid storage type {} specified for resource {}", resource.getStorageCase(), cc.getResourceId());
-            throw new Exception("Invalid storage type specified for resource " + cc.getResourceId());
-        }
-
-        SwiftStorage swiftStorage = resource.getSwiftStorage();
+        this.resourcePath = resourcePath;
 
         SwiftSecret swiftSecret;
 
@@ -126,7 +120,7 @@ public class SwiftIncomingConnector implements IncomingChunkedConnector {
     @Override
     public void downloadChunk(int chunkId, long startByte, long endByte, String downloadFile) throws Exception {
         SwiftObject swiftObject = objectApi.get(
-                resource.getFile().getResourcePath(),
+                resourcePath,
                 GetOptions.Builder.range(startByte, endByte));
 
         InputStream inputStream = swiftObject.getPayload().openStream();
@@ -145,7 +139,7 @@ public class SwiftIncomingConnector implements IncomingChunkedConnector {
     public InputStream downloadChunk(int chunkId, long startByte, long endByte) throws Exception {
 
         SwiftObject swiftObject = objectApi.get(
-                resource.getFile().getResourcePath(),
+                resourcePath,
                 GetOptions.Builder.range(startByte, endByte));
 
         return swiftObject.getPayload().openStream();

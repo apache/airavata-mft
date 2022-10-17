@@ -28,15 +28,11 @@ import com.google.api.services.storage.model.StorageObject;
 import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.core.DirectoryResourceMetadata;
 import org.apache.airavata.mft.core.FileResourceMetadata;
-import org.apache.airavata.mft.core.ResourceTypes;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.credential.stubs.gcs.GCSSecret;
 import org.apache.airavata.mft.credential.stubs.gcs.GCSSecretGetRequest;
-import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.common.FileResource;
-import org.apache.airavata.mft.resource.stubs.common.GenericResource;
-import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
+import org.apache.airavata.mft.resource.client.StorageServiceClient;
+import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorage;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
@@ -72,13 +68,22 @@ public class GCSMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
+    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
         checkInitialized();
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        GenericResource gcsResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder().setResourceId(resourceId).build());
 
-        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
-        GCSSecret gcsSecret = secretClient.gcs().getGCSSecret(GCSSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        GCSStorage gcsStorage;
+        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
+                .buildClient(resourceServiceHost, resourceServicePort)) {
+
+            gcsStorage = storageServiceClient.gcs()
+                    .getGCSStorage(GCSStorageGetRequest.newBuilder().setStorageId(storageId).build());
+        }
+
+        GCSSecret gcsSecret;
+        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
+                secretServiceHost, secretServicePort)) {
+            gcsSecret = secretClient.gcs().getGCSSecret(GCSSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        }
 
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
@@ -92,8 +97,8 @@ public class GCSMetadataCollector implements MetadataCollector {
         Storage storage = new Storage.Builder(transport, jsonFactory, credential).build();
 
         FileResourceMetadata metadata = new FileResourceMetadata();
-        StorageObject gcsMetadata = storage.objects().get(gcsResource.getGcsStorage().getBucketName(),
-                                                            gcsResource.getFile().getResourcePath()).execute();
+        StorageObject gcsMetadata = storage.objects().get(gcsStorage.getBucketName(), resourcePath).execute();
+
         metadata.setResourceSize(gcsMetadata.getSize().longValue());
         String md5Sum = String.format("%032x", new BigInteger(1, Base64.getDecoder().decode(gcsMetadata.getMd5Hash())));
         metadata.setMd5sum(md5Sum);
@@ -103,47 +108,28 @@ public class GCSMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
+    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String resourcePath,
+                                                                  String storageId, String credentialToken) throws Exception {
         throw new UnsupportedOperationException("Method not implemented");
     }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
-        throw new UnsupportedOperationException("Method not implemented");    }
-
-    @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
-        throw new UnsupportedOperationException("Method not implemented");
-    }
-
-    @Override
-    public Boolean isAvailable(AuthToken authZToken, String resourceId, String credentialToken) throws Exception {
+    public Boolean isAvailable(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
         checkInitialized();
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        GenericResource gcsResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
-                .setResourceId(resourceId).build());
 
-        return isAvailable(gcsResource, credentialToken);
-    }
+        GCSStorage gcsStorage;
+        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
+                .buildClient(resourceServiceHost, resourceServicePort)) {
 
-    @Override
-    public Boolean isAvailable(AuthToken authToken, String parentResourceId, String resourcePath, String credentialToken) throws Exception {
-        checkInitialized();
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-        GenericResource genericResource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
-                .setResourceId(parentResourceId).build());
+            gcsStorage = storageServiceClient.gcs()
+                    .getGCSStorage(GCSStorageGetRequest.newBuilder().setStorageId(storageId).build());
+        }
 
-        GenericResource gcsResource = GenericResource.newBuilder()
-                .setFile(FileResource.newBuilder().setResourcePath(resourcePath).build())
-                .setGcsStorage(genericResource.getGcsStorage()).build();
-
-        return isAvailable(gcsResource, credentialToken);
-    }
-
-    private Boolean isAvailable(GenericResource gcsResource, String credentialToken) throws Exception {
-
-        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
-        GCSSecret gcsSecret = secretClient.gcs().getGCSSecret(GCSSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        GCSSecret gcsSecret;
+        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
+                secretServiceHost, secretServicePort)) {
+            gcsSecret = secretClient.gcs().getGCSSecret(GCSSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        }
 
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = new JacksonFactory();
@@ -155,14 +141,6 @@ public class GCSMetadataCollector implements MetadataCollector {
         }
 
         Storage storage = new Storage.Builder(transport, jsonFactory, credential).build();
-        switch (gcsResource.getResourceCase().name()){
-            case ResourceTypes.FILE:
-                return !storage.objects().get(gcsResource.getGcsStorage().getBucketName(), gcsResource.getFile().getResourcePath())
-                        .execute().isEmpty();
-            case ResourceTypes.DIRECTORY:
-                return !storage.objects().get(gcsResource.getGcsStorage().getBucketName(), gcsResource.getDirectory().getResourcePath())
-                        .execute().isEmpty();
-        }
-        return false;
+        return !storage.objects().get(gcsStorage.getBucketName(), resourcePath).execute().isEmpty();
     }
 }

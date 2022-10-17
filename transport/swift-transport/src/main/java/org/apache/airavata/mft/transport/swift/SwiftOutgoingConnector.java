@@ -21,11 +21,10 @@ import org.apache.airavata.mft.core.api.ConnectorConfig;
 import org.apache.airavata.mft.core.api.OutgoingChunkedConnector;
 import org.apache.airavata.mft.credential.stubs.swift.SwiftSecret;
 import org.apache.airavata.mft.credential.stubs.swift.SwiftSecretGetRequest;
-import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.common.GenericResource;
-import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
+import org.apache.airavata.mft.resource.client.StorageServiceClient;
+import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorage;
+import org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.jclouds.ContextBuilder;
@@ -36,7 +35,6 @@ import org.jclouds.openstack.swift.v1.SwiftApi;
 import org.jclouds.openstack.swift.v1.domain.Segment;
 import org.jclouds.openstack.swift.v1.features.ObjectApi;
 import org.jclouds.openstack.swift.v1.features.StaticLargeObjectApi;
-import org.jclouds.openstack.swift.v1.options.PutOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,10 +47,10 @@ public class SwiftOutgoingConnector implements OutgoingChunkedConnector {
 
     private static final Logger logger = LoggerFactory.getLogger(SwiftOutgoingConnector.class);
 
-    private GenericResource resource;
     private SwiftApi swiftApi;
     private ObjectApi objectApi;
     private StaticLargeObjectApi staticLargeObjectApi;
+    private String resourcePath;
 
     private final Map<Integer, Segment> segmentMap = new ConcurrentHashMap();
 
@@ -60,20 +58,16 @@ public class SwiftOutgoingConnector implements OutgoingChunkedConnector {
 
     @Override
     public void init(ConnectorConfig cc) throws Exception {
-        try (ResourceServiceClient resourceClient = ResourceServiceClientBuilder
+
+        SwiftStorage swiftStorage;
+        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
                 .buildClient(cc.getResourceServiceHost(), cc.getResourceServicePort())) {
+            swiftStorage = storageServiceClient.swift()
+                    .getSwiftStorage(SwiftStorageGetRequest.newBuilder().setStorageId(cc.getStorageId()).build());
 
-            resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
-                    .setAuthzToken(cc.getAuthToken())
-                    .setResourceId(cc.getResourceId()).build());
         }
 
-        if (resource.getStorageCase() != GenericResource.StorageCase.SWIFTSTORAGE) {
-            logger.error("Invalid storage type {} specified for resource {}", resource.getStorageCase(), cc.getResourceId());
-            throw new Exception("Invalid storage type specified for resource " + cc.getResourceId());
-        }
-
-        SwiftStorage swiftStorage = resource.getSwiftStorage();
+        this.resourcePath = cc.getResourcePath();
 
         SwiftSecret swiftSecret;
 
@@ -124,7 +118,7 @@ public class SwiftOutgoingConnector implements OutgoingChunkedConnector {
             segments.add(segmentMap.get(id));
         }
 
-        String etag = staticLargeObjectApi.replaceManifest(resource.getFile().getResourcePath(),
+        String etag = staticLargeObjectApi.replaceManifest(resourcePath,
                 segments, new HashMap<>());
 
         if (swiftApi != null) {
@@ -145,9 +139,9 @@ public class SwiftOutgoingConnector implements OutgoingChunkedConnector {
 
     @Override
     public void uploadChunk(int chunkId, long startByte, long endByte, InputStream inputStream) throws Exception {
-        String etag = objectApi.put(resource.getFile().getResourcePath() + chunkId, new InputStreamPayload(inputStream));
+        String etag = objectApi.put(resourcePath + chunkId, new InputStreamPayload(inputStream));
         Segment segment = Segment.builder().etag(etag)
-                .path(resource.getFile().getResourcePath() + chunkId)
+                .path(resourcePath + chunkId)
                 .sizeBytes(endByte - startByte).build();
         segmentMap.put(chunkId, segment);
     }

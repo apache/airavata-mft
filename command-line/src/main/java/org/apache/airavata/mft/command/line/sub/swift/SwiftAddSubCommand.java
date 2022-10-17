@@ -17,31 +17,31 @@ import java.util.concurrent.Callable;
 @CommandLine.Command(name = "add")
 public class SwiftAddSubCommand implements Callable<Integer> {
 
-    @CommandLine.Option(names = {"-n", "--name"}, description = "Storage Name")
+    @CommandLine.Option(names = {"-n", "--name"}, description = "Storage Name", required = true)
     private String remoteName;
 
-    @CommandLine.Option(names = {"-c", "--container"}, description = "Swift Container Name")
+    @CommandLine.Option(names = {"-c", "--container"}, description = "Swift Container Name", required = true)
     private String container;
 
-    @CommandLine.Option(names = {"-e", "--endpoint"}, description = "Endpoint Name")
+    @CommandLine.Option(names = {"-e", "--endpoint"}, description = "Endpoint Name", required = true)
     private String endpoint;
 
-    @CommandLine.Option(names = {"-r", "--region"}, description = "Region")
+    @CommandLine.Option(names = {"-r", "--region"}, description = "Region", required = true)
     private String region;
 
-    @CommandLine.Option(names = {"-v", "--keystoneversion"}, description = "Keystone Version")
+    @CommandLine.Option(names = {"-v", "--keystoneversion"}, description = "Keystone Version", required = true)
     private int keystoneVersion;
 
-    @CommandLine.Option(names = {"-u", "--user"}, description = "User Name (Password Credentials")
+    @CommandLine.Option(names = {"-u", "--user"}, description = "User Name (Password Credentials", required = true)
     private String userName;
 
-    @CommandLine.Option(names = {"-p", "--password"}, description = "Password (Password Credentials")
+    @CommandLine.Option(names = {"-p", "--password"}, description = "Password (Password Credentials", required = true)
     private String password;
 
-    @CommandLine.Option(names = {"-pid", "--projectId"}, description = "Project Id (Password Credentials")
+    @CommandLine.Option(names = {"-pid", "--projectId"}, description = "Project Id (Password Credentials", required = true)
     private String projectId;
 
-    @CommandLine.Option(names = {"-d", "--domainId"}, description = "Domain Id (Password Credentials")
+    @CommandLine.Option(names = {"-d", "--domainId"}, description = "Domain Id (Password Credentials", required = true)
     private String domainId;
 
 
