@@ -87,7 +87,37 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
         } catch (Exception e) {
             logger.error("Error in submitting transfer request", e);
             responseObserver.onError(Status.INTERNAL
-                    .withDescription("Failed to submit http download request. " + e.getMessage())
+                    .withDescription("Failed to submit transfer request. " + e.getMessage())
+                    .asException());
+        }
+    }
+
+    @Override
+    public void submitBatchTransfer(BatchTransferApiRequest request, StreamObserver<BatchTransferApiResponse> responseObserver) {
+        try {
+            List<TransferApiRequest> transferRequests = request.getTransferRequestsList();
+
+            BatchTransferApiResponse.Builder responseBuilder = BatchTransferApiResponse.newBuilder();
+            for (TransferApiRequest apiRequest: transferRequests) {
+                String transferId = mftConsulClient.submitTransfer(apiRequest);
+
+                logger.info("Submitted the transfer request {}", transferId);
+
+                mftConsulClient.saveTransferState(transferId, new TransferState()
+                        .setUpdateTimeMils(System.currentTimeMillis())
+                        .setState("RECEIVED").setPercentage(0)
+                        .setPublisher("api")
+                        .setDescription("Received transfer job " + transferId));
+
+                responseBuilder.addTransferIds(transferId);
+            }
+
+            responseObserver.onNext(responseBuilder.build());
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Error in submitting batch transfer request", e);
+            responseObserver.onError(Status.INTERNAL
+                    .withDescription("Failed to submit batch transfer request. " + e.getMessage())
                     .asException());
         }
     }

@@ -31,6 +31,14 @@ message TransferApiResponse {
     string transferId = 1;
 }
 
+message BatchTransferApiRequest {
+    repeated TransferApiRequest transferRequests = 1;
+}
+
+message BatchTransferApiResponse {
+    repeated string transferIds = 1;
+}
+
 message HttpUploadApiRequest {
     string destinationStorageId = 1;
     string resourcePath = 2;
@@ -114,6 +122,8 @@ message FetchResourceMetadataRequest {
 service  MFTTransferService {
 
     rpc submitTransfer(TransferApiRequest) returns (TransferApiResponse);
+
+    rpc submitBatchTransfer(BatchTransferApiRequest) returns (BatchTransferApiResponse);
 
     rpc submitHttpUpload(HttpUploadApiRequest) returns (HttpUploadApiResponse);
 
