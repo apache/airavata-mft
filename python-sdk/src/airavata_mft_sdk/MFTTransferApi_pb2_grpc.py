@@ -19,6 +19,11 @@ class MFTTransferServiceStub(object):
                 request_serializer=MFTTransferApi__pb2.TransferApiRequest.SerializeToString,
                 response_deserializer=MFTTransferApi__pb2.TransferApiResponse.FromString,
                 )
+        self.submitBatchTransfer = channel.unary_unary(
+                '/org.apache.airavata.mft.api.service.MFTTransferService/submitBatchTransfer',
+                request_serializer=MFTTransferApi__pb2.BatchTransferApiRequest.SerializeToString,
+                response_deserializer=MFTTransferApi__pb2.BatchTransferApiResponse.FromString,
+                )
         self.submitHttpUpload = channel.unary_unary(
                 '/org.apache.airavata.mft.api.service.MFTTransferService/submitHttpUpload',
                 request_serializer=MFTTransferApi__pb2.HttpUploadApiRequest.SerializeToString,
@@ -60,6 +65,12 @@ class MFTTransferServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def submitTransfer(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def submitBatchTransfer(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -114,6 +125,11 @@ def add_MFTTransferServiceServicer_to_server(servicer, server):
                     servicer.submitTransfer,
                     request_deserializer=MFTTransferApi__pb2.TransferApiRequest.FromString,
                     response_serializer=MFTTransferApi__pb2.TransferApiResponse.SerializeToString,
+            ),
+            'submitBatchTransfer': grpc.unary_unary_rpc_method_handler(
+                    servicer.submitBatchTransfer,
+                    request_deserializer=MFTTransferApi__pb2.BatchTransferApiRequest.FromString,
+                    response_serializer=MFTTransferApi__pb2.BatchTransferApiResponse.SerializeToString,
             ),
             'submitHttpUpload': grpc.unary_unary_rpc_method_handler(
                     servicer.submitHttpUpload,
@@ -174,6 +190,23 @@ class MFTTransferService(object):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.api.service.MFTTransferService/submitTransfer',
             MFTTransferApi__pb2.TransferApiRequest.SerializeToString,
             MFTTransferApi__pb2.TransferApiResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def submitBatchTransfer(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.api.service.MFTTransferService/submitBatchTransfer',
+            MFTTransferApi__pb2.BatchTransferApiRequest.SerializeToString,
+            MFTTransferApi__pb2.BatchTransferApiResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

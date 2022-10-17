@@ -41,6 +41,7 @@ python3 -m grpc_tools.protoc --proto_path=../../../services/resource-service/stu
           ../../../services/resource-service/stub/src/main/proto/swift/SwiftStorage.proto \
           ../../../services/resource-service/stub/src/main/proto/odata/ODataStorageService.proto \
           ../../../services/resource-service/stub/src/main/proto/odata/ODataStorage.proto \
+          ../../../services/resource-service/stub/src/main/proto/common/StorageCommon.proto \
           --python_out=$RESOURCE_DIR --grpc_python_out=$RESOURCE_DIR
 
 
@@ -86,6 +87,7 @@ touch s3/__init__.py
 touch scp/__init__.py
 touch swift/__init__.py
 touch odata/__init__.py
+touch common/__init__.py
 
 
 sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' azure/*.py
@@ -100,6 +102,7 @@ sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' s3/*.py
 sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' scp/*.py
 sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' swift/*.py
 sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' odata/*.py
+sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' common/*.py
 sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' *pb2.py
 sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' *pb2_grpc.py
 
@@ -115,5 +118,6 @@ sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' s3/*.py
 sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' scp/*.py
 sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' swift/*.py
 sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' odata/*.py
+sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' common/*.py
 sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' *pb2.py
 sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' *pb2_grpc.py

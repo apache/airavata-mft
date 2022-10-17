@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 import airavata_mft_sdk.CredCommon_pb2 as CredCommon__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14MFTTransferApi.proto\x12#org.apache.airavata.mft.api.service\x1a\x10\x43redCommon.proto\"\x9b\x01\n\x10\x43\x61llbackEndpoint\x12P\n\x04type\x18\x01 \x01(\x0e\x32\x42.org.apache.airavata.mft.api.service.CallbackEndpoint.CallbackType\x12\x10\n\x08\x65ndpoint\x18\x02 \x01(\t\"#\n\x0c\x43\x61llbackType\x12\x08\n\x04HTTP\x10\x00\x12\t\n\x05KAFKA\x10\x01\"\xbc\x04\n\x12TransferApiRequest\x12\x18\n\x10sourceResourceId\x18\x01 \x01(\t\x12\x1f\n\x17sourceChildResourcePath\x18\x02 \x01(\t\x12\x12\n\nsourceType\x18\x03 \x01(\t\x12\x13\n\x0bsourceToken\x18\x04 \x01(\t\x12\x1d\n\x15\x64\x65stinationResourceId\x18\x05 \x01(\t\x12$\n\x1c\x64\x65stinationChildResourcePath\x18\x06 \x01(\t\x12\x17\n\x0f\x64\x65stinationType\x18\x07 \x01(\t\x12\x18\n\x10\x64\x65stinationToken\x18\x08 \x01(\t\x12\x18\n\x10\x61\x66\x66inityTransfer\x18\t \x01(\x08\x12_\n\x0ctargetAgents\x18\n \x03(\x0b\x32I.org.apache.airavata.mft.api.service.TransferApiRequest.TargetAgentsEntry\x12H\n\x15mftAuthorizationToken\x18\x0b \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\x12P\n\x11\x63\x61llbackEndpoints\x18\x0c \x03(\x0b\x32\x35.org.apache.airavata.mft.api.service.CallbackEndpoint\x1a\x33\n\x11TargetAgentsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\")\n\x13TransferApiResponse\x12\x12\n\ntransferId\x18\x01 \x01(\t\"\xed\x01\n\x14HttpUploadApiRequest\x12\x1d\n\x15\x64\x65stinationResourceId\x18\x01 \x01(\t\x12$\n\x1c\x64\x65stinationResourceChildPath\x18\x02 \x01(\t\x12\x18\n\x10\x64\x65stinationToken\x18\x03 \x01(\t\x12\x17\n\x0f\x64\x65stinationType\x18\x04 \x01(\t\x12\x13\n\x0btargetAgent\x18\x05 \x01(\t\x12H\n\x15mftAuthorizationToken\x18\x06 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"9\n\x15HttpUploadApiResponse\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x13\n\x0btargetAgent\x18\x02 \x01(\t\"\xdb\x01\n\x16HttpDownloadApiRequest\x12\x18\n\x10sourceResourceId\x18\x01 \x01(\t\x12\x1f\n\x17sourceResourceChildPath\x18\x02 \x01(\t\x12\x13\n\x0bsourceToken\x18\x03 \x01(\t\x12\x12\n\nsourceType\x18\x04 \x01(\t\x12\x13\n\x0btargetAgent\x18\x05 \x01(\t\x12H\n\x15mftAuthorizationToken\x18\x06 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\";\n\x17HttpDownloadApiResponse\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x13\n\x0btargetAgent\x18\x02 \x01(\t\"w\n\x17TransferStateApiRequest\x12\x12\n\ntransferId\x18\x01 \x01(\t\x12H\n\x15mftAuthorizationToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"j\n\x18TransferStateApiResponse\x12\r\n\x05state\x18\x01 \x01(\t\x12\x16\n\x0eupdateTimeMils\x18\x02 \x01(\x03\x12\x12\n\npercentage\x18\x03 \x01(\x01\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\"\xff\x01\n\x1bResourceAvailabilityRequest\x12\x12\n\nresourceId\x18\x01 \x01(\t\x12\x19\n\x11\x63hildResourcePath\x18\x02 \x01(\t\x12\x14\n\x0cresourceType\x18\x03 \x01(\t\x12\x15\n\rresourceToken\x18\x04 \x01(\t\x12\x17\n\x0fresourceBackend\x18\x05 \x01(\t\x12!\n\x19resourceCredentialBackend\x18\x06 \x01(\t\x12H\n\x15mftAuthorizationToken\x18\x07 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"1\n\x1cResourceAvailabilityResponse\x12\x11\n\tavailable\x18\x01 \x01(\x08\"\xc7\x01\n\x14\x46ileMetadataResponse\x12\x14\n\x0c\x66riendlyName\x18\x01 \x01(\t\x12\x14\n\x0cresourceSize\x18\x02 \x01(\x03\x12\x13\n\x0b\x63reatedTime\x18\x03 \x01(\x03\x12\x12\n\nupdateTime\x18\x04 \x01(\x03\x12\x0e\n\x06md5sum\x18\x05 \x01(\t\x12\x14\n\x0cresourcePath\x18\x06 \x01(\t\x12\x18\n\x10parentResourceId\x18\x07 \x01(\t\x12\x1a\n\x12parentResourceType\x18\x08 \x01(\t\"\xde\x02\n\x19\x44irectoryMetadataResponse\x12\x14\n\x0c\x66riendlyName\x18\x01 \x01(\t\x12\x13\n\x0b\x63reatedTime\x18\x02 \x01(\x03\x12\x12\n\nupdateTime\x18\x03 \x01(\x03\x12\x14\n\x0cresourcePath\x18\x04 \x01(\t\x12\x18\n\x10parentResourceId\x18\x05 \x01(\t\x12\x1a\n\x12parentResourceType\x18\x06 \x01(\t\x12S\n\x0b\x64irectories\x18\x07 \x03(\x0b\x32>.org.apache.airavata.mft.api.service.DirectoryMetadataResponse\x12H\n\x05\x66iles\x18\x08 \x03(\x0b\x32\x39.org.apache.airavata.mft.api.service.FileMetadataResponse\x12\x17\n\x0flazyInitialized\x18\t \x01(\x08\"\xaa\x02\n\x1c\x46\x65tchResourceMetadataRequest\x12\x12\n\nresourceId\x18\x01 \x01(\t\x12\x19\n\x11\x63hildResourcePath\x18\x02 \x01(\t\x12\x14\n\x0cresourceType\x18\x03 \x01(\t\x12\x15\n\rresourceToken\x18\x04 \x01(\t\x12\x17\n\x0fresourceBackend\x18\x05 \x01(\t\x12!\n\x19resourceCredentialBackend\x18\x06 \x01(\t\x12\x15\n\rtargetAgentId\x18\x07 \x01(\t\x12\x11\n\tchildPath\x18\x08 \x01(\t\x12H\n\x15mftAuthorizationToken\x18\t \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken2\xbe\t\n\x12MFTTransferService\x12\x83\x01\n\x0esubmitTransfer\x12\x37.org.apache.airavata.mft.api.service.TransferApiRequest\x1a\x38.org.apache.airavata.mft.api.service.TransferApiResponse\x12\x89\x01\n\x10submitHttpUpload\x12\x39.org.apache.airavata.mft.api.service.HttpUploadApiRequest\x1a:.org.apache.airavata.mft.api.service.HttpUploadApiResponse\x12\x8f\x01\n\x12submitHttpDownload\x12;.org.apache.airavata.mft.api.service.HttpDownloadApiRequest\x1a<.org.apache.airavata.mft.api.service.HttpDownloadApiResponse\x12\x92\x01\n\x11getTransferStates\x12<.org.apache.airavata.mft.api.service.TransferStateApiRequest\x1a=.org.apache.airavata.mft.api.service.TransferStateApiResponse0\x01\x12\x8f\x01\n\x10getTransferState\x12<.org.apache.airavata.mft.api.service.TransferStateApiRequest\x1a=.org.apache.airavata.mft.api.service.TransferStateApiResponse\x12\x9e\x01\n\x17getResourceAvailability\x12@.org.apache.airavata.mft.api.service.ResourceAvailabilityRequest\x1a\x41.org.apache.airavata.mft.api.service.ResourceAvailabilityResponse\x12\x97\x01\n\x17getFileResourceMetadata\x12\x41.org.apache.airavata.mft.api.service.FetchResourceMetadataRequest\x1a\x39.org.apache.airavata.mft.api.service.FileMetadataResponse\x12\xa1\x01\n\x1cgetDirectoryResourceMetadata\x12\x41.org.apache.airavata.mft.api.service.FetchResourceMetadataRequest\x1a>.org.apache.airavata.mft.api.service.DirectoryMetadataResponseB\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14MFTTransferApi.proto\x12#org.apache.airavata.mft.api.service\x1a\x10\x43redCommon.proto\"\x9b\x01\n\x10\x43\x61llbackEndpoint\x12P\n\x04type\x18\x01 \x01(\x0e\x32\x42.org.apache.airavata.mft.api.service.CallbackEndpoint.CallbackType\x12\x10\n\x08\x65ndpoint\x18\x02 \x01(\t\"#\n\x0c\x43\x61llbackType\x12\x08\n\x04HTTP\x10\x00\x12\t\n\x05KAFKA\x10\x01\"\xf3\x03\n\x12TransferApiRequest\x12\x12\n\nsourcePath\x18\x01 \x01(\t\x12\x17\n\x0fsourceStorageId\x18\x02 \x01(\t\x12\x13\n\x0bsourceToken\x18\x03 \x01(\t\x12\x17\n\x0f\x64\x65stinationPath\x18\x04 \x01(\t\x12\x1c\n\x14\x64\x65stinationStorageId\x18\x05 \x01(\t\x12\x18\n\x10\x64\x65stinationToken\x18\x06 \x01(\t\x12\x18\n\x10\x61\x66\x66inityTransfer\x18\x07 \x01(\x08\x12_\n\x0ctargetAgents\x18\x08 \x03(\x0b\x32I.org.apache.airavata.mft.api.service.TransferApiRequest.TargetAgentsEntry\x12H\n\x15mftAuthorizationToken\x18\t \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\x12P\n\x11\x63\x61llbackEndpoints\x18\n \x03(\x0b\x32\x35.org.apache.airavata.mft.api.service.CallbackEndpoint\x1a\x33\n\x11TargetAgentsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\")\n\x13TransferApiResponse\x12\x12\n\ntransferId\x18\x01 \x01(\t\"l\n\x17\x42\x61tchTransferApiRequest\x12Q\n\x10transferRequests\x18\x01 \x03(\x0b\x32\x37.org.apache.airavata.mft.api.service.TransferApiRequest\"/\n\x18\x42\x61tchTransferApiResponse\x12\x13\n\x0btransferIds\x18\x01 \x03(\t\"\xc3\x01\n\x14HttpUploadApiRequest\x12\x1c\n\x14\x64\x65stinationStorageId\x18\x01 \x01(\t\x12\x14\n\x0cresourcePath\x18\x02 \x01(\t\x12\x18\n\x10\x64\x65stinationToken\x18\x03 \x01(\t\x12\x13\n\x0btargetAgent\x18\x05 \x01(\t\x12H\n\x15mftAuthorizationToken\x18\x06 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"9\n\x15HttpUploadApiResponse\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x13\n\x0btargetAgent\x18\x02 \x01(\t\"\xbb\x01\n\x16HttpDownloadApiRequest\x12\x14\n\x0cresourcePath\x18\x01 \x01(\t\x12\x17\n\x0fsourceStorageId\x18\x02 \x01(\t\x12\x13\n\x0bsourceToken\x18\x03 \x01(\t\x12\x13\n\x0btargetAgent\x18\x05 \x01(\t\x12H\n\x15mftAuthorizationToken\x18\x06 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\";\n\x17HttpDownloadApiResponse\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x13\n\x0btargetAgent\x18\x02 \x01(\t\"w\n\x17TransferStateApiRequest\x12\x12\n\ntransferId\x18\x01 \x01(\t\x12H\n\x15mftAuthorizationToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"j\n\x18TransferStateApiResponse\x12\r\n\x05state\x18\x01 \x01(\t\x12\x16\n\x0eupdateTimeMils\x18\x02 \x01(\x03\x12\x12\n\npercentage\x18\x03 \x01(\x01\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\"\xa7\x01\n\x1bResourceAvailabilityRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x14\n\x0cresourcePath\x18\x02 \x01(\t\x12\x15\n\rresourceToken\x18\x04 \x01(\t\x12H\n\x15mftAuthorizationToken\x18\x07 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"1\n\x1cResourceAvailabilityResponse\x12\x11\n\tavailable\x18\x01 \x01(\x08\"\xc7\x01\n\x14\x46ileMetadataResponse\x12\x14\n\x0c\x66riendlyName\x18\x01 \x01(\t\x12\x14\n\x0cresourceSize\x18\x02 \x01(\x03\x12\x13\n\x0b\x63reatedTime\x18\x03 \x01(\x03\x12\x12\n\nupdateTime\x18\x04 \x01(\x03\x12\x0e\n\x06md5sum\x18\x05 \x01(\t\x12\x14\n\x0cresourcePath\x18\x06 \x01(\t\x12\x18\n\x10parentResourceId\x18\x07 \x01(\t\x12\x1a\n\x12parentResourceType\x18\x08 \x01(\t\"\xde\x02\n\x19\x44irectoryMetadataResponse\x12\x14\n\x0c\x66riendlyName\x18\x01 \x01(\t\x12\x13\n\x0b\x63reatedTime\x18\x02 \x01(\x03\x12\x12\n\nupdateTime\x18\x03 \x01(\x03\x12\x14\n\x0cresourcePath\x18\x04 \x01(\t\x12\x18\n\x10parentResourceId\x18\x05 \x01(\t\x12\x1a\n\x12parentResourceType\x18\x06 \x01(\t\x12S\n\x0b\x64irectories\x18\x07 \x03(\x0b\x32>.org.apache.airavata.mft.api.service.DirectoryMetadataResponse\x12H\n\x05\x66iles\x18\x08 \x03(\x0b\x32\x39.org.apache.airavata.mft.api.service.FileMetadataResponse\x12\x17\n\x0flazyInitialized\x18\t \x01(\x08\"\xbf\x01\n\x1c\x46\x65tchResourceMetadataRequest\x12\x14\n\x0cresourcePath\x18\x01 \x01(\t\x12\x15\n\rresourceToken\x18\x04 \x01(\t\x12\x11\n\tstorageId\x18\x05 \x01(\t\x12\x15\n\rtargetAgentId\x18\x07 \x01(\t\x12H\n\x15mftAuthorizationToken\x18\t \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken2\xd3\n\n\x12MFTTransferService\x12\x83\x01\n\x0esubmitTransfer\x12\x37.org.apache.airavata.mft.api.service.TransferApiRequest\x1a\x38.org.apache.airavata.mft.api.service.TransferApiResponse\x12\x92\x01\n\x13submitBatchTransfer\x12<.org.apache.airavata.mft.api.service.BatchTransferApiRequest\x1a=.org.apache.airavata.mft.api.service.BatchTransferApiResponse\x12\x89\x01\n\x10submitHttpUpload\x12\x39.org.apache.airavata.mft.api.service.HttpUploadApiRequest\x1a:.org.apache.airavata.mft.api.service.HttpUploadApiResponse\x12\x8f\x01\n\x12submitHttpDownload\x12;.org.apache.airavata.mft.api.service.HttpDownloadApiRequest\x1a<.org.apache.airavata.mft.api.service.HttpDownloadApiResponse\x12\x92\x01\n\x11getTransferStates\x12<.org.apache.airavata.mft.api.service.TransferStateApiRequest\x1a=.org.apache.airavata.mft.api.service.TransferStateApiResponse0\x01\x12\x8f\x01\n\x10getTransferState\x12<.org.apache.airavata.mft.api.service.TransferStateApiRequest\x1a=.org.apache.airavata.mft.api.service.TransferStateApiResponse\x12\x9e\x01\n\x17getResourceAvailability\x12@.org.apache.airavata.mft.api.service.ResourceAvailabilityRequest\x1a\x41.org.apache.airavata.mft.api.service.ResourceAvailabilityResponse\x12\x97\x01\n\x17getFileResourceMetadata\x12\x41.org.apache.airavata.mft.api.service.FetchResourceMetadataRequest\x1a\x39.org.apache.airavata.mft.api.service.FileMetadataResponse\x12\xa1\x01\n\x1cgetDirectoryResourceMetadata\x12\x41.org.apache.airavata.mft.api.service.FetchResourceMetadataRequest\x1a>.org.apache.airavata.mft.api.service.DirectoryMetadataResponseB\x02P\x01\x62\x06proto3')
 
 
 
@@ -23,6 +23,8 @@ _CALLBACKENDPOINT = DESCRIPTOR.message_types_by_name['CallbackEndpoint']
 _TRANSFERAPIREQUEST = DESCRIPTOR.message_types_by_name['TransferApiRequest']
 _TRANSFERAPIREQUEST_TARGETAGENTSENTRY = _TRANSFERAPIREQUEST.nested_types_by_name['TargetAgentsEntry']
 _TRANSFERAPIRESPONSE = DESCRIPTOR.message_types_by_name['TransferApiResponse']
+_BATCHTRANSFERAPIREQUEST = DESCRIPTOR.message_types_by_name['BatchTransferApiRequest']
+_BATCHTRANSFERAPIRESPONSE = DESCRIPTOR.message_types_by_name['BatchTransferApiResponse']
 _HTTPUPLOADAPIREQUEST = DESCRIPTOR.message_types_by_name['HttpUploadApiRequest']
 _HTTPUPLOADAPIRESPONSE = DESCRIPTOR.message_types_by_name['HttpUploadApiResponse']
 _HTTPDOWNLOADAPIREQUEST = DESCRIPTOR.message_types_by_name['HttpDownloadApiRequest']
@@ -63,6 +65,20 @@ TransferApiResponse = _reflection.GeneratedProtocolMessageType('TransferApiRespo
   # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.api.service.TransferApiResponse)
   })
 _sym_db.RegisterMessage(TransferApiResponse)
+
+BatchTransferApiRequest = _reflection.GeneratedProtocolMessageType('BatchTransferApiRequest', (_message.Message,), {
+  'DESCRIPTOR' : _BATCHTRANSFERAPIREQUEST,
+  '__module__' : 'MFTTransferApi_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.api.service.BatchTransferApiRequest)
+  })
+_sym_db.RegisterMessage(BatchTransferApiRequest)
+
+BatchTransferApiResponse = _reflection.GeneratedProtocolMessageType('BatchTransferApiResponse', (_message.Message,), {
+  'DESCRIPTOR' : _BATCHTRANSFERAPIRESPONSE,
+  '__module__' : 'MFTTransferApi_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.api.service.BatchTransferApiResponse)
+  })
+_sym_db.RegisterMessage(BatchTransferApiResponse)
 
 HttpUploadApiRequest = _reflection.GeneratedProtocolMessageType('HttpUploadApiRequest', (_message.Message,), {
   'DESCRIPTOR' : _HTTPUPLOADAPIREQUEST,
@@ -153,33 +169,37 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _CALLBACKENDPOINT_CALLBACKTYPE._serialized_start=200
   _CALLBACKENDPOINT_CALLBACKTYPE._serialized_end=235
   _TRANSFERAPIREQUEST._serialized_start=238
-  _TRANSFERAPIREQUEST._serialized_end=810
-  _TRANSFERAPIREQUEST_TARGETAGENTSENTRY._serialized_start=759
-  _TRANSFERAPIREQUEST_TARGETAGENTSENTRY._serialized_end=810
-  _TRANSFERAPIRESPONSE._serialized_start=812
-  _TRANSFERAPIRESPONSE._serialized_end=853
-  _HTTPUPLOADAPIREQUEST._serialized_start=856
-  _HTTPUPLOADAPIREQUEST._serialized_end=1093
-  _HTTPUPLOADAPIRESPONSE._serialized_start=1095
-  _HTTPUPLOADAPIRESPONSE._serialized_end=1152
-  _HTTPDOWNLOADAPIREQUEST._serialized_start=1155
-  _HTTPDOWNLOADAPIREQUEST._serialized_end=1374
-  _HTTPDOWNLOADAPIRESPONSE._serialized_start=1376
-  _HTTPDOWNLOADAPIRESPONSE._serialized_end=1435
-  _TRANSFERSTATEAPIREQUEST._serialized_start=1437
-  _TRANSFERSTATEAPIREQUEST._serialized_end=1556
-  _TRANSFERSTATEAPIRESPONSE._serialized_start=1558
-  _TRANSFERSTATEAPIRESPONSE._serialized_end=1664
-  _RESOURCEAVAILABILITYREQUEST._serialized_start=1667
-  _RESOURCEAVAILABILITYREQUEST._serialized_end=1922
-  _RESOURCEAVAILABILITYRESPONSE._serialized_start=1924
-  _RESOURCEAVAILABILITYRESPONSE._serialized_end=1973
-  _FILEMETADATARESPONSE._serialized_start=1976
-  _FILEMETADATARESPONSE._serialized_end=2175
-  _DIRECTORYMETADATARESPONSE._serialized_start=2178
-  _DIRECTORYMETADATARESPONSE._serialized_end=2528
-  _FETCHRESOURCEMETADATAREQUEST._serialized_start=2531
-  _FETCHRESOURCEMETADATAREQUEST._serialized_end=2829
-  _MFTTRANSFERSERVICE._serialized_start=2832
-  _MFTTRANSFERSERVICE._serialized_end=4046
+  _TRANSFERAPIREQUEST._serialized_end=737
+  _TRANSFERAPIREQUEST_TARGETAGENTSENTRY._serialized_start=686
+  _TRANSFERAPIREQUEST_TARGETAGENTSENTRY._serialized_end=737
+  _TRANSFERAPIRESPONSE._serialized_start=739
+  _TRANSFERAPIRESPONSE._serialized_end=780
+  _BATCHTRANSFERAPIREQUEST._serialized_start=782
+  _BATCHTRANSFERAPIREQUEST._serialized_end=890
+  _BATCHTRANSFERAPIRESPONSE._serialized_start=892
+  _BATCHTRANSFERAPIRESPONSE._serialized_end=939
+  _HTTPUPLOADAPIREQUEST._serialized_start=942
+  _HTTPUPLOADAPIREQUEST._serialized_end=1137
+  _HTTPUPLOADAPIRESPONSE._serialized_start=1139
+  _HTTPUPLOADAPIRESPONSE._serialized_end=1196
+  _HTTPDOWNLOADAPIREQUEST._serialized_start=1199
+  _HTTPDOWNLOADAPIREQUEST._serialized_end=1386
+  _HTTPDOWNLOADAPIRESPONSE._serialized_start=1388
+  _HTTPDOWNLOADAPIRESPONSE._serialized_end=1447
+  _TRANSFERSTATEAPIREQUEST._serialized_start=1449
+  _TRANSFERSTATEAPIREQUEST._serialized_end=1568
+  _TRANSFERSTATEAPIRESPONSE._serialized_start=1570
+  _TRANSFERSTATEAPIRESPONSE._serialized_end=1676
+  _RESOURCEAVAILABILITYREQUEST._serialized_start=1679
+  _RESOURCEAVAILABILITYREQUEST._serialized_end=1846
+  _RESOURCEAVAILABILITYRESPONSE._serialized_start=1848
+  _RESOURCEAVAILABILITYRESPONSE._serialized_end=1897
+  _FILEMETADATARESPONSE._serialized_start=1900
+  _FILEMETADATARESPONSE._serialized_end=2099
+  _DIRECTORYMETADATARESPONSE._serialized_start=2102
+  _DIRECTORYMETADATARESPONSE._serialized_end=2452
+  _FETCHRESOURCEMETADATAREQUEST._serialized_start=2455
+  _FETCHRESOURCEMETADATAREQUEST._serialized_end=2646
+  _MFTTRANSFERSERVICE._serialized_start=2649
+  _MFTTRANSFERSERVICE._serialized_end=4012
 # @@protoc_insertion_point(module_scope)
