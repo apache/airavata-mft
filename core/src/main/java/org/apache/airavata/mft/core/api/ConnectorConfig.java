@@ -191,6 +191,7 @@ public class ConnectorConfig {
             connectorConfig.setAuthToken(authToken);
             connectorConfig.setTransferId(transferId);
             connectorConfig.setMetadata(metadata);
+            connectorConfig.setResourcePath(resourcePath);
             return connectorConfig;
         }
     }
