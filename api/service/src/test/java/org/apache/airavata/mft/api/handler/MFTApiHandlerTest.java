@@ -41,56 +41,51 @@ public class MFTApiHandlerTest {
 
     @Test
     public void testValidSubmitTransfer() throws MFTConsulClientException {
-        String testSourcePath = "test-file.txt";
-        String testSourceStorageId = "ca0e786c-09de-40ff-a6ef-5d52a09e0027";
-        String testSourceToken = "4c8337fc-f3e6-481e-b2be-ecabbd075924";
-        String testDestinationPath = "test/test-file2.txt";
-        String testDestinationStorageId = "e815392c-79e0-4e63-b730-7f10929b62dd";
-        String testDestinationToken = "c211d1f7-e231-4147-a8dc-8af14194ee54";
-
+        // given
         TransferApiRequest transferApiRequest = TransferApiRequest.newBuilder()
-                .setSourceToken(testSourceToken)
-                .setDestinationToken(testDestinationToken)
-                .setDestinationStorageId(testDestinationStorageId)
-                .setDestinationPath(testDestinationPath)
-                .setSourceStorageId(testSourceStorageId)
-                .setSourcePath(testSourcePath).build();
-
-        String mock_transferId="mock-transfer-id-test-1234";
-        when(mftConsulClient.submitTransfer(transferApiRequest)).thenReturn(mock_transferId);
+                .setSourceToken("mock-source-token-1234")
+                .setDestinationToken("mock-destination-token-1234")
+                .setDestinationStorageId("mock-destination-storage-id-1234")
+                .setDestinationPath("test/test-file2.txt")
+                .setSourceStorageId("mock-source-storage-id-1234")
+                .setSourcePath("test-file.txt").build();
+        // mftConsulClient mock behavior
+        when(mftConsulClient.submitTransfer(transferApiRequest)).thenReturn("mock-transfer-id-test-1234");
         doNothing().when(mftConsulClient).saveTransferState(any(String.class), any(TransferState.class));
+        // mock stream observer
         StreamObserver<TransferApiResponse> observer = mock(StreamObserver.class);
+
+        // when
         mftApiHandler.submitTransfer(transferApiRequest, observer);
 
+        // then
         verify(observer).onNext(any(TransferApiResponse.class));
         verify(observer, times(1)).onCompleted();
+        verify(observer, times(0)).onError(any(MFTConsulClientException.class));
     }
 
     @Test
     public void testInvalidSubmitTransfer() throws MFTConsulClientException {
-        String testSourcePath = "test-file.txt";
-        String testSourceStorageId = "ca0e786c-09de-40ff-a6ef-5d52a09e0027";
-        String testSourceToken = "4c8337fc-f3e6-481e-b2be-ecabbd075924";
-        String testDestinationPath = "test/test-file2.txt";
-        String testDestinationStorageId = "e815392c-79e0-4e63-b730-7f10929b62dd";
-        String testDestinationToken = "c211d1f7-e231-4147-a8dc-8af14194ee54";
-
+        // given
         TransferApiRequest transferApiRequest = TransferApiRequest.newBuilder()
-                .setSourceToken(testSourceToken)
-                .setDestinationToken(testDestinationToken)
-                .setDestinationStorageId(testDestinationStorageId)
-                .setDestinationPath(testDestinationPath)
-                .setSourceStorageId(testSourceStorageId)
-                .setSourcePath(testSourcePath).build();
-
-        String mock_transferId="mock-transfer-id-test-1234";
-        when(mftConsulClient.submitTransfer(transferApiRequest)).thenReturn(mock_transferId);
-        doNothing().when(mftConsulClient).saveTransferState(any(String.class), any(TransferState.class));
+                .setSourceToken("mock-source-token-1234")
+                .setDestinationToken("mock-destination-token-1234")
+                .setDestinationStorageId("mock-destination-storage-id-1234")
+                .setDestinationPath("test/test-file2.txt")
+                .setSourceStorageId("mock-source-storage-id-1234")
+                .setSourcePath("test-file.txt").build();
+        // mftConsulClient mock behavior
+        when(mftConsulClient.submitTransfer(transferApiRequest)).thenThrow(new MFTConsulClientException("Test Exception"));
+        // mock stream observer
         StreamObserver<TransferApiResponse> observer = mock(StreamObserver.class);
+
+        // when
         mftApiHandler.submitTransfer(transferApiRequest, observer);
 
-        verify(observer).onNext(any(TransferApiResponse.class));
-        verify(observer, times(1)).onCompleted();
+        // then
+        verify(observer, times(0)).onNext(any(TransferApiResponse.class));
+        verify(observer, times(0)).onCompleted();
+        verify(observer, times(0)).onError(any(MFTConsulClientException.class));
     }
 
     @Disabled
