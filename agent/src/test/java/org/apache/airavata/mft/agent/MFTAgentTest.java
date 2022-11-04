@@ -1,36 +1,18 @@
 package org.apache.airavata.mft.agent;
 
 import com.orbitz.consul.KeyValueClient;
-import com.orbitz.consul.SessionClient;
 import com.orbitz.consul.cache.ConsulCache;
 import com.orbitz.consul.cache.KVCache;
 import com.orbitz.consul.model.kv.Value;
-import com.orbitz.consul.model.session.ImmutableSession;
-import com.orbitz.consul.model.session.Session;
-import com.orbitz.consul.model.session.SessionCreatedResponse;
-import io.grpc.stub.StreamObserver;
 import org.apache.airavata.mft.admin.MFTConsulClient;
-import org.apache.airavata.mft.admin.models.TransferState;
-import org.apache.airavata.mft.api.service.TransferApiResponse;
-import org.apache.airavata.mft.resource.client.StorageServiceClient;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
