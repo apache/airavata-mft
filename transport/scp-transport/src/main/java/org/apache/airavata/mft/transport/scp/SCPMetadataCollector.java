@@ -45,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -239,7 +240,7 @@ public class SCPMetadataCollector implements MetadataCollector {
 
         sshClient.addHostKeyVerifier((h, p, key) -> true);
 
-        File privateKeyFile = File.createTempFile("id_rsa", "");
+        File privateKeyFile = Files.createTempFile("id_rsa", "").toFile();
         BufferedWriter writer = new BufferedWriter(new FileWriter(privateKeyFile));
         writer.write(scpSecret.getPrivateKey());
         writer.close();
