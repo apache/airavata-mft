@@ -19,6 +19,7 @@ package org.apache.airavata.mft.agent;
 
 import org.apache.airavata.mft.admin.MFTConsulClient;
 import org.apache.airavata.mft.agent.http.HttpTransferRequestsStore;
+import org.apache.airavata.mft.agent.ingress.ConsulIngressHandler;
 import org.apache.airavata.mft.agent.rpc.RPCParser;
 import org.apache.airavata.mft.resource.client.StorageServiceClient;
 import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
@@ -58,6 +59,17 @@ public class AppConfig {
     @Bean
     public StorageServiceClient storageServiceClient() {
         return StorageServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+    }
+
+    @Bean
+    public ConsulIngressHandler consulIngressHandler() {
+        return new ConsulIngressHandler();
+
+    }
+
+    @Bean
+    public TransferOrchestrator transferOrchestrator() {
+        return new TransferOrchestrator();
     }
 
 }
