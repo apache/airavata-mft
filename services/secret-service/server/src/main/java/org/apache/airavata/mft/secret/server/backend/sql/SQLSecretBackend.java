@@ -28,6 +28,7 @@ import org.apache.airavata.mft.credential.stubs.scp.*;
 import org.apache.airavata.mft.credential.stubs.swift.*;
 import org.apache.airavata.mft.secret.server.backend.SecretBackend;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.FTPSecretEntity;
+import org.apache.airavata.mft.secret.server.backend.sql.entity.GCSSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.ODataSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.S3SecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.SCPSecretEntity;
@@ -35,6 +36,7 @@ import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftAuthC
 import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftPasswordSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.FTPSecretRepository;
+import org.apache.airavata.mft.secret.server.backend.sql.repository.GCSSecretRepository;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.ODataSecretRepository;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.S3SecretRepository;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.SCPSecretRepository;
@@ -72,6 +74,9 @@ public class SQLSecretBackend implements SecretBackend {
 
     @Autowired
     private ODataSecretRepository odataSecretRepository;
+
+    @Autowired
+    private GCSSecretRepository gcsSecretRepository;
 
     private DozerBeanMapper mapper = new DozerBeanMapper();
 
@@ -174,13 +179,16 @@ public class SQLSecretBackend implements SecretBackend {
     }
 
     @Override
-    public Optional<GCSSecret> getGCSSecret(GCSSecretGetRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+    public Optional<GCSSecret> getGCSSecret( GCSSecretGetRequest request ) throws Exception
+    {
+        Optional<GCSSecretEntity> secretEty = gcsSecretRepository.findBySecretId( request.getSecretId() );
+        return secretEty.map( gcsSecretEntity -> mapper.map( gcsSecretEntity, GCSSecret.newBuilder().getClass() ).build() );
     }
 
     @Override
     public GCSSecret createGCSSecret(GCSSecretCreateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        GCSSecretEntity savedEntity = gcsSecretRepository.save(mapper.map(request, GCSSecretEntity.class));
+        return mapper.map(savedEntity, GCSSecret.newBuilder().getClass()).build();
     }
 
     @Override
