@@ -103,4 +103,22 @@ public class GCSServiceHandler extends GCSStorageServiceGrpc.GCSStorageServiceIm
                     .asRuntimeException());
         }
     }
+
+    @Override
+    public void listGCSStorage( GCSStorageListRequest request, StreamObserver<GCSStorageListResponse> responseObserver )
+    {
+        try
+        {
+            GCSStorageListResponse response = this.backend.listGCSStorage( request );
+            responseObserver.onNext( response );
+            responseObserver.onCompleted();
+        }
+        catch ( Exception e )
+        {
+            logger.error( "Failed in retrieving GCS storage list", e );
+            responseObserver.onError( Status.INTERNAL.withCause( e ).
+                    withDescription( "Failed in retrieving GCS storage list" ).asRuntimeException() );
+        }
+    }
+
 }

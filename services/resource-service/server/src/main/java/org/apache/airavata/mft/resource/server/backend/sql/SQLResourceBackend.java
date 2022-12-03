@@ -58,6 +58,9 @@ public class SQLResourceBackend implements ResourceBackend {
     private S3StorageRepository s3StorageRepository;
 
     @Autowired
+    private GCSStorageRepository gcsStorageRepository;
+
+    @Autowired
     private SwiftStorageRepository swiftStorageRepository;
 
     @Autowired
@@ -413,27 +416,40 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public GCSStorageListResponse listGCSStorage(GCSStorageListRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        GCSStorageListResponse.Builder respBuilder = GCSStorageListResponse.newBuilder();
+        List<GCSStorageEntity> all = gcsStorageRepository.findAll(PageRequest.of(request.getOffset(), request.getLimit()));
+        all.forEach(ety -> respBuilder.addStorages(mapper.map(ety, GCSStorage.newBuilder().getClass())));
+        return respBuilder.build();
     }
 
     @Override
     public Optional<GCSStorage> getGCSStorage(GCSStorageGetRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
-    }
+        Optional<GCSStorageEntity> entity = gcsStorageRepository.findById(request.getStorageId());
+        return entity.map(e -> mapper.map(e, GCSStorage.newBuilder().getClass()).build());    }
 
     @Override
     public GCSStorage createGCSStorage(GCSStorageCreateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        GCSStorageEntity savedEntity = gcsStorageRepository.save(mapper.map(request, GCSStorageEntity.class));
+
+        ResolveStorageEntity storageTypeEty = new ResolveStorageEntity();
+        storageTypeEty.setStorageId(savedEntity.getStorageId());
+        storageTypeEty.setStorageType(ResolveStorageEntity.StorageType.GCS);
+        resolveStorageRepository.save(storageTypeEty);
+
+        return mapper.map(savedEntity, GCSStorage.newBuilder().getClass()).build();
     }
 
     @Override
     public boolean updateGCSStorage(GCSStorageUpdateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        gcsStorageRepository.save(mapper.map(request, GCSStorageEntity.class));
+        return true;
     }
 
     @Override
     public boolean deleteGCSStorage(GCSStorageDeleteRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        gcsStorageRepository.deleteById(request.getStorageId());
+        resourceRepository.deleteByStorageIdAndStorageType(request.getStorageId(), GenericResourceEntity.StorageType.GCS);
+        return true;
     }
 
     @Override
