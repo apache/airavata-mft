@@ -34,8 +34,15 @@ public class GCSSecretEntity
     @GenericGenerator( name = "uuid", strategy = "uuid2")
     private String secretId;
 
-    @Column(name = "CREDENTIALS_JSON")
-    private String credentialsJson;
+    @Column(name = "PROJECT_ID")
+    private String projectId;
+
+    @Column(name = "PRIVATE_KEY")
+    private String privateKey;
+
+    @Column(name = "CLIENT_EMAIL")
+    private String clientEmail;
+
 
     public String getSecretId()
     {
@@ -47,13 +54,33 @@ public class GCSSecretEntity
         this.secretId = secretId;
     }
 
-    public String getCredentialsJson()
+    public String getProjectId()
     {
-        return credentialsJson;
+        return projectId;
     }
 
-    public void setCredentialsJson( String credentialsJson )
+    public void setProjectId( String projectId )
     {
-        this.credentialsJson = credentialsJson;
+        this.projectId = projectId;
+    }
+
+    public String getPrivateKey()
+    {
+        return privateKey;
+    }
+
+    public void setPrivateKey( String privateKey )
+    {
+        this.privateKey = privateKey;
+    }
+
+    public String getClientEmail()
+    {
+        return clientEmail;
+    }
+
+    public void setClientEmail( String clientEmail )
+    {
+        this.clientEmail = clientEmail;
     }
 }
