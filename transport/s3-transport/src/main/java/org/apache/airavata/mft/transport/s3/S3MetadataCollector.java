@@ -24,34 +24,27 @@ import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import org.apache.airavata.mft.common.AuthToken;
-import org.apache.airavata.mft.core.DirectoryResourceMetadata;
-import org.apache.airavata.mft.core.FileResourceMetadata;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
+import org.apache.airavata.mft.agent.stub.*;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.credential.stubs.s3.S3Secret;
-import org.apache.airavata.mft.credential.stubs.s3.S3SecretGetRequest;
-import org.apache.airavata.mft.resource.client.StorageServiceClient;
-import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage;
-import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageGetRequest;
-import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
+
+import java.io.File;
+import java.util.List;
 
 public class S3MetadataCollector implements MetadataCollector {
 
-    private String resourceServiceHost;
-    private int resourceServicePort;
-    private String secretServiceHost;
-    private int secretServicePort;
     boolean initialized = false;
+    private S3Storage s3Storage;
+    private S3Secret s3Secret;
 
     @Override
-    public void init(String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) {
-        this.resourceServiceHost = resourceServiceHost;
-        this.resourceServicePort = resourceServicePort;
-        this.secretServiceHost = secretServiceHost;
-        this.secretServicePort = secretServicePort;
+    public void init(StorageWrapper storage, SecretWrapper secret) {
+        this.s3Storage = storage.getS3();
+        this.s3Secret = secret.getS3();
         this.initialized = true;
     }
 
@@ -62,23 +55,9 @@ public class S3MetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
+    public ResourceMetadata getResourceMetadata(String resourcePath) throws Exception {
 
         checkInitialized();
-
-        S3Storage s3Storage;
-        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
-                .buildClient(resourceServiceHost, resourceServicePort)) {
-
-            s3Storage = storageServiceClient.s3()
-                    .getS3Storage(S3StorageGetRequest.newBuilder().setStorageId(storageId).build());
-        }
-
-        S3Secret s3Secret;
-        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
-                secretServiceHost, secretServicePort)) {
-            s3Secret = secretClient.s3().getS3Secret(S3SecretGetRequest.newBuilder().setSecretId(credentialToken).build());
-        }
 
         AWSCredentials awsCreds;
         if (s3Secret.getSessionToken() == null || s3Secret.getSessionToken().equals("")) {
@@ -96,39 +75,53 @@ public class S3MetadataCollector implements MetadataCollector {
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
                 .build();
 
-        FileResourceMetadata metadata = new FileResourceMetadata();
-        ObjectMetadata s3Metadata = s3Client.getObjectMetadata(s3Storage.getBucketName(), resourcePath);
-        metadata.setResourceSize(s3Metadata.getContentLength());
-        metadata.setMd5sum(s3Metadata.getETag());
-        metadata.setUpdateTime(s3Metadata.getLastModified().getTime());
-        metadata.setCreatedTime(s3Metadata.getLastModified().getTime());
-        return metadata;
+        ResourceMetadata.Builder resourceBuilder = ResourceMetadata.newBuilder();
+
+        String key = s3Client.getObject(s3Storage.getBucketName(), resourcePath).getKey();
+
+        if (key.endsWith("/")) { // Folder
+
+            ObjectListing objectListing = s3Client.listObjects(s3Storage.getBucketName(), key);
+            List<S3ObjectSummary> objectSummaries = objectListing.getObjectSummaries();
+            DirectoryMetadata.Builder dirBuilder = DirectoryMetadata.newBuilder();
+            for (S3ObjectSummary summary: objectSummaries) {
+                if (summary.getKey().endsWith("/")) {
+                    DirectoryMetadata.Builder subDirBuilder = DirectoryMetadata.newBuilder();
+                    subDirBuilder.setCreatedTime(summary.getLastModified().getTime());
+                    subDirBuilder.setUpdateTime(summary.getLastModified().getTime());
+                    subDirBuilder.setResourcePath(summary.getKey());
+                    subDirBuilder.setFriendlyName(new File(summary.getKey()).getName());
+                    dirBuilder.addDirectories(subDirBuilder);
+                } else {
+                    FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
+                    fileBuilder.setUpdateTime(summary.getLastModified().getTime());
+                    fileBuilder.setCreatedTime(summary.getLastModified().getTime());
+                    fileBuilder.setResourcePath(summary.getKey());
+                    fileBuilder.setFriendlyName(new File(summary.getKey()).getName());
+                    fileBuilder.setResourceSize(summary.getSize());
+                    dirBuilder.addFiles(fileBuilder);
+                }
+            }
+            resourceBuilder.setDirectory(dirBuilder);
+        } else { // File
+            FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
+            ObjectMetadata fileMetadata = s3Client.getObjectMetadata(s3Storage.getBucketName(), resourcePath);
+            fileBuilder.setResourceSize(fileMetadata.getContentLength());
+            fileBuilder.setResourcePath(resourcePath);
+            fileBuilder.setMd5Sum(fileMetadata.getContentMD5());
+            fileBuilder.setFriendlyName(new File(resourcePath).getName());
+            fileBuilder.setCreatedTime(fileMetadata.getLastModified().getTime());
+            fileBuilder.setUpdateTime(fileMetadata.getLastModified().getTime());
+            resourceBuilder.setFile(fileBuilder);
+        }
+
+        return resourceBuilder.build();
     }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String resourcePath, String storageId,
-                                                                  String credentialToken) throws Exception {
-        throw new UnsupportedOperationException("Method not implemented");    }
-
-
-    @Override
-    public Boolean isAvailable(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
+    public Boolean isAvailable(String resourcePath) throws Exception {
 
         checkInitialized();
-
-        S3Storage s3Storage;
-        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
-                .buildClient(resourceServiceHost, resourceServicePort)) {
-
-            s3Storage = storageServiceClient.s3()
-                    .getS3Storage(S3StorageGetRequest.newBuilder().setStorageId(storageId).build());
-        }
-
-        S3Secret s3Secret;
-        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
-                secretServiceHost, secretServicePort)) {
-            s3Secret = secretClient.s3().getS3Secret(S3SecretGetRequest.newBuilder().setSecretId(credentialToken).build());
-        }
         BasicAWSCredentials awsCreds = new BasicAWSCredentials(s3Secret.getAccessKey(), s3Secret.getSecretKey());
 
         AmazonS3 s3Client = AmazonS3ClientBuilder.standard()

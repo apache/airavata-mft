@@ -27,10 +27,12 @@ import com.orbitz.consul.ConsulException;
 import com.orbitz.consul.KeyValueClient;
 import com.orbitz.consul.SessionClient;
 import com.orbitz.consul.model.kv.Value;
+import com.orbitz.consul.option.PutOptions;
 import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCResponse;
+import org.apache.airavata.mft.agent.stub.AgentTransferRequest;
 import org.apache.airavata.mft.api.service.TransferApiRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,11 +88,11 @@ public class MFTConsulClient {
 
     public String submitTransfer(TransferApiRequest transferRequest) throws MFTConsulClientException {
         try {
-            String asStr = JsonFormat.printer().print(transferRequest);
             String transferId = UUID.randomUUID().toString();
-            kvClient.putValue(CONTROLLER_TRANSFER_MESSAGE_PATH + transferId, asStr);
+            kvClient.putValue(CONTROLLER_TRANSFER_MESSAGE_PATH + transferId, transferRequest.toByteArray(),
+                    0L, PutOptions.BLANK);
             return transferId;
-        } catch (InvalidProtocolBufferException e) {
+        } catch (Exception e) {
             throw new MFTConsulClientException("Error in serializing transfer request", e);
         }
     }
@@ -102,7 +104,8 @@ public class MFTConsulClient {
      * @param transferRequest Target transfer request
      * @throws MFTConsulClientException If {@link TransferApiRequest} can not be delivered to consul store
      */
-    public void commandTransferToAgent(String agentId, String transferId, TransferApiRequest transferRequest) throws MFTConsulClientException {
+    public void commandTransferToAgent(String agentId, String transferId, AgentTransferRequest transferRequest)
+            throws MFTConsulClientException {
         try {
             submitTransferStateToProcess(transferId, "controller", new TransferState()
             .setState("INITIALIZING")
@@ -110,11 +113,12 @@ public class MFTConsulClient {
             .setUpdateTimeMils(System.currentTimeMillis())
             .setPublisher("controller")
             .setDescription("Initializing the transfer"));
-            String asString = JsonFormat.printer().print(transferRequest);
-            kvClient.putValue(AGENTS_TRANSFER_REQUEST_MESSAGE_PATH + agentId + "/" + transferId, asString);
+            byte[] transferReqBytes = transferRequest.toByteArray();
+            kvClient.putValue(AGENTS_TRANSFER_REQUEST_MESSAGE_PATH + agentId + "/" + transferId, transferReqBytes,
+                    0L, PutOptions.BLANK);
 
-        } catch (InvalidProtocolBufferException e) {
-            throw new MFTConsulClientException("Error in serializing transfer request", e);
+        } catch (Exception e) {
+            throw new MFTConsulClientException("Error in submitting transfer command to Agent through consul", e);
         }
     }
 

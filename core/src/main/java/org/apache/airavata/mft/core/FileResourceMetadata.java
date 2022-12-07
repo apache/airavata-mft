@@ -18,7 +18,6 @@
 package org.apache.airavata.mft.core;
 
 public class FileResourceMetadata {
-
     private String friendlyName;
     private long resourceSize;
     private long createdTime;

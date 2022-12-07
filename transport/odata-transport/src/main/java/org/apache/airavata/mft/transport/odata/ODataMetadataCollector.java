@@ -17,18 +17,10 @@
 
 package org.apache.airavata.mft.transport.odata;
 
-import org.apache.airavata.mft.common.AuthToken;
-import org.apache.airavata.mft.core.DirectoryResourceMetadata;
-import org.apache.airavata.mft.core.FileResourceMetadata;
+import org.apache.airavata.mft.agent.stub.*;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.credential.stubs.odata.ODataSecret;
-import org.apache.airavata.mft.credential.stubs.odata.ODataSecretGetRequest;
-import org.apache.airavata.mft.resource.client.StorageServiceClient;
-import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.odata.storage.ODataStorage;
-import org.apache.airavata.mft.resource.stubs.odata.storage.ODataStorageGetRequest;
-import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.apache.http.HttpEntity;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -55,18 +47,12 @@ import java.util.Optional;
 public class ODataMetadataCollector implements MetadataCollector {
 
     private static final Logger logger = LoggerFactory.getLogger(ODataMetadataCollector.class);
-
-    private String resourceServiceHost;
-    private int resourceServicePort;
-    private String secretServiceHost;
-    private int secretServicePort;
-
+    private ODataStorage oDataStorage;
+    private ODataSecret oDataSecret;
     @Override
-    public void init(String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) {
-        this.resourceServiceHost = resourceServiceHost;
-        this.resourceServicePort = resourceServicePort;
-        this.secretServiceHost = secretServiceHost;
-        this.secretServicePort = secretServicePort;
+    public void init(StorageWrapper storage, SecretWrapper secret) {
+        oDataStorage = storage.getOdata();
+        oDataSecret = secret.getOdata();
     }
 
     private CloseableHttpClient getHttpClient(ODataSecret oDataSecret) {
@@ -79,45 +65,27 @@ public class ODataMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourcePath, String storageId,
-                                                        String credentialToken) throws Exception {
-        return findFileResourceMetadata(authZToken, resourcePath, storageId, credentialToken)
-                .orElseThrow(() -> new Exception("Could not find a file resource entry for resource path " + resourcePath));
-    }
-
-
-    @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String resourcePath,
-                                                                  String storageId, String credentialToken) throws Exception {
-        throw new UnsupportedOperationException("OData does not have directory structures");
+    public ResourceMetadata getResourceMetadata(String resourcePath) throws Exception {
+        ResourceMetadata.Builder resourceBuilder = ResourceMetadata.newBuilder();
+        Optional<FileMetadata> fileResourceMetadata = findFileResourceMetadata(resourcePath);
+        if (fileResourceMetadata.isPresent()) {
+            resourceBuilder.setFile(fileResourceMetadata.get());
+        } else {
+            resourceBuilder.setError(MetadataFetchError.NOT_FOUND);
+        }
+        return resourceBuilder.build();
     }
 
     @Override
-    public Boolean isAvailable(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
-        return findFileResourceMetadata(authZToken, resourcePath, storageId, credentialToken).isPresent();
+    public Boolean isAvailable(String resourcePath) throws Exception {
+        return findFileResourceMetadata(resourcePath).isPresent();
     }
 
-    private Optional<FileResourceMetadata> findFileResourceMetadata(AuthToken authZToken, String resourcePath,
-                                                                    String storageId, String credentialToken) throws Exception {
-
-        ODataStorage odataStorage;
-        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
-                .buildClient(resourceServiceHost, resourceServicePort)) {
-
-            odataStorage = storageServiceClient.odata()
-                    .getODataStorage(ODataStorageGetRequest.newBuilder().setStorageId(storageId).build());
-        }
-
-        ODataSecret oDataSecret;
-        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
-                secretServiceHost, secretServicePort)) {
-            oDataSecret = secretClient.odata().getODataSecret(
-                    ODataSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
-        }
+    private Optional<FileMetadata> findFileResourceMetadata(String resourcePath) throws Exception {
 
         try (CloseableHttpClient httpClient = getHttpClient(oDataSecret)) {
 
-            HttpGet httpGet = new HttpGet(odataStorage.getBaseUrl() +
+            HttpGet httpGet = new HttpGet(oDataStorage.getBaseUrl() +
                     "/Products('" + resourcePath +"')");
 
             try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
@@ -133,7 +101,7 @@ public class ODataMetadataCollector implements MetadataCollector {
         }
     }
 
-    private Optional<FileResourceMetadata> parseXML(String xmlBody) {
+    private Optional<FileMetadata> parseXML(String xmlBody) {
 
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -147,7 +115,7 @@ public class ODataMetadataCollector implements MetadataCollector {
 
             if (properties.getLength() == 1) {
 
-                FileResourceMetadata.Builder builder = FileResourceMetadata.Builder.newBuilder();
+                FileMetadata.Builder builder = FileMetadata.newBuilder();
 
                 Node propertyNode = properties.item(0);
                 NodeList childNodes = propertyNode.getChildNodes();
@@ -155,26 +123,26 @@ public class ODataMetadataCollector implements MetadataCollector {
                     Node item = childNodes.item(i);
                     switch (item.getNodeName()) {
                         case "d:ContentLength":
-                            builder.withResourceSize(Long.parseLong(item.getTextContent()));
+                            builder.setResourceSize(Long.parseLong(item.getTextContent()));
                             break;
                         case "d:CreationDate":
-                            builder.withCreatedTime(Instant.parse(item.getTextContent() + "Z").toEpochMilli());
+                            builder.setCreatedTime(Instant.parse(item.getTextContent() + "Z").toEpochMilli());
                             break;
                         case "d:ModificationDate":
-                            builder.withUpdateTime(Instant.parse(item.getTextContent() + "Z").toEpochMilli());
+                            builder.setUpdateTime(Instant.parse(item.getTextContent() + "Z").toEpochMilli());
                             break;
                         case "d:Name":
-                            builder.withFriendlyName(item.getTextContent());
+                            builder.setFriendlyName(item.getTextContent());
                             break;
                         case "d:Id":
-                            builder.withResourcePath(item.getTextContent());
+                            builder.setResourcePath(item.getTextContent());
                             break;
                         case "d:Checksum":
                             NodeList checksumNodes = item.getChildNodes();
                             for (int j = 0; j < checksumNodes.getLength(); j++) {
                                 Node item1 = checksumNodes.item(j);
                                 if (item1.getNodeName().equals("d:Value")) {
-                                    builder.withMd5sum(item1.getTextContent());
+                                    builder.setMd5Sum(item1.getTextContent());
                                 }
                             }
                             break;

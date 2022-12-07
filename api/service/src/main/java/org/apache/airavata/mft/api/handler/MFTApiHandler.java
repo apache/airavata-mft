@@ -27,11 +27,9 @@ import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCResponse;
+import org.apache.airavata.mft.agent.stub.DirectoryMetadata;
+import org.apache.airavata.mft.agent.stub.FileMetadata;
 import org.apache.airavata.mft.api.service.*;
-import org.apache.airavata.mft.core.DirectoryResourceMetadata;
-import org.apache.airavata.mft.core.FileResourceMetadata;
-import org.apache.airavata.mft.core.MetadataCollectorResolver;
-import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.commons.lang3.tuple.Pair;
 import org.dozer.DozerBeanMapper;
 import org.lognet.springboot.grpc.GRpcService;
@@ -278,7 +276,7 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
 
             switch (rpcResponse.getResponseStatus()) {
                 case SUCCESS:
-                    FileResourceMetadata fileResourceMetadata = jsonMapper.readValue(rpcResponse.getResponseAsStr(), FileResourceMetadata.class);
+                    FileMetadata fileResourceMetadata = jsonMapper.readValue(rpcResponse.getResponseAsStr(), FileMetadata.class);
                     FileMetadataResponse.Builder responseBuilder = FileMetadataResponse.newBuilder();
                     dozerBeanMapper.map(fileResourceMetadata, responseBuilder);
                     responseObserver.onNext(responseBuilder.build());
@@ -328,18 +326,18 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
 
             switch (rpcResponse.getResponseStatus()) {
                 case SUCCESS:
-                    DirectoryResourceMetadata dirResourceMetadata = jsonMapper.readValue(rpcResponse.getResponseAsStr(), DirectoryResourceMetadata.class);
+                    DirectoryMetadata dirResourceMetadata = jsonMapper.readValue(rpcResponse.getResponseAsStr(), DirectoryMetadata.class);
                     DirectoryMetadataResponse.Builder responseBuilder = DirectoryMetadataResponse.newBuilder();
                     dozerBeanMapper.map(dirResourceMetadata, responseBuilder);
 
                     // As dozer mapper can't map collections in protobuf, do it manually for directories and files
-                    for (DirectoryResourceMetadata dm : dirResourceMetadata.getDirectories()) {
+                    for (DirectoryMetadata dm : dirResourceMetadata.getDirectoriesList()) {
                         DirectoryMetadataResponse.Builder db = DirectoryMetadataResponse.newBuilder();
                         dozerBeanMapper.map(dm, db);
                         responseBuilder.addDirectories(db);
                     }
 
-                    for (FileResourceMetadata fm : dirResourceMetadata.getFiles()) {
+                    for (FileMetadata fm : dirResourceMetadata.getFilesList()) {
                         FileMetadataResponse.Builder fb = FileMetadataResponse.newBuilder();
                         dozerBeanMapper.map(fm, fb);
                         responseBuilder.addFiles(fb);

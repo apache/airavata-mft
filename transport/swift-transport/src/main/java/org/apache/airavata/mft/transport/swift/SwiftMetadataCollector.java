@@ -17,41 +17,29 @@
 
 package org.apache.airavata.mft.transport.swift;
 
-import org.apache.airavata.mft.common.AuthToken;
-import org.apache.airavata.mft.core.DirectoryResourceMetadata;
-import org.apache.airavata.mft.core.FileResourceMetadata;
+import org.apache.airavata.mft.agent.stub.*;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.credential.stubs.swift.SwiftSecret;
-import org.apache.airavata.mft.credential.stubs.swift.SwiftSecretGetRequest;
-import org.apache.airavata.mft.resource.client.StorageServiceClient;
-import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorage;
-import org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorageGetRequest;
-import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.jclouds.ContextBuilder;
 import org.jclouds.openstack.keystone.auth.config.CredentialTypes;
 import org.jclouds.openstack.keystone.config.KeystoneProperties;
 import org.jclouds.openstack.swift.v1.SwiftApi;
+import org.jclouds.openstack.swift.v1.domain.ObjectList;
 import org.jclouds.openstack.swift.v1.domain.SwiftObject;
 import org.jclouds.openstack.swift.v1.features.ObjectApi;
 
 import java.util.Properties;
 
 public class SwiftMetadataCollector implements MetadataCollector {
-
-    private String resourceServiceHost;
-    private int resourceServicePort;
-    private String secretServiceHost;
-    private int secretServicePort;
     boolean initialized = false;
+    private SwiftStorage swiftStorage;
+    private SwiftSecret swiftSecret;
 
     @Override
-    public void init(String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) {
-        this.resourceServiceHost = resourceServiceHost;
-        this.resourceServicePort = resourceServicePort;
-        this.secretServiceHost = secretServiceHost;
-        this.secretServicePort = secretServicePort;
+    public void init(StorageWrapper storage, SecretWrapper secret) {
+        this.swiftStorage = storage.getSwift();
+        this.swiftSecret = secret.getSwift();
         this.initialized = true;
     }
 
@@ -91,60 +79,50 @@ public class SwiftMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
+    public ResourceMetadata getResourceMetadata(String resourcePath) throws Exception {
         checkInitialized();
-
-        SwiftStorage swiftStorage;
-        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
-                .buildClient(resourceServiceHost, resourceServicePort)) {
-
-            swiftStorage = storageServiceClient.swift()
-                    .getSwiftStorage(SwiftStorageGetRequest.newBuilder().setStorageId(storageId).build());
-        }
-
-        SwiftSecret swiftSecret;
-        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
-                secretServiceHost, secretServicePort)) {
-            swiftSecret = secretClient.swift().getSwiftSecret(SwiftSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
-        }
 
         SwiftApi swiftApi = getSwiftApi(swiftStorage, swiftSecret);
 
         ObjectApi objectApi = swiftApi.getObjectApi(swiftStorage.getRegion(), swiftStorage.getContainer());
 
-        SwiftObject swiftObject = objectApi.get(resourcePath);
+        ResourceMetadata.Builder resourceBuilder = ResourceMetadata.newBuilder();
+        if ("".equals(resourcePath)) {
+            DirectoryMetadata.Builder rootDirBuilder = DirectoryMetadata.newBuilder();
 
-        FileResourceMetadata metadata = new FileResourceMetadata();
-        metadata.setResourceSize(swiftObject.getPayload().getContentMetadata().getContentLength());
-        metadata.setMd5sum(swiftObject.getETag());
-        metadata.setUpdateTime(swiftObject.getLastModified().getTime());
-        metadata.setCreatedTime(swiftObject.getLastModified().getTime());
-        return metadata;
+            ObjectList objectList = objectApi.list();
+            objectList.forEach(swiftObject -> {
+                FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
+                fileBuilder.setFriendlyName(swiftObject.getName());
+                fileBuilder.setResourcePath(swiftObject.getName());
+                fileBuilder.setCreatedTime(swiftObject.getLastModified().getTime());
+                fileBuilder.setUpdateTime(swiftObject.getLastModified().getTime());
+                fileBuilder.setResourceSize(swiftObject.getPayload().getContentMetadata().getContentLength());
+                rootDirBuilder.addFiles(fileBuilder);
+            });
+            resourceBuilder.setDirectory(rootDirBuilder);
+        } else {
+            SwiftObject swiftObject = objectApi.get(resourcePath);
+
+            if (swiftObject == null) {
+                resourceBuilder.setError(MetadataFetchError.NOT_FOUND);
+                return resourceBuilder.build();
+            }
+
+            FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
+            fileBuilder.setFriendlyName(swiftObject.getName());
+            fileBuilder.setResourcePath(swiftObject.getName());
+            fileBuilder.setCreatedTime(swiftObject.getLastModified().getTime());
+            fileBuilder.setUpdateTime(swiftObject.getLastModified().getTime());
+            fileBuilder.setResourceSize(swiftObject.getPayload().getContentMetadata().getContentLength());
+            resourceBuilder.setFile(fileBuilder);
+        }
+        return resourceBuilder.build();
     }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String resourcePath,
-                                                                  String storageId, String credentialToken) throws Exception {
-        throw new UnsupportedOperationException("Method not implemented");
-    }
-
-    @Override
-    public Boolean isAvailable(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
+    public Boolean isAvailable(String resourcePath) throws Exception {
         checkInitialized();
-
-        SwiftStorage swiftStorage;
-        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
-                .buildClient(resourceServiceHost, resourceServicePort)) {
-
-            swiftStorage = storageServiceClient.swift()
-                    .getSwiftStorage(SwiftStorageGetRequest.newBuilder().setStorageId(storageId).build());
-        }
-
-        SwiftSecret swiftSecret;
-        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
-                secretServiceHost, secretServicePort)) {
-            swiftSecret = secretClient.swift().getSwiftSecret(SwiftSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
-        }
 
         SwiftApi swiftApi = getSwiftApi(swiftStorage, swiftSecret);
 

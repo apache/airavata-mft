@@ -17,45 +17,29 @@
 
 package org.apache.airavata.mft.transport.azure;
 
+import com.azure.core.http.rest.PagedIterable;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.models.BlobItemProperties;
 import com.azure.storage.blob.models.BlobProperties;
-import org.apache.airavata.mft.common.AuthToken;
-import org.apache.airavata.mft.core.DirectoryResourceMetadata;
-import org.apache.airavata.mft.core.FileResourceMetadata;
-import org.apache.airavata.mft.core.ResourceTypes;
+import org.apache.airavata.mft.agent.stub.*;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.credential.stubs.azure.AzureSecret;
-import org.apache.airavata.mft.credential.stubs.azure.AzureSecretGetRequest;
-import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.client.StorageServiceClient;
-import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage;
-import org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageGetRequest;
-import org.apache.airavata.mft.resource.stubs.common.FileResource;
-import org.apache.airavata.mft.resource.stubs.common.GenericResource;
-import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
-import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageGetRequest;
-import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
 public class AzureMetadataCollector implements MetadataCollector {
 
-    private String resourceServiceHost;
-    private int resourceServicePort;
-    private String secretServiceHost;
-    private int secretServicePort;
     boolean initialized = false;
 
+    private AzureStorage azureStorage;
+    private AzureSecret azureSecret;
     @Override
-    public void init( String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) {
-        this.resourceServiceHost = resourceServiceHost;
-        this.resourceServicePort = resourceServicePort;
-        this.secretServiceHost = secretServiceHost;
-        this.secretServicePort = secretServicePort;
+    public void init(StorageWrapper storage, SecretWrapper secret) {
+        this.azureStorage = storage.getAzure();
+        this.azureSecret = secret.getAzure();
         this.initialized = true;
     }
 
@@ -66,84 +50,79 @@ public class AzureMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourcePath,
-                                                        String storageId, String credentialToken) throws Exception {
+    public ResourceMetadata getResourceMetadata(String resourcePath) throws Exception {
         checkInitialized();
 
-        if (!isAvailable(authZToken, resourcePath, storageId, credentialToken)) {
-            throw new Exception("Azure blob can not find for resource path " + resourcePath);
-        }
-
-        AzureStorage azureStorage;
-        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
-                .buildClient(resourceServiceHost, resourceServicePort)) {
-
-            azureStorage = storageServiceClient.azure()
-                    .getAzureStorage(AzureStorageGetRequest.newBuilder().setStorageId(storageId).build());
-        }
-
-        AzureSecret azureSecret;
-        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
-                secretServiceHost, secretServicePort)) {
-            azureSecret = secretClient.azure().getAzureSecret(AzureSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
-
+        // Azure does not have a concept called hierarchical containers. So we assume that there are no containers inside
+        // the given container
+        ResourceMetadata.Builder metadataBuilder = ResourceMetadata.newBuilder();
+        if (!isAvailable(resourcePath)) {
+            metadataBuilder.setError(MetadataFetchError.NOT_FOUND);
+            return metadataBuilder.build();
         }
 
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(azureSecret.getConnectionString()).buildClient();
 
-        BlobClient blobClient = blobServiceClient.getBlobContainerClient(azureStorage.getContainer())
-                                                .getBlobClient(resourcePath);
+        BlobContainerClient blobContainerClient = blobServiceClient.getBlobContainerClient(azureStorage.getContainer());
 
-        BlobProperties properties = blobClient.getBlockBlobClient().getProperties();
-        FileResourceMetadata metadata = new FileResourceMetadata();
-        metadata.setResourceSize(properties.getBlobSize());
-        metadata.setCreatedTime(properties.getCreationTime().toEpochSecond());
-        metadata.setUpdateTime(properties.getCreationTime().toEpochSecond());
+        if (resourcePath.isEmpty()) { // List the container
+            PagedIterable<BlobItem> blobItems = blobContainerClient.listBlobs();
+            DirectoryMetadata.Builder directoryBuilder = DirectoryMetadata.newBuilder();
+            blobItems.forEach(blobItem -> {
+                FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
+                BlobItemProperties properties = blobItem.getProperties();
 
-        byte[] contentMd5 = properties.getContentMd5();
-        StringBuilder md5sb = new StringBuilder();
-        for (byte aByte : contentMd5) {
-            md5sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
+                fileBuilder.setResourceSize(properties.getContentLength());
+                fileBuilder.setCreatedTime(properties.getCreationTime().toEpochSecond());
+                fileBuilder.setUpdateTime(properties.getCreationTime().toEpochSecond());
+                fileBuilder.setFriendlyName(blobItem.getName());
+                fileBuilder.setResourcePath(blobItem.getName());
+                byte[] contentMd5 = properties.getContentMd5();
+                StringBuilder md5sb = new StringBuilder();
+                for (byte aByte : contentMd5) {
+                    md5sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
+                }
+                fileBuilder.setMd5Sum(md5sb.toString());
+                directoryBuilder.addFiles(fileBuilder);
+            });
+            metadataBuilder.setDirectory(directoryBuilder);
+
+        } else { // If resource is a file
+
+            BlobClient blobClient = blobContainerClient.getBlobClient(resourcePath);
+            FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
+            BlobProperties properties = blobClient.getProperties();
+
+            fileBuilder.setResourceSize(properties.getBlobSize());
+            fileBuilder.setCreatedTime(properties.getCreationTime().toEpochSecond());
+            fileBuilder.setUpdateTime(properties.getCreationTime().toEpochSecond());
+            fileBuilder.setFriendlyName(blobClient.getBlobName());
+            fileBuilder.setResourcePath(resourcePath);
+            byte[] contentMd5 = properties.getContentMd5();
+            StringBuilder md5sb = new StringBuilder();
+            for (byte aByte : contentMd5) {
+                md5sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
+            }
+            fileBuilder.setMd5Sum(md5sb.toString());
+            metadataBuilder.setFile(fileBuilder);
         }
 
-        metadata.setMd5sum(md5sb.toString());
-
-        return metadata;
+        return metadataBuilder.build();
     }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
-        throw new UnsupportedOperationException("Method not implemented");
-    }
-
-
-    @Override
-    public Boolean isAvailable(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
+    public Boolean isAvailable(String resourcePath) throws Exception {
         checkInitialized();
 
-        AzureStorage storage;
-        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
-                .buildClient(resourceServiceHost, resourceServicePort)) {
-
-            storage = storageServiceClient.azure()
-                    .getAzureStorage(AzureStorageGetRequest.newBuilder().setStorageId(storageId).build());
-        }
-
-        AzureSecret azureSecret;
-        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
-                secretServiceHost, secretServicePort)) {
-            azureSecret = secretClient.azure().getAzureSecret(AzureSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
-
-        }
-
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(azureSecret.getConnectionString()).buildClient();
-        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(storage.getContainer());
+        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(azureStorage.getContainer());
         boolean containerExists = containerClient.exists();
         if (!containerExists) {
             return false;
         }
+        if (resourcePath.isEmpty()) {
+            return true;
+        }
         return containerClient.getBlobClient(resourcePath).exists();
     }
-
-
 }

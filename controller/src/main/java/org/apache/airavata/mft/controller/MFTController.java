@@ -23,10 +23,12 @@ import com.google.protobuf.util.JsonFormat;
 import com.orbitz.consul.cache.ConsulCache;
 import com.orbitz.consul.cache.KVCache;
 import com.orbitz.consul.model.kv.Value;
+import org.apache.airavata.mft.admin.ControllerRequestBuilder;
 import org.apache.airavata.mft.admin.MFTConsulClient;
 import org.apache.airavata.mft.admin.MFTConsulClientException;
 import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferState;
+import org.apache.airavata.mft.agent.stub.AgentTransferRequest;
 import org.apache.airavata.mft.api.service.TransferApiRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +67,9 @@ public class MFTController implements CommandLineRunner {
     private ScheduledExecutorService pendingMonitor;
 
     @Autowired
+    private ControllerRequestBuilder controllerRequestBuilder;
+
+    @Autowired
     private MFTConsulClient mftConsulClient;
 
     private ObjectMapper jsonMapper = new ObjectMapper();
@@ -100,15 +105,14 @@ public class MFTController implements CommandLineRunner {
         // Due to bug in consul https://github.com/hashicorp/consul/issues/571
         ConsulCache.Listener<String, Value> messageCacheListener = newValues -> newValues.forEach((key, value) -> {
             String transferId = key.substring(key.lastIndexOf("/") + 1);
-            Optional<String> decodedValue = value.getValueAsString();
+            Optional<byte[]> decodedValue = value.getValueAsBytes();
             decodedValue.ifPresent(v -> {
                 logger.info("Received transfer request : {} with id {}", v, transferId);
-
 
                 TransferApiRequest transferRequest;
                 try {
                     TransferApiRequest.Builder builder = TransferApiRequest.newBuilder();
-                    JsonFormat.parser().merge(value.getValueAsString().get(), builder);
+                    builder.mergeFrom(v);
                     transferRequest = builder.build();
                 } catch (IOException e) {
                     logger.error("Failed to parse the transfer request {}", v, e);
@@ -188,9 +192,9 @@ public class MFTController implements CommandLineRunner {
 
                                 if (!scheduledSession.equals(sessionId)) {
                                     logger.info("Old transfer session found. Re scheduling to agent {}", agentId);
-                                    TransferApiRequest.Builder builder = TransferApiRequest.newBuilder();
-                                    JsonFormat.parser().merge(v.getValueAsString().get(), builder);
-                                    mftConsulClient.commandTransferToAgent(agentId, scheduledTransfer, builder.build());
+                                    AgentTransferRequest transferRequest = AgentTransferRequest
+                                            .newBuilder().mergeFrom(v.getValueAsBytes().get()).build();
+                                    mftConsulClient.commandTransferToAgent(agentId, scheduledTransfer, transferRequest);
 
                                     // Delete the key as it is already processed
                                     mftConsulClient.getKvClient().deleteKey(v.getKey());
@@ -308,7 +312,10 @@ public class MFTController implements CommandLineRunner {
 
                     if (agent.isPresent()) {
                         logger.info("Found agent {} to initiate the transfer {}", agent, transferId);
-                        mftConsulClient.commandTransferToAgent(agent.get(), transferId, transferRequest);
+
+                        AgentTransferRequest agentTransferRequest = controllerRequestBuilder.createAgentTransferRequest(transferRequest);
+
+                        mftConsulClient.commandTransferToAgent(agent.get(), transferId, agentTransferRequest);
                         markAsProcessed(transferId, transferRequest);
                         mftConsulClient.getKvClient().deleteKey(value.getKey());
                         logger.info("Marked transfer {} as processed", transferId);
