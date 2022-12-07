@@ -17,7 +17,9 @@
 
 package org.apache.airavata.mft.core.api;
 
-import org.apache.airavata.mft.common.AuthToken;
+import org.apache.airavata.mft.agent.stub.ResourceMetadata;
+import org.apache.airavata.mft.agent.stub.SecretWrapper;
+import org.apache.airavata.mft.agent.stub.StorageWrapper;
 import org.apache.airavata.mft.core.DirectoryResourceMetadata;
 import org.apache.airavata.mft.core.FileResourceMetadata;
 
@@ -26,50 +28,27 @@ public interface MetadataCollector {
     /**
      * Initializes the {@link MetadataCollector}
      *
-     * @param resourceServiceHost hostname of the resource service
-     * @param resourceServicePort port of the resource service
-     * @param secretServiceHost hostname of the secret service
-     * @param secretServicePort port of the secret service
+     * @param storage
+     * @param secret
      */
-    public void init(String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort);
+    public void init(StorageWrapper storage, SecretWrapper secret);
 
     /**
      * Fetches a metadata of given File Resource
      *
-     *
-     * @param authZToken
      * @param resourcePath path of the resource
-     * @param storageId Storage id
-     * @param credentialToken credential token for the resource
      * @return an object of {@link FileResourceMetadata}
      * @throws Exception if the resource id is not a File Resource type or the resource can't be fetched from the resource service
      */
-    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception;
-
-    /**
-     * Fetches a metadata of given Directory Resource
-     *
-     *
-     * @param authZToken
-     * @param resourcePath path of the resource
-     * @param storageId Storage id
-     * @param credentialToken credential token for the resource
-     * @return an object of {@link DirectoryResourceMetadata}
-     * @throws Exception if the resource id is not a Directory Resource type or the resource can't be fetched from the resource service
-     */
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception;
+    public ResourceMetadata getResourceMetadata(String resourcePath) throws Exception;
 
     /**
      * Check whether the resource is available in the actual storage
      *
-     *
-     * @param authZToken
-     * @param resourcePath      path of the resource
-     * @param storageId Storage id
-     * @param credentialToken credential token for the resource
+     * @param resourcePath path of the resource
      * @return true of the resource is available false otherwise
      * @throws Exception if the resource details can not be fetched from the resource service
      */
-    public Boolean isAvailable(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception;
+    public Boolean isAvailable(String resourcePath) throws Exception;
 
 }

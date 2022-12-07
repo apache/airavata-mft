@@ -18,31 +18,26 @@
 package org.apache.airavata.mft.transport.box;
 
 
-import com.box.sdk.BoxAPIConnection;
-import com.box.sdk.BoxFile;
-import org.apache.airavata.mft.common.AuthToken;
-import org.apache.airavata.mft.core.DirectoryResourceMetadata;
-import org.apache.airavata.mft.core.FileResourceMetadata;
+import com.box.sdk.*;
+import org.apache.airavata.mft.agent.stub.*;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.credential.stubs.box.BoxSecret;
-import org.apache.airavata.mft.credential.stubs.box.BoxSecretGetRequest;
-import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.box.storage.BoxStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BoxMetadataCollector implements MetadataCollector {
 
-    private String resourceServiceHost;
-    private int resourceServicePort;
-    private String secretServiceHost;
-    private int secretServicePort;
+    private static final Logger logger = LoggerFactory.getLogger(BoxMetadataCollector.class);
+
     boolean initialized = false;
 
+    private BoxStorage boxStorage;
+    private BoxSecret boxSecret;
     @Override
-    public void init(String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) {
-        this.resourceServiceHost = resourceServiceHost;
-        this.resourceServicePort = resourceServicePort;
-        this.secretServiceHost = secretServiceHost;
-        this.secretServicePort = secretServicePort;
+    public void init(StorageWrapper storage, SecretWrapper secret) {
+        this.boxStorage = storage.getBox();
+        this.boxSecret = secret.getBox();
         this.initialized = true;
     }
 
@@ -53,53 +48,90 @@ public class BoxMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
+    public ResourceMetadata getResourceMetadata(String resourcePath) throws Exception {
 
         checkInitialized();
 
-        BoxSecret boxSecret;
-        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
-                secretServiceHost, secretServicePort)) {
-            boxSecret = secretClient.box().getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        BoxAPIConnection api = new BoxAPIConnection(boxSecret.getAccessToken());
 
+        BoxFile boxFile = null;
+        BoxFile.Info boxFileInfo = null;
+        BoxFolder boxFolder = null;
+        BoxFolder.Info boxFolderInfo;
+        boolean isFile = true;
+
+        ResourceMetadata.Builder resourceBuilder = ResourceMetadata.newBuilder();
+
+        try { // There is no API to derive the type of entry. So, manually checking the file type is used
+            boxFile = new BoxFile(api, resourcePath);
+            boxFileInfo = boxFile.getInfo();
+        } catch (BoxAPIException e) {
+            try {
+                boxFolder = new BoxFolder(api, resourcePath);
+                boxFolderInfo = boxFolder.getInfo();
+                isFile = false;
+            } catch (BoxAPIException ex) {
+                logger.error("Failed to fetch information of box item {}", resourcePath, ex);
+                resourceBuilder.setError(MetadataFetchError.NOT_FOUND);
+                return resourceBuilder.build();
+            }
         }
 
-        BoxAPIConnection api = new BoxAPIConnection(boxSecret.getAccessToken());
-        BoxFile boxFile = new BoxFile(api, resourcePath);
-        BoxFile.Info boxFileInfo = boxFile.getInfo();
+        if (isFile) {
+            FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
+            fileBuilder.setResourcePath(resourcePath);
+            fileBuilder.setFriendlyName(boxFileInfo.getName());
+            fileBuilder.setResourceSize(boxFileInfo.getSize());
+            fileBuilder.setCreatedTime(boxFileInfo.getCreatedAt().getTime());
+            fileBuilder.setUpdateTime(boxFileInfo.getModifiedAt().getTime());
+            resourceBuilder.setFile(fileBuilder);
+        } else {
+            DirectoryMetadata.Builder dirBuilder = DirectoryMetadata.newBuilder();
 
-        FileResourceMetadata metadata = new FileResourceMetadata();
-        metadata.setResourceSize(boxFileInfo.getSize());
-
-        // TODO
-        // metadata.setMd5sum(boxFileInfo.getSha1());
-
-        metadata.setUpdateTime(boxFileInfo.getModifiedAt().getTime());
-        metadata.setCreatedTime(boxFileInfo.getCreatedAt().getTime());
-
-        return metadata;
+            Iterable<BoxItem.Info> itemsInFolder = boxFolder.getChildren("metadata.global.properties");
+            for (BoxItem.Info itemInfo : itemsInFolder) {
+                if (itemInfo instanceof BoxFile.Info) {
+                    BoxFile.Info fileInfo = (BoxFile.Info) itemInfo;
+                    FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
+                    fileBuilder.setResourcePath(fileInfo.getID());
+                    fileBuilder.setFriendlyName(fileInfo.getName());
+                    fileBuilder.setResourceSize(fileInfo.getSize());
+                    fileBuilder.setCreatedTime(fileInfo.getCreatedAt().getTime());
+                    fileBuilder.setUpdateTime(fileInfo.getModifiedAt().getTime());
+                    dirBuilder.addFiles(fileBuilder);
+                } else if (itemInfo instanceof BoxFolder.Info) {
+                    BoxFolder.Info folderInfo = (BoxFolder.Info) itemInfo;
+                    DirectoryMetadata.Builder subDirBuilder = DirectoryMetadata.newBuilder();
+                    subDirBuilder.setFriendlyName(folderInfo.getName());
+                    subDirBuilder.setResourcePath(folderInfo.getID());
+                    subDirBuilder.setCreatedTime(folderInfo.getCreatedAt().getTime());
+                    subDirBuilder.setUpdateTime(folderInfo.getModifiedAt().getTime());
+                    dirBuilder.addDirectories(subDirBuilder);
+                }
+            }
+            resourceBuilder.setDirectory(dirBuilder);
+        }
+        return resourceBuilder.build();
     }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
-        throw new UnsupportedOperationException("Method not implemented");
-    }
-
-    @Override
-    public Boolean isAvailable(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
+    public Boolean isAvailable(String resourcePath) throws Exception {
 
         checkInitialized();
 
-        BoxSecret boxSecret;
-        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
-                secretServiceHost, secretServicePort)) {
-            boxSecret = secretClient.box().getBoxSecret(BoxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
-
-        }
-
         BoxAPIConnection api = new BoxAPIConnection(boxSecret.getAccessToken());
-        BoxFile boxFile = new BoxFile(api, resourcePath);
-        // TODO Fix this. Need to figur out how to check if the file exists in box
+        try {
+            BoxFile boxFile = new BoxFile(api, resourcePath);
+            boxFile.getInfo();
+        } catch (BoxAPIException e) {
+            try {
+                BoxFolder boxFolder = new BoxFolder(api, resourcePath);
+                boxFolder.getInfo();
+            } catch (BoxAPIException ex) {
+                logger.warn("Failed to fetch information of box item {}", resourcePath, ex);
+                return false;
+            }
+        }
         return true;
     }
 }

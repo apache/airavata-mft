@@ -32,16 +32,34 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>mft-gcp-transport</artifactId>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.google.cloud</groupId>
+				<artifactId>libraries-bom</artifactId>
+				<version>26.1.5</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.airavata</groupId>
 			<artifactId>mft-core</artifactId>
 			<version>0.01-SNAPSHOT</version>
 		</dependency>
+
 		<dependency>
-			<groupId>com.google.apis</groupId>
-			<artifactId>google-api-services-storage</artifactId>
-			<version>v1-rev171-1.25.0</version>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-storage</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-core</artifactId>
+			<version>1.12.152</version>
 		</dependency>
 	</dependencies>
 </project>

@@ -57,29 +57,17 @@ public class ODataIncomingConnector implements IncomingStreamingConnector {
 
     @Override
     public void init(ConnectorConfig cc) throws Exception {
-        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
-                .buildClient(cc.getResourceServiceHost(), cc.getResourceServicePort())) {
-
-            odataStorage = storageServiceClient.odata()
-                    .getODataStorage(ODataStorageGetRequest.newBuilder().setStorageId(cc.getStorageId()).build());
-        }
 
         this.resourcePath = cc.getResourcePath();
+        odataStorage = cc.getStorage().getOdata();
+        ODataSecret oDataSecret = cc.getSecret().getOdata();
 
-        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
-                cc.getSecretServiceHost(), cc.getSecretServicePort())) {
+        CredentialsProvider provider = new BasicCredentialsProvider();
+        UsernamePasswordCredentials credentials
+                = new UsernamePasswordCredentials(oDataSecret.getUserName(), oDataSecret.getPassword());
+        provider.setCredentials(AuthScope.ANY, credentials);
 
-            ODataSecret oDataSecret = secretClient.odata().getODataSecret(ODataSecretGetRequest.newBuilder()
-                    .setAuthzToken(cc.getAuthToken())
-                    .setSecretId(cc.getCredentialToken()).build());
-
-            CredentialsProvider provider = new BasicCredentialsProvider();
-            UsernamePasswordCredentials credentials
-                    = new UsernamePasswordCredentials(oDataSecret.getUserName(), oDataSecret.getPassword());
-            provider.setCredentials(AuthScope.ANY, credentials);
-
-            client = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
-        }
+        client = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
     }
 
     @Override

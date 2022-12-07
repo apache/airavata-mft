@@ -19,30 +19,27 @@ package org.apache.airavata.mft.transport.dropbox;
 
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.FileMetadata;
-import org.apache.airavata.mft.common.AuthToken;
-import org.apache.airavata.mft.core.DirectoryResourceMetadata;
-import org.apache.airavata.mft.core.FileResourceMetadata;
+import com.dropbox.core.v2.files.FolderMetadata;
+import com.dropbox.core.v2.files.ListFolderResult;
+import com.dropbox.core.v2.files.Metadata;
+import org.apache.airavata.mft.agent.stub.*;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecret;
-import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretGetRequest;
-import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorage;
+
+import java.util.List;
 
 public class DropboxMetadataCollector implements MetadataCollector {
 
-    private String resourceServiceHost;
-    private int resourceServicePort;
-    private String secretServiceHost;
-    private int secretServicePort;
+    private DropboxStorage dropboxStorage;
+    private DropboxSecret dropboxSecret;
+
     boolean initialized = false;
 
     @Override
-    public void init(String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) {
-        this.resourceServiceHost = resourceServiceHost;
-        this.resourceServicePort = resourceServicePort;
-        this.secretServiceHost = secretServiceHost;
-        this.secretServicePort = secretServicePort;
+    public void init(StorageWrapper storage, SecretWrapper secret) {
+        this.dropboxStorage = storage.getDropbox();
+        this.dropboxSecret = secret.getDropbox();
         this.initialized = true;
     }
 
@@ -53,45 +50,91 @@ public class DropboxMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourcePath, String storageId,
-                                                        String credentialToken) throws Exception {
+    public ResourceMetadata getResourceMetadata(String resourcePath) throws Exception {
         checkInitialized();
-
-        DropboxSecret dropboxSecret;
-        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
-                secretServiceHost, secretServicePort)) {
-            dropboxSecret = secretClient.dropbox().getDropboxSecret(DropboxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
-
-        }
 
         DbxRequestConfig config = DbxRequestConfig.newBuilder("mftdropbox/v1").build();
         DbxClientV2 dbxClientV2 = new DbxClientV2(config, dropboxSecret.getAccessToken());
 
-        FileResourceMetadata metadata = new FileResourceMetadata();
-        FileMetadata fileMetadata = (FileMetadata) dbxClientV2.files().getMetadata(resourcePath);
-        metadata.setResourceSize(fileMetadata.getSize());
-        metadata.setMd5sum(null);
-        metadata.setUpdateTime(fileMetadata.getServerModified().getTime());
-        metadata.setCreatedTime(fileMetadata.getClientModified().getTime());
-        return metadata;
-    }
+        ResourceMetadata.Builder resourceBuilder = ResourceMetadata.newBuilder();
 
-    @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
-        throw new UnsupportedOperationException("Method not implemented");
-    }
+        if (resourcePath.isEmpty()) { // List root folder
+            ListFolderResult listFolderResult = dbxClientV2.files().listFolder(resourcePath);
+            List<Metadata> entryMetadatas = listFolderResult.getEntries();
+            DirectoryMetadata.Builder directoryBuilder = DirectoryMetadata.newBuilder();
+            directoryBuilder.setResourcePath("");
+            directoryBuilder.setFriendlyName("");
 
+            entryMetadatas.forEach(entryMetadata -> {
+                if (entryMetadata instanceof com.dropbox.core.v2.files.FileMetadata) {
+                    com.dropbox.core.v2.files.FileMetadata fileMetadata = (com.dropbox.core.v2.files.FileMetadata) entryMetadata;
+                    FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
+                    fileBuilder.setResourceSize(fileMetadata.getSize());
+                    fileBuilder.setUpdateTime(fileMetadata.getServerModified().getTime());
+                    fileBuilder.setCreatedTime(fileMetadata.getClientModified().getTime());
+                    fileBuilder.setFriendlyName(fileMetadata.getName());
+                    fileBuilder.setResourcePath(resourcePath);
+                    directoryBuilder.addFiles(fileBuilder);
+                } else if (entryMetadata instanceof FolderMetadata) {
+                    FolderMetadata folderMetadata = (FolderMetadata) entryMetadata;
+                    DirectoryMetadata.Builder subDirBuilder = DirectoryMetadata.newBuilder();
+                    subDirBuilder.setFriendlyName(folderMetadata.getName());
+                    subDirBuilder.setResourcePath(folderMetadata.getName());
+                    directoryBuilder.addDirectories(subDirBuilder);
+                }
+            });
 
-    @Override
-    public Boolean isAvailable(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
-        checkInitialized();
+            resourceBuilder.setDirectory(directoryBuilder);
 
-        DropboxSecret dropboxSecret;
-        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
-                secretServiceHost, secretServicePort)) {
-            dropboxSecret = secretClient.dropbox().getDropboxSecret(DropboxSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
+        } else {
+            Metadata entryMetadata = dbxClientV2.files().getMetadata(resourcePath);
+            if (entryMetadata instanceof com.dropbox.core.v2.files.FileMetadata) {
+                com.dropbox.core.v2.files.FileMetadata fileMetadata = (com.dropbox.core.v2.files.FileMetadata) entryMetadata;
+                FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
+                fileBuilder.setResourceSize(fileMetadata.getSize());
+                fileBuilder.setUpdateTime(fileMetadata.getServerModified().getTime());
+                fileBuilder.setCreatedTime(fileMetadata.getClientModified().getTime());
+                fileBuilder.setFriendlyName(fileMetadata.getName());
+                fileBuilder.setResourcePath(resourcePath);
+                resourceBuilder.setFile(fileBuilder);
+            } else if (entryMetadata instanceof FolderMetadata) {
 
+                ListFolderResult listFolderResult = dbxClientV2.files().listFolder(resourcePath);
+                List<Metadata> entryMetadatas = listFolderResult.getEntries();
+                DirectoryMetadata.Builder directoryBuilder = DirectoryMetadata.newBuilder();
+                directoryBuilder.setResourcePath(resourcePath);
+                directoryBuilder.setFriendlyName(entryMetadata.getName());
+
+                entryMetadatas.forEach(em -> {
+                    if (em instanceof com.dropbox.core.v2.files.FileMetadata) {
+                        com.dropbox.core.v2.files.FileMetadata fileMetadata = (com.dropbox.core.v2.files.FileMetadata) em;
+                        FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
+                        fileBuilder.setResourceSize(fileMetadata.getSize());
+                        fileBuilder.setUpdateTime(fileMetadata.getServerModified().getTime());
+                        fileBuilder.setCreatedTime(fileMetadata.getClientModified().getTime());
+                        fileBuilder.setFriendlyName(fileMetadata.getName());
+                        fileBuilder.setResourcePath(resourcePath + "/" + fileMetadata.getName());
+                        directoryBuilder.addFiles(fileBuilder);
+                    } else if (em instanceof FolderMetadata) {
+                        FolderMetadata folderMetadata = (FolderMetadata) em;
+                        DirectoryMetadata.Builder subDirBuilder = DirectoryMetadata.newBuilder();
+                        subDirBuilder.setFriendlyName(folderMetadata.getName());
+                        subDirBuilder.setResourcePath(resourcePath + "/" + folderMetadata.getName());
+                        directoryBuilder.addDirectories(subDirBuilder);
+                    }
+                    resourceBuilder.setDirectory(directoryBuilder);
+                });
+            } else {
+                resourceBuilder.setError(MetadataFetchError.NOT_FOUND);
+            }
         }
+
+        return resourceBuilder.build();
+    }
+
+    @Override
+    public Boolean isAvailable(String resourcePath) throws Exception {
+        checkInitialized();
 
         DbxRequestConfig config = DbxRequestConfig.newBuilder("mftdropbox/v1").build();
         DbxClientV2 dbxClientV2 = new DbxClientV2(config, dropboxSecret.getAccessToken());

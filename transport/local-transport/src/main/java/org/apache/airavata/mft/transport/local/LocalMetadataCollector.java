@@ -17,17 +17,15 @@
 
 package org.apache.airavata.mft.transport.local;
 
-import org.apache.airavata.mft.common.AuthToken;
-import org.apache.airavata.mft.core.DirectoryResourceMetadata;
-import org.apache.airavata.mft.core.FileResourceMetadata;
+import org.apache.airavata.mft.agent.stub.*;
 import org.apache.airavata.mft.core.api.MetadataCollector;
+import org.apache.airavata.mft.resource.stubs.local.storage.LocalStorage;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.security.MessageDigest;
+import java.util.stream.Stream;
 
 public class LocalMetadataCollector implements MetadataCollector {
 
@@ -37,12 +35,10 @@ public class LocalMetadataCollector implements MetadataCollector {
     private int secretServicePort;
     boolean initialized = false;
 
+    private LocalStorage localStorage;
     @Override
-    public void init(String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) {
-        this.resourceServiceHost = resourceServiceHost;
-        this.resourceServicePort = resourceServicePort;
-        this.secretServiceHost = secretServiceHost;
-        this.secretServicePort = secretServicePort;
+    public void init(StorageWrapper storage, SecretWrapper secret) {
+        this.localStorage = storage.getLocal();
         this.initialized = true;
     }
 
@@ -52,45 +48,72 @@ public class LocalMetadataCollector implements MetadataCollector {
         }
     }
 
-    @Override
-    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
+    private FileMetadata.Builder getFileBuilderFromPath(File file) throws Exception {
 
+        BasicFileAttributes basicFileAttributes = Files.readAttributes(Path.of(file.getPath()), BasicFileAttributes.class);
+        FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
+        fileBuilder.setCreatedTime(basicFileAttributes.creationTime().toMillis());
+        fileBuilder.setUpdateTime(basicFileAttributes.lastModifiedTime().toMillis());
+        fileBuilder.setResourceSize(basicFileAttributes.size());
+
+        fileBuilder.setResourcePath(file.getPath());
+        fileBuilder.setFriendlyName(file.getName());
+
+        return fileBuilder;
+    }
+    @Override
+    public ResourceMetadata getResourceMetadata(String resourcePath) throws Exception {
+
+        checkInitialized();
+
+        ResourceMetadata.Builder resouceBuilder = ResourceMetadata.newBuilder();
         File resourceFile = new File(resourcePath);
         if (resourceFile.exists()) {
 
-            BasicFileAttributes basicFileAttributes = Files.readAttributes(Path.of(resourcePath), BasicFileAttributes.class);
-            FileResourceMetadata metadata = new FileResourceMetadata();
-            metadata.setCreatedTime(basicFileAttributes.creationTime().toMillis());
-            metadata.setUpdateTime(basicFileAttributes.lastModifiedTime().toMillis());
-            metadata.setResourceSize(basicFileAttributes.size());
+            if (resourceFile.isFile()) {
+                FileMetadata.Builder fileBuilder = getFileBuilderFromPath(resourceFile);
+                resouceBuilder.setFile(fileBuilder);
 
-            MessageDigest digest = MessageDigest.getInstance("MD5");
-            FileInputStream fis = new FileInputStream(resourcePath);
-            byte[] byteArray = new byte[1024];
-            int bytesCount = 0;
-            while ((bytesCount = fis.read(byteArray)) != -1) {
-                digest.update(byteArray, 0, bytesCount);
-            };
-            fis.close();
-            byte[] bytes = digest.digest();
-            StringBuilder sb = new StringBuilder();
-            for (byte aByte : bytes) {
-                sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
+            } else if (resourceFile.isDirectory()) {
+                DirectoryMetadata.Builder dirBuilder = DirectoryMetadata.newBuilder();
+                BasicFileAttributes basicFileAttributes = Files.readAttributes(Path.of(resourcePath), BasicFileAttributes.class);
+                dirBuilder.setCreatedTime(basicFileAttributes.creationTime().toMillis());
+                dirBuilder.setUpdateTime(basicFileAttributes.lastModifiedTime().toMillis());
+
+                Stream<Path> fileList = Files.list(resourceFile.toPath());
+                fileList.forEach(p -> {
+                    try {
+                        if (p.toFile().isFile()) {
+
+                            FileMetadata.Builder fileBuilder = getFileBuilderFromPath(resourceFile);
+                            dirBuilder.addFiles(fileBuilder);
+                        } else if (p.toFile().isDirectory()) {
+                            DirectoryMetadata.Builder subDirBuilder = DirectoryMetadata.newBuilder();
+                            BasicFileAttributes bfa = Files.readAttributes(p, BasicFileAttributes.class);
+                            subDirBuilder.setCreatedTime(bfa.creationTime().toMillis());
+                            subDirBuilder.setUpdateTime(bfa.lastModifiedTime().toMillis());
+                            dirBuilder.addDirectories(subDirBuilder);
+                        }
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                });
+
+                resouceBuilder.setDirectory(dirBuilder);
+            } else {
+                resouceBuilder.setError(MetadataFetchError.UNRECOGNIZED);
             }
-            metadata.setMd5sum(sb.toString());
-
-            return metadata;
         } else {
-            throw new Exception("Resource with path " + resourcePath +  " does not exist");
+            resouceBuilder.setError(MetadataFetchError.NOT_FOUND);
         }
+
+        return resouceBuilder.build();
     }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
-        throw new UnsupportedOperationException("Method not implemented");    }
+    public Boolean isAvailable(String resourcePath) throws Exception {
 
-    @Override
-    public Boolean isAvailable(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
+        checkInitialized();
         return new File(resourcePath).exists();
     }
 }

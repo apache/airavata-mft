@@ -57,23 +57,8 @@ public final class SCPOutgoingConnector implements OutgoingStreamingConnector {
     public void init(ConnectorConfig cc) throws Exception {
 
         this.cc = cc;
-        SCPStorage scpStorage;
-        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
-                .buildClient(cc.getResourceServiceHost(), cc.getResourceServicePort())) {
-            scpStorage = storageServiceClient.scp()
-                    .getSCPStorage(SCPStorageGetRequest.newBuilder().setStorageId(cc.getStorageId()).build());
-
-        }
-
-        SCPSecret scpSecret;
-
-        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
-                cc.getSecretServiceHost(), cc.getSecretServicePort())) {
-
-            scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder()
-                    .setAuthzToken(cc.getAuthToken())
-                    .setSecretId(cc.getCredentialToken()).build());
-        }
+        SCPStorage scpStorage = cc.getStorage().getScp();
+        SCPSecret scpSecret = cc.getSecret().getScp();
 
         logger.info("Creating a ssh session for {}@{}:{}", scpSecret.getUser(), scpStorage.getHost(), scpStorage.getPort());
 
@@ -98,7 +83,7 @@ public final class SCPOutgoingConnector implements OutgoingStreamingConnector {
     @Override
     public OutputStream fetchOutputStream() throws Exception {
 
-        return fetchOutputStreamJCraft(escapeSpecialChars(cc.getResourcePath()), cc.getMetadata().getResourceSize());
+        return fetchOutputStreamJCraft(escapeSpecialChars(cc.getResourcePath()), cc.getMetadata().getFile().getResourceSize());
     }
 
     public OutputStream fetchOutputStreamJCraft(String resourcePath, long fileSize) throws Exception {
