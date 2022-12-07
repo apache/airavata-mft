@@ -44,8 +44,15 @@ public class GCSAddSubCommand implements Callable<Integer>
     @CommandLine.Option( names = {"-s", "--storageId"}, description = "Storage ID" )
     private String storageId;
 
-    @CommandLine.Option( names = {"-c", "--credentials"}, description = "Credentials" )
-    private String credentials;
+    @CommandLine.Option( names = {"-pid", "--projectId"}, description = "Project Id", required = true )
+    private String projectId;
+
+    @CommandLine.Option( names = {"-p", "--privateKey"}, description = "Private Key", required = true )
+    private String privateKey;
+
+    @CommandLine.Option( names = {"-c", "--clientEmail"}, description = "Client Email", required = true )
+    private String clientEmail;
+
 
 
     @Override
@@ -57,7 +64,9 @@ public class GCSAddSubCommand implements Callable<Integer>
 
         GCSSecret gcsSecret = mftApiClient.getSecretServiceClient().gcs().
                 createGCSSecret( GCSSecretCreateRequest.newBuilder().
-                        setCredentialsJson( credentials ).
+                        setProjectId( projectId ).
+                        setPrivateKey( privateKey ).
+                        setClientEmail( clientEmail ).
                         setAuthzToken( authToken ).build() );
 
         System.out.println( "Created the gcs secret " + gcsSecret.getSecretId() );
