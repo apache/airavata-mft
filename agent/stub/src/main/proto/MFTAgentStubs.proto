@@ -20,26 +20,26 @@ syntax = "proto3";
 option java_multiple_files = true;
 package org.apache.airavata.mft.agent.stub;
 
-import "AzureStorage.proto";
-import "BoxStorage.proto";
-import "DropboxStorage.proto";
-import "FTPStorage.proto";
-import "GCSStorage.proto";
-import "LocalStorage.proto";
-import "ODataStorage.proto";
-import "S3Storage.proto";
-import "SCPStorage.proto";
-import "SwiftStorage.proto";
+import "azure/AzureStorage.proto";
+import "box/BoxStorage.proto";
+import "dropbox/DropboxStorage.proto";
+import "ftp/FTPStorage.proto";
+import "gcs/GCSStorage.proto";
+import "local/LocalStorage.proto";
+import "odata/ODataStorage.proto";
+import "s3/S3Storage.proto";
+import "scp/SCPStorage.proto";
+import "swift/SwiftStorage.proto";
 
-import "AzureCredential.proto";
-import "BoxCredential.proto";
-import "DropboxCredential.proto";
-import "FTPCredential.proto";
-import "GCSCredential.proto";
-import "ODataCredential.proto";
-import "S3Credential.proto";
-import "SCPCredential.proto";
-import "SwiftCredential.proto";
+import "azure/AzureCredential.proto";
+import "box/BoxCredential.proto";
+import "dropbox/DropboxCredential.proto";
+import "ftp/FTPCredential.proto";
+import "gcs/GCSCredential.proto";
+import "odata/ODataCredential.proto";
+import "s3/S3Credential.proto";
+import "scp/SCPCredential.proto";
+import "swift/SwiftCredential.proto";
 
 message StorageWrapper {
     oneof storage {

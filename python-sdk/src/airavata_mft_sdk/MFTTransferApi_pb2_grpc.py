@@ -2,6 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
+import airavata_mft_sdk.MFTAgentStubs_pb2 as MFTAgentStubs__pb2
 import airavata_mft_sdk.MFTTransferApi_pb2 as MFTTransferApi__pb2
 
 
@@ -46,18 +47,13 @@ class MFTTransferServiceStub(object):
                 )
         self.getResourceAvailability = channel.unary_unary(
                 '/org.apache.airavata.mft.api.service.MFTTransferService/getResourceAvailability',
-                request_serializer=MFTTransferApi__pb2.ResourceAvailabilityRequest.SerializeToString,
+                request_serializer=MFTTransferApi__pb2.FetchResourceMetadataRequest.SerializeToString,
                 response_deserializer=MFTTransferApi__pb2.ResourceAvailabilityResponse.FromString,
                 )
-        self.getFileResourceMetadata = channel.unary_unary(
-                '/org.apache.airavata.mft.api.service.MFTTransferService/getFileResourceMetadata',
+        self.resourceMetadata = channel.unary_unary(
+                '/org.apache.airavata.mft.api.service.MFTTransferService/resourceMetadata',
                 request_serializer=MFTTransferApi__pb2.FetchResourceMetadataRequest.SerializeToString,
-                response_deserializer=MFTTransferApi__pb2.FileMetadataResponse.FromString,
-                )
-        self.getDirectoryResourceMetadata = channel.unary_unary(
-                '/org.apache.airavata.mft.api.service.MFTTransferService/getDirectoryResourceMetadata',
-                request_serializer=MFTTransferApi__pb2.FetchResourceMetadataRequest.SerializeToString,
-                response_deserializer=MFTTransferApi__pb2.DirectoryMetadataResponse.FromString,
+                response_deserializer=MFTAgentStubs__pb2.ResourceMetadata.FromString,
                 )
 
 
@@ -106,13 +102,7 @@ class MFTTransferServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def getFileResourceMetadata(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def getDirectoryResourceMetadata(self, request, context):
+    def resourceMetadata(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -153,18 +143,13 @@ def add_MFTTransferServiceServicer_to_server(servicer, server):
             ),
             'getResourceAvailability': grpc.unary_unary_rpc_method_handler(
                     servicer.getResourceAvailability,
-                    request_deserializer=MFTTransferApi__pb2.ResourceAvailabilityRequest.FromString,
+                    request_deserializer=MFTTransferApi__pb2.FetchResourceMetadataRequest.FromString,
                     response_serializer=MFTTransferApi__pb2.ResourceAvailabilityResponse.SerializeToString,
             ),
-            'getFileResourceMetadata': grpc.unary_unary_rpc_method_handler(
-                    servicer.getFileResourceMetadata,
+            'resourceMetadata': grpc.unary_unary_rpc_method_handler(
+                    servicer.resourceMetadata,
                     request_deserializer=MFTTransferApi__pb2.FetchResourceMetadataRequest.FromString,
-                    response_serializer=MFTTransferApi__pb2.FileMetadataResponse.SerializeToString,
-            ),
-            'getDirectoryResourceMetadata': grpc.unary_unary_rpc_method_handler(
-                    servicer.getDirectoryResourceMetadata,
-                    request_deserializer=MFTTransferApi__pb2.FetchResourceMetadataRequest.FromString,
-                    response_serializer=MFTTransferApi__pb2.DirectoryMetadataResponse.SerializeToString,
+                    response_serializer=MFTAgentStubs__pb2.ResourceMetadata.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -290,13 +275,13 @@ class MFTTransferService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.api.service.MFTTransferService/getResourceAvailability',
-            MFTTransferApi__pb2.ResourceAvailabilityRequest.SerializeToString,
+            MFTTransferApi__pb2.FetchResourceMetadataRequest.SerializeToString,
             MFTTransferApi__pb2.ResourceAvailabilityResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def getFileResourceMetadata(request,
+    def resourceMetadata(request,
             target,
             options=(),
             channel_credentials=None,
@@ -306,25 +291,8 @@ class MFTTransferService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.api.service.MFTTransferService/getFileResourceMetadata',
+        return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.api.service.MFTTransferService/resourceMetadata',
             MFTTransferApi__pb2.FetchResourceMetadataRequest.SerializeToString,
-            MFTTransferApi__pb2.FileMetadataResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def getDirectoryResourceMetadata(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.api.service.MFTTransferService/getDirectoryResourceMetadata',
-            MFTTransferApi__pb2.FetchResourceMetadataRequest.SerializeToString,
-            MFTTransferApi__pb2.DirectoryMetadataResponse.FromString,
+            MFTAgentStubs__pb2.ResourceMetadata.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

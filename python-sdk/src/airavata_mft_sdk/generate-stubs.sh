@@ -13,9 +13,11 @@ touch $SECRET_DIR/__init__.py
 touch $COMMON_DIR/__init__.py
 touch $COMMON_DIR/__init__.py
 
+echo "Building Common Stubs........."
 python3 -m grpc_tools.protoc --proto_path=../../../common/mft-common-proto/src/main/proto/ \
           ../../../common/mft-common-proto/src/main/proto/CredCommon.proto --python_out=$COMMON_DIR --grpc_python_out=$COMMON_DIR
 
+echo "Building Resource Stubs........."
 python3 -m grpc_tools.protoc --proto_path=../../../services/resource-service/stub/src/main/proto \
           --proto_path=../../../common/mft-common-proto/src/main/proto/ \
           --proto_path=. \
@@ -44,7 +46,7 @@ python3 -m grpc_tools.protoc --proto_path=../../../services/resource-service/stu
           ../../../services/resource-service/stub/src/main/proto/common/StorageCommon.proto \
           --python_out=$RESOURCE_DIR --grpc_python_out=$RESOURCE_DIR
 
-
+echo "Building Secret Stubs........."
 python3 -m grpc_tools.protoc --proto_path=../../../services/secret-service/stub/src/main/proto \
           --proto_path=../../../common/mft-common-proto/src/main/proto/ \
           --proto_path=. \
@@ -68,8 +70,21 @@ python3 -m grpc_tools.protoc --proto_path=../../../services/secret-service/stub/
           ../../../services/secret-service/stub/src/main/proto/odata/ODataSecretService.proto \
           --python_out=$SECRET_DIR --grpc_python_out=$SECRET_DIR
 
+echo "Building Agent Stubs........."
+python3 -m grpc_tools.protoc --proto_path=../../../agent/stub/src/main/proto/ \
+          --proto_path=../../../common/mft-common-proto/src/main/proto/ \
+          --proto_path=../../../services/resource-service/stub/src/main/proto \
+          --proto_path=../../../services/secret-service/stub/src/main/proto \
+          --proto_path=. \
+          ../../../agent/stub/src/main/proto/MFTAgentStubs.proto --python_out=. --grpc_python_out=.
+
+echo "Building API Stubs........."
+
 python3 -m grpc_tools.protoc --proto_path=../../../api/stub/src/main/proto \
           --proto_path=../../../common/mft-common-proto/src/main/proto/ \
+          --proto_path=../../../services/resource-service/stub/src/main/proto \
+          --proto_path=../../../services/secret-service/stub/src/main/proto \
+          --proto_path=../../../agent/stub/src/main/proto/ \
           --proto_path=. \
           ../../../api/stub/src/main/proto/MFTTransferApi.proto \
           --python_out=$TRANSFER_DIR --grpc_python_out=$TRANSFER_DIR
