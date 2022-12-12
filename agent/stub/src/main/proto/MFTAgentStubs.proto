@@ -70,13 +70,6 @@ message SecretWrapper {
     }
 }
 
-message FileResourceMetadataGetRequest {
-    string resourcePath = 1;
-    string storageId = 2;
-    string resourceToken = 3;
-    string mftAuthorizationToken = 4;
-}
-
 message AgentTransferRequest {
     StorageWrapper sourceStorage = 1;
     SecretWrapper sourceSecret = 2;

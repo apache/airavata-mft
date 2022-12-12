@@ -27,8 +27,7 @@ import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCResponse;
-import org.apache.airavata.mft.agent.stub.DirectoryMetadata;
-import org.apache.airavata.mft.agent.stub.FileMetadata;
+import org.apache.airavata.mft.agent.stub.*;
 import org.apache.airavata.mft.api.service.*;
 import org.apache.commons.lang3.tuple.Pair;
 import org.dozer.DozerBeanMapper;
@@ -247,117 +246,75 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
         }
     }
 
-    /**
-     * Fetches metadata for a specified file resource.  This has 2 modes
-     * 1. Fetch the metadata of the exact file pointed in the resourceId. This assumes resourceId is an id of a file resource
-     * 2. Fetch the metadata of a child directory in the parent directory. To do this, childPath should be provided explicitly
-     * and resourceId is the parent resource id. Here resource id should be an id of directory resource
-     */
     @Override
-    public void getFileResourceMetadata(FetchResourceMetadataRequest request, StreamObserver<FileMetadataResponse> responseObserver) {
-
+    public void getResourceAvailability(FetchResourceMetadataRequest request, StreamObserver<ResourceAvailabilityResponse> responseObserver) {
+        GetResourceMetadataRequest directRequest = request.getDirectRequest();
         try {
-
-            logger.info("Calling get file resource metadata for resource path {}", request.getResourcePath());
-
-            String targetAgent = derriveTargetAgent(request.getTargetAgentId());
-
+            String targetAgent = derriveTargetAgent("");
             SyncRPCRequest.SyncRPCRequestBuilder requestBuilder = SyncRPCRequest.SyncRPCRequestBuilder.builder()
                     .withAgentId(targetAgent)
                     .withMessageId(UUID.randomUUID().toString())
-                    .withParameter("resourcePath", request.getResourcePath())
-                    .withParameter("storageId", request.getStorageId())
-                    .withParameter("resourceToken", request.getResourceToken())
-                    .withParameter("mftAuthorizationToken", JsonFormat.printer().print(request.getMftAuthorizationToken()));
+                    .withParameter("request", JsonFormat.printer().print(directRequest));
 
-            requestBuilder.withMethod("getFileResourceMetadata");
+            requestBuilder.withMethod("getResourceAvailability");
 
             SyncRPCResponse rpcResponse = agentRPCClient.sendSyncRequest(requestBuilder.build());
 
             switch (rpcResponse.getResponseStatus()) {
                 case SUCCESS:
-                    FileMetadata fileResourceMetadata = jsonMapper.readValue(rpcResponse.getResponseAsStr(), FileMetadata.class);
-                    FileMetadataResponse.Builder responseBuilder = FileMetadataResponse.newBuilder();
-                    dozerBeanMapper.map(fileResourceMetadata, responseBuilder);
-                    responseObserver.onNext(responseBuilder.build());
+                    Boolean resourceAvailable = jsonMapper.readValue(rpcResponse.getResponseAsStr(), Boolean.class);
+                    responseObserver.onNext(ResourceAvailabilityResponse.newBuilder().setAvailable(resourceAvailable).build());
                     responseObserver.onCompleted();
                     return;
                 case FAIL:
-                    logger.error("Errored while processing the fetch file metadata response for resource path {}. Error msg : {}",
-                            request.getResourcePath(), rpcResponse.getErrorAsStr());
+                    logger.error("Errored while processing the fetch metadata response for resource path {}. Error msg : {}",
+                            directRequest.getResourcePath(), rpcResponse.getErrorAsStr());
                     responseObserver.onError(Status.INTERNAL
                             .withDescription("Errored while processing the the fetch file metadata response. Error msg : " +
                                     rpcResponse.getErrorAsStr())
                             .asException());
             }
         } catch (Exception e) {
-            logger.error("Error while fetching resource metadata for file resource " + request.getResourcePath(), e);
+            logger.error("Error while fetching resource metadata for resource path " + directRequest.getResourcePath(), e);
             responseObserver.onError(Status.INTERNAL
                     .withDescription("Failed to fetch file resource metadata. " + e.getMessage())
                     .asException());
         }
     }
 
-    /**
-     * Fetches metadata for a specified directory resource. This method assumes that the resourceId is an id of
-     * a directory resource. This has 2 modes
-     * 1. Fetch the metadata of the exact directory pointed in the resourceId
-     * 2. Fetch the metadata of a child directory in the parent directory. To do this, childPath should be provided explicitly
-     * and resourceId is the parent resource id.
-     */
     @Override
-    public void getDirectoryResourceMetadata(FetchResourceMetadataRequest request, StreamObserver<DirectoryMetadataResponse> responseObserver) {
+    public void resourceMetadata(FetchResourceMetadataRequest request, StreamObserver<ResourceMetadata> responseObserver) {
+
+        GetResourceMetadataRequest directRequest = request.getDirectRequest();
         try {
-
-            logger.info("Calling get directory metadata for resource path {}", request.getResourcePath());
-            String targetAgent = derriveTargetAgent(request.getTargetAgentId());
-
+            String targetAgent = derriveTargetAgent("");
             SyncRPCRequest.SyncRPCRequestBuilder requestBuilder = SyncRPCRequest.SyncRPCRequestBuilder.builder()
                     .withAgentId(targetAgent)
                     .withMessageId(UUID.randomUUID().toString())
-                    .withParameter("resourcePath", request.getResourcePath())
-                    .withParameter("storageId", request.getStorageId())
-                    .withParameter("resourceToken", request.getResourceToken())
-                    .withParameter("mftAuthorizationToken", JsonFormat.printer().print(request.getMftAuthorizationToken()));
+                    .withParameter("request", JsonFormat.printer().print(directRequest));
 
-            requestBuilder.withMethod("getDirectoryResourceMetadata");
+            requestBuilder.withMethod("getResourceMetadata");
 
             SyncRPCResponse rpcResponse = agentRPCClient.sendSyncRequest(requestBuilder.build());
 
             switch (rpcResponse.getResponseStatus()) {
                 case SUCCESS:
-                    DirectoryMetadata dirResourceMetadata = jsonMapper.readValue(rpcResponse.getResponseAsStr(), DirectoryMetadata.class);
-                    DirectoryMetadataResponse.Builder responseBuilder = DirectoryMetadataResponse.newBuilder();
-                    dozerBeanMapper.map(dirResourceMetadata, responseBuilder);
-
-                    // As dozer mapper can't map collections in protobuf, do it manually for directories and files
-                    for (DirectoryMetadata dm : dirResourceMetadata.getDirectoriesList()) {
-                        DirectoryMetadataResponse.Builder db = DirectoryMetadataResponse.newBuilder();
-                        dozerBeanMapper.map(dm, db);
-                        responseBuilder.addDirectories(db);
-                    }
-
-                    for (FileMetadata fm : dirResourceMetadata.getFilesList()) {
-                        FileMetadataResponse.Builder fb = FileMetadataResponse.newBuilder();
-                        dozerBeanMapper.map(fm, fb);
-                        responseBuilder.addFiles(fb);
-                    }
-
-                    responseObserver.onNext(responseBuilder.build());
+                    ResourceMetadata.Builder resourceMetadataBuilder = jsonMapper.readValue(rpcResponse.getResponseAsStr(), ResourceMetadata.Builder.class);
+                    responseObserver.onNext(resourceMetadataBuilder.build());
                     responseObserver.onCompleted();
                     return;
                 case FAIL:
-                    logger.error("Errored while processing the fetch directory metadata response for resource path {}. Error msg : {}",
-                            request.getResourcePath(), rpcResponse.getErrorAsStr());
+                    logger.error("Errored while processing the fetch metadata response for resource path {}. Error msg : {}",
+                            directRequest.getResourcePath(), rpcResponse.getErrorAsStr());
                     responseObserver.onError(Status.INTERNAL
-                            .withDescription("Errored while processing the the fetch directory metadata response. Error msg : " +
+                            .withDescription("Errored while processing the the fetch file metadata response. Error msg : " +
                                     rpcResponse.getErrorAsStr())
                             .asException());
             }
         } catch (Exception e) {
-            logger.error("Error while fetching directory resource metadata for resource path {}", request.getResourcePath(), e);
+            logger.error("Error while fetching resource metadata for resource path " + directRequest.getResourcePath(), e);
             responseObserver.onError(Status.INTERNAL
-                    .withDescription("Failed to fetch directory resource metadata. " + e.getMessage())
+                    .withDescription("Failed to fetch file resource metadata. " + e.getMessage())
                     .asException());
         }
     }

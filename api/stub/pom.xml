@@ -38,6 +38,11 @@
             <artifactId>mft-common-proto</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
+            <artifactId>mft-agent-stub</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <extensions>
@@ -58,6 +63,26 @@
                     <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.0.1:exe:${os.detected.classifier}</pluginArtifact>
                     <additionalProtoPathElements>
                         <additionalProtoPathElement>../../common/mft-common-proto/src/main/proto</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/azure</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/box</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/dropbox</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/ftp</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/gcs</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/local</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/odata</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/s3</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/scp</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/swift</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/azure</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/box</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/dropbox</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/ftp</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/gcs</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/odata</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/s3</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/scp</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/swift</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../agent/stub/src/main/proto</additionalProtoPathElement>
                     </additionalProtoPathElements>
                 </configuration>
                 <executions>
