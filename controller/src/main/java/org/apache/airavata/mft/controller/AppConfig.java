@@ -17,7 +17,12 @@
 
 package org.apache.airavata.mft.controller;
 
+import org.apache.airavata.mft.admin.ControllerRequestBuilder;
 import org.apache.airavata.mft.admin.MFTConsulClient;
+import org.apache.airavata.mft.resource.client.StorageServiceClient;
+import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
+import org.apache.airavata.mft.secret.client.SecretServiceClient;
+import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -29,6 +34,32 @@ public class AppConfig {
 
     @org.springframework.beans.factory.annotation.Value("${consul.port}")
     Integer consulPort;
+
+    @org.springframework.beans.factory.annotation.Value("${resource.service.host}")
+    private String resourceServiceHost;
+
+    @org.springframework.beans.factory.annotation.Value("${resource.service.port}")
+    private int resourceServicePort;
+
+    @org.springframework.beans.factory.annotation.Value("${secret.service.host}")
+    private String secretServiceHost;
+
+    @org.springframework.beans.factory.annotation.Value("${secret.service.port}")
+    private int secretServicePort;
+    @Bean
+    public StorageServiceClient storageServiceClient() {
+        return StorageServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+    }
+
+    @Bean
+    public SecretServiceClient secretServiceClient() {
+        return SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+    }
+
+    @Bean
+    public ControllerRequestBuilder controllerRequestBuilder() {
+        return new ControllerRequestBuilder();
+    }
 
     @Bean
     public MFTConsulClient mftConsulClient() {

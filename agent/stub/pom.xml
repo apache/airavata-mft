@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>mft-agent</artifactId>
+        <groupId>org.apache.airavata</groupId>
+        <version>0.01-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>mft-agent-stub</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
+            <artifactId>mft-resource-service-stub</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
+            <artifactId>mft-secret-service-stub</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>${os.maven.plugin}</version>
+            </extension>
+        </extensions>
+        <plugins>
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <version>${protobuf.maven.plugin}</version>
+                <configuration>
+                    <protocArtifact>com.google.protobuf:protoc:3.0.2:exe:${os.detected.classifier}</protocArtifact>
+                    <pluginId>grpc-java</pluginId>
+                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.0.1:exe:${os.detected.classifier}</pluginArtifact>
+                    <additionalProtoPathElements>
+                        <additionalProtoPathElement>../../common/mft-common-proto/src/main/proto</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/azure</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/box</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/dropbox</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/ftp</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/gcs</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/local</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/odata</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/s3</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/scp</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/swift</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/azure</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/box</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/dropbox</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/ftp</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/gcs</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/odata</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/s3</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/scp</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/swift</additionalProtoPathElement>
+                    </additionalProtoPathElements>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>compile-custom</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+</project>

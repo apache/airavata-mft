@@ -4,6 +4,7 @@ option java_multiple_files = true;
 package org.apache.airavata.mft.api.service;
 
 import "CredCommon.proto";
+import "MFTAgentStubs.proto";
 
 message CallbackEndpoint {
     enum CallbackType {
@@ -77,46 +78,22 @@ message TransferStateApiResponse {
     string description = 4;
 }
 
-message ResourceAvailabilityRequest {
-    string storageId = 1;
-    string resourcePath = 2;
-    string resourceToken = 4;
-    org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 7;
-}
-
 message ResourceAvailabilityResponse {
     bool available = 1;
 }
 
-message FileMetadataResponse {
-    string friendlyName = 1;
-    int64 resourceSize = 2;
-    int64 createdTime = 3;
-    int64 updateTime = 4;
-    string md5sum = 5;
-    string resourcePath = 6;
-    string parentResourceId = 7;
-    string parentResourceType = 8;
-}
-
-message DirectoryMetadataResponse {
-    string friendlyName = 1;
-    int64 createdTime = 2;
-    int64 updateTime = 3;
-    string resourcePath = 4;
-    string parentResourceId = 5;
-    string parentResourceType = 6;
-    repeated DirectoryMetadataResponse directories = 7;
-    repeated FileMetadataResponse files = 8;
-    bool lazyInitialized = 9;
+message GetResourceMetadataFromIDsRequest {
+    string resourcePath = 1;
+    string storageId = 2;
+    string secretId = 3;
 }
 
 message FetchResourceMetadataRequest {
-    string resourcePath = 1;
-    string resourceToken = 4;
-    string storageId = 5;
-    string targetAgentId = 7;
-    org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 9;
+    oneof request {
+        org.apache.airavata.mft.agent.stub.GetResourceMetadataRequest directRequest = 1;
+        GetResourceMetadataFromIDsRequest idRequest = 2;
+    }
+    org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 3;
 }
 
 service  MFTTransferService {
@@ -133,9 +110,8 @@ service  MFTTransferService {
 
     rpc getTransferState(TransferStateApiRequest) returns (TransferStateApiResponse);
 
-    rpc getResourceAvailability(ResourceAvailabilityRequest) returns (ResourceAvailabilityResponse);
+    rpc getResourceAvailability(FetchResourceMetadataRequest) returns (ResourceAvailabilityResponse);
 
-    rpc getFileResourceMetadata(FetchResourceMetadataRequest) returns (FileMetadataResponse);
+    rpc resourceMetadata(FetchResourceMetadataRequest) returns (org.apache.airavata.mft.agent.stub.ResourceMetadata);
 
-    rpc getDirectoryResourceMetadata(FetchResourceMetadataRequest) returns (DirectoryMetadataResponse);
 }

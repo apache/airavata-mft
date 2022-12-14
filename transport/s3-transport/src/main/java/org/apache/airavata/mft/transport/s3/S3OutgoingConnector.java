@@ -43,37 +43,24 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
 
         this.resourcePath = cc.getResourcePath();
 
-        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
-                .buildClient(cc.getResourceServiceHost(), cc.getResourceServicePort())) {
+        s3Storage = cc.getStorage().getS3();
 
-            s3Storage = storageServiceClient.s3()
-                    .getS3Storage(S3StorageGetRequest.newBuilder().setStorageId(cc.getStorageId()).build());
+        S3Secret s3Secret = cc.getSecret().getS3();
+
+        AWSCredentials awsCreds;
+        if (s3Secret.getSessionToken() == null || s3Secret.getSessionToken().equals("")) {
+            awsCreds = new BasicAWSCredentials(s3Secret.getAccessKey(), s3Secret.getSecretKey());
+        } else {
+            awsCreds = new BasicSessionCredentials(s3Secret.getAccessKey(),
+                    s3Secret.getSecretKey(),
+                    s3Secret.getSessionToken());
         }
 
-        S3Secret s3Secret;
-
-        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
-                cc.getSecretServiceHost(), cc.getSecretServicePort())) {
-
-            s3Secret = secretClient.s3().getS3Secret(S3SecretGetRequest.newBuilder()
-                    .setAuthzToken(cc.getAuthToken())
-                    .setSecretId(cc.getCredentialToken()).build());
-
-            AWSCredentials awsCreds;
-            if (s3Secret.getSessionToken() == null || s3Secret.getSessionToken().equals("")) {
-                awsCreds = new BasicAWSCredentials(s3Secret.getAccessKey(), s3Secret.getSecretKey());
-            } else {
-                awsCreds = new BasicSessionCredentials(s3Secret.getAccessKey(),
-                        s3Secret.getSecretKey(),
-                        s3Secret.getSessionToken());
-            }
-
-            s3Client = AmazonS3ClientBuilder.standard()
-                    .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
-                            s3Storage.getEndpoint(), s3Storage.getRegion()))
-                    .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                    .build();
-        }
+        s3Client = AmazonS3ClientBuilder.standard()
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
+                        s3Storage.getEndpoint(), s3Storage.getRegion()))
+                .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
+                .build();
 
         InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(s3Storage.getBucketName(),
                 resourcePath);

@@ -53,56 +53,41 @@ public class SwiftIncomingConnector implements IncomingChunkedConnector {
     @Override
     public void init(ConnectorConfig cc) throws Exception {
 
-        SwiftStorage swiftStorage;
+        SwiftStorage swiftStorage = cc.getStorage().getSwift();
 
-        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
-                .buildClient(cc.getResourceServiceHost(), cc.getResourceServicePort())) {
+        this.resourcePath = cc.getResourcePath();
 
-            swiftStorage = storageServiceClient.swift()
-                    .getSwiftStorage(SwiftStorageGetRequest.newBuilder().setStorageId(cc.getStorageId()).build());
+        SwiftSecret swiftSecret = cc.getSecret().getSwift();
+
+        String provider = "openstack-swift";
+
+        Properties overrides = new Properties();
+        overrides.put(KeystoneProperties.KEYSTONE_VERSION, swiftStorage.getKeystoneVersion() + "");
+
+        String identity = null;
+        String credential = null;
+        switch (swiftSecret.getSecretCase()) {
+            case PASSWORDSECRET:
+                identity = swiftSecret.getPasswordSecret().getDomainId() + ":" + swiftSecret.getPasswordSecret().getUserName();
+                credential = swiftSecret.getPasswordSecret().getPassword();
+                overrides.put(KeystoneProperties.SCOPE, "projectId:" + swiftSecret.getPasswordSecret().getProjectId());
+                overrides.put(KeystoneProperties.CREDENTIAL_TYPE, CredentialTypes.PASSWORD_CREDENTIALS);
+                break;
+            case AUTHCREDENTIALSECRET:
+                identity = swiftSecret.getAuthCredentialSecret().getCredentialId();
+                credential = swiftSecret.getAuthCredentialSecret().getCredentialSecret();
+                overrides.put(KeystoneProperties.CREDENTIAL_TYPE, CredentialTypes.API_ACCESS_KEY_CREDENTIALS);
+                break;
         }
 
-        this.resourcePath = resourcePath;
+        swiftApi = ContextBuilder.newBuilder(provider)
+                .endpoint(swiftStorage.getEndpoint())
+                .credentials(identity, credential)
+                .overrides(overrides)
+                .buildApi(SwiftApi.class);
 
-        SwiftSecret swiftSecret;
+        objectApi = swiftApi.getObjectApi(swiftStorage.getRegion(), swiftStorage.getContainer());
 
-        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
-                cc.getSecretServiceHost(), cc.getSecretServicePort())) {
-
-            swiftSecret = secretClient.swift().getSwiftSecret(SwiftSecretGetRequest.newBuilder()
-                    .setAuthzToken(cc.getAuthToken())
-                    .setSecretId(cc.getCredentialToken()).build());
-
-            String provider = "openstack-swift";
-
-            Properties overrides = new Properties();
-            overrides.put(KeystoneProperties.KEYSTONE_VERSION, swiftStorage.getKeystoneVersion() + "");
-
-            String identity = null;
-            String credential = null;
-            switch (swiftSecret.getSecretCase()) {
-                case PASSWORDSECRET:
-                    identity = swiftSecret.getPasswordSecret().getDomainId() + ":" + swiftSecret.getPasswordSecret().getUserName();
-                    credential = swiftSecret.getPasswordSecret().getPassword();
-                    overrides.put(KeystoneProperties.SCOPE, "projectId:" + swiftSecret.getPasswordSecret().getProjectId());
-                    overrides.put(KeystoneProperties.CREDENTIAL_TYPE, CredentialTypes.PASSWORD_CREDENTIALS);
-                    break;
-                case AUTHCREDENTIALSECRET:
-                    identity = swiftSecret.getAuthCredentialSecret().getCredentialId();
-                    credential = swiftSecret.getAuthCredentialSecret().getCredentialSecret();
-                    overrides.put(KeystoneProperties.CREDENTIAL_TYPE, CredentialTypes.API_ACCESS_KEY_CREDENTIALS);
-                    break;
-            }
-
-            swiftApi = ContextBuilder.newBuilder(provider)
-                    .endpoint(swiftStorage.getEndpoint())
-                    .credentials(identity, credential)
-                    .overrides(overrides)
-                    .buildApi(SwiftApi.class);
-
-            objectApi = swiftApi.getObjectApi(swiftStorage.getRegion(), swiftStorage.getContainer());
-
-        }
     }
 
     @Override

@@ -38,6 +38,11 @@
             <artifactId>mft-common-proto</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
+            <artifactId>mft-agent-stub</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <extensions>
@@ -58,6 +63,9 @@
                     <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.0.1:exe:${os.detected.classifier}</pluginArtifact>
                     <additionalProtoPathElements>
                         <additionalProtoPathElement>../../common/mft-common-proto/src/main/proto</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../agent/stub/src/main/proto</additionalProtoPathElement>
                     </additionalProtoPathElements>
                 </configuration>
                 <executions>

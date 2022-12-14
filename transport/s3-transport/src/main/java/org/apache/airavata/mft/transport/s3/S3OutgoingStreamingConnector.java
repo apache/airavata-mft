@@ -62,41 +62,27 @@ public class S3OutgoingStreamingConnector implements OutgoingStreamingConnector 
     @Override
     public void init(ConnectorConfig cc) throws Exception {
 
-        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
-                .buildClient(cc.getResourceServiceHost(), cc.getResourceServicePort())) {
-
-            s3Storage = storageServiceClient.s3()
-                    .getS3Storage(S3StorageGetRequest.newBuilder().setStorageId(cc.getStorageId()).build());
-        }
+        s3Storage = cc.getStorage().getS3();
 
         this.resourcePath = cc.getResourcePath();
 
-        S3Secret s3Secret;
+        S3Secret s3Secret = cc.getSecret().getS3();
 
-        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
-                cc.getSecretServiceHost(), cc.getSecretServicePort())) {
-
-            s3Secret = secretClient.s3().getS3Secret(S3SecretGetRequest.newBuilder()
-                    .setAuthzToken(cc.getAuthToken())
-                    .setSecretId(cc.getCredentialToken()).build());
-
-            AwsCredentials awsCreds;
-            if (s3Secret.getSessionToken() == null || s3Secret.getSessionToken().equals("")) {
-                awsCreds = AwsBasicCredentials.create(s3Secret.getAccessKey(), s3Secret.getSecretKey());
-            } else {
-                awsCreds = AwsSessionCredentials.create(s3Secret.getAccessKey(),
-                        s3Secret.getSecretKey(),
-                        s3Secret.getSessionToken());
-            }
-
-            S3Client s3Client = S3Client.builder()
-                    .region(Region.of(s3Storage.getRegion())).endpointOverride(new URI(s3Storage.getEndpoint()))
-                    .credentialsProvider(() -> awsCreds)
-                    .build();
-
-            this.s3 = AwsS3ClientMultipartUpload.builder().s3(s3Client).build();
-
+        AwsCredentials awsCreds;
+        if (s3Secret.getSessionToken() == null || s3Secret.getSessionToken().equals("")) {
+            awsCreds = AwsBasicCredentials.create(s3Secret.getAccessKey(), s3Secret.getSecretKey());
+        } else {
+            awsCreds = AwsSessionCredentials.create(s3Secret.getAccessKey(),
+                    s3Secret.getSecretKey(),
+                    s3Secret.getSessionToken());
         }
+
+        S3Client s3Client = S3Client.builder()
+                .region(Region.of(s3Storage.getRegion())).endpointOverride(new URI(s3Storage.getEndpoint()))
+                .credentialsProvider(() -> awsCreds)
+                .build();
+
+        this.s3 = AwsS3ClientMultipartUpload.builder().s3(s3Client).build();
     }
 
     @Override

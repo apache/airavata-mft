@@ -17,47 +17,30 @@
 
 package org.apache.airavata.mft.transport.gcp;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.services.storage.Storage;
-import com.google.api.services.storage.StorageScopes;
-import com.google.api.services.storage.model.StorageObject;
-import org.apache.airavata.mft.common.AuthToken;
-import org.apache.airavata.mft.core.DirectoryResourceMetadata;
-import org.apache.airavata.mft.core.FileResourceMetadata;
+import com.google.api.gax.paging.Page;
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.Storage;
+import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.cloud.storage.StorageOptions;
+import org.apache.airavata.mft.agent.stub.*;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.credential.stubs.gcs.GCSSecret;
-import org.apache.airavata.mft.credential.stubs.gcs.GCSSecretGetRequest;
-import org.apache.airavata.mft.resource.client.StorageServiceClient;
-import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorage;
-import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageGetRequest;
-import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
-import java.io.ByteArrayInputStream;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Collection;
+import java.security.PrivateKey;
+import java.time.temporal.ChronoField;
 
 public class GCSMetadataCollector implements MetadataCollector {
 
     boolean initialized = false;
-    private String resourceServiceHost;
-    private int resourceServicePort;
-    private String secretServiceHost;
-    private int secretServicePort;
+
+    private GCSStorage gcsStorage;
+    private GCSSecret gcsSecret;
 
     @Override
-    public void init(String resourceServiceHost, int resourceServicePort, String secretServiceHost, int secretServicePort) {
-        this.resourceServiceHost = resourceServiceHost;
-        this.resourceServicePort = resourceServicePort;
-        this.secretServiceHost = secretServiceHost;
-        this.secretServicePort = secretServicePort;
+    public void init(StorageWrapper storage, SecretWrapper secret) {
+        this.gcsStorage = storage.getGcs();
+        this.gcsSecret = secret.getGcs();
         this.initialized = true;
     }
 
@@ -68,79 +51,99 @@ public class GCSMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public FileResourceMetadata getFileResourceMetadata(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
+    public ResourceMetadata getResourceMetadata(String resourcePath) throws Exception {
         checkInitialized();
 
-        GCSStorage gcsStorage;
-        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
-                .buildClient(resourceServiceHost, resourceServicePort)) {
+        PrivateKey privKey = GCSUtil.getPrivateKey(gcsSecret.getPrivateKey());
 
-            gcsStorage = storageServiceClient.gcs()
-                    .getGCSStorage(GCSStorageGetRequest.newBuilder().setStorageId(storageId).build());
+        try (Storage storage = StorageOptions.newBuilder().setCredentials(ServiceAccountCredentials.newBuilder()
+                .setProjectId(gcsSecret.getProjectId())
+                .setPrivateKey(privKey)
+                .setClientEmail(gcsSecret.getClientEmail())
+                .build()).build().getService()) {
+
+            Blob blob = storage.get(gcsStorage.getBucketName(),
+                    resourcePath, Storage.BlobGetOption.fields(Storage.BlobField.values()));
+
+
+            ResourceMetadata.Builder resourceBuilder = ResourceMetadata.newBuilder();
+            if (blob != null) {
+                FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
+                fileBuilder.setFriendlyName(blob.getName());
+                fileBuilder.setResourcePath(resourcePath);
+                fileBuilder.setCreatedTime(blob.getCreateTimeOffsetDateTime().getLong(ChronoField.INSTANT_SECONDS));
+                fileBuilder.setUpdateTime(blob.getUpdateTimeOffsetDateTime().getLong(ChronoField.INSTANT_SECONDS));
+                fileBuilder.setResourceSize(blob.getSize());
+                fileBuilder.setMd5Sum(blob.getMd5());
+                resourceBuilder.setFile(fileBuilder);
+            } else {
+                final String dirPath = resourcePath.endsWith("/") ? resourcePath : resourcePath + "/";
+
+                DirectoryMetadata.Builder dirBuilder = DirectoryMetadata.newBuilder();
+
+                try {
+
+                    Page<Blob> blobs = storage.list(gcsStorage.getBucketName(),
+                            Storage.BlobListOption.currentDirectory(),
+                            Storage.BlobListOption.prefix(dirPath));
+                    Iterable<Blob> blobIter = blobs.iterateAll();
+                    blobIter.forEach(b -> {
+                        if (b.isDirectory()) {
+                            DirectoryMetadata.Builder subDirBuilder = DirectoryMetadata.newBuilder();
+                            subDirBuilder.setCreatedTime(b.getCreateTimeOffsetDateTime().getLong(ChronoField.INSTANT_SECONDS));
+                            subDirBuilder.setUpdateTime(b.getUpdateTimeOffsetDateTime().getLong(ChronoField.INSTANT_SECONDS));
+                            dirBuilder.addDirectories(subDirBuilder);
+                        } else {
+                            FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
+                            fileBuilder.setFriendlyName(b.getName());
+                            fileBuilder.setResourcePath(dirPath + b.getName());
+                            fileBuilder.setCreatedTime(b.getCreateTimeOffsetDateTime().getLong(ChronoField.INSTANT_SECONDS));
+                            fileBuilder.setUpdateTime(b.getUpdateTimeOffsetDateTime().getLong(ChronoField.INSTANT_SECONDS));
+                            fileBuilder.setResourceSize(b.getSize());
+                            fileBuilder.setMd5Sum(b.getMd5());
+                            dirBuilder.addFiles(fileBuilder);
+                        }
+                    });
+
+
+                    resourceBuilder.setDirectory(dirBuilder);
+                } catch (Exception e) {
+                    resourceBuilder.setError(MetadataFetchError.NOT_FOUND);
+                }
+            }
+            return resourceBuilder.build();
         }
-
-        GCSSecret gcsSecret;
-        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
-                secretServiceHost, secretServicePort)) {
-            gcsSecret = secretClient.gcs().getGCSSecret(GCSSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
-        }
-
-        HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
-        JsonFactory jsonFactory = new JacksonFactory();
-        String jsonString = gcsSecret.getCredentialsJson();
-        GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8)), transport, jsonFactory);
-        if (credential.createScopedRequired()) {
-            Collection<String> scopes = StorageScopes.all();
-            credential = credential.createScoped(scopes);
-        }
-
-        Storage storage = new Storage.Builder(transport, jsonFactory, credential).build();
-
-        FileResourceMetadata metadata = new FileResourceMetadata();
-        StorageObject gcsMetadata = storage.objects().get(gcsStorage.getBucketName(), resourcePath).execute();
-
-        metadata.setResourceSize(gcsMetadata.getSize().longValue());
-        String md5Sum = String.format("%032x", new BigInteger(1, Base64.getDecoder().decode(gcsMetadata.getMd5Hash())));
-        metadata.setMd5sum(md5Sum);
-        metadata.setUpdateTime(gcsMetadata.getTimeStorageClassUpdated().getValue());
-        metadata.setCreatedTime(gcsMetadata.getTimeCreated().getValue());
-        return metadata;
     }
 
     @Override
-    public DirectoryResourceMetadata getDirectoryResourceMetadata(AuthToken authZToken, String resourcePath,
-                                                                  String storageId, String credentialToken) throws Exception {
-        throw new UnsupportedOperationException("Method not implemented");
-    }
-
-    @Override
-    public Boolean isAvailable(AuthToken authZToken, String resourcePath, String storageId, String credentialToken) throws Exception {
+    public Boolean isAvailable(String resourcePath) throws Exception {
         checkInitialized();
+        PrivateKey privKey = GCSUtil.getPrivateKey(gcsSecret.getPrivateKey());
 
-        GCSStorage gcsStorage;
-        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
-                .buildClient(resourceServiceHost, resourceServicePort)) {
+        try (Storage storage = StorageOptions.newBuilder().setCredentials(ServiceAccountCredentials.newBuilder()
+                .setProjectId(gcsSecret.getProjectId())
+                .setPrivateKey(privKey)
+                .setClientEmail(gcsSecret.getClientEmail())
+                .build()).build().getService()) {
 
-            gcsStorage = storageServiceClient.gcs()
-                    .getGCSStorage(GCSStorageGetRequest.newBuilder().setStorageId(storageId).build());
+            Blob blob = storage.get(gcsStorage.getBucketName(),
+                    resourcePath, Storage.BlobGetOption.fields(Storage.BlobField.values()));
+
+            if (blob != null) {
+                return true;
+            } else {
+                final String dirPath = resourcePath.endsWith("/") ? resourcePath : resourcePath + "/";
+                try {
+
+                    Page<Blob> blobs = storage.list(gcsStorage.getBucketName(),
+                            Storage.BlobListOption.currentDirectory(),
+                            Storage.BlobListOption.prefix(dirPath));
+
+                    return true;
+                } catch (Exception e) {
+                    return false;
+                }
+            }
         }
-
-        GCSSecret gcsSecret;
-        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
-                secretServiceHost, secretServicePort)) {
-            gcsSecret = secretClient.gcs().getGCSSecret(GCSSecretGetRequest.newBuilder().setSecretId(credentialToken).build());
-        }
-
-        HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
-        JsonFactory jsonFactory = new JacksonFactory();
-        String jsonString = gcsSecret.getCredentialsJson();
-        GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8)), transport, jsonFactory);
-        if (credential.createScopedRequired()) {
-            Collection<String> scopes = StorageScopes.all();
-            credential = credential.createScoped(scopes);
-        }
-
-        Storage storage = new Storage.Builder(transport, jsonFactory, credential).build();
-        return !storage.objects().get(gcsStorage.getBucketName(), resourcePath).execute().isEmpty();
     }
 }

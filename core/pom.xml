@@ -44,5 +44,10 @@
             <artifactId>mft-common-proto</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
+            <artifactId>mft-agent-stub</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

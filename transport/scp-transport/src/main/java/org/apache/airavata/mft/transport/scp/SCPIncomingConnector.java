@@ -55,25 +55,11 @@ public final class SCPIncomingConnector implements IncomingStreamingConnector {
     @Override
     public void init(ConnectorConfig cc) throws Exception {
 
-        SCPStorage scpStorage;
-        try (StorageServiceClient storageServiceClient = StorageServiceClientBuilder
-                .buildClient(cc.getResourceServiceHost(), cc.getResourceServicePort())) {
-
-            scpStorage = storageServiceClient.scp()
-                    .getSCPStorage(SCPStorageGetRequest.newBuilder().setStorageId(cc.getStorageId()).build());
-        }
+        SCPStorage scpStorage = cc.getStorage().getScp();
 
         this.resourcePath = cc.getResourcePath();
 
-        SCPSecret scpSecret;
-
-        try (SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(
-                cc.getSecretServiceHost(), cc.getSecretServicePort())) {
-
-            scpSecret = secretClient.scp().getSCPSecret(SCPSecretGetRequest.newBuilder()
-                    .setAuthzToken(cc.getAuthToken())
-                    .setSecretId(cc.getCredentialToken()).build());
-        }
+        SCPSecret scpSecret = cc.getSecret().getScp();
 
         logger.info("Creating a ssh session for {}@{}:{}", scpSecret.getUser(), scpStorage.getHost(), scpStorage.getPort());
 
