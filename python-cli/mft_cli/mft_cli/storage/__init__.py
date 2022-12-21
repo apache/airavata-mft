@@ -1,6 +1,10 @@
 import typer
 from pick import pick
 import mft_cli.storage.s3 as s3
+from airavata_mft_sdk import mft_client
+from airavata_mft_sdk.common import StorageCommon_pb2
+from rich.console import Console
+from rich.table import Table
 
 app = typer.Typer()
 
@@ -15,4 +19,21 @@ def add_storage():
 
 @app.command("list")
 def list_storage():
-    print("Listing storages")
+    client = mft_client.MFTClient()
+    list_req = StorageCommon_pb2.StorageListRequest()
+    list_response = client.common_api.listStorages(list_req)
+
+    console = Console()
+    table = Table(show_header=True, header_style='bold #2070b2')
+
+    table.add_column('Storage Name', justify='left')
+    table.add_column('Type', justify='center')
+    table.add_column('Storage ID', justify='center')
+
+    for storage in list_response.storageList:
+
+        table.add_row('[bold]' + storage.storageName + '[/bold]',
+                      StorageCommon_pb2.StorageType.Name(storage.storageType),
+                      storage.storageId)
+
+    console.print(table)
