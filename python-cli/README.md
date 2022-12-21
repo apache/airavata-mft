@@ -1,6 +1,28 @@
-python3.10 -m venv venv
+### MFT-Cli Build Instructions
+
+Install Poetry
+```
+python3.10 -m venv venv  ## Use python 3.10.6 or higher
 source venv/bin/activate
 pip install poetry
-cd mft-cli
+pip install pick
+```
+
+Load Poetry shell
+```
+cd mft_cli
 poetry shell
+```
+
+Install dependencies
+```
+pip install grpcio==1.46.3
+pip install grpcio-tools==1.46.3
+pip install airavata_mft_sdk==0.0.1-alpha15
+```
+
+Build the binary
+```
 poetry install
+mft-cli
+```

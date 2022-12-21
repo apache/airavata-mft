@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "mft-cli"
+version = "0.1.0"
+description = "Command Line Client for Airavata MFT data transfer framework"
+authors = ["Dimuthu Wannipurage <dimuthu.upeksha2@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.scripts]
+mft-cli = "mft_cli.main:app"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+typer = {extras = ["all"], version = "^0.7.0"}
+pick = {version= "2.2.0"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

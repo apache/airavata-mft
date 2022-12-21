@@ -1,24 +1,11 @@
 import typer
+import mft_cli.storage
 
 app = typer.Typer()
 
-@app.callback()
-def callback():
-    """
-    Awesome Portal Gun
-    """
-
-@app.command()
-def shoot():
-    """
-    Shoot the portal gun
-    """
-    typer.echo("Shooting portal gun")
+storage_app = typer.Typer()
+app.add_typer(mft_cli.storage.app, name="storage")
 
 
-@app.command()
-def load():
-    """
-    Load the portal gun
-    """
-    typer.echo("Loading portal gun")
+if __name__ == "__main__":
+    app()

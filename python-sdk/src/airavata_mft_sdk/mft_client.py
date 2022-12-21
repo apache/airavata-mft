@@ -1,6 +1,5 @@
 import grpc
 import airavata_mft_sdk.MFTTransferApi_pb2_grpc as transfer_grpc
-from airavata_mft_sdk.resource import ResourceService_pb2_grpc
 from airavata_mft_sdk.azure import AzureStorageService_pb2_grpc
 from airavata_mft_sdk.box import BoxStorageService_pb2_grpc
 from airavata_mft_sdk.dropbox import DropboxStorageService_pb2_grpc
@@ -9,7 +8,7 @@ from airavata_mft_sdk.gcs import GCSStorageService_pb2_grpc
 from airavata_mft_sdk.local import LocalStorageService_pb2_grpc
 from airavata_mft_sdk.s3 import S3StorageService_pb2_grpc
 from airavata_mft_sdk.scp import SCPStorageService_pb2_grpc
-from airavata_mft_sdk.resourcesecretmap import StorageSecretMap_pb2_grpc
+from airavata_mft_sdk.common import StorageCommon_pb2_grpc
 
 
 from airavata_mft_sdk.azure import AzureSecretService_pb2_grpc
@@ -40,7 +39,6 @@ class MFTClient:
         if (not resource_service_secured):
             self.resource_channel = grpc.insecure_channel('{}:{}'.format(resource_service_host, resource_service_port))
         # TODO implement secure channel
-        self.resource_api = ResourceService_pb2_grpc.GenericResourceServiceStub(self.resource_channel)
         self.azure_storage_api = AzureStorageService_pb2_grpc.AzureStorageServiceStub(self.resource_channel)
         self.box_storage_api = BoxStorageService_pb2_grpc.BoxStorageServiceStub(self.resource_channel)
         self.dropbox_storage_api = DropboxStorageService_pb2_grpc.DropboxStorageServiceStub(self.resource_channel)
@@ -49,8 +47,7 @@ class MFTClient:
         self.local_storage_api = LocalStorageService_pb2_grpc.LocalStorageServiceStub(self.resource_channel)
         self.s3_storage_api = S3StorageService_pb2_grpc.S3StorageServiceStub(self.resource_channel)
         self.scp_storage_api = SCPStorageService_pb2_grpc.SCPStorageServiceStub(self.resource_channel)
-        self.storage_secret_map_api = StorageSecretMap_pb2_grpc.StorageSecretServiceStub(self.resource_channel)
-
+        self.common_api = StorageCommon_pb2_grpc.StorageCommonServiceStub(self.resource_channel)
 
         if (not secret_service_secured):
             self.secret_channel = grpc.insecure_channel('{}:{}'.format(secret_service_host, secret_service_port))
