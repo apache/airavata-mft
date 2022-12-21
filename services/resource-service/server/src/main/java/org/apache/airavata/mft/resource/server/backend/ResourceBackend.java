@@ -19,7 +19,6 @@ package org.apache.airavata.mft.resource.server.backend;
 
 import org.apache.airavata.mft.resource.stubs.azure.storage.*;
 import org.apache.airavata.mft.resource.stubs.box.storage.*;
-import org.apache.airavata.mft.resource.stubs.common.*;
 import org.apache.airavata.mft.resource.stubs.dropbox.storage.*;
 import org.apache.airavata.mft.resource.stubs.ftp.storage.*;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.*;
@@ -27,10 +26,8 @@ import org.apache.airavata.mft.resource.stubs.local.storage.*;
 import org.apache.airavata.mft.resource.stubs.odata.storage.*;
 import org.apache.airavata.mft.resource.stubs.s3.storage.*;
 import org.apache.airavata.mft.resource.stubs.scp.storage.*;
-import org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeResolveRequest;
-import org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeResolveResponse;
+import org.apache.airavata.mft.resource.stubs.storage.common.*;
 import org.apache.airavata.mft.resource.stubs.swift.storage.*;
-import org.apache.airavata.mft.storage.stubs.storagesecret.*;
 
 import java.util.Optional;
 
@@ -38,18 +35,11 @@ public interface ResourceBackend {
 
     public void init();
     public void destroy();
+    public SecretForStorage getSecretForStorage(SecretForStorageGetRequest request) throws Exception;
+    public SecretForStorage registerSecretForStorage(SecretForStorage request) throws Exception;
+    public boolean deleteSecretForStorage(SecretForStorageDeleteRequest request) throws Exception;
 
-    public Optional<GenericResource> getGenericResource(GenericResourceGetRequest request) throws Exception;
-    public GenericResource createGenericResource(GenericResourceCreateRequest request) throws Exception;
-    public boolean updateGenericResource(GenericResourceUpdateRequest request) throws Exception;
-    public boolean deleteGenericResource(GenericResourceDeleteRequest request) throws Exception;
-
-    public Optional<StorageSecret> getStorageSecret(StorageSecretGetRequest request) throws Exception;
-    public StorageSecret createStorageSecret(StorageSecretCreateRequest request) throws Exception;
-    public boolean updateStorageSecret(StorageSecretUpdateRequest request) throws Exception;
-    public boolean deleteStorageSecret(StorageSecretDeleteRequest request) throws Exception;
-    public Optional<StorageSecret> searchStorageSecret(StorageSecretSearchRequest request) throws Exception;
-
+    public StorageListResponse listStorage(StorageListRequest request) throws Exception;
     public SCPStorageListResponse listSCPStorage(SCPStorageListRequest request) throws Exception;
     public Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request) throws Exception;
     public SCPStorage createSCPStorage(SCPStorageCreateRequest request) throws Exception;

@@ -23,9 +23,9 @@ import org.apache.airavata.mft.credential.stubs.odata.ODataSecret;
 import org.apache.airavata.mft.credential.stubs.odata.ODataSecretCreateRequest;
 import org.apache.airavata.mft.resource.stubs.odata.storage.ODataStorage;
 import org.apache.airavata.mft.resource.stubs.odata.storage.ODataStorageCreateRequest;
-import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecret;
-import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretCreateRequest;
-import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretServiceGrpc;
+import org.apache.airavata.mft.resource.stubs.storage.common.SecretForStorage;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageCommonServiceGrpc;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageType;
 import picocli.CommandLine;
 
 import java.util.concurrent.Callable;
@@ -62,12 +62,12 @@ public class ODataRemoteAddSubCommand implements Callable<Integer> {
 
         System.out.println("Created OData storage " + oDataStorage.getStorageId());
 
-        StorageSecretServiceGrpc.StorageSecretServiceBlockingStub storageSecretClient = mftApiClient.getStorageServiceClient().storageSecret();
+        StorageCommonServiceGrpc.StorageCommonServiceBlockingStub commonStorageClient = mftApiClient.getStorageServiceClient().common();
 
-        StorageSecret storageSecret = storageSecretClient.createStorageSecret(StorageSecretCreateRequest.newBuilder()
+        commonStorageClient.registerSecretForStorage(SecretForStorage.newBuilder()
                 .setStorageId(oDataStorage.getStorageId())
                 .setSecretId(oDataSecret.getSecretId())
-                .setType(StorageSecret.StorageType.ODATA).build());
+                .setStorageType(StorageType.ODATA).build());
 
         System.out.println("Successfully added OData remote endpoint");
 

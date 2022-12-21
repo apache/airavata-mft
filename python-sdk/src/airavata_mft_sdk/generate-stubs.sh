@@ -21,12 +21,10 @@ echo "Building Resource Stubs........."
 python3 -m grpc_tools.protoc --proto_path=../../../services/resource-service/stub/src/main/proto \
           --proto_path=../../../common/mft-common-proto/src/main/proto/ \
           --proto_path=. \
-          ../../../services/resource-service/stub/src/main/proto/resource/ResourceService.proto \
           ../../../services/resource-service/stub/src/main/proto/s3/S3StorageService.proto \
           ../../../services/resource-service/stub/src/main/proto/s3/S3Storage.proto \
           ../../../services/resource-service/stub/src/main/proto/scp/SCPStorage.proto \
           ../../../services/resource-service/stub/src/main/proto/scp/SCPStorageService.proto \
-          ../../../services/resource-service/stub/src/main/proto/resourcesecretmap/StorageSecretMap.proto \
           ../../../services/resource-service/stub/src/main/proto/local/LocalStorageService.proto \
           ../../../services/resource-service/stub/src/main/proto/local/LocalStorage.proto \
           ../../../services/resource-service/stub/src/main/proto/gcs/GCSStorageService.proto \
@@ -96,8 +94,6 @@ touch dropbox/__init__.py
 touch ftp/__init__.py
 touch gcs/__init__.py
 touch local/__init__.py
-touch resource/__init__.py
-touch resourcesecretmap/__init__.py
 touch s3/__init__.py
 touch scp/__init__.py
 touch swift/__init__.py
@@ -105,34 +101,32 @@ touch odata/__init__.py
 touch common/__init__.py
 
 
-sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' azure/*.py
-sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' box/*.py
-sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' dropbox/*.py
-sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' ftp/*.py
-sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' gcs/*.py
-sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' local/*.py
-sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' resource/*.py
-sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' resourcesecretmap/*.py
-sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' s3/*.py
-sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' scp/*.py
-sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' swift/*.py
-sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' odata/*.py
-sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' common/*.py
-sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' *pb2.py
-sed -i 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' *pb2_grpc.py
+sed -i'.bak' -e 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' azure/*.py
+sed -i'.bak' -e 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' box/*.py
+sed -i'.bak' -e 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' dropbox/*.py
+sed -i'.bak' -e 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' ftp/*.py
+sed -i'.bak' -e 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' gcs/*.py
+sed -i'.bak' -e 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' local/*.py
+sed -i'.bak' -e 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' s3/*.py
+sed -i'.bak' -e 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' scp/*.py
+sed -i'.bak' -e 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' swift/*.py
+sed -i'.bak' -e 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' odata/*.py
+sed -i'.bak' -e 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' common/*.py
+sed -i'.bak' -e 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' *pb2.py
+sed -i'.bak' -e 's/from \([^)]*\)pb2/from airavata_mft_sdk.\1pb2/' *pb2_grpc.py
 
-sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' azure/*.py
-sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' box/*.py
-sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' dropbox/*.py
-sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' ftp/*.py
-sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' gcs/*.py
-sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' local/*.py
-sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' resource/*.py
-sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' resourcesecretmap/*.py
-sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' s3/*.py
-sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' scp/*.py
-sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' swift/*.py
-sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' odata/*.py
-sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' common/*.py
-sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' *pb2.py
-sed -i 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' *pb2_grpc.py
+sed -i'.bak' -e 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' azure/*.py
+sed -i'.bak' -e 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' box/*.py
+sed -i'.bak' -e 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' dropbox/*.py
+sed -i'.bak' -e 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' ftp/*.py
+sed -i'.bak' -e 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' gcs/*.py
+sed -i'.bak' -e 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' local/*.py
+sed -i'.bak' -e 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' s3/*.py
+sed -i'.bak' -e 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' scp/*.py
+sed -i'.bak' -e 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' swift/*.py
+sed -i'.bak' -e 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' odata/*.py
+sed -i'.bak' -e 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' common/*.py
+sed -i'.bak' -e 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' *pb2.py
+sed -i'.bak' -e 's/^import \([^)]*\)pb2/import airavata_mft_sdk.\1pb2/' *pb2_grpc.py
+
+find . -name "*.bak" -type f -delete

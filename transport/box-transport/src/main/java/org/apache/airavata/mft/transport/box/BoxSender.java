@@ -25,10 +25,6 @@ import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.box.BoxSecret;
 import org.apache.airavata.mft.credential.stubs.box.BoxSecretGetRequest;
-import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.common.GenericResource;
-import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
@@ -61,6 +57,7 @@ public class BoxSender implements Connector {
     @Override
     public void startStream(AuthToken authToken, String resourceId, String credentialToken, ConnectorContext context) throws Exception {
 
+        /*
         logger.info("Starting Box Sender stream for transfer {}", context.getTransferId());
         logger.debug("Content length for transfer {} {}", context.getTransferId(), context.getMetadata().getResourceSize());
 
@@ -90,6 +87,8 @@ public class BoxSender implements Connector {
 
         logger.info("Completed Box Sender stream for transfer {}", context.getTransferId());
 
+
+         */
     }
 
     @Override

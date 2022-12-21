@@ -26,11 +26,7 @@ import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.azure.AzureSecret;
 import org.apache.airavata.mft.credential.stubs.azure.AzureSecretGetRequest;
-import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage;
-import org.apache.airavata.mft.resource.stubs.common.GenericResource;
-import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
@@ -72,6 +68,7 @@ public class AzureSender implements Connector {
     @Override
     public void startStream(AuthToken authToken, String resourceId, String credentialToken, ConnectorContext context) throws Exception {
         logger.info("Starting Azure send for remote server for transfer {}", context.getTransferId());
+        /*
         checkInitialized();
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
@@ -93,6 +90,8 @@ public class AzureSender implements Connector {
         BlockBlobClient blockBlobClient = containerClient.getBlobClient(resource.getFile().getResourcePath()).getBlockBlobClient();
         blockBlobClient.upload(context.getStreamBuffer().getInputStream(), context.getMetadata().getResourceSize(), true);
         logger.info("Completed Azure send for remote server for transfer {}", context.getTransferId());
+
+         */
     }
 
     @Override

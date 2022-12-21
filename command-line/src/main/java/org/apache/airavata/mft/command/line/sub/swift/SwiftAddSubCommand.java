@@ -5,11 +5,11 @@ import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.credential.stubs.swift.SwiftPasswordSecret;
 import org.apache.airavata.mft.credential.stubs.swift.SwiftSecret;
 import org.apache.airavata.mft.credential.stubs.swift.SwiftSecretCreateRequest;
+import org.apache.airavata.mft.resource.stubs.storage.common.SecretForStorage;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageCommonServiceGrpc;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageType;
 import org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorage;
 import org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorageCreateRequest;
-import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecret;
-import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretCreateRequest;
-import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretServiceGrpc;
 import picocli.CommandLine;
 
 import java.util.concurrent.Callable;
@@ -69,12 +69,11 @@ public class SwiftAddSubCommand implements Callable<Integer> {
 
         System.out.println("Created swift storage " + swiftStorage.getStorageId());
 
-        StorageSecretServiceGrpc.StorageSecretServiceBlockingStub storageSecretClient = mftApiClient.getStorageServiceClient().storageSecret();
-
-        StorageSecret storageSecret = storageSecretClient.createStorageSecret(StorageSecretCreateRequest.newBuilder()
+        StorageCommonServiceGrpc.StorageCommonServiceBlockingStub commonClient = mftApiClient.getStorageServiceClient().common();
+        commonClient.registerSecretForStorage(SecretForStorage.newBuilder()
                 .setStorageId(swiftStorage.getStorageId())
                 .setSecretId(swiftSecret.getSecretId())
-                .setType(StorageSecret.StorageType.SWIFT).build());
+                .setStorageType(StorageType.SWIFT).build());
 
         System.out.println("Successfully added Swift remote endpoint");
 

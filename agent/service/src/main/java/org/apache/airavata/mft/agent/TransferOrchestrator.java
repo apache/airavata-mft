@@ -23,11 +23,9 @@ import org.apache.airavata.mft.agent.stub.ResourceMetadata;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
 import org.apache.airavata.mft.core.api.ConnectorConfig;
 import org.apache.airavata.mft.core.api.MetadataCollector;
-import org.apache.airavata.mft.resource.client.StorageServiceClient;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -63,21 +61,6 @@ public class TransferOrchestrator {
 
     @org.springframework.beans.factory.annotation.Value("${agent.temp.data.dir}")
     private String tempDataDir = "/tmp";
-
-    @org.springframework.beans.factory.annotation.Value("${resource.service.host}")
-    private String resourceServiceHost;
-
-    @org.springframework.beans.factory.annotation.Value("${resource.service.port}")
-    private int resourceServicePort;
-
-    @org.springframework.beans.factory.annotation.Value("${secret.service.host}")
-    private String secretServiceHost;
-
-    @org.springframework.beans.factory.annotation.Value("${secret.service.port}")
-    private int secretServicePort;
-
-    @Autowired
-    private StorageServiceClient storageServiceClient;
 
     @PostConstruct
     public void init() {

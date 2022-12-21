@@ -38,6 +38,9 @@ public class ResolveStorageEntity {
     @Column(name = "STORAGE_TYPE")
     private StorageType storageType;
 
+    @Column(name = "STORAGE_NAME")
+    private String storageName;
+
     public String getStorageId() {
         return storageId;
     }
@@ -52,5 +55,13 @@ public class ResolveStorageEntity {
 
     public void setStorageType(StorageType storageType) {
         this.storageType = storageType;
+    }
+
+    public String getStorageName() {
+        return storageName;
+    }
+
+    public void setStorageName(String storageName) {
+        this.storageName = storageName;
     }
 }

@@ -20,6 +20,8 @@ package org.apache.airavata.mft.resource.server.backend.sql.repository;
 import org.apache.airavata.mft.resource.server.backend.sql.entity.ResolveStorageEntity;
 import org.springframework.data.repository.CrudRepository;
 
+import java.util.Optional;
+
 public interface ResolveStorageRepository extends CrudRepository<ResolveStorageEntity, String> {
-    public ResolveStorageEntity getByStorageId(String storageID);
+    public Optional<ResolveStorageEntity> getByStorageId(String storageID);
 }

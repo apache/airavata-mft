@@ -24,6 +24,7 @@ import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
@@ -76,6 +77,25 @@ public class S3MetadataCollector implements MetadataCollector {
                 .build();
 
         ResourceMetadata.Builder resourceBuilder = ResourceMetadata.newBuilder();
+
+        if (s3Storage.getBucketName().isEmpty() && resourcePath.isEmpty()) {
+            List<Bucket> buckets = s3Client.listBuckets();
+            DirectoryMetadata.Builder parentDir = DirectoryMetadata.newBuilder();
+            parentDir.setResourcePath("");
+            parentDir.setFriendlyName("");
+            buckets.forEach(b -> {
+                DirectoryMetadata.Builder bucketDir = DirectoryMetadata.newBuilder();
+                bucketDir.setFriendlyName(b.getName());
+                bucketDir.setResourcePath(b.getName());
+                bucketDir.setCreatedTime(b.getCreationDate().getTime());
+                bucketDir.setUpdateTime(b.getCreationDate().getTime());
+                parentDir.addDirectories(bucketDir);
+            });
+            resourceBuilder.setDirectory(parentDir);
+
+            return resourceBuilder.build();
+        }
+
 
         String key = s3Client.getObject(s3Storage.getBucketName(), resourcePath).getKey();
 

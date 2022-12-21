@@ -20,11 +20,8 @@ package org.apache.airavata.mft.api.client;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.apache.airavata.mft.api.service.*;
-import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
 import org.apache.airavata.mft.resource.client.StorageServiceClient;
 import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.common.GenericResourceServiceGrpc;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
@@ -37,7 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MFTApiClient implements Closeable {
 
     private ManagedChannel channel;
-    private ResourceServiceClient resourceServiceClient;
     private StorageServiceClient storageServiceClient;
     private SecretServiceClient secretServiceClient;
 
@@ -52,17 +48,12 @@ public class MFTApiClient implements Closeable {
 
     public void init() {
         channel = ManagedChannelBuilder.forAddress(transferServiceHost, transferServicePort).usePlaintext().build();
-        resourceServiceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         storageServiceClient = StorageServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         secretServiceClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
     }
 
     public MFTTransferServiceGrpc.MFTTransferServiceBlockingStub getTransferClient() {
         return MFTTransferServiceGrpc.newBlockingStub(channel);
-    }
-
-    public GenericResourceServiceGrpc.GenericResourceServiceBlockingStub getResourceClient() {
-        return resourceServiceClient.get();
     }
 
     public StorageServiceClient getStorageServiceClient() {

@@ -19,35 +19,19 @@ package org.apache.airavata.mft.agent.rpc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.util.JsonFormat;
-import org.apache.airavata.mft.admin.ControllerRequestBuilder;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCResponse;
-import org.apache.airavata.mft.agent.http.HttpTransferRequestsStore;
 import org.apache.airavata.mft.agent.stub.*;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
 import org.apache.airavata.mft.core.api.MetadataCollector;
-import org.apache.airavata.mft.resource.client.StorageServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
 public class RPCParser {
 
     private static final Logger logger = LoggerFactory.getLogger(RPCParser.class);
-
-    @org.springframework.beans.factory.annotation.Value("${agent.advertised.url}")
-    private String agentAdvertisedUrl;
-
-    @Autowired
-    private HttpTransferRequestsStore httpTransferRequestsStore;
-
-    @Autowired
-    private StorageServiceClient storageServiceClient;
-
-    @Autowired
-    private ControllerRequestBuilder controllerRequestBuilder;
 
     public String resolveRPCRequest(SyncRPCRequest request) throws Exception {
         // TODO implement using the reflection
@@ -59,8 +43,8 @@ public class RPCParser {
                 String requestStr = request.getParameters().get("request");
 
                 GetResourceMetadataRequest.Builder directResourceMetadataReq = GetResourceMetadataRequest.newBuilder();
-                GetResourceMetadataRequest req = directResourceMetadataReq.build();
                 JsonFormat.parser().merge(requestStr, directResourceMetadataReq);
+                GetResourceMetadataRequest req = directResourceMetadataReq.build();
 
                 Optional<MetadataCollector> metadataCollectorOptional = MetadataCollectorResolver.resolveMetadataCollector(req.getStorage().getStorageCase().name());
                 if (metadataCollectorOptional.isPresent()) {

@@ -17,7 +17,6 @@
 
 package org.apache.airavata.mft.api.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.util.JsonFormat;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
@@ -49,8 +48,6 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
 
     @Autowired
     private DozerBeanMapper dozerBeanMapper;
-
-    private ObjectMapper jsonMapper = new ObjectMapper();
 
     @Autowired
     private SyncRPCClient agentRPCClient;
@@ -262,7 +259,7 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
 
             switch (rpcResponse.getResponseStatus()) {
                 case SUCCESS:
-                    Boolean resourceAvailable = jsonMapper.readValue(rpcResponse.getResponseAsStr(), Boolean.class);
+                    boolean resourceAvailable = Boolean.parseBoolean(rpcResponse.getResponseAsStr());
                     responseObserver.onNext(ResourceAvailabilityResponse.newBuilder().setAvailable(resourceAvailable).build());
                     responseObserver.onCompleted();
                     return;
@@ -299,7 +296,8 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
 
             switch (rpcResponse.getResponseStatus()) {
                 case SUCCESS:
-                    ResourceMetadata.Builder resourceMetadataBuilder = jsonMapper.readValue(rpcResponse.getResponseAsStr(), ResourceMetadata.Builder.class);
+                    ResourceMetadata.Builder resourceMetadataBuilder = ResourceMetadata.newBuilder();
+                    JsonFormat.parser().merge(rpcResponse.getResponseAsStr(), resourceMetadataBuilder);
                     responseObserver.onNext(resourceMetadataBuilder.build());
                     responseObserver.onCompleted();
                     return;

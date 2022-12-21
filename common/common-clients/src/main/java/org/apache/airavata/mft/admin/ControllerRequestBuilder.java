@@ -95,7 +95,7 @@ public class ControllerRequestBuilder {
         SecretWrapper.Builder secretBuilder = SecretWrapper.newBuilder();
         
         switch (resolve.getStorageType()) {
-            case "S3":
+            case S3:
                 S3Storage s3Storage = storageCache.containsKey(storageId)? storageCache.get(storageId).getS3():
                         storageServiceClient
                                 .s3()
@@ -110,7 +110,7 @@ public class ControllerRequestBuilder {
                 secretBuilder.setS3(s3Secret);
                 break;
 
-            case "SCP":
+            case SCP:
                 SCPStorage scpStorage = storageCache.containsKey(storageId)? storageCache.get(storageId).getScp():
                         storageServiceClient
                         .scp()
@@ -124,14 +124,14 @@ public class ControllerRequestBuilder {
 
                 secretBuilder.setScp(scpSecret);
                 break;
-            case "LOCAL":
+            case LOCAL:
                 LocalStorage localStorage = storageCache.containsKey(storageId)? storageCache.get(storageId).getLocal():
                         storageServiceClient
                         .local()
                         .getLocalStorage(LocalStorageGetRequest.newBuilder().setStorageId(storageId).build());
                 storageBuilder.setLocal(localStorage);
                 break;
-            case "FTP":
+            case FTP:
                 FTPStorage ftpStorage = storageCache.containsKey(storageId)? storageCache.get(storageId).getFtp():
                         storageServiceClient
                         .ftp()
@@ -145,7 +145,7 @@ public class ControllerRequestBuilder {
 
                 secretBuilder.setFtp(ftpSecret);
                 break;
-            case "BOX":
+            case BOX:
                 BoxStorage boxStorage = storageCache.containsKey(storageId)? storageCache.get(storageId).getBox():
                         storageServiceClient
                         .box()
@@ -159,7 +159,7 @@ public class ControllerRequestBuilder {
 
                 secretBuilder.setBox(boxSecret);
                 break;
-            case "DROPBOX":
+            case DROPBOX:
                 DropboxStorage dropboxStorage = storageCache.containsKey(storageId)? storageCache.get(storageId).getDropbox():
                         storageServiceClient
                         .dropbox()
@@ -174,7 +174,7 @@ public class ControllerRequestBuilder {
                 secretBuilder.setDropbox(dropboxSecret);
                 break;
 
-            case "GCS":
+            case GCS:
                 GCSStorage gcsStorage = storageCache.containsKey(storageId)? storageCache.get(storageId).getGcs():
                         storageServiceClient
                         .gcs()
@@ -189,7 +189,7 @@ public class ControllerRequestBuilder {
                 secretBuilder.setGcs(gcsSecret);
                 break;
 
-            case "AZURE":
+            case AZURE:
                 AzureStorage azureStorage = storageCache.containsKey(storageId)? storageCache.get(storageId).getAzure():
                         storageServiceClient
                         .azure()
@@ -204,7 +204,7 @@ public class ControllerRequestBuilder {
                 secretBuilder.setAzure(azureSecret);
                 break;
 
-            case "SWIFT":
+            case SWIFT:
                 SwiftStorage swiftStorage = storageCache.containsKey(storageId)? storageCache.get(storageId).getSwift():
                         storageServiceClient
                         .swift()
@@ -219,7 +219,7 @@ public class ControllerRequestBuilder {
                 secretBuilder.setSwift(swiftSecret);
                 break;
 
-            case "ODATA":
+            case ODATA:
                     ODataStorage odataStorage = storageCache.containsKey(storageId)? storageCache.get(storageId).getOdata():
                             storageServiceClient
                             .odata()

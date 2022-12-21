@@ -19,12 +19,56 @@ class StorageCommonServiceStub(object):
                 request_serializer=common_dot_StorageCommon__pb2.StorageTypeResolveRequest.SerializeToString,
                 response_deserializer=common_dot_StorageCommon__pb2.StorageTypeResolveResponse.FromString,
                 )
+        self.registerSecretForStorage = channel.unary_unary(
+                '/org.apache.airavata.mft.resource.stubs.storage.common.StorageCommonService/registerSecretForStorage',
+                request_serializer=common_dot_StorageCommon__pb2.SecretForStorage.SerializeToString,
+                response_deserializer=common_dot_StorageCommon__pb2.SecretForStorage.FromString,
+                )
+        self.getSecretForStorage = channel.unary_unary(
+                '/org.apache.airavata.mft.resource.stubs.storage.common.StorageCommonService/getSecretForStorage',
+                request_serializer=common_dot_StorageCommon__pb2.SecretForStorageGetRequest.SerializeToString,
+                response_deserializer=common_dot_StorageCommon__pb2.SecretForStorage.FromString,
+                )
+        self.deleteSecretsForStorage = channel.unary_unary(
+                '/org.apache.airavata.mft.resource.stubs.storage.common.StorageCommonService/deleteSecretsForStorage',
+                request_serializer=common_dot_StorageCommon__pb2.SecretForStorageDeleteRequest.SerializeToString,
+                response_deserializer=common_dot_StorageCommon__pb2.SecretForStorageDeleteResponse.FromString,
+                )
+        self.listStorages = channel.unary_unary(
+                '/org.apache.airavata.mft.resource.stubs.storage.common.StorageCommonService/listStorages',
+                request_serializer=common_dot_StorageCommon__pb2.StorageListRequest.SerializeToString,
+                response_deserializer=common_dot_StorageCommon__pb2.StorageListResponse.FromString,
+                )
 
 
 class StorageCommonServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def resolveStorageType(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def registerSecretForStorage(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def getSecretForStorage(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def deleteSecretsForStorage(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def listStorages(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -37,6 +81,26 @@ def add_StorageCommonServiceServicer_to_server(servicer, server):
                     servicer.resolveStorageType,
                     request_deserializer=common_dot_StorageCommon__pb2.StorageTypeResolveRequest.FromString,
                     response_serializer=common_dot_StorageCommon__pb2.StorageTypeResolveResponse.SerializeToString,
+            ),
+            'registerSecretForStorage': grpc.unary_unary_rpc_method_handler(
+                    servicer.registerSecretForStorage,
+                    request_deserializer=common_dot_StorageCommon__pb2.SecretForStorage.FromString,
+                    response_serializer=common_dot_StorageCommon__pb2.SecretForStorage.SerializeToString,
+            ),
+            'getSecretForStorage': grpc.unary_unary_rpc_method_handler(
+                    servicer.getSecretForStorage,
+                    request_deserializer=common_dot_StorageCommon__pb2.SecretForStorageGetRequest.FromString,
+                    response_serializer=common_dot_StorageCommon__pb2.SecretForStorage.SerializeToString,
+            ),
+            'deleteSecretsForStorage': grpc.unary_unary_rpc_method_handler(
+                    servicer.deleteSecretsForStorage,
+                    request_deserializer=common_dot_StorageCommon__pb2.SecretForStorageDeleteRequest.FromString,
+                    response_serializer=common_dot_StorageCommon__pb2.SecretForStorageDeleteResponse.SerializeToString,
+            ),
+            'listStorages': grpc.unary_unary_rpc_method_handler(
+                    servicer.listStorages,
+                    request_deserializer=common_dot_StorageCommon__pb2.StorageListRequest.FromString,
+                    response_serializer=common_dot_StorageCommon__pb2.StorageListResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -62,5 +126,73 @@ class StorageCommonService(object):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.stubs.storage.common.StorageCommonService/resolveStorageType',
             common_dot_StorageCommon__pb2.StorageTypeResolveRequest.SerializeToString,
             common_dot_StorageCommon__pb2.StorageTypeResolveResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def registerSecretForStorage(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.stubs.storage.common.StorageCommonService/registerSecretForStorage',
+            common_dot_StorageCommon__pb2.SecretForStorage.SerializeToString,
+            common_dot_StorageCommon__pb2.SecretForStorage.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def getSecretForStorage(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.stubs.storage.common.StorageCommonService/getSecretForStorage',
+            common_dot_StorageCommon__pb2.SecretForStorageGetRequest.SerializeToString,
+            common_dot_StorageCommon__pb2.SecretForStorage.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def deleteSecretsForStorage(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.stubs.storage.common.StorageCommonService/deleteSecretsForStorage',
+            common_dot_StorageCommon__pb2.SecretForStorageDeleteRequest.SerializeToString,
+            common_dot_StorageCommon__pb2.SecretForStorageDeleteResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def listStorages(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.resource.stubs.storage.common.StorageCommonService/listStorages',
+            common_dot_StorageCommon__pb2.StorageListRequest.SerializeToString,
+            common_dot_StorageCommon__pb2.StorageListResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

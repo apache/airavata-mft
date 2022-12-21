@@ -38,18 +38,6 @@ public class AppConfig {
     @org.springframework.beans.factory.annotation.Value("${consul.port}")
     Integer consulPort;
 
-    @org.springframework.beans.factory.annotation.Value("${resource.service.host}")
-    private String resourceServiceHost;
-
-    @org.springframework.beans.factory.annotation.Value("${resource.service.port}")
-    private int resourceServicePort;
-
-    @org.springframework.beans.factory.annotation.Value("${secret.service.host}")
-    private String secretServiceHost;
-
-    @org.springframework.beans.factory.annotation.Value("${secret.service.port}")
-    private int secretServicePort;
-
     @Bean
     public MFTConsulClient mftConsulClient() {
         return new MFTConsulClient(consulHost, consulPort);
@@ -66,16 +54,6 @@ public class AppConfig {
     }
 
     @Bean
-    public StorageServiceClient storageServiceClient() {
-        return StorageServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
-    }
-
-    @Bean
-    public SecretServiceClient secretServiceClient() {
-        return SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
-    }
-
-    @Bean
     public ConsulIngressHandler consulIngressHandler() {
         return new ConsulIngressHandler();
 
@@ -85,10 +63,4 @@ public class AppConfig {
     public TransferOrchestrator transferOrchestrator() {
         return new TransferOrchestrator();
     }
-
-    @Bean
-    public ControllerRequestBuilder controllerRequestBuilder() {
-        return new ControllerRequestBuilder();
-    }
-
 }

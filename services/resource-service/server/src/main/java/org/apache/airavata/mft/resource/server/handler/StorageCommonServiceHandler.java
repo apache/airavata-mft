@@ -20,14 +20,13 @@ package org.apache.airavata.mft.resource.server.handler;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
-import org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageListResponse;
-import org.apache.airavata.mft.resource.stubs.storage.common.StorageCommonServiceGrpc;
-import org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeResolveRequest;
-import org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeResolveResponse;
+import org.apache.airavata.mft.resource.stubs.storage.common.*;
 import org.lognet.springboot.grpc.GRpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.sound.midi.Track;
 
 @GRpcService
 public class StorageCommonServiceHandler extends StorageCommonServiceGrpc.StorageCommonServiceImplBase {
@@ -52,4 +51,66 @@ public class StorageCommonServiceHandler extends StorageCommonServiceGrpc.Storag
         }
     }
 
+    @Override
+    public void registerSecretForStorage(SecretForStorage request, StreamObserver<SecretForStorage> responseObserver) {
+        try {
+            SecretForStorage secretForStorage = this.backend.registerSecretForStorage(request);
+            responseObserver.onNext(secretForStorage);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed registering secret for storage id {}", request.getStorageId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed registering secret for storage")
+                    .asRuntimeException());
+        }
+
+    }
+
+    @Override
+    public void getSecretForStorage(SecretForStorageGetRequest request, StreamObserver<SecretForStorage> responseObserver) {
+        try {
+            SecretForStorage secretForStorage = this.backend.getSecretForStorage(request);
+            responseObserver.onNext(secretForStorage);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed fetch secret for storage id {}", request.getStorageId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed fetching secret for storage")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void deleteSecretsForStorage(SecretForStorageDeleteRequest request, StreamObserver<SecretForStorageDeleteResponse> responseObserver) {
+        try {
+            this.backend.deleteSecretForStorage(request);
+            SecretForStorageDeleteResponse.Builder builder = SecretForStorageDeleteResponse.newBuilder();
+            builder.setStatus(true);
+            responseObserver.onNext(builder.build());
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed deleting secret for storage id {}", request.getStorageId(), e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed deleting secret for storage")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void listStorages(StorageListRequest request, StreamObserver<StorageListResponse> responseObserver) {
+        try {
+            StorageListResponse storageListResponse = this.backend.listStorage(request);
+            responseObserver.onNext(storageListResponse);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed listing storages", e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed listing storages\"")
+                    .asRuntimeException());
+        }
+    }
 }

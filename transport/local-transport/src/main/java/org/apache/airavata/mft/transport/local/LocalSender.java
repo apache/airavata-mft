@@ -20,10 +20,6 @@ package org.apache.airavata.mft.transport.local;
 import org.apache.airavata.mft.common.AuthToken;
 import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
-import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.common.GenericResource;
-import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +66,7 @@ public class LocalSender implements Connector {
 
         checkInitialized();
 
-        ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        /*ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         GenericResource resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
                 .setResourceId(resourceId).build());
 
@@ -110,6 +106,8 @@ public class LocalSender implements Connector {
         fos.close();
 
         logger.info("Completed local sender stream for transfer {}", context.getTransferId());
+
+         */
     }
 
     @Override

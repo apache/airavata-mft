@@ -24,9 +24,9 @@ import org.apache.airavata.mft.credential.stubs.gcs.GCSSecretCreateRequest;
 import org.apache.airavata.mft.resource.service.gcs.GCSStorageServiceGrpc;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorage;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageCreateRequest;
-import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecret;
-import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretCreateRequest;
-import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretServiceGrpc;
+import org.apache.airavata.mft.resource.stubs.storage.common.SecretForStorage;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageCommonServiceGrpc;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageType;
 import picocli.CommandLine;
 
 import java.util.concurrent.Callable;
@@ -80,12 +80,11 @@ public class GCSAddSubCommand implements Callable<Integer>
                 .setName( name ).build() );
         System.out.println( "Created gcs storage " + gcsStorage.getStorageId() );
 
-        StorageSecretServiceGrpc.StorageSecretServiceBlockingStub storageSecretClient =
-                mftApiClient.getStorageServiceClient().storageSecret();
-        StorageSecret storageSecret = storageSecretClient.createStorageSecret( StorageSecretCreateRequest.newBuilder()
-                .setStorageId( gcsStorage.getStorageId() )
-                .setSecretId( gcsSecret.getSecretId() )
-                .setType( StorageSecret.StorageType.GCS ).build() );
+        StorageCommonServiceGrpc.StorageCommonServiceBlockingStub commonClient = mftApiClient.getStorageServiceClient().common();
+        commonClient.registerSecretForStorage(SecretForStorage.newBuilder()
+                .setStorageId(gcsStorage.getStorageId())
+                .setSecretId(gcsSecret.getSecretId())
+                .setStorageType(StorageType.GCS).build());
 
         System.out.println( "Storage Id " + gcsStorage.getStorageId() );
 

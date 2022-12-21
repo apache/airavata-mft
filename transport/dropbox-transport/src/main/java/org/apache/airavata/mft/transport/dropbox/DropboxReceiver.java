@@ -24,10 +24,6 @@ import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecret;
 import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretGetRequest;
-import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.common.GenericResource;
-import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 
@@ -65,7 +61,7 @@ public class DropboxReceiver implements Connector {
     public void startStream(AuthToken authToken, String resourceId, String credentialToken, ConnectorContext context) throws Exception {
 
         logger.info("Starting Dropbox Receiver stream for transfer {}", context.getTransferId());
-
+        /*
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         GenericResource resource = resourceClient.get().getGenericResource(GenericResourceGetRequest.newBuilder()
                 .setResourceId(resourceId).build());
@@ -113,6 +109,8 @@ public class DropboxReceiver implements Connector {
 
         logger.info("Completed Dropbox Receiver stream for transfer {}", context.getTransferId());
 
+
+         */
     }
 
     @Override

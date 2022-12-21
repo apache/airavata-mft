@@ -3,7 +3,8 @@
 ```
 virtualenv -p python3 env
 source env/bin/activate
-pip install grpcio grpcio-tools
+pip install grpcio==1.46.3
+pip install grpcio-tools==1.46.3
 cd src/airavata_mft_sdk
 ./generate-stubs.sh
 ```
@@ -20,7 +21,8 @@ Otherwise, move to the next command section
 ```
 virtualenv -p python3 env
 source env/bin/activate
-pip install grpcio grpcio-tools
+pip install grpcio==1.46.3
+pip install grpcio-tools==1.46.3
 ```
 
 

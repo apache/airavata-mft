@@ -4,11 +4,10 @@ import org.apache.airavata.mft.api.client.MFTApiClient;
 import org.apache.airavata.mft.api.service.TransferApiRequest;
 import org.apache.airavata.mft.api.service.TransferApiResponse;
 import org.apache.airavata.mft.common.AuthToken;
-import org.apache.airavata.mft.resource.stubs.common.FileResource;
-import org.apache.airavata.mft.resource.stubs.common.GenericResource;
-import org.apache.airavata.mft.resource.stubs.common.GenericResourceCreateRequest;
-import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretSearchRequest;
-import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretSearchResponse;
+import org.apache.airavata.mft.resource.stubs.storage.common.Error;
+import org.apache.airavata.mft.resource.stubs.storage.common.SecretForStorage;
+import org.apache.airavata.mft.resource.stubs.storage.common.SecretForStorageGetRequest;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageCommonServiceGrpc;
 import picocli.CommandLine;
 
 import java.util.concurrent.Callable;
@@ -35,18 +34,26 @@ public class SubmitTransferSubCommand implements Callable<Integer> {
 
         AuthToken token = AuthToken.newBuilder().build();
 
-        StorageSecretSearchResponse sourceSecret = mftApiClient.getStorageServiceClient().storageSecret()
-                .searchStorageSecret(StorageSecretSearchRequest.newBuilder()
-                        .setAuthzToken(token).setStorageId(sourceStorageId).build());
-        System.out.println(sourceSecret);
+        StorageCommonServiceGrpc.StorageCommonServiceBlockingStub commonClient = mftApiClient.getStorageServiceClient().common();
+        SecretForStorage sourceSecretForStorage = commonClient
+                .getSecretForStorage(SecretForStorageGetRequest.newBuilder().setStorageId(sourceStorageId).build());
 
-        StorageSecretSearchResponse destSecret = mftApiClient.getStorageServiceClient().storageSecret()
-                .searchStorageSecret(StorageSecretSearchRequest.newBuilder()
-                        .setAuthzToken(token).setStorageId(destinationStorageId).build());
+        if (sourceSecretForStorage.getError() != Error.UNRECOGNIZED) {
+            System.out.println("Errored while fetching credentials for source storage " + sourceStorageId
+                    + ". Error: " + sourceSecretForStorage.getError());
+        }
+
+        SecretForStorage destSecretForStorage = commonClient
+                .getSecretForStorage(SecretForStorageGetRequest.newBuilder().setStorageId(destinationStorageId).build());
+
+        if (destSecretForStorage.getError() != Error.UNRECOGNIZED) {
+            System.out.println("Errored while fetching credentials for destination storage " + sourceStorageId
+                    + ". Error: " + destSecretForStorage.getError());
+        }
 
         TransferApiResponse transferResp = mftApiClient.getTransferClient().submitTransfer(TransferApiRequest.newBuilder()
-                .setSourceToken(sourceSecret.getStorageSecret().getSecretId())
-                .setDestinationToken(destSecret.getStorageSecret().getSecretId())
+                .setSourceToken(sourceSecretForStorage.getSecretId())
+                .setDestinationToken(destSecretForStorage.getSecretId())
                 .setDestinationStorageId(destinationStorageId)
                 .setDestinationPath(destinationPath)
                 .setSourceStorageId(sourceStorageId)

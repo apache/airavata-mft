@@ -22,10 +22,6 @@ import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.ftp.FTPSecret;
 import org.apache.airavata.mft.credential.stubs.ftp.FTPSecretGetRequest;
-import org.apache.airavata.mft.resource.client.ResourceServiceClient;
-import org.apache.airavata.mft.resource.client.ResourceServiceClientBuilder;
-import org.apache.airavata.mft.resource.stubs.common.GenericResource;
-import org.apache.airavata.mft.resource.stubs.common.GenericResourceGetRequest;
 import org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorage;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
@@ -69,6 +65,7 @@ public class FTPReceiver implements Connector {
 
         logger.info("Starting FTP receiver stream for transfer {}", context.getTransferId());
 
+        /*
         checkInitialized();
 
         ResourceServiceClient resourceClient = ResourceServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
@@ -119,6 +116,8 @@ public class FTPReceiver implements Connector {
         streamOs.close();
         logger.info("Completed FTP receiver stream for transfer {}", context.getTransferId());
 
+
+         */
     }
 
     private void checkInitialized() {

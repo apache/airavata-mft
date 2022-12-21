@@ -7,9 +7,9 @@ import org.apache.airavata.mft.credential.stubs.s3.S3SecretCreateRequest;
 import org.apache.airavata.mft.resource.service.s3.S3StorageServiceGrpc;
 import org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage;
 import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageCreateRequest;
-import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecret;
-import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretCreateRequest;
-import org.apache.airavata.mft.storage.stubs.storagesecret.StorageSecretServiceGrpc;
+import org.apache.airavata.mft.resource.stubs.storage.common.SecretForStorage;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageCommonServiceGrpc;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageType;
 import picocli.CommandLine;
 
 import java.util.concurrent.Callable;
@@ -53,7 +53,7 @@ public class S3StorageAddSubCommand implements Callable<Integer> {
                         .setAuthzToken(authToken).build());
 
         S3StorageServiceGrpc.S3StorageServiceBlockingStub s3StorageClient = mftApiClient.getStorageServiceClient().s3();
-        StorageSecretServiceGrpc.StorageSecretServiceBlockingStub storageSecretClient = mftApiClient.getStorageServiceClient().storageSecret();
+        StorageCommonServiceGrpc.StorageCommonServiceBlockingStub commonStorageClient = mftApiClient.getStorageServiceClient().common();
 
         S3Storage s3Storage = s3StorageClient.createS3Storage(S3StorageCreateRequest.newBuilder()
                 .setName(remoteName)
@@ -61,10 +61,10 @@ public class S3StorageAddSubCommand implements Callable<Integer> {
                 .setBucketName(bucket)
                 .setRegion(region).build());
 
-        StorageSecret storageSecret = storageSecretClient.createStorageSecret(StorageSecretCreateRequest.newBuilder()
+        commonStorageClient.registerSecretForStorage(SecretForStorage.newBuilder()
                 .setStorageId(s3Storage.getStorageId())
                 .setSecretId(s3Secret.getSecretId())
-                .setType(StorageSecret.StorageType.S3).build());
+                .setStorageType(StorageType.S3).build());
 
         System.out.println("Storage Id " + s3Storage.getStorageId());
         return 0;
