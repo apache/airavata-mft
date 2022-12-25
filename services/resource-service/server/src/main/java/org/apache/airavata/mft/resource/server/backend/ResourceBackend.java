@@ -38,7 +38,7 @@ public interface ResourceBackend {
     public SecretForStorage getSecretForStorage(SecretForStorageGetRequest request) throws Exception;
     public SecretForStorage registerSecretForStorage(SecretForStorage request) throws Exception;
     public boolean deleteSecretForStorage(SecretForStorageDeleteRequest request) throws Exception;
-
+    public StorageListResponse searchStorages(StorageSearchRequest request) throws Exception;
     public StorageListResponse listStorage(StorageListRequest request) throws Exception;
     public SCPStorageListResponse listSCPStorage(SCPStorageListRequest request) throws Exception;
     public Optional<SCPStorage> getSCPStorage(SCPStorageGetRequest request) throws Exception;

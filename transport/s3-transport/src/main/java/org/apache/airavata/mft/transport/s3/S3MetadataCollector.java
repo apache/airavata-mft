@@ -34,7 +34,10 @@ import org.apache.airavata.mft.credential.stubs.s3.S3Secret;
 import org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class S3MetadataCollector implements MetadataCollector {
 
@@ -56,7 +59,7 @@ public class S3MetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public ResourceMetadata getResourceMetadata(String resourcePath) throws Exception {
+    public ResourceMetadata getResourceMetadata(String resourcePath, boolean recursiveSearch) throws Exception {
 
         checkInitialized();
 
@@ -96,46 +99,90 @@ public class S3MetadataCollector implements MetadataCollector {
             return resourceBuilder.build();
         }
 
+        // If directory path or top level bucket path
+        if (resourcePath.endsWith("/") || resourcePath.isEmpty()) { // Directory
+            ObjectListing objectListing = s3Client.listObjects(s3Storage.getBucketName(), resourcePath);
+            resourceBuilder.setDirectory(processDirectory(resourcePath, objectListing));
 
-        String key = s3Client.getObject(s3Storage.getBucketName(), resourcePath).getKey();
+        } else if (s3Client.doesObjectExist(s3Storage.getBucketName(), resourcePath)){ // File
 
-        if (key.endsWith("/")) { // Folder
-
-            ObjectListing objectListing = s3Client.listObjects(s3Storage.getBucketName(), key);
-            List<S3ObjectSummary> objectSummaries = objectListing.getObjectSummaries();
-            DirectoryMetadata.Builder dirBuilder = DirectoryMetadata.newBuilder();
-            for (S3ObjectSummary summary: objectSummaries) {
-                if (summary.getKey().endsWith("/")) {
-                    DirectoryMetadata.Builder subDirBuilder = DirectoryMetadata.newBuilder();
-                    subDirBuilder.setCreatedTime(summary.getLastModified().getTime());
-                    subDirBuilder.setUpdateTime(summary.getLastModified().getTime());
-                    subDirBuilder.setResourcePath(summary.getKey());
-                    subDirBuilder.setFriendlyName(new File(summary.getKey()).getName());
-                    dirBuilder.addDirectories(subDirBuilder);
-                } else {
-                    FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
-                    fileBuilder.setUpdateTime(summary.getLastModified().getTime());
-                    fileBuilder.setCreatedTime(summary.getLastModified().getTime());
-                    fileBuilder.setResourcePath(summary.getKey());
-                    fileBuilder.setFriendlyName(new File(summary.getKey()).getName());
-                    fileBuilder.setResourceSize(summary.getSize());
-                    dirBuilder.addFiles(fileBuilder);
-                }
-            }
-            resourceBuilder.setDirectory(dirBuilder);
-        } else { // File
             FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
             ObjectMetadata fileMetadata = s3Client.getObjectMetadata(s3Storage.getBucketName(), resourcePath);
             fileBuilder.setResourceSize(fileMetadata.getContentLength());
             fileBuilder.setResourcePath(resourcePath);
-            fileBuilder.setMd5Sum(fileMetadata.getContentMD5());
+            fileBuilder.setMd5Sum(fileMetadata.getContentMD5() == null ? "" : fileMetadata.getContentMD5() );
             fileBuilder.setFriendlyName(new File(resourcePath).getName());
             fileBuilder.setCreatedTime(fileMetadata.getLastModified().getTime());
             fileBuilder.setUpdateTime(fileMetadata.getLastModified().getTime());
             resourceBuilder.setFile(fileBuilder);
+        } else { // Try if user forgot add trailing /
+            ObjectListing objectListing = s3Client.listObjects(s3Storage.getBucketName(), resourcePath + "/");
+            resourceBuilder.setDirectory(processDirectory(resourcePath + "/", objectListing));
         }
 
         return resourceBuilder.build();
+    }
+
+    private DirectoryMetadata.Builder processDirectory(String resourcePath, ObjectListing objectListing) {
+
+        List<S3ObjectSummary> objectSummaries = objectListing.getObjectSummaries();
+
+        Map<String, DirectoryMetadata.Builder> subDirCache = new HashMap<>();
+        Map<String, List<String>> childTree = new HashMap<>();
+        childTree.put(resourcePath, new ArrayList<>());
+
+        DirectoryMetadata.Builder dirBuilder = DirectoryMetadata.newBuilder();
+        subDirCache.put(resourcePath, dirBuilder);
+
+        for (S3ObjectSummary summary: objectSummaries) {
+            buildStructureRecursively(resourcePath, summary.getKey(), summary, subDirCache, childTree);
+        }
+
+        registerChildren(resourcePath, subDirCache, childTree);
+
+        return dirBuilder;
+    }
+
+    private void registerChildren(String parentPath, Map<String, DirectoryMetadata.Builder> directoryStore,
+                                  Map<String, List<String>> childTree) {
+        for (String childDir : childTree.get(parentPath)) {
+            registerChildren(childDir, directoryStore, childTree);
+            directoryStore.get(parentPath).addDirectories(directoryStore.get(childDir));
+        }
+    }
+
+    private void buildStructureRecursively(String basePath, String filePath, S3ObjectSummary summary,
+                                           Map<String, DirectoryMetadata.Builder> directoryStore,
+                                           Map<String, List<String>> childTree) {
+        String relativePath = filePath.substring(basePath.length());
+        if (relativePath.contains("/")) { // A Directory
+            String[] pathSections = relativePath.split("/");
+
+            String thisDirKey = basePath + pathSections[0] + "/";
+
+            if (!directoryStore.containsKey(thisDirKey)) {
+                DirectoryMetadata.Builder subDirBuilder = DirectoryMetadata.newBuilder();
+                subDirBuilder.setCreatedTime(summary.getLastModified().getTime());
+                subDirBuilder.setUpdateTime(summary.getLastModified().getTime());
+                subDirBuilder.setResourcePath(thisDirKey);
+                subDirBuilder.setFriendlyName(pathSections[0]);
+                directoryStore.put(thisDirKey, subDirBuilder);
+                childTree.get(basePath).add(thisDirKey);
+                childTree.put(thisDirKey, new ArrayList<>());
+            }
+
+            //directoryStore.get(basePath).addDirectories(subDirBuilder);
+            buildStructureRecursively(thisDirKey, filePath, summary, directoryStore, childTree);
+
+        } else { // A File
+            FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
+            fileBuilder.setUpdateTime(summary.getLastModified().getTime());
+            fileBuilder.setCreatedTime(summary.getLastModified().getTime());
+            fileBuilder.setResourcePath(summary.getKey());
+            fileBuilder.setFriendlyName(new File(summary.getKey()).getName());
+            fileBuilder.setResourceSize(summary.getSize());
+            directoryStore.get(basePath).addFiles(fileBuilder);
+        }
     }
 
     @Override

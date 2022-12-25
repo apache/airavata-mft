@@ -51,7 +51,7 @@ public class GCSMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public ResourceMetadata getResourceMetadata(String resourcePath) throws Exception {
+    public ResourceMetadata getResourceMetadata(String resourcePath, boolean recursiveSearch) throws Exception {
         checkInitialized();
 
         PrivateKey privKey = GCSUtil.getPrivateKey(gcsSecret.getPrivateKey());

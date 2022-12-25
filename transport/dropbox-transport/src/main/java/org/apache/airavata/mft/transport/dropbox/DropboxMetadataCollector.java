@@ -50,7 +50,7 @@ public class DropboxMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public ResourceMetadata getResourceMetadata(String resourcePath) throws Exception {
+    public ResourceMetadata getResourceMetadata(String resourcePath, boolean recursiveSearch) throws Exception {
         checkInitialized();
 
         DbxRequestConfig config = DbxRequestConfig.newBuilder("mftdropbox/v1").build();

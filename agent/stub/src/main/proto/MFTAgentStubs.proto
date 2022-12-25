@@ -114,5 +114,6 @@ message GetResourceMetadataRequest {
     string resourcePath = 1;
     StorageWrapper storage = 2;
     SecretWrapper secret = 3;
+    bool recursiveSearch = 4;
 }
 

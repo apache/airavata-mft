@@ -65,7 +65,7 @@ public class ODataMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public ResourceMetadata getResourceMetadata(String resourcePath) throws Exception {
+    public ResourceMetadata getResourceMetadata(String resourcePath, boolean recursiveSearch) throws Exception {
         ResourceMetadata.Builder resourceBuilder = ResourceMetadata.newBuilder();
         Optional<FileMetadata> fileResourceMetadata = findFileResourceMetadata(resourcePath);
         if (fileResourceMetadata.isPresent()) {

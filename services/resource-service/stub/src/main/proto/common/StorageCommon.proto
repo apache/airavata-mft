@@ -84,10 +84,19 @@ message StorageListRequest {
     int32 pageSize = 2;
 }
 
+message StorageSearchRequest {
+    oneof searchQuery {
+        string storageId = 1;
+        string storageName = 2;
+        StorageType storageType = 3;
+    }
+}
+
 service StorageCommonService {
     rpc resolveStorageType (StorageTypeResolveRequest) returns (StorageTypeResolveResponse);
     rpc registerSecretForStorage(SecretForStorage) returns (SecretForStorage);
     rpc getSecretForStorage(SecretForStorageGetRequest) returns (SecretForStorage);
     rpc deleteSecretsForStorage(SecretForStorageDeleteRequest) returns (SecretForStorageDeleteResponse);
+    rpc searchStorages(StorageSearchRequest) returns (StorageListResponse);
     rpc listStorages(StorageListRequest) returns (StorageListResponse);
 }

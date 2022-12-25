@@ -57,7 +57,7 @@ public class SCPMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public ResourceMetadata getResourceMetadata(String resourcePath) throws Exception {
+    public ResourceMetadata getResourceMetadata(String resourcePath, boolean recursiveSearch) throws Exception {
 
         ResourceMetadata.Builder resourceBuilder = ResourceMetadata.newBuilder();
         try (SSHClient sshClient = getSSHClient(scpStorage, scpSecret)) {

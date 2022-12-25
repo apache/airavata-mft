@@ -100,6 +100,21 @@ public class StorageCommonServiceHandler extends StorageCommonServiceGrpc.Storag
     }
 
     @Override
+    public void searchStorages(StorageSearchRequest request, StreamObserver<StorageListResponse> responseObserver) {
+        try {
+            StorageListResponse storageListResponse = this.backend.searchStorages(request);
+            responseObserver.onNext(storageListResponse);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Failed searching storages", e);
+
+            responseObserver.onError(Status.INTERNAL.withCause(e)
+                    .withDescription("Failed listing storages\"")
+                    .asRuntimeException());
+        }
+    }
+
+    @Override
     public void listStorages(StorageListRequest request, StreamObserver<StorageListResponse> responseObserver) {
         try {
             StorageListResponse storageListResponse = this.backend.listStorage(request);

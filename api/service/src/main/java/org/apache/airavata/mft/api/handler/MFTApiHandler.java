@@ -28,6 +28,50 @@ import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCResponse;
 import org.apache.airavata.mft.agent.stub.*;
 import org.apache.airavata.mft.api.service.*;
+import org.apache.airavata.mft.credential.stubs.azure.AzureSecret;
+import org.apache.airavata.mft.credential.stubs.azure.AzureSecretGetRequest;
+import org.apache.airavata.mft.credential.stubs.box.BoxSecret;
+import org.apache.airavata.mft.credential.stubs.box.BoxSecretGetRequest;
+import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecret;
+import org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretGetRequest;
+import org.apache.airavata.mft.credential.stubs.ftp.FTPSecret;
+import org.apache.airavata.mft.credential.stubs.ftp.FTPSecretGetRequest;
+import org.apache.airavata.mft.credential.stubs.gcs.GCSSecret;
+import org.apache.airavata.mft.credential.stubs.gcs.GCSSecretGetRequest;
+import org.apache.airavata.mft.credential.stubs.odata.ODataSecret;
+import org.apache.airavata.mft.credential.stubs.odata.ODataSecretGetRequest;
+import org.apache.airavata.mft.credential.stubs.s3.S3Secret;
+import org.apache.airavata.mft.credential.stubs.s3.S3SecretGetRequest;
+import org.apache.airavata.mft.credential.stubs.scp.SCPSecret;
+import org.apache.airavata.mft.credential.stubs.scp.SCPSecretGetRequest;
+import org.apache.airavata.mft.credential.stubs.swift.SwiftSecret;
+import org.apache.airavata.mft.credential.stubs.swift.SwiftSecretGetRequest;
+import org.apache.airavata.mft.resource.client.StorageServiceClient;
+import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
+import org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage;
+import org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageGetRequest;
+import org.apache.airavata.mft.resource.stubs.box.storage.BoxStorage;
+import org.apache.airavata.mft.resource.stubs.box.storage.BoxStorageGetRequest;
+import org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorage;
+import org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageGetRequest;
+import org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorage;
+import org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageGetRequest;
+import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorage;
+import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageGetRequest;
+import org.apache.airavata.mft.resource.stubs.local.storage.LocalStorage;
+import org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageGetRequest;
+import org.apache.airavata.mft.resource.stubs.odata.storage.ODataStorage;
+import org.apache.airavata.mft.resource.stubs.odata.storage.ODataStorageGetRequest;
+import org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage;
+import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageGetRequest;
+import org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorage;
+import org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageGetRequest;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeResolveRequest;
+import org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeResolveResponse;
+import org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorage;
+import org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorageGetRequest;
+import org.apache.airavata.mft.secret.client.SecretServiceClient;
+import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.dozer.DozerBeanMapper;
 import org.lognet.springboot.grpc.GRpcService;
@@ -243,10 +287,151 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
         }
     }
 
+    private GetResourceMetadataRequest deriveDirectRequest(GetResourceMetadataFromIDsRequest idRequest) {
+
+
+        StorageServiceClient storageClient = StorageServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
+        SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);
+        StorageTypeResolveResponse storageTypeResp = storageClient.common().resolveStorageType(
+                StorageTypeResolveRequest.newBuilder().setStorageId(idRequest.getStorageId()).build());
+
+        GetResourceMetadataRequest.Builder directReqBuilder = GetResourceMetadataRequest.newBuilder();
+        directReqBuilder.setResourcePath(idRequest.getResourcePath());
+        directReqBuilder.setRecursiveSearch(idRequest.getRecursiveSearch());
+
+        switch (storageTypeResp.getStorageType()) {
+            case S3:
+                S3Storage s3Storage = storageClient.s3()
+                        .getS3Storage(S3StorageGetRequest.newBuilder()
+                                .setStorageId(idRequest.getStorageId()).build());
+                S3Secret s3Secret = secretClient.s3()
+                        .getS3Secret(S3SecretGetRequest.newBuilder()
+                                .setSecretId(idRequest.getSecretId()).build());
+
+                directReqBuilder
+                        .setStorage(StorageWrapper.newBuilder().setS3(s3Storage).build())
+                        .setSecret(SecretWrapper.newBuilder().setS3(s3Secret).build());
+                break;
+            case FTP:
+                FTPStorage ftpStorage = storageClient.ftp()
+                        .getFTPStorage(FTPStorageGetRequest.newBuilder()
+                                .setStorageId(idRequest.getStorageId()).build());
+                FTPSecret ftpSecret = secretClient.ftp()
+                        .getFTPSecret(FTPSecretGetRequest.newBuilder()
+                                .setSecretId(idRequest.getSecretId()).build());
+
+                directReqBuilder
+                        .setStorage(StorageWrapper.newBuilder().setFtp(ftpStorage).build())
+                        .setSecret(SecretWrapper.newBuilder().setFtp(ftpSecret).build());
+                break;
+            case LOCAL:
+                LocalStorage localStorage = storageClient.local()
+                        .getLocalStorage(LocalStorageGetRequest.newBuilder()
+                                .setStorageId(idRequest.getStorageId()).build());
+
+                directReqBuilder
+                        .setStorage(StorageWrapper.newBuilder().setLocal(localStorage).build());
+                break;
+            case BOX:
+                BoxStorage boxStorage = storageClient.box()
+                        .getBoxStorage(BoxStorageGetRequest.newBuilder()
+                                .setStorageId(idRequest.getStorageId()).build());
+                BoxSecret boxSecret = secretClient.box()
+                        .getBoxSecret(BoxSecretGetRequest.newBuilder()
+                                .setSecretId(idRequest.getSecretId()).build());
+
+                directReqBuilder
+                        .setStorage(StorageWrapper.newBuilder().setBox(boxStorage).build())
+                        .setSecret(SecretWrapper.newBuilder().setBox(boxSecret).build());
+                break;
+            case DROPBOX:
+                DropboxStorage dropBoxStorage = storageClient.dropbox()
+                        .getDropboxStorage(DropboxStorageGetRequest.newBuilder()
+                                .setStorageId(idRequest.getStorageId()).build());
+                DropboxSecret dropBoxSecret = secretClient.dropbox()
+                        .getDropboxSecret(DropboxSecretGetRequest.newBuilder()
+                                .setSecretId(idRequest.getSecretId()).build());
+
+                directReqBuilder
+                        .setStorage(StorageWrapper.newBuilder().setDropbox(dropBoxStorage).build())
+                        .setSecret(SecretWrapper.newBuilder().setDropbox(dropBoxSecret).build());
+                break;
+            case GCS:
+                GCSStorage gcsStorage = storageClient.gcs()
+                        .getGCSStorage(GCSStorageGetRequest.newBuilder()
+                                .setStorageId(idRequest.getStorageId()).build());
+                GCSSecret gcsSecret = secretClient.gcs()
+                        .getGCSSecret(GCSSecretGetRequest.newBuilder()
+                                .setSecretId(idRequest.getSecretId()).build());
+
+                directReqBuilder
+                        .setStorage(StorageWrapper.newBuilder().setGcs(gcsStorage).build())
+                        .setSecret(SecretWrapper.newBuilder().setGcs(gcsSecret).build());
+                break;
+            case AZURE:
+                AzureStorage azureStorage = storageClient.azure()
+                        .getAzureStorage(AzureStorageGetRequest.newBuilder()
+                                .setStorageId(idRequest.getStorageId()).build());
+                AzureSecret azureSecret = secretClient.azure()
+                        .getAzureSecret(AzureSecretGetRequest.newBuilder()
+                                .setSecretId(idRequest.getSecretId()).build());
+
+                directReqBuilder
+                        .setStorage(StorageWrapper.newBuilder().setAzure(azureStorage).build())
+                        .setSecret(SecretWrapper.newBuilder().setAzure(azureSecret).build());
+                break;
+            case SWIFT:
+                SwiftStorage swiftStorage = storageClient.swift()
+                        .getSwiftStorage(SwiftStorageGetRequest.newBuilder()
+                                .setStorageId(idRequest.getStorageId()).build());
+                SwiftSecret swiftSecret = secretClient.swift()
+                        .getSwiftSecret(SwiftSecretGetRequest.newBuilder()
+                                .setSecretId(idRequest.getSecretId()).build());
+
+                directReqBuilder
+                        .setStorage(StorageWrapper.newBuilder().setSwift(swiftStorage).build())
+                        .setSecret(SecretWrapper.newBuilder().setSwift(swiftSecret).build());
+                break;
+            case ODATA:
+                ODataStorage odataStorage = storageClient.odata()
+                        .getODataStorage(ODataStorageGetRequest.newBuilder()
+                                .setStorageId(idRequest.getStorageId()).build());
+                ODataSecret odataSecret = secretClient.odata()
+                        .getODataSecret(ODataSecretGetRequest.newBuilder()
+                                .setSecretId(idRequest.getSecretId()).build());
+
+                directReqBuilder
+                        .setStorage(StorageWrapper.newBuilder().setOdata(odataStorage).build())
+                        .setSecret(SecretWrapper.newBuilder().setOdata(odataSecret).build());
+                break;
+            case SCP:
+                SCPStorage scpStorage = storageClient.scp()
+                        .getSCPStorage(SCPStorageGetRequest.newBuilder()
+                                .setStorageId(idRequest.getStorageId()).build());
+                SCPSecret scpSecret = secretClient.scp()
+                        .getSCPSecret(SCPSecretGetRequest.newBuilder()
+                                .setSecretId(idRequest.getSecretId()).build());
+
+                directReqBuilder
+                        .setStorage(StorageWrapper.newBuilder().setScp(scpStorage).build())
+                        .setSecret(SecretWrapper.newBuilder().setScp(scpSecret).build());
+                break;
+
+        }
+
+        return directReqBuilder.build();
+    }
     @Override
     public void getResourceAvailability(FetchResourceMetadataRequest request, StreamObserver<ResourceAvailabilityResponse> responseObserver) {
-        GetResourceMetadataRequest directRequest = request.getDirectRequest();
+        GetResourceMetadataRequest directRequest = null;
+
         try {
+            if (request.getRequestCase() == FetchResourceMetadataRequest.RequestCase.DIRECTREQUEST) {
+                directRequest = request.getDirectRequest();
+            } else {
+                directRequest = deriveDirectRequest(request.getIdRequest());
+            }
+
             String targetAgent = derriveTargetAgent("");
             SyncRPCRequest.SyncRPCRequestBuilder requestBuilder = SyncRPCRequest.SyncRPCRequestBuilder.builder()
                     .withAgentId(targetAgent)
@@ -282,8 +467,16 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
     @Override
     public void resourceMetadata(FetchResourceMetadataRequest request, StreamObserver<ResourceMetadata> responseObserver) {
 
-        GetResourceMetadataRequest directRequest = request.getDirectRequest();
+        GetResourceMetadataRequest directRequest = null;
+
         try {
+
+            if (request.getRequestCase() == FetchResourceMetadataRequest.RequestCase.DIRECTREQUEST) {
+                directRequest = request.getDirectRequest();
+            } else {
+                directRequest = deriveDirectRequest(request.getIdRequest());
+            }
+
             String targetAgent = derriveTargetAgent("");
             SyncRPCRequest.SyncRPCRequestBuilder requestBuilder = SyncRPCRequest.SyncRPCRequestBuilder.builder()
                     .withAgentId(targetAgent)

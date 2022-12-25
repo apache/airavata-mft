@@ -86,6 +86,7 @@ message GetResourceMetadataFromIDsRequest {
     string resourcePath = 1;
     string storageId = 2;
     string secretId = 3;
+    bool recursiveSearch = 4;
 }
 
 message FetchResourceMetadataRequest {

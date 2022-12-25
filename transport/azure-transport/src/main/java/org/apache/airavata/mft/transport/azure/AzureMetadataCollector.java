@@ -50,7 +50,7 @@ public class AzureMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public ResourceMetadata getResourceMetadata(String resourcePath) throws Exception {
+    public ResourceMetadata getResourceMetadata(String resourcePath, boolean recursiveSearch) throws Exception {
         checkInitialized();
 
         // Azure does not have a concept called hierarchical containers. So we assume that there are no containers inside

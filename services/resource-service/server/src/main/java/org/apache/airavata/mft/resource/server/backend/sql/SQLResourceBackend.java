@@ -109,6 +109,7 @@ public class SQLResourceBackend implements ResourceBackend {
         ety.setSecretId(request.getSecretId());
         ety.setStorageId(request.getStorageId());
         ety.setType(request.getStorageType().name());
+        resourceSecretRepository.save(ety);
         return request;
     }
 
@@ -116,6 +117,44 @@ public class SQLResourceBackend implements ResourceBackend {
     public boolean deleteSecretForStorage(SecretForStorageDeleteRequest request) throws Exception {
         resourceSecretRepository.deleteByStorageId(request.getStorageId());
         return true;
+    }
+
+    @Override
+    public StorageListResponse searchStorages(StorageSearchRequest request) throws Exception {
+        StorageListResponse.Builder resp = StorageListResponse.newBuilder();
+        switch (request.getSearchQueryCase()) {
+            case STORAGEID:
+                Optional<ResolveStorageEntity> storageOp = resolveStorageRepository.getByStorageId(request.getStorageId());
+                if (storageOp.isPresent()) {
+                    StorageListEntry.Builder entry = StorageListEntry.newBuilder();
+                    entry.setStorageId(storageOp.get().getStorageId());
+                    entry.setStorageName(storageOp.get().getStorageName());
+                    entry.setStorageType(StorageType.valueOf(storageOp.get().getStorageType().name()));
+                    resp.addStorageList(entry);
+                }
+                break;
+            case STORAGENAME:
+                List<ResolveStorageEntity> storages = resolveStorageRepository.getByStorageName(request.getStorageName());
+                storages.forEach(st -> {
+                    StorageListEntry.Builder entry = StorageListEntry.newBuilder();
+                    entry.setStorageId(st.getStorageId());
+                    entry.setStorageName(st.getStorageName());
+                    entry.setStorageType(StorageType.valueOf(st.getStorageType().name()));
+                    resp.addStorageList(entry);
+                });
+                break;
+            case STORAGETYPE:
+                storages = resolveStorageRepository.getByStorageType(ResolveStorageEntity.StorageType.valueOf(request.getStorageType().name()));
+                storages.forEach(st -> {
+                    StorageListEntry.Builder entry = StorageListEntry.newBuilder();
+                    entry.setStorageId(st.getStorageId());
+                    entry.setStorageName(st.getStorageName());
+                    entry.setStorageType(StorageType.valueOf(st.getStorageType().name()));
+                    resp.addStorageList(entry);
+                });
+                break;
+        }
+        return resp.build();
     }
 
     @Override

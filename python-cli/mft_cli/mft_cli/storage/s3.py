@@ -86,10 +86,10 @@ def handle_add_storage():
         selected_bucket = typer.prompt("Enter bucket name ")
     storage_name = typer.prompt("Name of the storage ", selected_bucket)
 
-    s3_storage.bucketName = selected_bucket
-    s3_storage.name = storage_name
+    s3_storage_create_req = S3Storage_pb2.S3StorageCreateRequest(
+        endpoint=endpoint, region=region, bucketName=selected_bucket, name =storage_name)
 
-    created_storage = client.s3_storage_api.createS3Storage(s3_storage)
+    created_storage = client.s3_storage_api.createS3Storage(s3_storage_create_req)
 
     secret_create_req= S3Credential_pb2.S3SecretCreateRequest(accessKey=client_id, secretKey=client_secret)
     created_secret = client.s3_secret_api.createS3Secret(secret_create_req)

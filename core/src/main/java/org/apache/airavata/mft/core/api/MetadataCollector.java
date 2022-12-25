@@ -20,7 +20,6 @@ package org.apache.airavata.mft.core.api;
 import org.apache.airavata.mft.agent.stub.ResourceMetadata;
 import org.apache.airavata.mft.agent.stub.SecretWrapper;
 import org.apache.airavata.mft.agent.stub.StorageWrapper;
-import org.apache.airavata.mft.core.DirectoryResourceMetadata;
 import org.apache.airavata.mft.core.FileResourceMetadata;
 
 public interface MetadataCollector {
@@ -36,11 +35,12 @@ public interface MetadataCollector {
     /**
      * Fetches a metadata of given File Resource
      *
-     * @param resourcePath path of the resource
+     * @param resourcePath    path of the resource
+     * @param recursiveSearch
      * @return an object of {@link FileResourceMetadata}
      * @throws Exception if the resource id is not a File Resource type or the resource can't be fetched from the resource service
      */
-    public ResourceMetadata getResourceMetadata(String resourcePath) throws Exception;
+    public ResourceMetadata getResourceMetadata(String resourcePath, boolean recursiveSearch) throws Exception;
 
     /**
      * Check whether the resource is available in the actual storage

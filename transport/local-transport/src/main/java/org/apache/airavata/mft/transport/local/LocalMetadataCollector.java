@@ -62,7 +62,7 @@ public class LocalMetadataCollector implements MetadataCollector {
         return fileBuilder;
     }
     @Override
-    public ResourceMetadata getResourceMetadata(String resourcePath) throws Exception {
+    public ResourceMetadata getResourceMetadata(String resourcePath, boolean recursiveSearch) throws Exception {
 
         checkInitialized();
 

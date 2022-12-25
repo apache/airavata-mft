@@ -50,7 +50,7 @@ public class RPCParser {
                 if (metadataCollectorOptional.isPresent()) {
                     MetadataCollector metadataCollector = metadataCollectorOptional.get();
                     metadataCollector.init(req.getStorage(), req.getSecret());
-                    ResourceMetadata resourceMetadata = metadataCollector.getResourceMetadata(req.getResourcePath());
+                    ResourceMetadata resourceMetadata = metadataCollector.getResourceMetadata(req.getResourcePath(), directResourceMetadataReq.getRecursiveSearch());
                     return JsonFormat.printer().print(resourceMetadata);
                 } else {
                     throw new Exception("No metadata collector for type " + req.getStorage().getStorageCase().name());

@@ -48,7 +48,7 @@ public class FTPMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public ResourceMetadata getResourceMetadata(String resourcePath) throws Exception {
+    public ResourceMetadata getResourceMetadata(String resourcePath, boolean recursiveSearch) throws Exception {
 
         checkInitialized();
         ResourceMetadata.Builder resourceBuilder = ResourceMetadata.newBuilder();

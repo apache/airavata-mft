@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1a\x63ommon/StorageCommon.proto\x12\x35org.apache.airavata.mft.resource.stubs.storage.common\".\n\x19StorageTypeResolveRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"\xea\x01\n\x1aStorageTypeResolveResponse\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x13\n\x0bstorageName\x18\x02 \x01(\t\x12W\n\x0bstorageType\x18\x03 \x01(\x0e\x32\x42.org.apache.airavata.mft.resource.stubs.storage.common.StorageType\x12K\n\x05\x65rror\x18\x04 \x01(\x0e\x32<.org.apache.airavata.mft.resource.stubs.storage.common.Error\"\xdd\x01\n\x10SecretForStorage\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x10\n\x08secretId\x18\x02 \x01(\t\x12W\n\x0bstorageType\x18\x03 \x01(\x0e\x32\x42.org.apache.airavata.mft.resource.stubs.storage.common.StorageType\x12K\n\x05\x65rror\x18\x04 \x01(\x0e\x32<.org.apache.airavata.mft.resource.stubs.storage.common.Error\"/\n\x1aSecretForStorageGetRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"2\n\x1dSecretForStorageDeleteRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"0\n\x1eSecretForStorageDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\"\x93\x01\n\x10StorageListEntry\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x13\n\x0bstorageName\x18\x02 \x01(\t\x12W\n\x0bstorageType\x18\x03 \x01(\x0e\x32\x42.org.apache.airavata.mft.resource.stubs.storage.common.StorageType\"s\n\x13StorageListResponse\x12\\\n\x0bstorageList\x18\x01 \x03(\x0b\x32G.org.apache.airavata.mft.resource.stubs.storage.common.StorageListEntry\":\n\x12StorageListRequest\x12\x12\n\npageNumber\x18\x01 \x01(\x05\x12\x10\n\x08pageSize\x18\x02 \x01(\x05*r\n\x0bStorageType\x12\x06\n\x02S3\x10\x00\x12\x07\n\x03SCP\x10\x01\x12\x07\n\x03\x46TP\x10\x02\x12\t\n\x05LOCAL\x10\x03\x12\x07\n\x03\x42OX\x10\x04\x12\x0b\n\x07\x44ROPBOX\x10\x05\x12\x07\n\x03GCS\x10\x06\x12\t\n\x05\x41ZURE\x10\x07\x12\t\n\x05SWIFT\x10\x08\x12\t\n\x05ODATA\x10\t*?\n\x05\x45rror\x12\r\n\tNOT_FOUND\x10\x00\x12\x11\n\rNO_PERMISSION\x10\x01\x12\x14\n\x10LIMIT_OVERFLOWED\x10\x02\x32\xa6\x07\n\x14StorageCommonService\x12\xb9\x01\n\x12resolveStorageType\x12P.org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeResolveRequest\x1aQ.org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeResolveResponse\x12\xac\x01\n\x18registerSecretForStorage\x12G.org.apache.airavata.mft.resource.stubs.storage.common.SecretForStorage\x1aG.org.apache.airavata.mft.resource.stubs.storage.common.SecretForStorage\x12\xb1\x01\n\x13getSecretForStorage\x12Q.org.apache.airavata.mft.resource.stubs.storage.common.SecretForStorageGetRequest\x1aG.org.apache.airavata.mft.resource.stubs.storage.common.SecretForStorage\x12\xc6\x01\n\x17\x64\x65leteSecretsForStorage\x12T.org.apache.airavata.mft.resource.stubs.storage.common.SecretForStorageDeleteRequest\x1aU.org.apache.airavata.mft.resource.stubs.storage.common.SecretForStorageDeleteResponse\x12\xa5\x01\n\x0clistStorages\x12I.org.apache.airavata.mft.resource.stubs.storage.common.StorageListRequest\x1aJ.org.apache.airavata.mft.resource.stubs.storage.common.StorageListResponseB\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1a\x63ommon/StorageCommon.proto\x12\x35org.apache.airavata.mft.resource.stubs.storage.common\".\n\x19StorageTypeResolveRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"\xea\x01\n\x1aStorageTypeResolveResponse\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x13\n\x0bstorageName\x18\x02 \x01(\t\x12W\n\x0bstorageType\x18\x03 \x01(\x0e\x32\x42.org.apache.airavata.mft.resource.stubs.storage.common.StorageType\x12K\n\x05\x65rror\x18\x04 \x01(\x0e\x32<.org.apache.airavata.mft.resource.stubs.storage.common.Error\"\xdd\x01\n\x10SecretForStorage\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x10\n\x08secretId\x18\x02 \x01(\t\x12W\n\x0bstorageType\x18\x03 \x01(\x0e\x32\x42.org.apache.airavata.mft.resource.stubs.storage.common.StorageType\x12K\n\x05\x65rror\x18\x04 \x01(\x0e\x32<.org.apache.airavata.mft.resource.stubs.storage.common.Error\"/\n\x1aSecretForStorageGetRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"2\n\x1dSecretForStorageDeleteRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"0\n\x1eSecretForStorageDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\"\x93\x01\n\x10StorageListEntry\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x13\n\x0bstorageName\x18\x02 \x01(\t\x12W\n\x0bstorageType\x18\x03 \x01(\x0e\x32\x42.org.apache.airavata.mft.resource.stubs.storage.common.StorageType\"s\n\x13StorageListResponse\x12\\\n\x0bstorageList\x18\x01 \x03(\x0b\x32G.org.apache.airavata.mft.resource.stubs.storage.common.StorageListEntry\":\n\x12StorageListRequest\x12\x12\n\npageNumber\x18\x01 \x01(\x05\x12\x10\n\x08pageSize\x18\x02 \x01(\x05\"\xac\x01\n\x14StorageSearchRequest\x12\x13\n\tstorageId\x18\x01 \x01(\tH\x00\x12\x15\n\x0bstorageName\x18\x02 \x01(\tH\x00\x12Y\n\x0bstorageType\x18\x03 \x01(\x0e\x32\x42.org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeH\x00\x42\r\n\x0bsearchQuery*r\n\x0bStorageType\x12\x06\n\x02S3\x10\x00\x12\x07\n\x03SCP\x10\x01\x12\x07\n\x03\x46TP\x10\x02\x12\t\n\x05LOCAL\x10\x03\x12\x07\n\x03\x42OX\x10\x04\x12\x0b\n\x07\x44ROPBOX\x10\x05\x12\x07\n\x03GCS\x10\x06\x12\t\n\x05\x41ZURE\x10\x07\x12\t\n\x05SWIFT\x10\x08\x12\t\n\x05ODATA\x10\t*?\n\x05\x45rror\x12\r\n\tNOT_FOUND\x10\x00\x12\x11\n\rNO_PERMISSION\x10\x01\x12\x14\n\x10LIMIT_OVERFLOWED\x10\x02\x32\xd2\x08\n\x14StorageCommonService\x12\xb9\x01\n\x12resolveStorageType\x12P.org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeResolveRequest\x1aQ.org.apache.airavata.mft.resource.stubs.storage.common.StorageTypeResolveResponse\x12\xac\x01\n\x18registerSecretForStorage\x12G.org.apache.airavata.mft.resource.stubs.storage.common.SecretForStorage\x1aG.org.apache.airavata.mft.resource.stubs.storage.common.SecretForStorage\x12\xb1\x01\n\x13getSecretForStorage\x12Q.org.apache.airavata.mft.resource.stubs.storage.common.SecretForStorageGetRequest\x1aG.org.apache.airavata.mft.resource.stubs.storage.common.SecretForStorage\x12\xc6\x01\n\x17\x64\x65leteSecretsForStorage\x12T.org.apache.airavata.mft.resource.stubs.storage.common.SecretForStorageDeleteRequest\x1aU.org.apache.airavata.mft.resource.stubs.storage.common.SecretForStorageDeleteResponse\x12\xa9\x01\n\x0esearchStorages\x12K.org.apache.airavata.mft.resource.stubs.storage.common.StorageSearchRequest\x1aJ.org.apache.airavata.mft.resource.stubs.storage.common.StorageListResponse\x12\xa5\x01\n\x0clistStorages\x12I.org.apache.airavata.mft.resource.stubs.storage.common.StorageListRequest\x1aJ.org.apache.airavata.mft.resource.stubs.storage.common.StorageListResponseB\x02P\x01\x62\x06proto3')
 
 _STORAGETYPE = DESCRIPTOR.enum_types_by_name['StorageType']
 StorageType = enum_type_wrapper.EnumTypeWrapper(_STORAGETYPE)
@@ -45,6 +45,7 @@ _SECRETFORSTORAGEDELETERESPONSE = DESCRIPTOR.message_types_by_name['SecretForSto
 _STORAGELISTENTRY = DESCRIPTOR.message_types_by_name['StorageListEntry']
 _STORAGELISTRESPONSE = DESCRIPTOR.message_types_by_name['StorageListResponse']
 _STORAGELISTREQUEST = DESCRIPTOR.message_types_by_name['StorageListRequest']
+_STORAGESEARCHREQUEST = DESCRIPTOR.message_types_by_name['StorageSearchRequest']
 StorageTypeResolveRequest = _reflection.GeneratedProtocolMessageType('StorageTypeResolveRequest', (_message.Message,), {
   'DESCRIPTOR' : _STORAGETYPERESOLVEREQUEST,
   '__module__' : 'common.StorageCommon_pb2'
@@ -108,15 +109,22 @@ StorageListRequest = _reflection.GeneratedProtocolMessageType('StorageListReques
   })
 _sym_db.RegisterMessage(StorageListRequest)
 
+StorageSearchRequest = _reflection.GeneratedProtocolMessageType('StorageSearchRequest', (_message.Message,), {
+  'DESCRIPTOR' : _STORAGESEARCHREQUEST,
+  '__module__' : 'common.StorageCommon_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.resource.stubs.storage.common.StorageSearchRequest)
+  })
+_sym_db.RegisterMessage(StorageSearchRequest)
+
 _STORAGECOMMONSERVICE = DESCRIPTOR.services_by_name['StorageCommonService']
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'P\001'
-  _STORAGETYPE._serialized_start=1072
-  _STORAGETYPE._serialized_end=1186
-  _ERROR._serialized_start=1188
-  _ERROR._serialized_end=1251
+  _STORAGETYPE._serialized_start=1247
+  _STORAGETYPE._serialized_end=1361
+  _ERROR._serialized_start=1363
+  _ERROR._serialized_end=1426
   _STORAGETYPERESOLVEREQUEST._serialized_start=85
   _STORAGETYPERESOLVEREQUEST._serialized_end=131
   _STORAGETYPERESOLVERESPONSE._serialized_start=134
@@ -135,6 +143,8 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _STORAGELISTRESPONSE._serialized_end=1010
   _STORAGELISTREQUEST._serialized_start=1012
   _STORAGELISTREQUEST._serialized_end=1070
-  _STORAGECOMMONSERVICE._serialized_start=1254
-  _STORAGECOMMONSERVICE._serialized_end=2188
+  _STORAGESEARCHREQUEST._serialized_start=1073
+  _STORAGESEARCHREQUEST._serialized_end=1245
+  _STORAGECOMMONSERVICE._serialized_start=1429
+  _STORAGECOMMONSERVICE._serialized_end=2535
 # @@protoc_insertion_point(module_scope)

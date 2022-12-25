@@ -106,7 +106,7 @@ public class TransferOrchestrator {
             MetadataCollector srcMetadataCollector = srcMetadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for source"));
             srcMetadataCollector.init(request.getSourceStorage(), request.getSourceSecret());
 
-            ResourceMetadata srcMetadata = srcMetadataCollector.getResourceMetadata(request.getSourcePath());
+            ResourceMetadata srcMetadata = srcMetadataCollector.getResourceMetadata(request.getSourcePath(), false);
             if (srcMetadata.getMetadataCase() != ResourceMetadata.MetadataCase.FILE) {
                 throw new Exception("Expected a file as the source but received " + srcMetadata.getMetadataCase().name());
             }

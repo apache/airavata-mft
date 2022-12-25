@@ -78,13 +78,15 @@
             </exclusions>
         </dependency>
 
-        <!-- To be removed -->
-
         <dependency>
             <groupId>org.apache.airavata</groupId>
-            <artifactId>mft-scp-transport</artifactId>
-            <version>0.01-SNAPSHOT</version>
-            <scope>runtime</scope>
+            <artifactId>mft-resource-service-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
+            <artifactId>mft-secret-service-client</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
