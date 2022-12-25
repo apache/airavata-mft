@@ -18,10 +18,10 @@ message CallbackEndpoint {
 message TransferApiRequest {
     string sourcePath = 1;
     string sourceStorageId = 2;
-    string sourceToken = 3;
+    string sourceSecretId = 3;
     string destinationPath = 4;
     string destinationStorageId = 5;
-    string destinationToken = 6;
+    string destinationSecretId = 6;
     bool affinityTransfer = 7;
     map<string, int32> targetAgents = 8;
     org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 9;
@@ -43,7 +43,7 @@ message BatchTransferApiResponse {
 message HttpUploadApiRequest {
     string destinationStorageId = 1;
     string resourcePath = 2;
-    string destinationToken = 3;
+    string destinationSecretId = 3;
     string targetAgent = 5;
     org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 6;
 }
@@ -56,7 +56,7 @@ message HttpUploadApiResponse {
 message HttpDownloadApiRequest {
     string resourcePath = 1;
     string sourceStorageId = 2;
-    string sourceToken = 3;
+    string sourceSecretId = 3;
     string targetAgent = 5;
     org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 6;
 }

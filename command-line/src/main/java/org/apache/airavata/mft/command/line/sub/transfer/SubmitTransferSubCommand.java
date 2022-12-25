@@ -52,8 +52,8 @@ public class SubmitTransferSubCommand implements Callable<Integer> {
         }
 
         TransferApiResponse transferResp = mftApiClient.getTransferClient().submitTransfer(TransferApiRequest.newBuilder()
-                .setSourceToken(sourceSecretForStorage.getSecretId())
-                .setDestinationToken(destSecretForStorage.getSecretId())
+                .setSourceSecretId(sourceSecretForStorage.getSecretId())
+                .setDestinationSecretId(destSecretForStorage.getSecretId())
                 .setDestinationStorageId(destinationStorageId)
                 .setDestinationPath(destinationPath)
                 .setSourceStorageId(sourceStorageId)

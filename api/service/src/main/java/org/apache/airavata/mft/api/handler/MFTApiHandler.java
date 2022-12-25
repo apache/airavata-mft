@@ -213,7 +213,7 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
                     .withMethod("submitHttpDownload")
                     .withParameter("resourcePath", request.getResourcePath())
                     .withParameter("sourceStorageId", request.getSourceStorageId())
-                    .withParameter("sourceToken", request.getSourceToken())
+                    .withParameter("sourceToken", request.getSourceSecretId())
                     .withParameter("mftAuthorizationToken", JsonFormat.printer().print(request.getMftAuthorizationToken()));
 
             SyncRPCResponse rpcResponse = agentRPCClient.sendSyncRequest(requestBuilder.build());

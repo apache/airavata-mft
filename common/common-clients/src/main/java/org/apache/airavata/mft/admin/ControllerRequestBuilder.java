@@ -69,13 +69,13 @@ public class ControllerRequestBuilder {
         agentTransferBuilder.setSourcePath(transferRequest.getSourcePath());
         agentTransferBuilder.setDestinationPath(transferRequest.getDestinationPath());
         Pair<StorageWrapper, SecretWrapper> sourceCred = createCredentials(transferRequest.getSourceStorageId(),
-                        transferRequest.getSourceToken());
+                        transferRequest.getSourceSecretId());
 
         agentTransferBuilder.setSourceStorage(sourceCred.getLeft());
         agentTransferBuilder.setSourceSecret(sourceCred.getRight());
 
         Pair<StorageWrapper, SecretWrapper> destCred = createCredentials(transferRequest.getDestinationStorageId(),
-                        transferRequest.getDestinationToken());
+                        transferRequest.getDestinationSecretId());
 
         agentTransferBuilder.setDestinationStorage(destCred.getLeft());
         agentTransferBuilder.setDestinationSecret(destCred.getRight());
