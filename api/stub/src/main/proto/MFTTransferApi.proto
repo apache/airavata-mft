@@ -15,14 +15,18 @@ message CallbackEndpoint {
     string endpoint = 2;
 }
 
-message TransferApiRequest {
+message EndpointPaths {
     string sourcePath = 1;
+    string destinationPath = 2;
+}
+
+message TransferApiRequest {
+    repeated EndpointPaths endpointPaths = 1;
     string sourceStorageId = 2;
     string sourceSecretId = 3;
-    string destinationPath = 4;
     string destinationStorageId = 5;
     string destinationSecretId = 6;
-    bool affinityTransfer = 7;
+    bool optimizeTransferPath = 7;
     map<string, int32> targetAgents = 8;
     org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 9;
     repeated CallbackEndpoint callbackEndpoints = 10;
@@ -30,14 +34,6 @@ message TransferApiRequest {
 
 message TransferApiResponse {
     string transferId = 1;
-}
-
-message BatchTransferApiRequest {
-    repeated TransferApiRequest transferRequests = 1;
-}
-
-message BatchTransferApiResponse {
-    repeated string transferIds = 1;
 }
 
 message HttpUploadApiRequest {
@@ -71,11 +67,21 @@ message TransferStateApiRequest {
     org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 2;
 }
 
-message TransferStateApiResponse {
+message TransferStateResponse {
     string state = 1;
     int64 updateTimeMils = 2;
     double percentage = 3;
     string description = 4;
+}
+
+message TransferStateSummaryResponse {
+    string state = 1;
+    int64 updateTimeMils = 2;
+    double percentage = 3;
+    repeated string completed = 4;
+    repeated string failed = 5;
+    repeated string processing = 6;
+    string description = 7;
 }
 
 message ResourceAvailabilityResponse {
@@ -101,15 +107,13 @@ service  MFTTransferService {
 
     rpc submitTransfer(TransferApiRequest) returns (TransferApiResponse);
 
-    rpc submitBatchTransfer(BatchTransferApiRequest) returns (BatchTransferApiResponse);
-
     rpc submitHttpUpload(HttpUploadApiRequest) returns (HttpUploadApiResponse);
 
     rpc submitHttpDownload(HttpDownloadApiRequest) returns (HttpDownloadApiResponse);
 
-    rpc getTransferStates(TransferStateApiRequest) returns (stream TransferStateApiResponse);
+    rpc getAllTransferStates(TransferStateApiRequest) returns (stream TransferStateResponse);
 
-    rpc getTransferState(TransferStateApiRequest) returns (TransferStateApiResponse);
+    rpc getTransferStateSummary(TransferStateApiRequest) returns (TransferStateSummaryResponse);
 
     rpc getResourceAvailability(FetchResourceMetadataRequest) returns (ResourceAvailabilityResponse);
 

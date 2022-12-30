@@ -1,6 +1,7 @@
 package org.apache.airavata.mft.command.line.sub.transfer;
 
 import org.apache.airavata.mft.api.client.MFTApiClient;
+import org.apache.airavata.mft.api.service.EndpointPaths;
 import org.apache.airavata.mft.api.service.TransferApiRequest;
 import org.apache.airavata.mft.api.service.TransferApiResponse;
 import org.apache.airavata.mft.common.AuthToken;
@@ -55,9 +56,9 @@ public class SubmitTransferSubCommand implements Callable<Integer> {
                 .setSourceSecretId(sourceSecretForStorage.getSecretId())
                 .setDestinationSecretId(destSecretForStorage.getSecretId())
                 .setDestinationStorageId(destinationStorageId)
-                .setDestinationPath(destinationPath)
                 .setSourceStorageId(sourceStorageId)
-                .setSourcePath(sourcePath).build());
+                .addEndpointPaths(EndpointPaths.newBuilder().setSourcePath(sourcePath)
+                        .setDestinationPath(destinationPath).build()).build());
 
         System.out.println("Submitted Transfer " + transferResp.getTransferId());
         return 0;

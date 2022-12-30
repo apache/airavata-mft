@@ -17,7 +17,6 @@
 
 package org.apache.airavata.mft.controller;
 
-import org.apache.airavata.mft.admin.ControllerRequestBuilder;
 import org.apache.airavata.mft.admin.MFTConsulClient;
 import org.apache.airavata.mft.resource.client.StorageServiceClient;
 import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
@@ -57,12 +56,17 @@ public class AppConfig {
     }
 
     @Bean
-    public ControllerRequestBuilder controllerRequestBuilder() {
-        return new ControllerRequestBuilder();
+    public RequestBuilder requestBuilder() {
+        return new RequestBuilder();
     }
 
     @Bean
     public MFTConsulClient mftConsulClient() {
         return new MFTConsulClient(consulHost, consulPort);
+    }
+
+    @Bean
+    public AgentTransferDispatcher pathOptimizer() {
+        return new AgentTransferDispatcher();
     }
 }

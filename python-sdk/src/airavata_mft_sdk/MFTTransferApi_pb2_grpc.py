@@ -20,11 +20,6 @@ class MFTTransferServiceStub(object):
                 request_serializer=MFTTransferApi__pb2.TransferApiRequest.SerializeToString,
                 response_deserializer=MFTTransferApi__pb2.TransferApiResponse.FromString,
                 )
-        self.submitBatchTransfer = channel.unary_unary(
-                '/org.apache.airavata.mft.api.service.MFTTransferService/submitBatchTransfer',
-                request_serializer=MFTTransferApi__pb2.BatchTransferApiRequest.SerializeToString,
-                response_deserializer=MFTTransferApi__pb2.BatchTransferApiResponse.FromString,
-                )
         self.submitHttpUpload = channel.unary_unary(
                 '/org.apache.airavata.mft.api.service.MFTTransferService/submitHttpUpload',
                 request_serializer=MFTTransferApi__pb2.HttpUploadApiRequest.SerializeToString,
@@ -35,15 +30,15 @@ class MFTTransferServiceStub(object):
                 request_serializer=MFTTransferApi__pb2.HttpDownloadApiRequest.SerializeToString,
                 response_deserializer=MFTTransferApi__pb2.HttpDownloadApiResponse.FromString,
                 )
-        self.getTransferStates = channel.unary_stream(
-                '/org.apache.airavata.mft.api.service.MFTTransferService/getTransferStates',
+        self.getAllTransferStates = channel.unary_stream(
+                '/org.apache.airavata.mft.api.service.MFTTransferService/getAllTransferStates',
                 request_serializer=MFTTransferApi__pb2.TransferStateApiRequest.SerializeToString,
-                response_deserializer=MFTTransferApi__pb2.TransferStateApiResponse.FromString,
+                response_deserializer=MFTTransferApi__pb2.TransferStateResponse.FromString,
                 )
-        self.getTransferState = channel.unary_unary(
-                '/org.apache.airavata.mft.api.service.MFTTransferService/getTransferState',
+        self.getTransferStateSummary = channel.unary_unary(
+                '/org.apache.airavata.mft.api.service.MFTTransferService/getTransferStateSummary',
                 request_serializer=MFTTransferApi__pb2.TransferStateApiRequest.SerializeToString,
-                response_deserializer=MFTTransferApi__pb2.TransferStateApiResponse.FromString,
+                response_deserializer=MFTTransferApi__pb2.TransferStateSummaryResponse.FromString,
                 )
         self.getResourceAvailability = channel.unary_unary(
                 '/org.apache.airavata.mft.api.service.MFTTransferService/getResourceAvailability',
@@ -66,12 +61,6 @@ class MFTTransferServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def submitBatchTransfer(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
     def submitHttpUpload(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -84,13 +73,13 @@ class MFTTransferServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def getTransferStates(self, request, context):
+    def getAllTransferStates(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def getTransferState(self, request, context):
+    def getTransferStateSummary(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -116,11 +105,6 @@ def add_MFTTransferServiceServicer_to_server(servicer, server):
                     request_deserializer=MFTTransferApi__pb2.TransferApiRequest.FromString,
                     response_serializer=MFTTransferApi__pb2.TransferApiResponse.SerializeToString,
             ),
-            'submitBatchTransfer': grpc.unary_unary_rpc_method_handler(
-                    servicer.submitBatchTransfer,
-                    request_deserializer=MFTTransferApi__pb2.BatchTransferApiRequest.FromString,
-                    response_serializer=MFTTransferApi__pb2.BatchTransferApiResponse.SerializeToString,
-            ),
             'submitHttpUpload': grpc.unary_unary_rpc_method_handler(
                     servicer.submitHttpUpload,
                     request_deserializer=MFTTransferApi__pb2.HttpUploadApiRequest.FromString,
@@ -131,15 +115,15 @@ def add_MFTTransferServiceServicer_to_server(servicer, server):
                     request_deserializer=MFTTransferApi__pb2.HttpDownloadApiRequest.FromString,
                     response_serializer=MFTTransferApi__pb2.HttpDownloadApiResponse.SerializeToString,
             ),
-            'getTransferStates': grpc.unary_stream_rpc_method_handler(
-                    servicer.getTransferStates,
+            'getAllTransferStates': grpc.unary_stream_rpc_method_handler(
+                    servicer.getAllTransferStates,
                     request_deserializer=MFTTransferApi__pb2.TransferStateApiRequest.FromString,
-                    response_serializer=MFTTransferApi__pb2.TransferStateApiResponse.SerializeToString,
+                    response_serializer=MFTTransferApi__pb2.TransferStateResponse.SerializeToString,
             ),
-            'getTransferState': grpc.unary_unary_rpc_method_handler(
-                    servicer.getTransferState,
+            'getTransferStateSummary': grpc.unary_unary_rpc_method_handler(
+                    servicer.getTransferStateSummary,
                     request_deserializer=MFTTransferApi__pb2.TransferStateApiRequest.FromString,
-                    response_serializer=MFTTransferApi__pb2.TransferStateApiResponse.SerializeToString,
+                    response_serializer=MFTTransferApi__pb2.TransferStateSummaryResponse.SerializeToString,
             ),
             'getResourceAvailability': grpc.unary_unary_rpc_method_handler(
                     servicer.getResourceAvailability,
@@ -179,23 +163,6 @@ class MFTTransferService(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def submitBatchTransfer(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.api.service.MFTTransferService/submitBatchTransfer',
-            MFTTransferApi__pb2.BatchTransferApiRequest.SerializeToString,
-            MFTTransferApi__pb2.BatchTransferApiResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
     def submitHttpUpload(request,
             target,
             options=(),
@@ -230,7 +197,7 @@ class MFTTransferService(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def getTransferStates(request,
+    def getAllTransferStates(request,
             target,
             options=(),
             channel_credentials=None,
@@ -240,14 +207,14 @@ class MFTTransferService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/org.apache.airavata.mft.api.service.MFTTransferService/getTransferStates',
+        return grpc.experimental.unary_stream(request, target, '/org.apache.airavata.mft.api.service.MFTTransferService/getAllTransferStates',
             MFTTransferApi__pb2.TransferStateApiRequest.SerializeToString,
-            MFTTransferApi__pb2.TransferStateApiResponse.FromString,
+            MFTTransferApi__pb2.TransferStateResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def getTransferState(request,
+    def getTransferStateSummary(request,
             target,
             options=(),
             channel_credentials=None,
@@ -257,9 +224,9 @@ class MFTTransferService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.api.service.MFTTransferService/getTransferState',
+        return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.api.service.MFTTransferService/getTransferStateSummary',
             MFTTransferApi__pb2.TransferStateApiRequest.SerializeToString,
-            MFTTransferApi__pb2.TransferStateApiResponse.FromString,
+            MFTTransferApi__pb2.TransferStateSummaryResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

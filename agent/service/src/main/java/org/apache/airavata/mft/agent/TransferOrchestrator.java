@@ -18,8 +18,7 @@
 package org.apache.airavata.mft.agent;
 
 import org.apache.airavata.mft.admin.models.TransferState;
-import org.apache.airavata.mft.agent.stub.AgentTransferRequest;
-import org.apache.airavata.mft.agent.stub.ResourceMetadata;
+import org.apache.airavata.mft.agent.stub.*;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
 import org.apache.airavata.mft.core.api.ConnectorConfig;
 import org.apache.airavata.mft.core.api.MetadataCollector;
@@ -79,53 +78,61 @@ public class TransferOrchestrator {
     }
 
     public void submitTransferToProcess(String transferId, AgentTransferRequest request,
-                                        BiConsumer<String, TransferState> updateStatus,
+                                        BiConsumer<EndpointPaths, TransferState> updateStatus,
                                         Consumer<Boolean> createTransferHook) {
-        long totalPending = totalPendingTransfers.incrementAndGet();
-        logger.info("Total pending transfers {}", totalPending);
-        transferRequestExecutor.submit(() -> processTransfer(transferId, request, updateStatus, createTransferHook));
+        long totalPending = totalPendingTransfers.addAndGet(request.getEndpointPathsCount());
+        logger.info("Total pending files to transfer {}", totalPending);
+        for (EndpointPaths endpointPath : request.getEndpointPathsList()) {
+
+            transferRequestExecutor.submit(() -> processTransfer(transferId, request.getRequestId(),
+                    request.getSourceStorage(),
+                    request.getDestinationStorage(), request.getSourceSecret(),
+                    request.getDestinationSecret(), endpointPath,
+                    updateStatus, createTransferHook));
+        }
     }
 
-    public void processTransfer(String transferId, AgentTransferRequest request,
-                                BiConsumer<String, TransferState> updateStatus, Consumer<Boolean> createTransferHook) {
+    public void processTransfer(String transferId, String requestId, StorageWrapper sourceStorage, StorageWrapper destStorage,
+                                SecretWrapper sourceSecret,SecretWrapper destSecret, EndpointPaths endpointPath,
+                                BiConsumer<EndpointPaths, TransferState> updateStatus, Consumer<Boolean> createTransferHook) {
         try {
 
             long running = totalRunningTransfers.incrementAndGet();
             long pending = totalPendingTransfers.decrementAndGet();
             logger.info("Received request {}. Total Running {}. Total Pending {}", transferId, running, pending);
 
-            updateStatus.accept(transferId, new TransferState()
+            updateStatus.accept(endpointPath, new TransferState()
                     .setState("STARTING")
                     .setPercentage(0)
                     .setUpdateTimeMils(System.currentTimeMillis())
                     .setDescription("Starting the transfer"));
 
             Optional<MetadataCollector> srcMetadataCollectorOp = MetadataCollectorResolver
-                    .resolveMetadataCollector(request.getSourceStorage().getStorageCase().name());
+                    .resolveMetadataCollector(sourceStorage.getStorageCase().name());
 
             MetadataCollector srcMetadataCollector = srcMetadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for source"));
-            srcMetadataCollector.init(request.getSourceStorage(), request.getSourceSecret());
+            srcMetadataCollector.init(sourceStorage, sourceSecret);
 
-            ResourceMetadata srcMetadata = srcMetadataCollector.getResourceMetadata(request.getSourcePath(), false);
+            ResourceMetadata srcMetadata = srcMetadataCollector.getResourceMetadata(endpointPath.getSourcePath(), false);
             if (srcMetadata.getMetadataCase() != ResourceMetadata.MetadataCase.FILE) {
                 throw new Exception("Expected a file as the source but received " + srcMetadata.getMetadataCase().name());
             }
 
             ConnectorConfig srcCC = ConnectorConfig.ConnectorConfigBuilder.newBuilder()
                     .withTransferId(transferId)
-                    .withSecret(request.getSourceSecret())
-                    .withStorage(request.getSourceStorage())
-                    .withResourcePath(request.getSourcePath())
+                    .withSecret(sourceSecret)
+                    .withStorage(sourceStorage)
+                    .withResourcePath(endpointPath.getSourcePath())
                     .withMetadata(srcMetadata).build();
 
             ConnectorConfig dstCC = ConnectorConfig.ConnectorConfigBuilder.newBuilder()
                     .withTransferId(transferId)
-                    .withSecret(request.getDestinationSecret())
-                    .withStorage(request.getDestinationStorage())
-                    .withResourcePath(request.getDestinationPath())
+                    .withStorage(destStorage)
+                    .withSecret(destSecret)
+                    .withResourcePath(endpointPath.getDestinationPath())
                     .withMetadata(srcMetadata).build();
 
-            updateStatus.accept(transferId, new TransferState()
+            updateStatus.accept(endpointPath, new TransferState()
                     .setState("STARTED")
                     .setPercentage(0)
                     .setUpdateTimeMils(System.currentTimeMillis())
@@ -149,18 +156,15 @@ public class TransferOrchestrator {
 
 
         } catch (Throwable e) {
-            if (request != null) {
-                logger.error("Error in submitting transfer {}", transferId, e);
+            logger.error("Error in submitting transfer {}", transferId, e);
 
-                updateStatus.accept(transferId, new TransferState()
-                        .setState("FAILED")
-                        .setPercentage(0)
-                        .setUpdateTimeMils(System.currentTimeMillis())
-                        .setDescription(ExceptionUtils.getStackTrace(e)));
+            updateStatus.accept(endpointPath, new TransferState()
+                    .setState("FAILED")
+                    .setPercentage(0)
+                    .setUpdateTimeMils(System.currentTimeMillis())
+                    .setDescription(ExceptionUtils.getStackTrace(e)));
 
-            } else {
-                logger.error("Unknown error in processing message {}", request.toString(), e);
-            }
+
         } finally {
             //logger.info("Deleting key " + consulEntryKey);
             //mftConsulClient.getKvClient().deleteKey(consulEntryKey); // Due to bug in consul https://github.com/hashicorp/consul/issues/571

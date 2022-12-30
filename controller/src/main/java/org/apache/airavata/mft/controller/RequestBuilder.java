@@ -1,4 +1,4 @@
-package org.apache.airavata.mft.admin;
+package org.apache.airavata.mft.controller;
 
 import org.apache.airavata.mft.agent.stub.AgentTransferRequest;
 import org.apache.airavata.mft.agent.stub.SecretWrapper;
@@ -23,7 +23,6 @@ import org.apache.airavata.mft.credential.stubs.scp.SCPSecretGetRequest;
 import org.apache.airavata.mft.credential.stubs.swift.SwiftSecret;
 import org.apache.airavata.mft.credential.stubs.swift.SwiftSecretGetRequest;
 import org.apache.airavata.mft.resource.client.StorageServiceClient;
-import org.apache.airavata.mft.resource.client.StorageServiceClientBuilder;
 import org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage;
 import org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageGetRequest;
 import org.apache.airavata.mft.resource.stubs.box.storage.BoxStorage;
@@ -53,7 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ControllerRequestBuilder {
+public class RequestBuilder {
 
     private final Map<String, StorageWrapper> storageCache = new ConcurrentHashMap<>();
     private final Map<String, SecretWrapper> secretCache = new ConcurrentHashMap<>();
@@ -64,10 +63,8 @@ public class ControllerRequestBuilder {
     @Autowired
     private SecretServiceClient secretServiceClient;
 
-    public AgentTransferRequest createAgentTransferRequest(TransferApiRequest transferRequest) {
+    public AgentTransferRequest.Builder prepareAgentTransferRequest(TransferApiRequest transferRequest) {
         AgentTransferRequest.Builder agentTransferBuilder = AgentTransferRequest.newBuilder();
-        agentTransferBuilder.setSourcePath(transferRequest.getSourcePath());
-        agentTransferBuilder.setDestinationPath(transferRequest.getDestinationPath());
         Pair<StorageWrapper, SecretWrapper> sourceCred = createCredentials(transferRequest.getSourceStorageId(),
                         transferRequest.getSourceSecretId());
 
@@ -80,7 +77,7 @@ public class ControllerRequestBuilder {
         agentTransferBuilder.setDestinationStorage(destCred.getLeft());
         agentTransferBuilder.setDestinationSecret(destCred.getRight());
 
-        return agentTransferBuilder.build();
+        return agentTransferBuilder;
     }
     public Pair<StorageWrapper, SecretWrapper> createCredentials(String storageId, String secretId) {
 

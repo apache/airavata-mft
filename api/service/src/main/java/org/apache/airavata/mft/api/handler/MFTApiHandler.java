@@ -81,6 +81,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 @GRpcService
 public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImplBase {
@@ -127,69 +128,6 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
             responseObserver.onError(Status.INTERNAL
                     .withDescription("Failed to submit transfer request. " + e.getMessage())
                     .asException());
-        }
-    }
-
-    private class BatchTransferSubmitter implements Callable<Pair<Integer, String>> {
-        private int index = 0;
-        private TransferApiRequest apiRequest;
-
-        public BatchTransferSubmitter(int index, TransferApiRequest apiRequest) {
-            this.index = index;
-            this.apiRequest = apiRequest;
-        }
-
-        @Override
-        public Pair<Integer, String> call() throws Exception {
-
-            String transferId = mftConsulClient.submitTransfer(apiRequest);
-            logger.info("Submitted the transfer request {}", transferId);
-
-            mftConsulClient.saveTransferState(transferId, new TransferState()
-                    .setUpdateTimeMils(System.currentTimeMillis())
-                    .setState("RECEIVED").setPercentage(0)
-                    .setPublisher("api")
-                    .setDescription("Received transfer job " + transferId));
-
-            return Pair.of(index, transferId);
-        }
-    }
-
-    @Override
-    public void submitBatchTransfer(BatchTransferApiRequest request, StreamObserver<BatchTransferApiResponse> responseObserver) {
-        ExecutorService executorService = Executors.newFixedThreadPool(20);
-
-        try {
-            List<TransferApiRequest> transferRequests = request.getTransferRequestsList();
-            BatchTransferApiResponse.Builder responseBuilder = BatchTransferApiResponse.newBuilder();
-
-            ExecutorCompletionService<Pair<Integer,String>> completionService = new ExecutorCompletionService<>(executorService);
-
-            for (int index = 0; index < transferRequests.size(); index ++) {
-                completionService.submit(new BatchTransferSubmitter(index, transferRequests.get(index)));
-            }
-
-            Map<Integer, String> resultMap = new HashMap<>();
-            for (int index = 0; index < transferRequests.size(); index ++) {
-                Future<Pair<Integer, String>> futureResult = completionService.take();
-                Pair<Integer, String> result = futureResult.get();
-                resultMap.put(result.getLeft(), result.getRight());
-            }
-
-            for (int index = 0; index < transferRequests.size(); index ++) {
-                responseBuilder.addTransferIds(resultMap.get(index));
-            }
-
-            responseObserver.onNext(responseBuilder.build());
-            responseObserver.onCompleted();
-
-        } catch (Exception e) {
-            logger.error("Error in submitting batch transfer request", e);
-            responseObserver.onError(Status.INTERNAL
-                    .withDescription("Failed to submit batch transfer request. " + e.getMessage())
-                    .asException());
-        } finally {
-            executorService.shutdown();
         }
     }
 
@@ -247,11 +185,11 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
     }
 
     @Override
-    public void getTransferStates(TransferStateApiRequest request, StreamObserver<TransferStateApiResponse> responseObserver) {
+    public void getAllTransferStates(TransferStateApiRequest request, StreamObserver<TransferStateResponse> responseObserver) {
         try {
             List<TransferState> states = mftConsulClient.getTransferStates(request.getTransferId());
             states.forEach(st -> {
-                TransferStateApiResponse s = dozerBeanMapper.map(st, TransferStateApiResponse.newBuilder().getClass()).build();
+                TransferStateResponse s = dozerBeanMapper.map(st, TransferStateResponse.newBuilder().getClass()).build();
                 responseObserver.onNext(s);
             });
             responseObserver.onCompleted();
@@ -264,19 +202,77 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
     }
 
     @Override
-    public void getTransferState(TransferStateApiRequest request, StreamObserver<TransferStateApiResponse> responseObserver) {
+    public void getTransferStateSummary(TransferStateApiRequest request, StreamObserver<TransferStateSummaryResponse> responseObserver) {
         try {
-            Optional<TransferState> stateOp = mftConsulClient.getTransferState(request.getTransferId());
 
-            if (stateOp.isPresent()) {
-                TransferStateApiResponse s = dozerBeanMapper.map(stateOp.get(),
-                        TransferStateApiResponse.newBuilder().getClass()).build();
-                responseObserver.onNext(s);
+            TransferStateSummaryResponse.Builder stateBuilder = TransferStateSummaryResponse.newBuilder().setPercentage(0);
+
+            List<TransferState> transferStates = mftConsulClient.getTransferStates(request.getTransferId());
+            List<TransferState> mainTransferStatus = transferStates.stream().filter(st -> st.getChildId() == null)
+                    .sorted((st1, st2) -> Long.compare(st2.getUpdateTimeMils(), st1.getUpdateTimeMils()))
+                    .collect(Collectors.toList());
+
+            Optional<TransferApiRequest> processedTransferOp = mftConsulClient.getProcessedTransfer(request.getTransferId());
+
+            if (processedTransferOp.isPresent()) {
+
+                Set<String> completedFiles = new HashSet<>();
+                Set<String> failedFiles = new HashSet<>();
+                transferStates.stream().filter(st -> st.getChildId() != null).forEach(st -> {
+                    if (st.getState().equals("COMPLETED")) {
+                        completedFiles.add(st.getChildId());
+                    } else if (st.getState().equals("FAILED")) {
+                        failedFiles.add("FAILED");
+                    }
+                });
+
+                Set<String> pendingFiles = processedTransferOp.get().getEndpointPathsList()
+                        .stream().map(ep -> mftConsulClient.getEndpointPathHash(ep))
+                        .filter(key -> !completedFiles.contains(key) && !failedFiles.contains(key)).collect(Collectors.toSet());
+
+                stateBuilder.addAllCompleted(completedFiles);
+                stateBuilder.addAllFailed(failedFiles);
+                stateBuilder.addAllProcessing(pendingFiles);
+
+                if (!pendingFiles.isEmpty()) {
+                    stateBuilder.setState("IN PROGRESS");
+                    stateBuilder.setPercentage((completedFiles.size() + failedFiles.size()) * 1.0 /
+                            (completedFiles.size() + failedFiles.size() + pendingFiles.size()));
+                    stateBuilder.setDescription("Transfer is in progress");
+
+                } else {
+                    if (!failedFiles.isEmpty() && !completedFiles.isEmpty()) {
+                        stateBuilder.setState("PARTIAL FAILURE");
+                        stateBuilder.setDescription("Some file transfers failed");
+                        stateBuilder.setPercentage((completedFiles.size() + failedFiles.size()) * 1.0 /
+                                (completedFiles.size() + failedFiles.size() + pendingFiles.size()));
+                    } else if (!failedFiles.isEmpty()) {
+                        stateBuilder.setState("FAILED");
+                        stateBuilder.setDescription("All file transfers failed");
+                        stateBuilder.setPercentage((completedFiles.size() + failedFiles.size()) * 1.0 /
+                                (completedFiles.size() + failedFiles.size() + pendingFiles.size()));
+                    } else if (!completedFiles.isEmpty()) {
+                        stateBuilder.setState("COMPLETED");
+                        stateBuilder.setState("All file transfers completed");
+                        stateBuilder.setPercentage((completedFiles.size() + failedFiles.size()) * 1.0 /
+                                (completedFiles.size() + failedFiles.size() + pendingFiles.size()));
+                    }
+                }
+
+                responseObserver.onNext(stateBuilder.build());
                 responseObserver.onCompleted();
+
+            } else if (!mainTransferStatus.isEmpty()){
+                stateBuilder.setState(mainTransferStatus.get(0).getState());
+                stateBuilder.setPercentage(0);
+
+                responseObserver.onNext(stateBuilder.build());
+                responseObserver.onCompleted();
+
             } else {
-                logger.error("There is no state for transfer " + request.getTransferId());
+                logger.error("There is processed transfer with id {}", request.getTransferId());
                 responseObserver.onError(Status.NOT_FOUND
-                        .withDescription("There is no state for transfer " + request.getTransferId())
+                        .withDescription("There is no processed transfer with id " + request.getTransferId())
                         .asRuntimeException());
             }
         } catch (Exception e) {
@@ -288,7 +284,6 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
     }
 
     private GetResourceMetadataRequest deriveDirectRequest(GetResourceMetadataFromIDsRequest idRequest) {
-
 
         StorageServiceClient storageClient = StorageServiceClientBuilder.buildClient(resourceServiceHost, resourceServicePort);
         SecretServiceClient secretClient = SecretServiceClientBuilder.buildClient(secretServiceHost, secretServicePort);

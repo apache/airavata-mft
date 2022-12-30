@@ -34,7 +34,7 @@ from airavata_mft_sdk.scp import SCPCredential_pb2 as scp_dot_SCPCredential__pb2
 from airavata_mft_sdk.swift import SwiftCredential_pb2 as swift_dot_SwiftCredential__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13MFTAgentStubs.proto\x12\"org.apache.airavata.mft.agent.stub\x1a\x18\x61zure/AzureStorage.proto\x1a\x14\x62ox/BoxStorage.proto\x1a\x1c\x64ropbox/DropboxStorage.proto\x1a\x14\x66tp/FTPStorage.proto\x1a\x14gcs/GCSStorage.proto\x1a\x18local/LocalStorage.proto\x1a\x18odata/ODataStorage.proto\x1a\x12s3/S3Storage.proto\x1a\x14scp/SCPStorage.proto\x1a\x18swift/SwiftStorage.proto\x1a\x1b\x61zure/AzureCredential.proto\x1a\x17\x62ox/BoxCredential.proto\x1a\x1f\x64ropbox/DropboxCredential.proto\x1a\x17\x66tp/FTPCredential.proto\x1a\x17gcs/GCSCredential.proto\x1a\x1bodata/ODataCredential.proto\x1a\x15s3/S3Credential.proto\x1a\x17scp/SCPCredential.proto\x1a\x1bswift/SwiftCredential.proto\"\xd2\x06\n\x0eStorageWrapper\x12S\n\x05\x61zure\x18\x01 \x01(\x0b\x32\x42.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageH\x00\x12M\n\x03\x62ox\x18\x02 \x01(\x0b\x32>.org.apache.airavata.mft.resource.stubs.box.storage.BoxStorageH\x00\x12Y\n\x07\x64ropbox\x18\x03 \x01(\x0b\x32\x46.org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageH\x00\x12M\n\x03\x66tp\x18\x04 \x01(\x0b\x32>.org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageH\x00\x12M\n\x03gcs\x18\x05 \x01(\x0b\x32>.org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageH\x00\x12S\n\x05local\x18\x06 \x01(\x0b\x32\x42.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageH\x00\x12S\n\x05odata\x18\x07 \x01(\x0b\x32\x42.org.apache.airavata.mft.resource.stubs.odata.storage.ODataStorageH\x00\x12J\n\x02s3\x18\x08 \x01(\x0b\x32<.org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageH\x00\x12M\n\x03scp\x18\t \x01(\x0b\x32>.org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageH\x00\x12S\n\x05swift\x18\n \x01(\x0b\x32\x42.org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorageH\x00\x42\t\n\x07storage\"\xbc\x05\n\rSecretWrapper\x12L\n\x05\x61zure\x18\x01 \x01(\x0b\x32;.org.apache.airavata.mft.credential.stubs.azure.AzureSecretH\x00\x12\x46\n\x03\x62ox\x18\x02 \x01(\x0b\x32\x37.org.apache.airavata.mft.credential.stubs.box.BoxSecretH\x00\x12R\n\x07\x64ropbox\x18\x03 \x01(\x0b\x32?.org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretH\x00\x12\x46\n\x03\x66tp\x18\x04 \x01(\x0b\x32\x37.org.apache.airavata.mft.credential.stubs.ftp.FTPSecretH\x00\x12\x46\n\x03gcs\x18\x05 \x01(\x0b\x32\x37.org.apache.airavata.mft.credential.stubs.gcs.GCSSecretH\x00\x12L\n\x05odata\x18\x06 \x01(\x0b\x32;.org.apache.airavata.mft.credential.stubs.odata.ODataSecretH\x00\x12\x43\n\x02s3\x18\x07 \x01(\x0b\x32\x35.org.apache.airavata.mft.credential.stubs.s3.S3SecretH\x00\x12\x46\n\x03scp\x18\x08 \x01(\x0b\x32\x37.org.apache.airavata.mft.credential.stubs.scp.SCPSecretH\x00\x12L\n\x05swift\x18\t \x01(\x0b\x32;.org.apache.airavata.mft.credential.stubs.swift.SwiftSecretH\x00\x42\x08\n\x06secret\"\xf5\x02\n\x14\x41gentTransferRequest\x12I\n\rsourceStorage\x18\x01 \x01(\x0b\x32\x32.org.apache.airavata.mft.agent.stub.StorageWrapper\x12G\n\x0csourceSecret\x18\x02 \x01(\x0b\x32\x31.org.apache.airavata.mft.agent.stub.SecretWrapper\x12\x12\n\nsourcePath\x18\x03 \x01(\t\x12N\n\x12\x64\x65stinationStorage\x18\x04 \x01(\x0b\x32\x32.org.apache.airavata.mft.agent.stub.StorageWrapper\x12L\n\x11\x64\x65stinationSecret\x18\x05 \x01(\x0b\x32\x31.org.apache.airavata.mft.agent.stub.SecretWrapper\x12\x17\n\x0f\x64\x65stinationPath\x18\x06 \x01(\t\"\x89\x01\n\x0c\x46ileMetadata\x12\x14\n\x0c\x66riendlyName\x18\x01 \x01(\t\x12\x14\n\x0cresourceSize\x18\x02 \x01(\x03\x12\x13\n\x0b\x63reatedTime\x18\x03 \x01(\x03\x12\x12\n\nupdateTime\x18\x04 \x01(\x03\x12\x0e\n\x06md5sum\x18\x05 \x01(\t\x12\x14\n\x0cresourcePath\x18\x06 \x01(\t\"\xf5\x01\n\x11\x44irectoryMetadata\x12\x14\n\x0c\x66riendlyName\x18\x01 \x01(\t\x12\x13\n\x0b\x63reatedTime\x18\x02 \x01(\x03\x12\x12\n\nupdateTime\x18\x03 \x01(\x03\x12\x14\n\x0cresourcePath\x18\x04 \x01(\t\x12J\n\x0b\x64irectories\x18\x05 \x03(\x0b\x32\x35.org.apache.airavata.mft.agent.stub.DirectoryMetadata\x12?\n\x05\x66iles\x18\x06 \x03(\x0b\x32\x30.org.apache.airavata.mft.agent.stub.FileMetadata\"\xf5\x01\n\x10ResourceMetadata\x12@\n\x04\x66ile\x18\x01 \x01(\x0b\x32\x30.org.apache.airavata.mft.agent.stub.FileMetadataH\x00\x12J\n\tdirectory\x18\x02 \x01(\x0b\x32\x35.org.apache.airavata.mft.agent.stub.DirectoryMetadataH\x00\x12G\n\x05\x65rror\x18\x03 \x01(\x0e\x32\x36.org.apache.airavata.mft.agent.stub.MetadataFetchErrorH\x00\x42\n\n\x08metadata\"\xd3\x01\n\x1aGetResourceMetadataRequest\x12\x14\n\x0cresourcePath\x18\x01 \x01(\t\x12\x43\n\x07storage\x18\x02 \x01(\x0b\x32\x32.org.apache.airavata.mft.agent.stub.StorageWrapper\x12\x41\n\x06secret\x18\x03 \x01(\x0b\x32\x31.org.apache.airavata.mft.agent.stub.SecretWrapper\x12\x17\n\x0frecursiveSearch\x18\x04 \x01(\x08*6\n\x12MetadataFetchError\x12\r\n\tNOT_FOUND\x10\x00\x12\x11\n\rNO_PERMISSION\x10\x01\x42\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13MFTAgentStubs.proto\x12\"org.apache.airavata.mft.agent.stub\x1a\x18\x61zure/AzureStorage.proto\x1a\x14\x62ox/BoxStorage.proto\x1a\x1c\x64ropbox/DropboxStorage.proto\x1a\x14\x66tp/FTPStorage.proto\x1a\x14gcs/GCSStorage.proto\x1a\x18local/LocalStorage.proto\x1a\x18odata/ODataStorage.proto\x1a\x12s3/S3Storage.proto\x1a\x14scp/SCPStorage.proto\x1a\x18swift/SwiftStorage.proto\x1a\x1b\x61zure/AzureCredential.proto\x1a\x17\x62ox/BoxCredential.proto\x1a\x1f\x64ropbox/DropboxCredential.proto\x1a\x17\x66tp/FTPCredential.proto\x1a\x17gcs/GCSCredential.proto\x1a\x1bodata/ODataCredential.proto\x1a\x15s3/S3Credential.proto\x1a\x17scp/SCPCredential.proto\x1a\x1bswift/SwiftCredential.proto\"\xd2\x06\n\x0eStorageWrapper\x12S\n\x05\x61zure\x18\x01 \x01(\x0b\x32\x42.org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorageH\x00\x12M\n\x03\x62ox\x18\x02 \x01(\x0b\x32>.org.apache.airavata.mft.resource.stubs.box.storage.BoxStorageH\x00\x12Y\n\x07\x64ropbox\x18\x03 \x01(\x0b\x32\x46.org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorageH\x00\x12M\n\x03\x66tp\x18\x04 \x01(\x0b\x32>.org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageH\x00\x12M\n\x03gcs\x18\x05 \x01(\x0b\x32>.org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageH\x00\x12S\n\x05local\x18\x06 \x01(\x0b\x32\x42.org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageH\x00\x12S\n\x05odata\x18\x07 \x01(\x0b\x32\x42.org.apache.airavata.mft.resource.stubs.odata.storage.ODataStorageH\x00\x12J\n\x02s3\x18\x08 \x01(\x0b\x32<.org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageH\x00\x12M\n\x03scp\x18\t \x01(\x0b\x32>.org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorageH\x00\x12S\n\x05swift\x18\n \x01(\x0b\x32\x42.org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorageH\x00\x42\t\n\x07storage\"\xbc\x05\n\rSecretWrapper\x12L\n\x05\x61zure\x18\x01 \x01(\x0b\x32;.org.apache.airavata.mft.credential.stubs.azure.AzureSecretH\x00\x12\x46\n\x03\x62ox\x18\x02 \x01(\x0b\x32\x37.org.apache.airavata.mft.credential.stubs.box.BoxSecretH\x00\x12R\n\x07\x64ropbox\x18\x03 \x01(\x0b\x32?.org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecretH\x00\x12\x46\n\x03\x66tp\x18\x04 \x01(\x0b\x32\x37.org.apache.airavata.mft.credential.stubs.ftp.FTPSecretH\x00\x12\x46\n\x03gcs\x18\x05 \x01(\x0b\x32\x37.org.apache.airavata.mft.credential.stubs.gcs.GCSSecretH\x00\x12L\n\x05odata\x18\x06 \x01(\x0b\x32;.org.apache.airavata.mft.credential.stubs.odata.ODataSecretH\x00\x12\x43\n\x02s3\x18\x07 \x01(\x0b\x32\x35.org.apache.airavata.mft.credential.stubs.s3.S3SecretH\x00\x12\x46\n\x03scp\x18\x08 \x01(\x0b\x32\x37.org.apache.airavata.mft.credential.stubs.scp.SCPSecretH\x00\x12L\n\x05swift\x18\t \x01(\x0b\x32;.org.apache.airavata.mft.credential.stubs.swift.SwiftSecretH\x00\x42\x08\n\x06secret\"<\n\rEndpointPaths\x12\x12\n\nsourcePath\x18\x01 \x01(\t\x12\x17\n\x0f\x64\x65stinationPath\x18\x02 \x01(\t\"\xa5\x03\n\x14\x41gentTransferRequest\x12\x11\n\trequestId\x18\x01 \x01(\t\x12I\n\rsourceStorage\x18\x02 \x01(\x0b\x32\x32.org.apache.airavata.mft.agent.stub.StorageWrapper\x12G\n\x0csourceSecret\x18\x03 \x01(\x0b\x32\x31.org.apache.airavata.mft.agent.stub.SecretWrapper\x12N\n\x12\x64\x65stinationStorage\x18\x04 \x01(\x0b\x32\x32.org.apache.airavata.mft.agent.stub.StorageWrapper\x12L\n\x11\x64\x65stinationSecret\x18\x05 \x01(\x0b\x32\x31.org.apache.airavata.mft.agent.stub.SecretWrapper\x12H\n\rendpointPaths\x18\x06 \x03(\x0b\x32\x31.org.apache.airavata.mft.agent.stub.EndpointPaths\"\x89\x01\n\x0c\x46ileMetadata\x12\x14\n\x0c\x66riendlyName\x18\x01 \x01(\t\x12\x14\n\x0cresourceSize\x18\x02 \x01(\x03\x12\x13\n\x0b\x63reatedTime\x18\x03 \x01(\x03\x12\x12\n\nupdateTime\x18\x04 \x01(\x03\x12\x0e\n\x06md5sum\x18\x05 \x01(\t\x12\x14\n\x0cresourcePath\x18\x06 \x01(\t\"\xf5\x01\n\x11\x44irectoryMetadata\x12\x14\n\x0c\x66riendlyName\x18\x01 \x01(\t\x12\x13\n\x0b\x63reatedTime\x18\x02 \x01(\x03\x12\x12\n\nupdateTime\x18\x03 \x01(\x03\x12\x14\n\x0cresourcePath\x18\x04 \x01(\t\x12J\n\x0b\x64irectories\x18\x05 \x03(\x0b\x32\x35.org.apache.airavata.mft.agent.stub.DirectoryMetadata\x12?\n\x05\x66iles\x18\x06 \x03(\x0b\x32\x30.org.apache.airavata.mft.agent.stub.FileMetadata\"\xf5\x01\n\x10ResourceMetadata\x12@\n\x04\x66ile\x18\x01 \x01(\x0b\x32\x30.org.apache.airavata.mft.agent.stub.FileMetadataH\x00\x12J\n\tdirectory\x18\x02 \x01(\x0b\x32\x35.org.apache.airavata.mft.agent.stub.DirectoryMetadataH\x00\x12G\n\x05\x65rror\x18\x03 \x01(\x0e\x32\x36.org.apache.airavata.mft.agent.stub.MetadataFetchErrorH\x00\x42\n\n\x08metadata\"\xd3\x01\n\x1aGetResourceMetadataRequest\x12\x14\n\x0cresourcePath\x18\x01 \x01(\t\x12\x43\n\x07storage\x18\x02 \x01(\x0b\x32\x32.org.apache.airavata.mft.agent.stub.StorageWrapper\x12\x41\n\x06secret\x18\x03 \x01(\x0b\x32\x31.org.apache.airavata.mft.agent.stub.SecretWrapper\x12\x17\n\x0frecursiveSearch\x18\x04 \x01(\x08*6\n\x12MetadataFetchError\x12\r\n\tNOT_FOUND\x10\x00\x12\x11\n\rNO_PERMISSION\x10\x01\x42\x02P\x01\x62\x06proto3')
 
 _METADATAFETCHERROR = DESCRIPTOR.enum_types_by_name['MetadataFetchError']
 MetadataFetchError = enum_type_wrapper.EnumTypeWrapper(_METADATAFETCHERROR)
@@ -44,6 +44,7 @@ NO_PERMISSION = 1
 
 _STORAGEWRAPPER = DESCRIPTOR.message_types_by_name['StorageWrapper']
 _SECRETWRAPPER = DESCRIPTOR.message_types_by_name['SecretWrapper']
+_ENDPOINTPATHS = DESCRIPTOR.message_types_by_name['EndpointPaths']
 _AGENTTRANSFERREQUEST = DESCRIPTOR.message_types_by_name['AgentTransferRequest']
 _FILEMETADATA = DESCRIPTOR.message_types_by_name['FileMetadata']
 _DIRECTORYMETADATA = DESCRIPTOR.message_types_by_name['DirectoryMetadata']
@@ -62,6 +63,13 @@ SecretWrapper = _reflection.GeneratedProtocolMessageType('SecretWrapper', (_mess
   # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.agent.stub.SecretWrapper)
   })
 _sym_db.RegisterMessage(SecretWrapper)
+
+EndpointPaths = _reflection.GeneratedProtocolMessageType('EndpointPaths', (_message.Message,), {
+  'DESCRIPTOR' : _ENDPOINTPATHS,
+  '__module__' : 'MFTAgentStubs_pb2'
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.agent.stub.EndpointPaths)
+  })
+_sym_db.RegisterMessage(EndpointPaths)
 
 AgentTransferRequest = _reflection.GeneratedProtocolMessageType('AgentTransferRequest', (_message.Message,), {
   'DESCRIPTOR' : _AGENTTRANSFERREQUEST,
@@ -102,20 +110,22 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'P\001'
-  _METADATAFETCHERROR._serialized_start=3326
-  _METADATAFETCHERROR._serialized_end=3380
+  _METADATAFETCHERROR._serialized_start=3436
+  _METADATAFETCHERROR._serialized_end=3490
   _STORAGEWRAPPER._serialized_start=545
   _STORAGEWRAPPER._serialized_end=1395
   _SECRETWRAPPER._serialized_start=1398
   _SECRETWRAPPER._serialized_end=2098
-  _AGENTTRANSFERREQUEST._serialized_start=2101
-  _AGENTTRANSFERREQUEST._serialized_end=2474
-  _FILEMETADATA._serialized_start=2477
-  _FILEMETADATA._serialized_end=2614
-  _DIRECTORYMETADATA._serialized_start=2617
-  _DIRECTORYMETADATA._serialized_end=2862
-  _RESOURCEMETADATA._serialized_start=2865
-  _RESOURCEMETADATA._serialized_end=3110
-  _GETRESOURCEMETADATAREQUEST._serialized_start=3113
-  _GETRESOURCEMETADATAREQUEST._serialized_end=3324
+  _ENDPOINTPATHS._serialized_start=2100
+  _ENDPOINTPATHS._serialized_end=2160
+  _AGENTTRANSFERREQUEST._serialized_start=2163
+  _AGENTTRANSFERREQUEST._serialized_end=2584
+  _FILEMETADATA._serialized_start=2587
+  _FILEMETADATA._serialized_end=2724
+  _DIRECTORYMETADATA._serialized_start=2727
+  _DIRECTORYMETADATA._serialized_end=2972
+  _RESOURCEMETADATA._serialized_start=2975
+  _RESOURCEMETADATA._serialized_end=3220
+  _GETRESOURCEMETADATAREQUEST._serialized_start=3223
+  _GETRESOURCEMETADATAREQUEST._serialized_end=3434
 # @@protoc_insertion_point(module_scope)

@@ -96,28 +96,34 @@ public class ConsulIngressHandler {
         transferCacheListener = newValues -> {
             newValues.values().forEach(value -> {
                 Optional<byte[]> decodedValue = value.getValueAsBytes();
-                String transferId = value.getKey().substring(value.getKey().lastIndexOf("/") + 1);
+
+                String[] partsOfKey = value.getKey().split("/");
+                String agentTransferRequestId = partsOfKey[partsOfKey.length  - 1];
+                String transferId = partsOfKey[partsOfKey.length  - 2];
+
                 decodedValue.ifPresent(reqBytes -> {
                     mftConsulClient.getKvClient().deleteKey(value.getKey());
                     AgentTransferRequest.Builder builder = null;
                     try {
                         builder = AgentTransferRequest.newBuilder().mergeFrom(reqBytes);
                     } catch (InvalidProtocolBufferException e) {
-                        logger.error("Failed to merge transfer {} from bytes", transferId, e);
+                        logger.error("Failed to merge transfer request {} for transfer {} from bytes", agentTransferRequestId, transferId, e);
                         return;
                     }
 
                     AgentTransferRequest request = builder.build();
                     transferOrchestrator.submitTransferToProcess(transferId, request,
-                            AgentUtil.throwingBiConsumerWrapper((id, st) -> {
-                                mftConsulClient.submitTransferStateToProcess(id, agentId, st.setPublisher(agentId));
+                            AgentUtil.throwingBiConsumerWrapper((endPointPath, st) -> {
+                                mftConsulClient.submitFileTransferStateToProcess(transferId, request.getRequestId(), endPointPath,  agentId, st.setPublisher(agentId));
                             }),
                             AgentUtil.throwingConsumerWrapper(create -> {
                                 if (create) {
-                                    mftConsulClient.getKvClient().putValue(MFTConsulClient.AGENTS_SCHEDULED_PATH + agentId + "/" + session + "/" + transferId,
+                                    mftConsulClient.getKvClient().putValue(MFTConsulClient.AGENTS_SCHEDULED_PATH
+                                                    + agentId + "/" + session + "/" + transferId + "/" + agentTransferRequestId,
                                             reqBytes, 0L, PutOptions.BLANK);
                                 } else {
-                                    mftConsulClient.getKvClient().deleteKey(MFTConsulClient.AGENTS_SCHEDULED_PATH + agentId + "/" + session + "/" + transferId);
+                                    mftConsulClient.getKvClient().deleteKey(MFTConsulClient.AGENTS_SCHEDULED_PATH
+                                            + agentId + "/" + session + "/" + transferId + "/" + agentTransferRequestId);
                                 }
                             }));
                 });

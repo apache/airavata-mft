@@ -95,8 +95,13 @@ def copy(source, destination):
 
     file_list = []
     source_metadata = get_resource_metadata(source)
-    transfer_requests = []
+    endpoint_paths = []
     total_volume = 0
+
+    transfer_request = MFTTransferApi_pb2.TransferApiRequest(sourceStorageId = source_storage_id,
+                                                             sourceSecretId = source_secret_id,
+                                                             destinationStorageId = dest_storage_id,
+                                                             destinationSecretId = dest_secret_id)
 
     if (source_metadata.WhichOneof('metadata') == 'directory') :
         if (destination[-1] != "/"):
@@ -107,13 +112,9 @@ def copy(source, destination):
         for file_entry in file_list:
             file = file_entry[0]
             relative_path = file_entry[1]
-            transfer_requests.append(MFTTransferApi_pb2.TransferApiRequest(
+            endpoint_paths.append(MFTTransferApi_pb2.EndpointPaths(
                 sourcePath = file.resourcePath,
-                sourceStorageId = source_storage_id,
-                sourceSecretId = source_secret_id,
-                destinationPath = destination[len(destination.split("/")[0]) +1 :] + relative_path,
-                destinationStorageId = dest_storage_id,
-                destinationSecretId = dest_secret_id))
+                destinationPath = destination[len(destination.split("/")[0]) +1 :] + relative_path))
             total_volume += file.resourceSize
 
     elif (source_metadata.WhichOneof('metadata') == 'file'):
@@ -122,13 +123,9 @@ def copy(source, destination):
         if destination[-1] == "/":
             destination = destination + source_metadata.file.friendlyName
 
-        transfer_requests.append(MFTTransferApi_pb2.TransferApiRequest(
+        endpoint_paths.append(MFTTransferApi_pb2.EndpointPaths(
             sourcePath = source_metadata.file.resourcePath,
-            sourceStorageId = source_storage_id,
-            sourceSecretId = source_secret_id,
-            destinationPath = destination[len(destination.split("/")[0]) +1 :],
-            destinationStorageId = dest_storage_id,
-            destinationSecretId = dest_secret_id))
+            destinationPath = destination[len(destination.split("/")[0]) +1 :]))
 
         total_volume += source_metadata.file.resourceSize
 
@@ -137,24 +134,21 @@ def copy(source, destination):
         print(metadata_resp.error)
         raise typer.Abort()
 
-    batch_transfer_request = MFTTransferApi_pb2.BatchTransferApiRequest()
-    batch_transfer_request.transferRequests.extend(transfer_requests)
+    transfer_request.endpointPaths.extend(endpoint_paths)
 
-    confirm = typer.confirm("Total number of " + str(len(transfer_requests)) +
+    confirm = typer.confirm("Total number of " + str(len(endpoint_paths)) +
                         " files to be transferred. Total volume is " + str(total_volume)
                         + " bytes. Do you want to start the transfer? ", True)
 
     client = mft_client.MFTClient()
-    batch_transfer_resp = client.transfer_api.submitBatchTransfer(batch_transfer_request)
+    transfer_resp = client.transfer_api.submitTransfer(transfer_request)
 
     if not confirm:
         raise typer.Abort()
 
-    transfer_ids = batch_transfer_resp.transferIds
+    transfer_id = transfer_resp.transferId
 
-    state_requests = []
-    for transfer_id in transfer_ids:
-        state_requests.append(MFTTransferApi_pb2.TransferStateApiRequest(transferId=transfer_id))
+    state_request = MFTTransferApi_pb2.TransferStateApiRequest(transferId=transfer_id)
 
     ## TODO: This has to be optimized and avoid frequent polling of all transfer ids in each iteration
     ## Possible fix is to introduce a parent batch transfer id at the API level and fetch child trnasfer id
@@ -163,22 +157,20 @@ def copy(source, destination):
     completed = 0
     failed = 0
 
-    with typer.progressbar(length=len(transfer_ids)) as progress:
+    with typer.progressbar(length=100) as progress:
 
         while 1:
-            completed = 0
-            failed = 0
-            for state_request in state_requests:
-                state_resp = client.transfer_api.getTransferState(state_request)
-                if state_resp.state == "COMPLETED":
-                    completed += 1
-                elif state_resp.state == "FAILED":
-                    failed += 1
+            state_resp = client.transfer_api.getTransferStateSummary(state_request)
 
-            total = completed + failed
-            progress.update(total)
-            if (total == len(transfer_ids)):
+            progress.update(int(state_resp.percentage * 100))
+            if (state_resp.percentage == 1.0):
+                completed = len(state_resp.completed)
+                failed = len(state_resp.failed)
                 break
+
+            if (state_resp.state == "FAILED"):
+                print("Transfer failed. Reason: " + state_resp.description)
+                raise typer.Abort()
             time.sleep(1)
 
     print(f"Processed {completed + failed} files. Completed {completed}, Failed {failed}.")

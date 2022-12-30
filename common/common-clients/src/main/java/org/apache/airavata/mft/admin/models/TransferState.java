@@ -24,6 +24,8 @@ public class TransferState {
     private double percentage;
     private String description;
 
+    private String childId;
+
     public String getState() {
         return state;
     }
@@ -66,6 +68,15 @@ public class TransferState {
 
     public TransferState setPublisher(String publisher) {
         this.publisher = publisher;
+        return this;
+    }
+
+    public String getChildId() {
+        return childId;
+    }
+
+    public TransferState setChildId(String childId) {
+        this.childId = childId;
         return this;
     }
 }

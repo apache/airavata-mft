@@ -2,7 +2,8 @@ package org.apache.airavata.mft.command.line.sub.transfer;
 
 import org.apache.airavata.mft.api.client.MFTApiClient;
 import org.apache.airavata.mft.api.service.TransferStateApiRequest;
-import org.apache.airavata.mft.api.service.TransferStateApiResponse;
+import org.apache.airavata.mft.api.service.TransferStateResponse;
+import org.apache.airavata.mft.api.service.TransferStateSummaryResponse;
 import org.apache.airavata.mft.command.line.CommandLineUtil;
 import org.apache.airavata.mft.common.AuthToken;
 import picocli.CommandLine;
@@ -30,7 +31,7 @@ public class TransferStateSubCommand implements Callable<Integer> {
 
 
         if (!all) {
-            TransferStateApiResponse transferState = mftApiClient.getTransferClient().getTransferState(
+            TransferStateSummaryResponse transferState = mftApiClient.getTransferClient().getTransferStateSummary(
                     TransferStateApiRequest.newBuilder()
                             .setMftAuthorizationToken(token)
                             .setTransferId(transferId).build());
@@ -48,10 +49,10 @@ public class TransferStateSubCommand implements Callable<Integer> {
             CommandLineUtil.printTable(columnWidth, content);
 
         } else {
-            Iterator<TransferStateApiResponse> transferStates = mftApiClient.getTransferClient().getTransferStates(TransferStateApiRequest.newBuilder()
+            Iterator<TransferStateResponse> transferStates = mftApiClient.getTransferClient().getAllTransferStates(TransferStateApiRequest.newBuilder()
                     .setMftAuthorizationToken(token).setTransferId(transferId).build());
 
-            List<TransferStateApiResponse> states = new ArrayList<>();
+            List<TransferStateResponse> states = new ArrayList<>();
             while (transferStates.hasNext()) {
                 states.add(transferStates.next());
             }
@@ -59,7 +60,7 @@ public class TransferStateSubCommand implements Callable<Integer> {
             String[] headers = {"UPDATE TIME", "STATE", "DESCRIPTION", "PERCENTAGE"};
             content[0] = headers;
             for (int i = 1; i <= states.size(); i ++) {
-                TransferStateApiResponse transferState = states.get(i -1);
+                TransferStateResponse transferState = states.get(i -1);
                 content[i][0] = transferState.getUpdateTimeMils() + "";
                 content[i][1] = transferState.getState();
                 content[i][2] = transferState.getDescription();

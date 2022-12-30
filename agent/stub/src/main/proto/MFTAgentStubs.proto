@@ -70,13 +70,18 @@ message SecretWrapper {
     }
 }
 
+message EndpointPaths {
+    string sourcePath = 1;
+    string destinationPath = 2;
+}
+
 message AgentTransferRequest {
-    StorageWrapper sourceStorage = 1;
-    SecretWrapper sourceSecret = 2;
-    string sourcePath = 3;
+    string requestId = 1;
+    StorageWrapper sourceStorage = 2;
+    SecretWrapper sourceSecret = 3;
     StorageWrapper destinationStorage = 4;
     SecretWrapper destinationSecret = 5;
-    string destinationPath = 6;
+    repeated EndpointPaths endpointPaths = 6;
 }
 
 message FileMetadata {

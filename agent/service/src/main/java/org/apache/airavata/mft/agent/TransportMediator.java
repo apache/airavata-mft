@@ -18,6 +18,7 @@
 package org.apache.airavata.mft.agent;
 
 import org.apache.airavata.mft.admin.models.TransferState;
+import org.apache.airavata.mft.agent.stub.EndpointPaths;
 import org.apache.airavata.mft.api.service.TransferApiRequest;
 import org.apache.airavata.mft.core.*;
 import org.apache.airavata.mft.core.api.*;
@@ -64,11 +65,14 @@ public class TransportMediator {
     public void transferSingleThread(String transferId,
                                      ConnectorConfig srcCC,
                                      ConnectorConfig dstCC,
-                                     BiConsumer<String, TransferState> onStatusCallback,
+                                     BiConsumer<EndpointPaths, TransferState> onStatusCallback,
                                      BiConsumer<String, Boolean> exitingCallback) {
 
         final AtomicBoolean transferInProgress = new AtomicBoolean(true);
 
+        EndpointPaths endpointPath = EndpointPaths.newBuilder()
+                .setSourcePath(srcCC.getResourcePath())
+                .setDestinationPath(dstCC.getResourcePath()).build();
         try {
 
             logger.info("Stating transfer {}", transferId);
@@ -85,7 +89,7 @@ public class TransportMediator {
 
 
 
-            onStatusCallback.accept(transferId, new TransferState()
+            onStatusCallback.accept(endpointPath, new TransferState()
                     .setPercentage(0)
                     .setState("RUNNING")
                     .setUpdateTimeMils(System.currentTimeMillis())
@@ -181,7 +185,7 @@ public class TransportMediator {
                             }
                             double transferPercentage = countAtomic.get() * 100.0 / srcCC.getMetadata().getFile().getResourceSize();
                             logger.info("Transfer percentage for transfer {} {}", transferId, transferPercentage);
-                            onStatusCallback.accept(transferId, new TransferState()
+                            onStatusCallback.accept(endpointPath, new TransferState()
                                     .setPercentage(transferPercentage)
                                     .setState("RUNNING")
                                     .setUpdateTimeMils(System.currentTimeMillis())
@@ -217,7 +221,7 @@ public class TransportMediator {
             logger.info("Transfer {} completed. Time {} S.  Speed {} MB/s", transferId, time,
                     (srcCC.getMetadata().getFile().getResourceSize() * 1.0 / time) / (1024 * 1024));
 
-            onStatusCallback.accept(transferId, new TransferState()
+            onStatusCallback.accept(endpointPath, new TransferState()
                     .setPercentage(100)
                     .setState("COMPLETED")
                     .setUpdateTimeMils(endTime)
@@ -228,7 +232,7 @@ public class TransportMediator {
 
             logger.error("Transfer {} failed with error", transferId, e);
 
-            onStatusCallback.accept(transferId, new TransferState()
+            onStatusCallback.accept(endpointPath, new TransferState()
                     .setPercentage(0)
                     .setState("FAILED")
                     .setUpdateTimeMils(System.currentTimeMillis())
