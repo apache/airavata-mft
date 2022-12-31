@@ -28,7 +28,7 @@ public class SpawnerSelector {
         switch (storageWrapper.getStorageCase()) {
             case S3:
                 if (storageWrapper.getS3().getEndpoint().endsWith("amazonaws.com")) {
-                    return Optional.of(new AwsAgentSpawner(storageWrapper, secretWrapper));
+                    return Optional.of(new EC2AgentSpawner(storageWrapper, secretWrapper));
                 }
                 break;
         }

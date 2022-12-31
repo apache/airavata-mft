@@ -24,60 +24,134 @@ import org.apache.airavata.mft.api.service.EndpointPaths;
 import org.apache.airavata.mft.api.service.TransferApiRequest;
 import org.apache.airavata.mft.controller.spawner.CloudAgentSpawner;
 import org.apache.airavata.mft.controller.spawner.SpawnerSelector;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class AgentTransferDispatcher {
     private static final Logger logger = LoggerFactory.getLogger(AgentTransferDispatcher.class);
+
+    //getId(transferRequest):Pair<TransferApiRequest, AgentTransferRequest.Builder>
+
     private final Map<String, Pair<TransferApiRequest, AgentTransferRequest.Builder>> pendingTransferRequests = new ConcurrentHashMap<>();
+    private final Map<String, String> pendingTransferIds = new ConcurrentHashMap<>();
+    //getId(transferRequest):consulKey
+
     private final Map<String, String> pendingTransferConsulKeys = new ConcurrentHashMap<>();
-    private final Map<String, Future<String>> pendingAgentSpawners = new ConcurrentHashMap<>();
+
+    //getId(transferRequest):CloudAgentSpawner
+    private final Map<String, CloudAgentSpawner> pendingAgentSpawners = new ConcurrentHashMap<>();
+
+    // getId(transferRequest):Set(TransferId)
     private final Map<String, Set<String>> runningAgentCache = new ConcurrentHashMap<>();
+
+    // AgentID:Spawner - Use this to keep track of agent spawners. This is required to terminate agent
+    private final Map<String, CloudAgentSpawner> agentSpawners = new ConcurrentHashMap<>();
+
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    // Temporarily store consul key until the optimizer spins up Agents. This will block the same pending transfer
+    // being handled twice
+    private final Set<String> optimizingConsulKeys = new ConcurrentSkipListSet<>();
 
     @Autowired
     private MFTConsulClient mftConsulClient;
+
+    public void init() {
+        scheduler.scheduleWithFixedDelay(() -> {
+            pendingAgentSpawners.forEach((key, spawner) -> {
+                if (spawner.getLaunchState().isDone()) {
+                    String transferId = pendingTransferIds.get(key);
+                    Pair<TransferApiRequest, AgentTransferRequest.Builder> transferRequests = pendingTransferRequests.get(key);
+                    String consulKey = pendingTransferConsulKeys.get(key);
+
+                    try {
+                        String agentId = spawner.getLaunchState().get();
+                        List<String> liveAgentIds = mftConsulClient.getLiveAgentIds();
+                        if (liveAgentIds.stream().noneMatch(id -> id.equals(agentId))) {
+                            throw new Exception("Agent was not registered even though the agent is up");
+                        }
+
+                        submitTransferToAgent(Collections.singletonList(agentId), transferId,
+                                transferRequests.getLeft(), transferRequests.getRight(), consulKey);
+
+                        // Use this to terminate agent in future
+                        agentSpawners.put(agentId, spawner);
+
+                    } catch (Exception e) {
+                        logger.error("Failed to launch agent for key {}", key, e);
+                        try {
+                            mftConsulClient.saveTransferState(transferId, new TransferState()
+                                    .setUpdateTimeMils(System.currentTimeMillis())
+                                    .setState("FAILED").setPercentage(0)
+                                    .setPublisher("controller")
+                                    .setDescription("Failed to launch the agent. " + ExceptionUtils.getRootCauseMessage(e)));
+                        } catch (Exception e2) {
+                            logger.error("Failed to submit transfer fail error for transfer id {}", transferId, e2);
+                        }
+
+                        logger.info("Removing consul key {}", consulKey);
+                        mftConsulClient.getKvClient().deleteKey(consulKey);
+                        logger.info("Terminating the spawner");
+                        spawner.terminate();
+
+                    } finally {
+                        pendingTransferIds.remove(key);
+                        pendingTransferRequests.remove(key);
+                        pendingAgentSpawners.remove(key);
+                        pendingTransferConsulKeys.remove(key);
+                        optimizingConsulKeys.remove(consulKey);
+                    }
+                }
+            });
+        }, 3, 5, TimeUnit.SECONDS);
+    }
+
 
     public void submitTransferToAgent(List<String> filteredAgents, String transferId,
                                       TransferApiRequest transferRequest,
                                       AgentTransferRequest.Builder agentTransferRequestTemplate, String consulKey)
             throws Exception {
 
-        if (filteredAgents.isEmpty()) {
+        try {
+            if (filteredAgents.isEmpty()) {
+                mftConsulClient.saveTransferState(transferId, new TransferState()
+                        .setUpdateTimeMils(System.currentTimeMillis())
+                        .setState("FAILED").setPercentage(0)
+                        .setPublisher("controller")
+                        .setDescription("No qualifying agent was found to orchestrate the transfer"));
+                return;
+            }
+
             mftConsulClient.saveTransferState(transferId, new TransferState()
+                    .setState("STARTING")
+                    .setPercentage(0)
                     .setUpdateTimeMils(System.currentTimeMillis())
-                    .setState("FAILED").setPercentage(0)
                     .setPublisher("controller")
-                    .setDescription("No qualifying agent was found to orchestrate the transfer"));
-            return;
+                    .setDescription("Initializing the transfer"));
+
+            AgentTransferRequest.Builder agentTransferRequest = agentTransferRequestTemplate.clone();
+
+            agentTransferRequest.setRequestId(UUID.randomUUID().toString());
+            for (EndpointPaths ep : transferRequest.getEndpointPathsList()) {
+                agentTransferRequest.addEndpointPaths(org.apache.airavata.mft.agent.stub.EndpointPaths.newBuilder()
+                        .setSourcePath(ep.getSourcePath())
+                        .setDestinationPath(ep.getDestinationPath()).buildPartial());
+            }
+
+            // TODO use a better way to select the right agent
+            mftConsulClient.commandTransferToAgent(filteredAgents.get(0), transferId, agentTransferRequest.build());
+            mftConsulClient.markTransferAsProcessed(transferId, transferRequest);
+            logger.info("Marked transfer {} as processed", transferId);
+        } finally {
+            mftConsulClient.getKvClient().deleteKey(consulKey);
         }
-
-        mftConsulClient.saveTransferState(transferId, new TransferState()
-                .setState("STARTING")
-                .setPercentage(0)
-                .setUpdateTimeMils(System.currentTimeMillis())
-                .setPublisher("controller")
-                .setDescription("Initializing the transfer"));
-
-        AgentTransferRequest.Builder agentTransferRequest = agentTransferRequestTemplate.clone();
-
-        agentTransferRequest.setRequestId(UUID.randomUUID().toString());
-        for (EndpointPaths ep : transferRequest.getEndpointPathsList()) {
-            agentTransferRequest.addEndpointPaths(org.apache.airavata.mft.agent.stub.EndpointPaths.newBuilder()
-                    .setSourcePath(ep.getSourcePath())
-                    .setDestinationPath(ep.getDestinationPath()).buildPartial());
-        }
-
-        // TODO use a better way to select the right agent
-        mftConsulClient.commandTransferToAgent(filteredAgents.get(0), transferId, agentTransferRequest.build());
-        mftConsulClient.markTransferAsProcessed(transferId, transferRequest);
-        mftConsulClient.getKvClient().deleteKey(consulKey);
     }
 
     public void handleTransferRequest(String transferId,
@@ -85,6 +159,12 @@ public class AgentTransferDispatcher {
                                       AgentTransferRequest.Builder agentTransferRequestTemplate,
                                       String consulKey) throws Exception{
 
+        if (optimizingConsulKeys.contains(consulKey)) {
+            logger.info("Ignoring handling transfer id {} as it is already in optimizing stage", transferId);
+            return;
+        }
+
+        logger.info("Handling transfer id {} with consul key {}", transferId, consulKey);
         List<String> liveAgentIds = mftConsulClient.getLiveAgentIds();
 
         Map<String, Integer> targetAgentsMap = transferRequest.getTargetAgentsMap();
@@ -115,22 +195,27 @@ public class AgentTransferDispatcher {
                 if (sourceSpawner.isPresent()) {
                     logger.info("Launching {} spawner in source side for transfer {}",
                             sourceSpawner.get().getClass().getName(), transferId);
-                    Future<String> launchFuture = sourceSpawner.get().launch();
-                    pendingAgentSpawners.put(getId(transferRequest, true), launchFuture);
+
+                    sourceSpawner.get().launch();
+                    pendingAgentSpawners.put(getId(transferRequest, true), sourceSpawner.get());
                     pendingTransferRequests.put(getId(transferRequest, true),
                             Pair.of(transferRequest, agentTransferRequestTemplate));
+                    pendingTransferIds.put(getId(transferRequest, true), transferId);
                     pendingTransferConsulKeys.put(getId(transferRequest, true), consulKey);
-
+                    optimizingConsulKeys.add(consulKey);
+                    return;
                 } else if (destSpawner.isPresent()) {
                     logger.info("Launching {} spawner in destination side for transfer {}",
                             destSpawner.get().getClass().getName(), transferId);
 
-                    Future<String> launchFuture = destSpawner.get().launch();
-                    pendingAgentSpawners.put(getId(transferRequest, false), launchFuture);
+                    destSpawner.get().launch();
+                    pendingAgentSpawners.put(getId(transferRequest, false), destSpawner.get());
                     pendingTransferRequests.put(getId(transferRequest, false),
                             Pair.of(transferRequest, agentTransferRequestTemplate));
+                    pendingTransferIds.put(getId(transferRequest, false), transferId);
                     pendingTransferConsulKeys.put(getId(transferRequest, false), consulKey);
-
+                    optimizingConsulKeys.add(consulKey);
+                    return;
                 } else {
                     logger.warn("No optimizing path is available. Moving user provided agents");
                     submitTransferToAgent(userProvidedAgents, transferId,
@@ -165,8 +250,6 @@ public class AgentTransferDispatcher {
                     agentTransferRequestTemplate,
                     consulKey);
         }
-
-        logger.info("Marked transfer {} as processed", transferId);
     }
 
     private String getId(TransferApiRequest transferRequest, boolean isSource) {

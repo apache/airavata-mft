@@ -101,7 +101,8 @@ def copy(source, destination):
     transfer_request = MFTTransferApi_pb2.TransferApiRequest(sourceStorageId = source_storage_id,
                                                              sourceSecretId = source_secret_id,
                                                              destinationStorageId = dest_storage_id,
-                                                             destinationSecretId = dest_secret_id)
+                                                             destinationSecretId = dest_secret_id,
+                                                             optimizeTransferPath = True)
 
     if (source_metadata.WhichOneof('metadata') == 'directory') :
         if (destination[-1] != "/"):

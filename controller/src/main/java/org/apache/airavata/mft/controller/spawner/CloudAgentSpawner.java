@@ -31,6 +31,9 @@ public abstract class CloudAgentSpawner {
         this.storageWrapper = storageWrapper;
     }
 
-    public abstract Future<String> launch();
-    public abstract Future<Boolean> terminate();
+    public abstract void launch();
+    public abstract Future<String> getLaunchState();
+    public abstract void terminate();
+
+    public abstract Future<Boolean> getTerminateState();
 }

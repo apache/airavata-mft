@@ -265,6 +265,7 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
             } else if (!mainTransferStatus.isEmpty()){
                 stateBuilder.setState(mainTransferStatus.get(0).getState());
                 stateBuilder.setPercentage(0);
+                stateBuilder.setDescription(mainTransferStatus.get(0).getDescription());
 
                 responseObserver.onNext(stateBuilder.build());
                 responseObserver.onCompleted();
