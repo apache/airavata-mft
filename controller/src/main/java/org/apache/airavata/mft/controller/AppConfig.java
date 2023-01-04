@@ -66,8 +66,8 @@ public class AppConfig {
     }
 
     @Bean
-    public AgentTransferDispatcher pathOptimizer() {
-        AgentTransferDispatcher agentTransferDispatcher = new AgentTransferDispatcher();
+    public TransferDispatcher pathOptimizer() {
+        TransferDispatcher agentTransferDispatcher = new TransferDispatcher();
         agentTransferDispatcher.init();
         return agentTransferDispatcher;
     }

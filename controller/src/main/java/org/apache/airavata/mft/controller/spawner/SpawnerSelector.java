@@ -24,7 +24,7 @@ import java.util.Optional;
 
 public class SpawnerSelector {
 
-    public static Optional<CloudAgentSpawner> selectSpawner(StorageWrapper storageWrapper, SecretWrapper secretWrapper) {
+    public static Optional<AgentSpawner> selectSpawner(StorageWrapper storageWrapper, SecretWrapper secretWrapper) {
         switch (storageWrapper.getStorageCase()) {
             case S3:
                 if (storageWrapper.getS3().getEndpoint().endsWith("amazonaws.com")) {

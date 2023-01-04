@@ -92,7 +92,7 @@ public class MFTConsulClient {
          5. Agent publishes the transfer state to controller
                 mft/controller/messages/states/{transferId}/{agentId}/{requestId}/{md5sum(sourcePath:destinationPath)}/{timeMils()} -> Transfer State
          6. Controller saves the transfer state in
-                mft/transfer/state/{transferId}/{UUID} -> Transfer State
+                mft/transfer/state/{transferId}/{requestId}/{UUID} -> Transfer State
 
      */
 
@@ -291,10 +291,14 @@ public class MFTConsulClient {
      * @param transferState
      * @throws MFTConsulClientException
      */
-    public void saveTransferState(String transferId, TransferState transferState) throws MFTConsulClientException {
+    public void saveTransferState(String transferId, String agentRequestId, TransferState transferState) throws MFTConsulClientException {
         try {
             String asStr = mapper.writeValueAsString(transferState);
-            kvClient.putValue(TRANSFER_STATE_PATH + transferId + "/" + UUID.randomUUID().toString(), asStr);
+            if (agentRequestId == null) {
+                kvClient.putValue(TRANSFER_STATE_PATH + transferId + "/" + UUID.randomUUID().toString(), asStr);
+            } else {
+                kvClient.putValue(TRANSFER_STATE_PATH + transferId + "/" + agentRequestId + "/" + UUID.randomUUID().toString(), asStr);
+            }
             logger.info("Saved transfer status " + asStr);
 
         } catch (Exception e) {
@@ -339,7 +343,11 @@ public class MFTConsulClient {
      * @throws IOException
      */
     public List<TransferState> getTransferStates(String transferId) throws IOException {
-        List<String> keys = kvClient.getKeys(TRANSFER_STATE_PATH + transferId);
+        return getTransferStates(transferId, null);
+    }
+
+    public List<TransferState> getTransferStates(String transferId, String agentRequestId) throws IOException {
+        List<String> keys = kvClient.getKeys(TRANSFER_STATE_PATH + transferId + (agentRequestId == null? "" : "/" + agentRequestId));
 
         List<TransferState> allStates = new ArrayList<>();
 
@@ -351,7 +359,7 @@ public class MFTConsulClient {
         }
         List<TransferState> sortedStates = allStates.stream().sorted((o1, o2) ->
                 (o1.getUpdateTimeMils() - o2.getUpdateTimeMils()) < 0 ? -1 :
-                (o1.getUpdateTimeMils() - o2.getUpdateTimeMils()) == 0 ? 0 : 1).collect(Collectors.toList());
+                        (o1.getUpdateTimeMils() - o2.getUpdateTimeMils()) == 0 ? 0 : 1).collect(Collectors.toList());
         return sortedStates;
     }
 

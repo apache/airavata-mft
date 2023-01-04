@@ -40,7 +40,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
-public class EC2AgentSpawner extends CloudAgentSpawner {
+public class EC2AgentSpawner extends AgentSpawner {
 
     private static final Logger logger = LoggerFactory.getLogger(EC2AgentSpawner.class);
 
@@ -48,18 +48,49 @@ public class EC2AgentSpawner extends CloudAgentSpawner {
 
     private String instanceId;
     private CountDownLatch portForwardLock;
-    Future<String> launchFuture;
-    Future<Boolean> terminateFuture;
+    private Future<String> launchFuture;
+    private Future<Boolean> terminateFuture;
+    private final Map<String, String> amiMap;
 
     public EC2AgentSpawner(StorageWrapper storageWrapper, SecretWrapper secretWrapper) {
         super(storageWrapper, secretWrapper);
+        amiMap = new HashMap<>();
+        amiMap.put("af-south-1","ami-0a9b2225722484002");
+        amiMap.put("ap-east-1","ami-056129cdd30574a9d");
+        amiMap.put("ap-northeast-1","ami-0e2bf1ada70fd3f33");
+        amiMap.put("ap-south-1","ami-0f69bc5520884278e");
+        amiMap.put("ap-southeast-1","ami-029562ad87fe1185c");
+        amiMap.put("ca-central-1","ami-09bbc74353976b63f");
+        amiMap.put("eu-central-1","ami-0039da1f3917fa8e3");
+        amiMap.put("eu-north-1","ami-03df6dea56f8aa618");
+        amiMap.put("eu-south-1","ami-0bac8f6f7c5943df6");
+        amiMap.put("eu-west-1","ami-026e72e4e468afa7b");
+        amiMap.put("me-central-1","ami-0747a6d5ab9621d5e");
+        amiMap.put("me-south-1","ami-000dfd0dafa71a443");
+        amiMap.put("sa-east-1","ami-07ac54771249f286c");
+        amiMap.put("us-east-1","ami-06878d265978313ca");
+        amiMap.put("us-west-1","ami-06bb3ee01d992f30d");
+        amiMap.put("us-gov-east-1","ami-0efd49eddc5639cc5");
+        amiMap.put("us-gov-west-1","ami-061efa908c09c5409");
+        amiMap.put("ap-northeast-2","ami-0f0646a5f59758444");
+        amiMap.put("ap-south-2","ami-021aeec757e935219");
+        amiMap.put("ap-southeast-2","ami-006fd15ab56f0fbe6");
+        amiMap.put("eu-central-2","ami-0d34b3fbb942249d5");
+        amiMap.put("eu-south-2","ami-0762ef22684c93e5c");
+        amiMap.put("eu-west-2","ami-01b8d743224353ffe");
+        amiMap.put("us-east-2","ami-0ff39345bd62c82a5");
+        amiMap.put("us-west-2","ami-03f8756d29f0b5f21");
+        amiMap.put("ap-northeast-3","ami-0d7b1258d728f42e3");
+        amiMap.put("ap-southeast-3","ami-0796a4cfd3b7bec87");
+        amiMap.put("eu-west-3","ami-03c476a1ca8e3ebdc");
     }
 
     @Override
     public void launch() {
 
         launchFuture = executor.submit( () -> {
-            String imageId = "ami-0ecc74eca1d66d8a6"; // Ubuntu base image
+            String region = storageWrapper.getS3().getRegion();
+            String imageId = getAmi(region); // Ubuntu base image
             String keyNamePrefix = "mft-aws-agent-key-";
             String secGroupName = "MFTAgentSecurityGroup";
             String agentId = UUID.randomUUID().toString();
@@ -68,7 +99,6 @@ public class EC2AgentSpawner extends CloudAgentSpawner {
             String mftKeyDir = System.getProperty("user.home") + File.separator + ".mft" + File.separator + "keys";
             String accessKey = secretWrapper.getS3().getAccessKey();
             String secretKey = secretWrapper.getS3().getSecretKey();
-            String region = storageWrapper.getS3().getRegion();
 
             try {
                 BasicAWSCredentials awsCreds = new BasicAWSCredentials(accessKey, secretKey);
@@ -272,6 +302,9 @@ public class EC2AgentSpawner extends CloudAgentSpawner {
         });
     }
 
+    private String getAmi(String region) {
+        return amiMap.get(region);
+    }
     @Override
     public Future<String> getLaunchState() {
         return launchFuture;

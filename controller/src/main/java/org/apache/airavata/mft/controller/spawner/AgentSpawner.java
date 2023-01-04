@@ -22,11 +22,11 @@ import org.apache.airavata.mft.agent.stub.StorageWrapper;
 
 import java.util.concurrent.Future;
 
-public abstract class CloudAgentSpawner {
+public abstract class AgentSpawner {
 
     protected StorageWrapper storageWrapper;
     protected SecretWrapper secretWrapper;
-    public CloudAgentSpawner(StorageWrapper storageWrapper, SecretWrapper secretWrapper) {
+    public AgentSpawner(StorageWrapper storageWrapper, SecretWrapper secretWrapper) {
         this.secretWrapper = secretWrapper;
         this.storageWrapper = storageWrapper;
     }

@@ -115,7 +115,7 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
             String transferId = mftConsulClient.submitTransfer(request);
             logger.info("Submitted the transfer request {}", transferId);
 
-            mftConsulClient.saveTransferState(transferId, new TransferState()
+            mftConsulClient.saveTransferState(transferId, null, new TransferState()
                     .setUpdateTimeMils(System.currentTimeMillis())
                     .setState("RECEIVED").setPercentage(0)
                     .setPublisher("api")

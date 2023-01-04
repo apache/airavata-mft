@@ -24,8 +24,6 @@ import com.orbitz.consul.cache.ConsulCache;
 import com.orbitz.consul.cache.KVCache;
 import com.orbitz.consul.model.kv.Value;
 import org.apache.airavata.mft.admin.MFTConsulClient;
-import org.apache.airavata.mft.admin.MFTConsulClientException;
-import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.agent.stub.AgentTransferRequest;
 import org.apache.airavata.mft.api.service.TransferApiRequest;
@@ -40,15 +38,12 @@ import org.springframework.context.annotation.ComponentScan;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @SpringBootApplication()
 @ComponentScan(basePackages = {"org.apache.airavata.mft"})
@@ -72,7 +67,7 @@ public class MFTController implements CommandLineRunner {
     private MFTConsulClient mftConsulClient;
 
     @Autowired
-    private AgentTransferDispatcher pathOptimizer;
+    private TransferDispatcher pathOptimizer;
 
     public void init() {
         logger.info("Initializing the Controller");
@@ -155,7 +150,7 @@ public class MFTController implements CommandLineRunner {
                     String time = parts[4];
 
                     TransferState transferState = mapper.readValue(valAsStr, TransferState.class);
-                    mftConsulClient.saveTransferState(transferId, transferState.setChildId(pathHash));
+                    mftConsulClient.saveTransferState(transferId, agentRequestId, transferState.setChildId(pathHash));
 
                 }
             } catch (Exception e) {
