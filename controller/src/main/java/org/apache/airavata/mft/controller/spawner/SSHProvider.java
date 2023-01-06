@@ -46,8 +46,10 @@ public class SSHProvider {
     private static final Logger logger = LoggerFactory.getLogger(SSHProvider.class);
 
     private SSHClient client;
+    private String hostName;
 
     public void initConnection(String hostName, int port, String keyPath, String user) throws IOException {
+        this.hostName = hostName;
         DefaultConfig defaultConfig = new DefaultConfig();
         defaultConfig.setKeepAliveProvider(KeepAliveProvider.KEEP_ALIVE);
 
@@ -94,6 +96,17 @@ public class SSHProvider {
         client.auth(user, am);
     }
 
+    public void closeConnection() {
+        try {
+            if (client != null) {
+                client.close();
+                logger.info("Closed the SSH connection to host {}", hostName);
+            }
+        } catch (Throwable e) {
+            logger.warn("Failed to close the SSH connection for host {}. Continuing ...", hostName, e);
+        }
+    }
+
     public int runCommand(String command) throws IOException {
         Session session = this.client.startSession();
         logger.info("Running command {}", command);
@@ -111,10 +124,14 @@ public class SSHProvider {
 
         CountDownLatch portForwardCompleteLock = new CountDownLatch(1);
         new Thread(() -> {
+
             String consulHost = "localhost";
+            RemotePortForwarder remotePortForwarder;
+            RemotePortForwarder.Forward portBind;
 
             try {
-                client.getRemotePortForwarder().bind(
+                remotePortForwarder = client.getRemotePortForwarder();
+                portBind = remotePortForwarder.bind(
                         new RemotePortForwarder.Forward(localPort),
                         new SocketForwardingConnectListener(new InetSocketAddress(consulHost, localPort)));
 
@@ -123,7 +140,7 @@ public class SSHProvider {
                 portForwardHoldLock.await();
 
                 logger.info("Releasing the remote port forward");
-                client.getRemotePortForwarder().cancel(new RemotePortForwarder.Forward(localPort));
+                remotePortForwarder.cancel(portBind);
 
             } catch (Exception e) {
                 logger.error("Failed to create the remote port forward for port {}", localPort, e);

@@ -79,7 +79,7 @@ public class TransferOrchestrator {
 
     public void submitTransferToProcess(String transferId, AgentTransferRequest request,
                                         BiConsumer<EndpointPaths, TransferState> updateStatus,
-                                        Consumer<Boolean> createTransferHook) {
+                                        BiConsumer<EndpointPaths, Boolean> createTransferHook) {
         long totalPending = totalPendingTransfers.addAndGet(request.getEndpointPathsCount());
         logger.info("Total pending files to transfer {}", totalPending);
         for (EndpointPaths endpointPath : request.getEndpointPathsList()) {
@@ -94,7 +94,8 @@ public class TransferOrchestrator {
 
     public void processTransfer(String transferId, String requestId, StorageWrapper sourceStorage, StorageWrapper destStorage,
                                 SecretWrapper sourceSecret,SecretWrapper destSecret, EndpointPaths endpointPath,
-                                BiConsumer<EndpointPaths, TransferState> updateStatus, Consumer<Boolean> createTransferHook) {
+                                BiConsumer<EndpointPaths, TransferState> updateStatus,
+                                BiConsumer<EndpointPaths, Boolean> createTransferHook) {
         try {
 
             long running = totalRunningTransfers.incrementAndGet();
@@ -139,13 +140,13 @@ public class TransferOrchestrator {
                     .setDescription("Started the transfer"));
 
             // Save transfer metadata in scheduled path to recover in case of an Agent failures. Recovery is done from controller
-            createTransferHook.accept(true);
+            createTransferHook.accept(endpointPath, true);
 
             mediator.transferSingleThread(transferId, srcCC, dstCC, updateStatus,
                     (id, transferSuccess) -> {
                         try {
                             // Delete scheduled key as the transfer completed / failed if it was placed in current session
-                            createTransferHook.accept(false);
+                            createTransferHook.accept(endpointPath,false);
                             long pendingAfter = totalRunningTransfers.decrementAndGet();
                             logger.info("Removed transfer {} from queue with transfer success = {}. Total running {}",
                                     id, transferSuccess, pendingAfter);

@@ -116,14 +116,11 @@ public class ConsulIngressHandler {
                             AgentUtil.throwingBiConsumerWrapper((endPointPath, st) -> {
                                 mftConsulClient.submitFileTransferStateToProcess(transferId, request.getRequestId(), endPointPath,  agentId, st.setPublisher(agentId));
                             }),
-                            AgentUtil.throwingConsumerWrapper(create -> {
+                            AgentUtil.throwingBiConsumerWrapper((endpointPath, create) -> {
                                 if (create) {
-                                    mftConsulClient.getKvClient().putValue(MFTConsulClient.AGENTS_SCHEDULED_PATH
-                                                    + agentId + "/" + session + "/" + transferId + "/" + agentTransferRequestId,
-                                            reqBytes, 0L, PutOptions.BLANK);
+                                    mftConsulClient.createEndpointHookForAgent(agentId, session, transferId, agentTransferRequestId, endpointPath);
                                 } else {
-                                    mftConsulClient.getKvClient().deleteKey(MFTConsulClient.AGENTS_SCHEDULED_PATH
-                                            + agentId + "/" + session + "/" + transferId + "/" + agentTransferRequestId);
+                                   mftConsulClient.deleteEndpointHookForAgent(agentId, session, transferId, agentTransferRequestId, endpointPath);
                                 }
                             }));
                 });

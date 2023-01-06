@@ -51,6 +51,7 @@ public class EC2AgentSpawner extends AgentSpawner {
     private Future<String> launchFuture;
     private Future<Boolean> terminateFuture;
     private final Map<String, String> amiMap;
+    private SSHProvider sshProvider;
 
     public EC2AgentSpawner(StorageWrapper storageWrapper, SecretWrapper secretWrapper) {
         super(storageWrapper, secretWrapper);
@@ -219,35 +220,35 @@ public class EC2AgentSpawner extends AgentSpawner {
                     logger.info("Waiting 30 seconds until the ssh interface comes up in instance {}", instanceId);
                     Thread.sleep(30000);
                     if ("running".equals(instanceState.getName()) && publicIpAddress != null) {
-                        SSHProvider portForwardAgent = new SSHProvider();
-                        portForwardAgent.initConnection(publicIpAddress, 22,
+                        sshProvider = new SSHProvider();
+                        sshProvider.initConnection(publicIpAddress, 22,
                                 Path.of(mftKeyDir, keyName).toAbsolutePath().toString(), systemUser);
                         logger.info("Created SSH Connection. Installing dependencies...");
 
-                        int exeCode = portForwardAgent.runCommand("sudo apt install -y openjdk-11-jre-headless");
+                        int exeCode = sshProvider.runCommand("sudo apt install -y openjdk-11-jre-headless");
                         if (exeCode != 0)
                             throw new IOException("Failed to install jdk on new VM");
-                        exeCode = portForwardAgent.runCommand("sudo apt install -y unzip");
+                        exeCode = sshProvider.runCommand("sudo apt install -y unzip");
                         if (exeCode != 0)
                             throw new IOException("Failed to install unzip on new VM");
-                        exeCode = portForwardAgent.runCommand("wget https://github.com/apache/airavata-mft/releases/download/v0.0.1/MFT-Agent-0.01-bin.zip");
+                        exeCode = sshProvider.runCommand("wget https://github.com/apache/airavata-mft/releases/download/v0.0.1/MFT-Agent-0.01-bin.zip");
                         if (exeCode != 0)
                             throw new IOException("Failed to download mft distribution");
-                        exeCode = portForwardAgent.runCommand("unzip MFT-Agent-0.01-bin.zip");
+                        exeCode = sshProvider.runCommand("unzip MFT-Agent-0.01-bin.zip");
                         if (exeCode != 0)
                             throw new IOException("Failed to unzip mft distribution");
 
-                        exeCode = portForwardAgent.runCommand("sed -ir \"s/^[#]*\\s*agent.id=.*/agent.id=" + agentId + "/\" /home/ubuntu/MFT-Agent-0.01/conf/application.properties");
+                        exeCode = sshProvider.runCommand("sed -ir \"s/^[#]*\\s*agent.id=.*/agent.id=" + agentId + "/\" /home/ubuntu/MFT-Agent-0.01/conf/application.properties");
                         if (exeCode != 0)
                             throw new IOException("Failed to update agent id in config file");
 
                         portForwardLock = new CountDownLatch(1);
-                        CountDownLatch portForwardPendingLock = portForwardAgent.createSshPortForward(8500, portForwardLock);
+                        CountDownLatch portForwardPendingLock = sshProvider.createSshPortForward(8500, portForwardLock);
 
                         logger.info("Waiting until the port forward is setup");
                         portForwardPendingLock.await();
 
-                        exeCode = portForwardAgent.runCommand("sh MFT-Agent-0.01/bin/agent-daemon.sh start");
+                        exeCode = sshProvider.runCommand("sh MFT-Agent-0.01/bin/agent-daemon.sh start");
                         if (exeCode != 0)
                             throw new IOException("Failed to start the MFT Agent");
 
@@ -278,6 +279,7 @@ public class EC2AgentSpawner extends AgentSpawner {
     public void terminate() {
 
         terminateFuture =  executor.submit(() -> {
+
             if (instanceId != null) {
                 String accessKey = secretWrapper.getS3().getAccessKey();
                 String secretKey = secretWrapper.getS3().getSecretKey();
@@ -292,6 +294,13 @@ public class EC2AgentSpawner extends AgentSpawner {
 
                 if (portForwardLock != null) {
                     portForwardLock.countDown();
+                }
+
+                logger.info("Waiting 3 seconds until the port forward lock is released");
+                Thread.sleep(3000);
+
+                if (sshProvider != null) {
+                    sshProvider.closeConnection();
                 }
 
                 TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest();

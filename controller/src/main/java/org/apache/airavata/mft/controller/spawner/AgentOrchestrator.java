@@ -154,41 +154,27 @@ public class AgentOrchestrator {
 
                     if ((System.currentTimeMillis() - metadata.lastScannedTime) >  SPAWNER_MAX_IDLE_SECONDS * 1000) {
 
-                        long totalFiles = 0;
-                        long completedOrFailedFiles = 0;
-
-                        Map<String, TransferInfo> transferInfos = metadata.transferInfos;
-
-                        for (String agentTransferId: transferInfos.keySet()) {
-                            TransferInfo transferInfo = transferInfos.get(agentTransferId);
-
-                            try {
-                                totalFiles += transferInfo.agentTransferRequest.getEndpointPathsCount();
-
-                                List<TransferState> transferStates = this.transferDispatcher.getMftConsulClient()
-                                        .getTransferStates(transferInfo.transferId, agentTransferId);
-
-                                completedOrFailedFiles += transferStates.stream()
-                                        .filter(transferState -> transferState.getState().equals("COMPLETED") ||
-                                                transferState.getState().equals("FAILED")).count();
-
-
-
-                            } catch (Exception e) {
-                                logger.error("Failed to fetch transfer states for agent transfer id {}", agentTransferId, e);
-                            }
+                        if (metadata.transferInfos.size() > 0) {
+                            return;
                         }
 
-                        logger.info("Spawner with key {} has total {} files to be transferred and {} were completed or failed",
-                                key, totalFiles, completedOrFailedFiles);
+                        logger.info("No transfer infos for spawner {}. Checking for termination", key);
 
-                        if (totalFiles == completedOrFailedFiles) {
-                            // TODO create a write lock with reusing agent logic
+                        try {
+                            List<String> pendingAgentTransfers = transferDispatcher.getMftConsulClient().listPendingAgentTransfers(metadata.spawner.getLaunchState().get());
+                            if (pendingAgentTransfers.isEmpty()) {
+                                int totalFilesInProgress = transferDispatcher.getMftConsulClient().getEndpointHookCountForAgent(metadata.spawner.getLaunchState().get());
+                                if (totalFilesInProgress == 0) {
+                                    logger.info("Killing spawner with key {} as all files were transferred and the agent" +
+                                                    " is inactive for {} seconds",
+                                            key, SPAWNER_MAX_IDLE_SECONDS);
+                                    metadata.spawner.terminate();
+                                    launchedSpawnersMap.remove(key);
+                                }
+                            }
 
-                            logger.info("Killing spawner with key {} as all files were transferred and inactive for {} seconds",
-                                    key, SPAWNER_MAX_IDLE_SECONDS);
-                            metadata.spawner.terminate();
-                            launchedSpawnersMap.remove(key);
+                        } catch (Exception e) {
+                            logger.error("Failed while fetching the endpoint count for agent", e);
                         }
                     }
                 });

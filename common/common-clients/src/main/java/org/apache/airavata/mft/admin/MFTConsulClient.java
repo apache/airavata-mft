@@ -141,6 +141,22 @@ public class MFTConsulClient {
         }
     }
 
+    public List<String> listPendingAgentTransfers(String agentId) throws MFTConsulClientException  {
+        try {
+            try {
+                return kvClient.getKeys(AGENTS_TRANSFER_REQUEST_MESSAGE_PATH + agentId);
+            } catch (ConsulException e) {
+                if (e.getCode() == 404) {
+                    return Collections.emptyList();
+                } else {
+                    throw e;
+                }
+            }
+        } catch (Exception e) {
+            throw new MFTConsulClientException("Failed to list pending agent transfers for agent " + agentId, e);
+        }
+    }
+
     public void sendSyncRPCToAgent(String agentId, SyncRPCRequest rpcRequest) throws MFTConsulClientException {
         try {
             String asString = mapper.writeValueAsString(rpcRequest);
@@ -379,6 +395,42 @@ public class MFTConsulClient {
     public List<AgentInfo> getLiveAgentInfos() throws MFTConsulClientException {
         List<String> liveAgentIds = getLiveAgentIds();
         return liveAgentIds.stream().map(id -> getAgentInfo(id).get()).collect(Collectors.toList());
+    }
+
+    public void createEndpointHookForAgent(String agentId, String session, String transferId,
+                                           String agentTransferRequestId,
+                                           EndpointPaths endpointPaths) {
+        getKvClient().putValue(MFTConsulClient.AGENTS_SCHEDULED_PATH
+                        + agentId + "/" + session + "/" + transferId + "/" + agentTransferRequestId
+                        + "/" + getEndpointPathHash(endpointPaths),
+                endpointPaths.toByteArray(), 0L, PutOptions.BLANK);
+    }
+
+    public void deleteEndpointHookForAgent(String agentId, String session, String transferId,
+                                          String agentTransferRequestId,
+                                          EndpointPaths endpointPaths) {
+        getKvClient().deleteKey(MFTConsulClient.AGENTS_SCHEDULED_PATH
+                + agentId + "/" + session + "/" + transferId + "/" + agentTransferRequestId
+                + "/" + getEndpointPathHash(endpointPaths));
+    }
+
+    public int getEndpointHookCountForAgent(String agentId) throws MFTConsulClientException {
+        Optional<String> session = getKvClient().getSession(LIVE_AGENTS_PATH + agentId);
+
+        try {
+            try {
+                return session.map(s -> getKvClient().getKeys(MFTConsulClient.AGENTS_SCHEDULED_PATH
+                        + agentId + "/" + s).size()).orElse(0);
+            } catch (ConsulException e) {
+                if (e.getCode() == 404) {
+                    return 0;
+                } else {
+                    throw e;
+                }
+            }
+        } catch (Exception e) {
+            throw new MFTConsulClientException("Failed to fetch endpoint hook count for agent " + agentId, e);
+        }
     }
 
     public KeyValueClient getKvClient() {
