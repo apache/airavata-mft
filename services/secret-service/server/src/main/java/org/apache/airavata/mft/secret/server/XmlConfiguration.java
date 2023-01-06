@@ -18,9 +18,7 @@
  package org.apache.airavata.mft.secret.server;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportResource;
 
-@Configuration
-@ImportResource({"classpath*:applicationContext.xml"})
+@Configuration("SecretServiceXmlConfig")
 public class XmlConfiguration {
 }

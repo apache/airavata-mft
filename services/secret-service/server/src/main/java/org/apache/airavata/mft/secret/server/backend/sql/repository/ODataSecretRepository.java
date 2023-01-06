@@ -19,9 +19,11 @@ package org.apache.airavata.mft.secret.server.backend.sql.repository;
 
 import org.apache.airavata.mft.secret.server.backend.sql.entity.ODataSecretEntity;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+@Repository
 public interface ODataSecretRepository extends CrudRepository<ODataSecretEntity, String> {
     Optional<ODataSecretEntity> findBySecretId(String secretId);
 }

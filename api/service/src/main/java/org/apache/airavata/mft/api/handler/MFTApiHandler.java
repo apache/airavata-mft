@@ -72,18 +72,18 @@ import org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorage;
 import org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorageGetRequest;
 import org.apache.airavata.mft.secret.client.SecretServiceClient;
 import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
-import org.apache.commons.lang3.tuple.Pair;
 import org.dozer.DozerBeanMapper;
 import org.lognet.springboot.grpc.GRpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 
 import java.util.*;
-import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @GRpcService
+@ComponentScan(basePackages = {"org.apache.airavata.mft.admin"})
 public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImplBase {
 
     private static final Logger logger = LoggerFactory.getLogger(MFTApiHandler.class);

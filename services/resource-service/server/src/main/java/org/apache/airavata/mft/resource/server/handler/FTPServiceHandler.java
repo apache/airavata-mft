@@ -17,18 +17,18 @@
 
  package org.apache.airavata.mft.resource.server.handler;
 
-import com.google.protobuf.Empty;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.apache.airavata.mft.resource.server.backend.ResourceBackend;
 import org.apache.airavata.mft.resource.service.ftp.FTPStorageServiceGrpc;
 import org.apache.airavata.mft.resource.stubs.ftp.storage.*;
-import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageListResponse;
 import org.lognet.springboot.grpc.GRpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service("RSFTPServiceHandler")
 @GRpcService
 public class FTPServiceHandler extends FTPStorageServiceGrpc.FTPStorageServiceImplBase {
 
