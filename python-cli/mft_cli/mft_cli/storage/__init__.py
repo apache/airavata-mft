@@ -1,6 +1,7 @@
 import typer
 from pick import pick
 import mft_cli.storage.s3 as s3
+import mft_cli.storage.gcs as gcs
 from airavata_mft_sdk import mft_client
 from airavata_mft_sdk.common import StorageCommon_pb2
 from rich.console import Console
@@ -15,7 +16,8 @@ def add_storage():
     option, index = pick(options, title, indicator="=>")
     if option == "S3":
         s3.handle_add_storage()
-
+    elif option == "Google Cloud Storage (GCS)":
+        gcs.handle_add_storage()
 
 @app.command("list")
 def list_storage():

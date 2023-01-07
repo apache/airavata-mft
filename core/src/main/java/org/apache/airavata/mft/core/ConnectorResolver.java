@@ -39,6 +39,9 @@ public final class ConnectorResolver {
             case "ODATA":
                 className = "org.apache.airavata.mft.transport.odata.ODataIncomingConnector";
                 break;
+            case "GCS":
+                className = "org.apache.airavata.mft.transport.gcp.GCSIncomingStreamingConnector";
+                break;
         }
 
         if (className != null) {
@@ -58,6 +61,9 @@ public final class ConnectorResolver {
                 break;
             case "S3":
                 className = "org.apache.airavata.mft.transport.s3.S3OutgoingStreamingConnector";
+                break;
+            case "GCS":
+                className = "org.apache.airavata.mft.transport.gcp.GCSOutgoingStreamingConnector";
                 break;
 
         }
@@ -79,6 +85,9 @@ public final class ConnectorResolver {
                 break;
             case "SWIFT":
                 className = "org.apache.airavata.mft.transport.swift.SwiftIncomingConnector";
+                break;
+            case "GCS":
+                className = "org.apache.airavata.mft.transport.gcp.GCSIncomingChunkedConnector";
                 break;
         }
 
