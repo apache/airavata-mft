@@ -1,3 +1,18 @@
+#  Licensed to the Apache Software Foundation (ASF) under one or more
+#  contributor license agreements.  See the NOTICE file distributed with
+#  this work for additional information regarding copyright ownership.
+#  The ASF licenses this file to You under the Apache License, Version 2.0
+#  (the "License"); you may not use this file except in compliance with
+#  the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 from rich import print
 from pick import pick
 import typer
@@ -8,8 +23,13 @@ from airavata_mft_sdk import MFTTransferApi_pb2
 from airavata_mft_sdk import MFTAgentStubs_pb2
 from airavata_mft_sdk.common import StorageCommon_pb2
 import json
-
+import configparser
 import os
+import base64
+import google.auth
+import googleapiclient.discovery
+
+gcs_key_path = '.mft/keys/gcs/service_account_key.json'
 
 
 def handle_add_storage():
@@ -28,35 +48,78 @@ def handle_add_storage():
     option, index = pick(options, "How do you want to load credentials", indicator="=>")
 
     if index == 1:  # Manual configuration
-        client_id = typer.prompt("Client ID")
-        client_secret = typer.prompt("Secret Key")
-        has_session_token = typer.confirm("Do you have a session token?", False)
-        if has_session_token:
-            session_token = typer.prompt("Session Token")
+        print("MFT uses service accounts to gain access to Google Cloud. You can creat a service account by going to "
+              "https://console.cloud.google.com/iam-admin/serviceaccounts. Download the JSON format of the service account key."
+              " More information about service accounts can be found here https://cloud.google.com/iam/docs/service-accounts")
 
-        is_gcs = typer.confirm("Is this a Google Cloud bucket?", True)
+        credential_json_path = typer.prompt("Service Account Credential JSON path")
+        with open(credential_json_path) as json_file:
+            sa_entries = json.load(json_file)
+            client_id = sa_entries['client_id']
+            client_secret = sa_entries['private_key']
+            project_id = sa_entries['project_id']
 
-        if is_gcs:
-            region, index = pick(gcp_regions, "Select the Google Cloud Region", indicator="=>")
 
-    else:  # Loading credentials from the aws cli config file
-        path = os.path.join(os.path.expanduser('~'), '.config/gcloud/application_default_credentials.json')
-        with open(path, 'r') as config_file:
-            config_data = json.load(config_file)
-        cred_sections = "1"
+    else:  # Loading credentials from the gcloud cli config file
+        service_account = None
+        client_email = None
+        default_service_account_name = 'mft-gcs-serviceaccount'
 
-        # TODO Need to create service account and load the credential from it
-        client_id = config_data['client_id']
-        client_id = 'xx@mfttest.iam.gserviceaccount.com'
-        # client_secret = base64.b64decode(config_data['client_secret']).decode("utf-8")
-        client_secret = 'privetKey'
-        project_id = 'mfttest'
+        # Find the active config for Google cloud ADC
+        active_config_path = os.path.join(os.path.expanduser('~'), '.config/gcloud/active_config')
+        with open(active_config_path) as f:
+            active_config = f.readline()
+        print('Active config : ' + active_config)
 
-        region, index = pick(gcs_regions, "Select the Google Cloud Region", indicator="=>")
+        # Load default project
+        config = configparser.RawConfigParser()
+        default_project_path = os.path.join(os.path.expanduser('~'), '.config/gcloud/configurations/config_' + active_config)
+        config.read(default_project_path)
+        project_id = config['core']['project']
+        account_email = config['core']['account']
+        print('Project ID : ' + project_id)
+        print(account_email)
 
+        default_service_account_email = (default_service_account_name + '@' + project_id + '.iam.gserviceaccount.com')
+
+        path = os.path.join(os.path.expanduser('~'), gcs_key_path)
+        if os.path.exists(path):
+            with open(path, 'r') as config_file:
+                config_data = json.load(config_file)
+            client_id = config_data['client_id']
+            client_email = config_data['client_email']
+            project_id = config_data['project_id']
+            client_secret = config_data['private_key']
+
+        print('Client email : ', client_email)
+        if client_email is None or client_email != default_service_account_email:
+            inferred_cred, inferred_project = google.auth.default(active_config)
+
+            service_acc_list = list_service_accounts(project_id=project_id, credentials=inferred_cred)
+            service_account_available = any(x['email'] == default_service_account_email for x in service_acc_list['accounts'])
+            print('Service account availability : ', service_account_available)
+            if service_account_available:  # Already have a service account for mft, But no key
+                get_service_account_key(credentials=inferred_cred, service_account_email=default_service_account_email)
+
+            else:  # No service account for mft
+
+                # Read OAuth credentials and create the service account
+                service_account = create_service_account(project_id, default_service_account_name, 'Airavata MFT Service Account', credentials=inferred_cred)
+
+            # Load service account details again
+            if os.path.exists(path):
+                with open(path, 'r') as config_file:
+                    config_data = json.load(config_file)
+                client_id = config_data['client_id']
+                client_email = config_data['client_email']
+                project_id = config_data['project_id']
+                client_secret = config_data['private_key']
+            else:
+                print("No credential found in ~/" + gcs_key_path + " file")
+                exit()
     client = mft_client.MFTClient()
 
-    gcs_secret = GCSCredential_pb2.GCSSecret(clientEmail=client_id, privateKey=client_secret, projectId=project_id)
+    gcs_secret = GCSCredential_pb2.GCSSecret(clientEmail=client_email, privateKey=client_secret, projectId=project_id)
     secret_wrapper = MFTAgentStubs_pb2.SecretWrapper(gcs=gcs_secret)
 
     gcs_storage = GCSStorage_pb2.GCSStorage()
@@ -94,3 +157,87 @@ def handle_add_storage():
     client.common_api.registerSecretForStorage(secret_for_storage_req)
 
     print("Successfully added the GCS Bucket...")
+
+
+def list_service_accounts(project_id, credentials):
+    """Lists all service accounts for the current project."""
+
+    service = googleapiclient.discovery.build('iam', 'v1', credentials=credentials)
+    service_accounts = service.projects().serviceAccounts().list(name='projects/' + project_id).execute()
+    # for account in service_accounts['accounts']:
+    #     print('Name: ' + account['name'])
+    #     print('Email: ' + account['email'])
+    #     print(' ')
+    return service_accounts
+
+
+def create_service_account(project_id, name, display_name, credentials):
+    """Creates a service account."""
+
+    service = googleapiclient.discovery.build('iam', 'v1', credentials=credentials)
+    my_service_account = service.projects().serviceAccounts().create(
+        name='projects/' + project_id,
+        body={
+            'accountId': name,
+            'serviceAccount': {
+                'displayName': display_name
+            }
+        }).execute()
+
+    print('Created service account: ' + my_service_account['email'])
+
+    resource_service = googleapiclient.discovery.build('cloudresourcemanager', 'v1', credentials=credentials)
+    policy = resource_service.projects().getIamPolicy(resource=project_id).execute()
+    account_handle = f"serviceAccount:{my_service_account['email']}"
+
+    # Add policy
+    modified = False
+    roles = [role["role"] for role in policy["bindings"]]
+    target_role = "roles/storage.admin"  # Service account role which can transfer GCS files
+    if target_role not in roles:
+        for role in policy["bindings"]:
+            if role["role"] == target_role:
+                if account_handle not in role["members"]:
+                    role["members"].append(account_handle)
+                    modified = True
+
+    else:  # role does not exist
+        policy["bindings"].append({"role": target_role, "members": [account_handle]})
+        modified = True
+
+    if modified:  # execute policy change
+        resource_service.projects().setIamPolicy(resource=project_id, body={"policy": policy}).execute()
+
+    # Generate a Service account key
+    get_service_account_key(credentials, my_service_account['email'])
+    return my_service_account
+
+
+def get_service_account_key(credentials, service_account_email):
+    """Creates a key for a service account."""
+
+    key_path = os.path.join(os.path.expanduser('~'), gcs_key_path)
+    service = googleapiclient.discovery.build('iam', 'v1', credentials=credentials)
+    # write key file
+    if not os.path.exists(key_path):
+
+        # list existing keys
+        keys = service.projects().serviceAccounts().keys().list(name="projects/-/serviceAccounts/" + service_account_email).execute()
+
+        # cannot have more than 10 keys per service account
+        if len(keys["keys"]) >= 10:
+            raise ValueError(f"Service account {service_account_email} has too many keys. Make sure to copy keys to {key_path} or create a new service account.")
+
+        # create key
+        key = (service.projects().serviceAccounts().keys().create(name="projects/-/serviceAccounts/" + service_account_email, body={}).execute())
+        print("New Key generated ...")
+        # create service key files
+        os.makedirs(os.path.dirname(key_path), exist_ok=True)
+        json_key_file = base64.b64decode(key["privateKeyData"]).decode("utf-8")
+        open(key_path, "w").write(json_key_file)
+
+    else:
+        print("Please backup the existing in service_account_key file ~/" + gcs_key_path + " to create new key file")
+        exit()
+
+    return key_path
