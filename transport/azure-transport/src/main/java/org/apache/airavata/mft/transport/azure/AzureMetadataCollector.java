@@ -22,6 +22,7 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.blob.models.BlobContainerItem;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobItemProperties;
 import com.azure.storage.blob.models.BlobProperties;
@@ -55,17 +56,34 @@ public class AzureMetadataCollector implements MetadataCollector {
 
         // Azure does not have a concept called hierarchical containers. So we assume that there are no containers inside
         // the given container
+
         ResourceMetadata.Builder metadataBuilder = ResourceMetadata.newBuilder();
-        if (!isAvailable(resourcePath)) {
-            metadataBuilder.setError(MetadataFetchError.NOT_FOUND);
-            return metadataBuilder.build();
-        }
 
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(azureSecret.getConnectionString()).buildClient();
 
+        if (resourcePath.isEmpty() && azureStorage.getContainer().isEmpty()) { // List containers
+            PagedIterable<BlobContainerItem> blobContainerItems = blobServiceClient.listBlobContainers();
+            DirectoryMetadata.Builder parentDir = DirectoryMetadata.newBuilder();
+            parentDir.setResourcePath("");
+            parentDir.setFriendlyName("");
+
+            blobContainerItems.forEach(containerItem -> {
+                DirectoryMetadata.Builder containerDir = DirectoryMetadata.newBuilder();
+                containerDir.setFriendlyName(containerItem.getName());
+                containerDir.setResourcePath(containerItem.getName());
+                containerDir.setCreatedTime(containerItem.getProperties().getLastModified().toEpochSecond());
+                containerDir.setUpdateTime(containerItem.getProperties().getLastModified().toEpochSecond());
+                parentDir.addDirectories(containerDir);
+            });
+            metadataBuilder.setDirectory(parentDir);
+
+            return metadataBuilder.build();
+        }
+
+
         BlobContainerClient blobContainerClient = blobServiceClient.getBlobContainerClient(azureStorage.getContainer());
 
-        if (resourcePath.isEmpty()) { // List the container
+        if (resourcePath.isEmpty()) { // List inside the container
             PagedIterable<BlobItem> blobItems = blobContainerClient.listBlobs();
             DirectoryMetadata.Builder directoryBuilder = DirectoryMetadata.newBuilder();
             blobItems.forEach(blobItem -> {
@@ -88,6 +106,11 @@ public class AzureMetadataCollector implements MetadataCollector {
             metadataBuilder.setDirectory(directoryBuilder);
 
         } else { // If resource is a file
+
+            if (!isAvailable(resourcePath)) {
+                metadataBuilder.setError(MetadataFetchError.NOT_FOUND);
+                return metadataBuilder.build();
+            }
 
             BlobClient blobClient = blobContainerClient.getBlobClient(resourcePath);
             FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();

@@ -39,6 +39,9 @@ public final class ConnectorResolver {
             case "ODATA":
                 className = "org.apache.airavata.mft.transport.odata.ODataIncomingConnector";
                 break;
+            case "AZURE":
+                className = "org.apache.airavata.mft.transport.azure.AzureIncomingStreamingConnector";
+                break;
         }
 
         if (className != null) {
@@ -58,6 +61,9 @@ public final class ConnectorResolver {
                 break;
             case "S3":
                 className = "org.apache.airavata.mft.transport.s3.S3OutgoingStreamingConnector";
+                break;
+            case "AZURE":
+                className = "org.apache.airavata.mft.transport.azure.AzureOutgoingStreamingConnector";
                 break;
 
         }

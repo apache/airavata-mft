@@ -25,8 +25,6 @@ import org.apache.airavata.mft.core.ConnectorContext;
 import org.apache.airavata.mft.core.api.Connector;
 import org.apache.airavata.mft.credential.stubs.box.BoxSecret;
 import org.apache.airavata.mft.credential.stubs.box.BoxSecretGetRequest;
-import org.apache.airavata.mft.secret.client.SecretServiceClient;
-import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
