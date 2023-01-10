@@ -19,7 +19,6 @@ def add_storage():
         s3.handle_add_storage()
     elif option == "Azure Storage":
         azure.handle_add_storage()
-
     elif option == "Google Cloud Storage (GCS)":
         gcs.handle_add_storage()
 
