@@ -13,7 +13,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from rich import print
+from rich import print as rprint
+from rich.panel import Panel
+from rich.text import Text
 from pick import pick
 import typer
 from airavata_mft_sdk import mft_client
@@ -33,29 +35,24 @@ gcs_key_path = '.mft/keys/gcs/service_account_key.json'
 
 
 def handle_add_storage():
-    session_token = ""
-    gcs_regions = ["us-central", "us-east1", "us-east4", "us-east5", "us-south1",
-                   "us-west1", "us-west2", "us-west3", "us-west4", "northamerica-northeast1", "northamerica-northeast2",
-                   "southamerica-east1", "southamerica-west1",
-                   "europe-central2", "europe-north1", "europe-southwest1", "europe-west1", "europe-west2",
-                   "europe-west3", "europe-west4", "europe-west6", "europe-west8", "europe-west9",
-                   "asia-east1", "asia-east2", "asia-northeast1", "asia-northeast2", "asia-northeast3",
-                   "asia-southeast1", "asia-south1", "asia-south2", "asia-southeast2",
-                   "me-west1", "australia-southeast1", "australia-southeast2"
-                   ]
 
     options = ["Through Google Cloud SDK config file", "Enter manually"]
     option, index = pick(options, "How do you want to load credentials", indicator="=>")
 
     if index == 1:  # Manual configuration
-        print("MFT uses service accounts to gain access to Google Cloud. You can creat a service account by going to "
-              "https://console.cloud.google.com/iam-admin/serviceaccounts. Download the JSON format of the service account key."
-              " More information about service accounts can be found here https://cloud.google.com/iam/docs/service-accounts")
+        text_msg = ("MFT uses service accounts to gain access to Google Cloud. "
+                    "\n 1) You can create a service account by going to https://console.cloud.google.com/iam-admin/serviceaccounts."
+                    "\n 2) Download the JSON format of the service account key."
+                    "\n 3) Use that downloaded Service Account Credential JSON file to access Google storage."
+                    "\nMore information about service accounts can be found here https://cloud.google.com/iam/docs/service-accounts")
 
+        panel = Panel.fit(Text(text_msg, justify="left"))
+        rprint(panel)
         credential_json_path = typer.prompt("Service Account Credential JSON path")
         with open(credential_json_path) as json_file:
             sa_entries = json.load(json_file)
             client_id = sa_entries['client_id']
+            client_email = sa_entries['client_email']
             client_secret = sa_entries['private_key']
             project_id = sa_entries['project_id']
 
