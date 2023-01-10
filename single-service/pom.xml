@@ -91,4 +91,50 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>${maven.assembly.plugin}</version>
+                <executions>
+                    <execution>
+                        <id>mft-single-service-distribution-package</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <tarLongFileMode>posix</tarLongFileMode>
+                            <finalName>${single.service.dist.name}</finalName>
+                            <descriptors>
+                                <descriptor>src/main/assembly/single-service-bin-assembly.xml</descriptor>
+                            </descriptors>
+                            <attach>false</attach>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*.properties</exclude>
+                        <exclude>**/*.xml</exclude>
+                        <exclude>**/*.sh</exclude>
+                        <exclude>**/*.json</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <properties>
+        <single.service.dist.name>Single-Service-0.01</single.service.dist.name>
+        <maven.assembly.plugin>3.1.1</maven.assembly.plugin>
+    </properties>
+
 </project>
