@@ -27,19 +27,11 @@ import org.apache.airavata.mft.credential.stubs.s3.*;
 import org.apache.airavata.mft.credential.stubs.scp.*;
 import org.apache.airavata.mft.credential.stubs.swift.*;
 import org.apache.airavata.mft.secret.server.backend.SecretBackend;
-import org.apache.airavata.mft.secret.server.backend.sql.entity.FTPSecretEntity;
-import org.apache.airavata.mft.secret.server.backend.sql.entity.GCSSecretEntity;
-import org.apache.airavata.mft.secret.server.backend.sql.entity.ODataSecretEntity;
-import org.apache.airavata.mft.secret.server.backend.sql.entity.S3SecretEntity;
-import org.apache.airavata.mft.secret.server.backend.sql.entity.SCPSecretEntity;
+import org.apache.airavata.mft.secret.server.backend.sql.entity.*;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftAuthCredentialSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftPasswordSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftSecretEntity;
-import org.apache.airavata.mft.secret.server.backend.sql.repository.FTPSecretRepository;
-import org.apache.airavata.mft.secret.server.backend.sql.repository.GCSSecretRepository;
-import org.apache.airavata.mft.secret.server.backend.sql.repository.ODataSecretRepository;
-import org.apache.airavata.mft.secret.server.backend.sql.repository.S3SecretRepository;
-import org.apache.airavata.mft.secret.server.backend.sql.repository.SCPSecretRepository;
+import org.apache.airavata.mft.secret.server.backend.sql.repository.*;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.swift.SwiftAuthCredentialSecretRepository;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.swift.SwiftPasswordSecretRepository;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.swift.SwiftSecretRepository;
@@ -62,6 +54,9 @@ public class SQLSecretBackend implements SecretBackend {
 
     @Autowired
     private S3SecretRepository s3SecretRepository;
+
+    @Autowired
+    private AzureSecretRepository azureSecretRepository;
 
     @Autowired
     private SwiftSecretRepository swiftSecretRepository;
@@ -160,22 +155,26 @@ public class SQLSecretBackend implements SecretBackend {
 
     @Override
     public Optional<AzureSecret> getAzureSecret(AzureSecretGetRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        Optional<AzureSecretEntity> secretEty = azureSecretRepository.findBySecretId(request.getSecretId());
+        return secretEty.map(azSecretEntity -> mapper.map(azSecretEntity, AzureSecret.newBuilder().getClass()).build());
     }
 
     @Override
     public AzureSecret createAzureSecret(AzureSecretCreateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        AzureSecretEntity savedEntity = azureSecretRepository.save(mapper.map(request, AzureSecretEntity.class));
+        return mapper.map(savedEntity, AzureSecret.newBuilder().getClass()).build();
     }
 
     @Override
     public boolean updateAzureSecret(AzureSecretUpdateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        azureSecretRepository.save(mapper.map(request, AzureSecretEntity.class));
+        return true;
     }
 
     @Override
     public boolean deleteAzureSecret(AzureSecretDeleteRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        azureSecretRepository.deleteById(request.getSecretId());
+        return true;
     }
 
     @Override

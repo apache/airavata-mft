@@ -55,6 +55,9 @@ public class SQLResourceBackend implements ResourceBackend {
     private S3StorageRepository s3StorageRepository;
 
     @Autowired
+    private AzureStorageRepository azureStorageRepository;
+
+    @Autowired
     private GCSStorageRepository gcsStorageRepository;
 
     @Autowired
@@ -318,27 +321,42 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public AzureStorageListResponse listAzureStorage(AzureStorageListRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        AzureStorageListResponse.Builder respBuilder = AzureStorageListResponse.newBuilder();
+        List<AzureStorageEntity> all = azureStorageRepository.findAll(PageRequest.of(request.getOffset(), request.getLimit()));
+        all.forEach(ety -> respBuilder.addStorages(mapper.map(ety, AzureStorage.newBuilder().getClass())));
+        return respBuilder.build();
     }
 
     @Override
     public Optional<AzureStorage> getAzureStorage(AzureStorageGetRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        Optional<AzureStorageEntity> entity = azureStorageRepository.findById(request.getStorageId());
+        return entity.map(e -> mapper.map(e, AzureStorage.newBuilder().getClass()).build());
     }
 
     @Override
     public AzureStorage createAzureStorage(AzureStorageCreateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        AzureStorageEntity savedEntity = azureStorageRepository.save(mapper.map(request, AzureStorageEntity.class));
+
+        ResolveStorageEntity storageTypeEty = new ResolveStorageEntity();
+        storageTypeEty.setStorageId(savedEntity.getStorageId());
+        storageTypeEty.setStorageType(ResolveStorageEntity.StorageType.AZURE);
+        storageTypeEty.setStorageName(savedEntity.getName());
+        resolveStorageRepository.save(storageTypeEty);
+
+        return mapper.map(savedEntity, AzureStorage.newBuilder().getClass()).build();
     }
 
     @Override
     public boolean updateAzureStorage(AzureStorageUpdateRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        azureStorageRepository.save(mapper.map(request, AzureStorageEntity.class));
+        return true;
     }
 
     @Override
     public boolean deleteAzureStorage(AzureStorageDeleteRequest request) throws Exception {
-        throw new UnsupportedOperationException("Operation is not supported in backend");
+        azureStorageRepository.deleteById(request.getStorageId());
+        resourceRepository.deleteByStorageIdAndStorageType(request.getStorageId(), GenericResourceEntity.StorageType.AZURE);
+        return true;
     }
 
     @Override

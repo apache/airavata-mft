@@ -1209,3 +1209,7 @@ airavata-mft/
 # Custom rules (everything added below won't be overriden by 'Generate .gitignore File' if you use 'Update' option)
 
 python-sdk/env
+python-sdk/samples/env/*
+python-sdk/venv/*
+python-cli/venv/*
+python-cli/mft_cli/poetry.lock

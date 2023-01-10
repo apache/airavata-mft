@@ -102,7 +102,7 @@ def copy(source, destination):
                                                              sourceSecretId = source_secret_id,
                                                              destinationStorageId = dest_storage_id,
                                                              destinationSecretId = dest_secret_id,
-                                                             optimizeTransferPath = True)
+                                                             optimizeTransferPath = False)
 
     if (source_metadata.WhichOneof('metadata') == 'directory') :
         if (destination[-1] != "/"):

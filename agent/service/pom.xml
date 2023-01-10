@@ -37,6 +37,17 @@
             <groupId>org.apache.airavata</groupId>
             <artifactId>mft-agent-stub</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-tcnative-boringssl-static</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-tcnative-boringssl-static</artifactId>
+            <version>2.0.54.Final</version>
         </dependency>
         <dependency>
             <groupId>org.apache.airavata</groupId>
@@ -58,6 +69,17 @@
             <groupId>org.apache.airavata</groupId>
             <artifactId>mft-s3-transport</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-common</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-common</artifactId>
+            <version>4.1.82.Final</version>
         </dependency>
         <dependency>
             <groupId>org.apache.airavata</groupId>
@@ -141,7 +163,7 @@
         </dependency>
     </dependencies>
 
-    <build>
+    <!--build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -166,7 +188,7 @@
                 </executions>
             </plugin>
         </plugins>
-    </build>
+    </build-->
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
