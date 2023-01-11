@@ -21,11 +21,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.PropertySource;
 
 @SpringBootApplication
 @ComponentScan(basePackages = {"org.apache.airavata.mft"})
+@PropertySource(value = "classpath:api-service-application.properties")
 public class ApiServiceApplication {
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         SpringApplication app = new SpringApplication(ApiServiceApplication.class);
         app.setWebApplicationType(WebApplicationType.NONE);
         app.run(args);

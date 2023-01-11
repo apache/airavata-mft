@@ -20,10 +20,12 @@ package org.apache.airavata.mft.resource.server.backend.sql.repository;
 import org.apache.airavata.mft.resource.server.backend.sql.entity.SwiftStorageEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface SwiftStorageRepository extends CrudRepository<SwiftStorageEntity, String> {
     Optional<SwiftStorageEntity> findByStorageId(String storageId);
     List<SwiftStorageEntity> findAll(Pageable pageable);

@@ -21,7 +21,9 @@ import java.util.Optional;
 
 import org.apache.airavata.mft.secret.server.backend.sql.entity.GCSSecretEntity;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface GCSSecretRepository extends CrudRepository<GCSSecretEntity, String>
 {
     Optional<GCSSecretEntity> findBySecretId( String resourceId);

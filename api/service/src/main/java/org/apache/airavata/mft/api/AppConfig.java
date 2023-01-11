@@ -23,7 +23,7 @@ import org.dozer.DozerBeanMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@Configuration("ASAppConfig")
 public class AppConfig {
 
     @org.springframework.beans.factory.annotation.Value("${consul.host}")
