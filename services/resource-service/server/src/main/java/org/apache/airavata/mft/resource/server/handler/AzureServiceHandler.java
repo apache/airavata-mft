@@ -26,6 +26,7 @@ import org.lognet.springboot.grpc.GRpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service("RSAzureServiceHandler")
@@ -35,6 +36,7 @@ public class AzureServiceHandler extends AzureStorageServiceGrpc.AzureStorageSer
     private static final Logger logger = LoggerFactory.getLogger(AzureServiceHandler.class);
 
     @Autowired
+    @Qualifier("SQLResourceBackend")
     private ResourceBackend backend;
 
     @Override

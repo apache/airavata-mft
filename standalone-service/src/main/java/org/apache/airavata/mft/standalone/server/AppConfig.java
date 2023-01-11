@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.singleservice;
+package org.apache.airavata.mft.standalone.server;
 
 import org.dozer.DozerBeanMapper;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

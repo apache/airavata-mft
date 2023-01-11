@@ -6,9 +6,9 @@
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context.xsd">
 
-<!--    <bean id="resourceBackend" class="org.apache.airavata.mft.secret.server.backend.file.FileBasedSecretBackend"-->
+<!--    <bean id="secretBackend" class="org.apache.airavata.mft.secret.server.backend.file.FileBasedSecretBackend"-->
 <!--          init-method="init" destroy-method="destroy"></bean>-->
-    <bean id="resourceBackend" class="org.apache.airavata.mft.secret.server.backend.sql.SQLSecretBackend"
+    <bean id="secretBackend" class="org.apache.airavata.mft.secret.server.backend.sql.SQLSecretBackend"
           init-method="init" destroy-method="destroy"></bean>
 
 </beans>

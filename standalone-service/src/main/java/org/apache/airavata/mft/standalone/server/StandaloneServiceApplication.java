@@ -1,4 +1,4 @@
-package org.apache.airavata.mft.singleservice;
+package org.apache.airavata.mft.standalone.server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,9 +17,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @PropertySource(value = "classpath:resource-service-application.properties")
 @PropertySource(value = "classpath:secret-service-application.properties")
 @Import(org.apache.airavata.mft.api.AppConfig.class)
-public class SingleServiceApplication {
+public class StandaloneServiceApplication {
 	public static void main(String[] args) {
-		SpringApplication.run(SingleServiceApplication.class, args);
+		SpringApplication.run(StandaloneServiceApplication.class, args);
 	}
 
 }
