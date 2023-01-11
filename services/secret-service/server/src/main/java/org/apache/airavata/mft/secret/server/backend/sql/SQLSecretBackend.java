@@ -43,7 +43,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-@Component
+@Component("SQLSecretBackend")
 public class SQLSecretBackend implements SecretBackend {
 
     private static final Logger logger = LoggerFactory.getLogger(SQLSecretBackend.class);

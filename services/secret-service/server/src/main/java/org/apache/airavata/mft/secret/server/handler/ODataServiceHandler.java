@@ -26,6 +26,7 @@ import org.lognet.springboot.grpc.GRpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service("SSODataServiceHandler")
@@ -35,7 +36,9 @@ public class ODataServiceHandler extends ODataSecretServiceGrpc.ODataSecretServi
     private static final Logger logger = LoggerFactory.getLogger(ODataServiceHandler.class);
 
     @Autowired
+    @Qualifier("SQLSecretBackend")
     private SecretBackend backend;
+
     @Override
     public void getODataSecret(ODataSecretGetRequest request, StreamObserver<ODataSecret> responseObserver) {
         try {

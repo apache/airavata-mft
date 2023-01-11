@@ -25,6 +25,7 @@ import org.lognet.springboot.grpc.GRpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service("RSStorageCommonServiceHandler")
@@ -34,6 +35,7 @@ public class StorageCommonServiceHandler extends StorageCommonServiceGrpc.Storag
     private static final Logger logger = LoggerFactory.getLogger(StorageCommonServiceHandler.class);
 
     @Autowired
+    @Qualifier("SQLResourceBackend")
     private ResourceBackend backend;
 
     @Override

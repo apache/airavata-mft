@@ -36,13 +36,14 @@ import org.dozer.DozerBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 
-@Component
+@Component("SQLResourceBackend")
 public class SQLResourceBackend implements ResourceBackend {
 
     private static final Logger logger = LoggerFactory.getLogger(SQLResourceBackend.class);
