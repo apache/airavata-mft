@@ -19,7 +19,7 @@ package org.apache.airavata.mft.secret.server;
 
 import org.springframework.context.annotation.Configuration;
 
-@Configuration("SSAppConfig")
+@Configuration
 public class AppConfig {
 
 }

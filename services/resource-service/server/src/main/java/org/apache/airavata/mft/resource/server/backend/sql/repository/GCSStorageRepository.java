@@ -22,9 +22,7 @@ import java.util.List;
 import org.apache.airavata.mft.resource.server.backend.sql.entity.GCSStorageEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
 
-@Repository
 public interface GCSStorageRepository extends CrudRepository<GCSStorageEntity, String>
 {
     List<GCSStorageEntity> findAll( Pageable pageable);

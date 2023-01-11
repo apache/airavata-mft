@@ -17,6 +17,7 @@
 
 package org.apache.airavata.mft.secret.server.handler;
 
+import com.google.protobuf.Empty;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.apache.airavata.mft.credential.service.ftp.FTPSecretServiceGrpc;
@@ -26,9 +27,7 @@ import org.lognet.springboot.grpc.GRpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service("SSFTPServiceHandler")
 @GRpcService
 public class FTPServiceHandler extends FTPSecretServiceGrpc.FTPSecretServiceImplBase {
 

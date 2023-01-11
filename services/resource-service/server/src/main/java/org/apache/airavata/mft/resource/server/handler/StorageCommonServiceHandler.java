@@ -25,9 +25,9 @@ import org.lognet.springboot.grpc.GRpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service("RSStorageCommonServiceHandler")
+import javax.sound.midi.Track;
+
 @GRpcService
 public class StorageCommonServiceHandler extends StorageCommonServiceGrpc.StorageCommonServiceImplBase {
 

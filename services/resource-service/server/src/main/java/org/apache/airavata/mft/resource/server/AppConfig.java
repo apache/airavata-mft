@@ -19,7 +19,7 @@ package org.apache.airavata.mft.resource.server;
 
 import org.springframework.context.annotation.Configuration;
 
-@Configuration("RSAppConfig")
+@Configuration
 public class AppConfig {
 
 }

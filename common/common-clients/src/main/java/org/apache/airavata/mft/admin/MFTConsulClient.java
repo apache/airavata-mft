@@ -37,13 +37,13 @@ import org.apache.airavata.mft.agent.stub.EndpointPaths;
 import org.apache.airavata.mft.api.service.TransferApiRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.google.common.net.HostAndPort.*;
 import static com.google.common.net.HostAndPort.fromParts;
 
 /*
@@ -53,7 +53,6 @@ import static com.google.common.net.HostAndPort.fromParts;
  mft/transfer/state/{transfer-id} -> transfer state
  */
 
-@Component
 public class MFTConsulClient {
 
     private static final Logger logger = LoggerFactory.getLogger(MFTConsulClient.class);
@@ -110,9 +109,6 @@ public class MFTConsulClient {
         this.client = Consul.builder().withHostAndPort(HostAndPort.fromParts(host, port)).build();
         this.kvClient = client.keyValueClient();
         this.sessionClient = client.sessionClient();
-    }
-
-    public MFTConsulClient() {
     }
 
     public String submitTransfer(TransferApiRequest transferRequest) throws MFTConsulClientException {

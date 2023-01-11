@@ -18,7 +18,9 @@
  package org.apache.airavata.mft.resource.server;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 
-@Configuration("ResourceServiceXmlConfig")
+@Configuration
+@ImportResource({"applicationContext.xml"})
 public class XmlConfiguration {
 }
