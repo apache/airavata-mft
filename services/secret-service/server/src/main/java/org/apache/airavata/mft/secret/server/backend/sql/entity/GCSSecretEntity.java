@@ -37,7 +37,7 @@ public class GCSSecretEntity
     @Column(name = "PROJECT_ID")
     private String projectId;
 
-    @Column(name = "PRIVATE_KEY")
+    @Column(name = "PRIVATE_KEY", length = 3000)
     private String privateKey;
 
     @Column(name = "CLIENT_EMAIL")

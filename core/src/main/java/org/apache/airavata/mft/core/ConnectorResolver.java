@@ -42,6 +42,9 @@ public final class ConnectorResolver {
             case "AZURE":
                 className = "org.apache.airavata.mft.transport.azure.AzureIncomingStreamingConnector";
                 break;
+            case "GCS":
+                className = "org.apache.airavata.mft.transport.gcp.GCSIncomingStreamingConnector";
+                break;
         }
 
         if (className != null) {
@@ -65,6 +68,9 @@ public final class ConnectorResolver {
             case "AZURE":
                 className = "org.apache.airavata.mft.transport.azure.AzureOutgoingStreamingConnector";
                 break;
+            case "GCS":
+                className = "org.apache.airavata.mft.transport.gcp.GCSOutgoingStreamingConnector";
+                break;
 
         }
 
@@ -85,6 +91,9 @@ public final class ConnectorResolver {
                 break;
             case "SWIFT":
                 className = "org.apache.airavata.mft.transport.swift.SwiftIncomingConnector";
+                break;
+            case "GCS":
+                className = "org.apache.airavata.mft.transport.gcp.GCSIncomingChunkedConnector";
                 break;
         }
 

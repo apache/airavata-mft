@@ -25,6 +25,8 @@ public class GCSOutgoingStreamingConnector implements OutgoingStreamingConnector
     private Storage storage;
     private BlobInfo blobInfo;
     private ConnectorConfig connectorConfig;
+
+    private WriteChannel writer;
     @Override
     public void init(ConnectorConfig connectorConfig) throws Exception {
 
@@ -48,11 +50,18 @@ public class GCSOutgoingStreamingConnector implements OutgoingStreamingConnector
 
     @Override
     public void complete() throws Exception {
+        if (writer != null) {
+            try {
+                writer.close();
+            } catch (Exception e) {
+                logger.warn("Failed to close the writer", e);
+            }
+        }
         if (storage != null) {
             try {
                 this.storage.close();
             } catch (Exception e) {
-                // Ignore
+                logger.warn("Failed to close the storage", e);
             }
         }
         logger.info("File {} successfully sent", connectorConfig.getResourcePath());
@@ -60,11 +69,18 @@ public class GCSOutgoingStreamingConnector implements OutgoingStreamingConnector
 
     @Override
     public void failed() throws Exception {
+        if (writer != null) {
+            try {
+                writer.close();
+            } catch (Exception e) {
+                logger.warn("Failed to close the writer", e);
+            }
+        }
         if (storage != null) {
             try {
                 this.storage.close();
             } catch (Exception e) {
-                // Ignore
+                logger.warn("Failed to close the storage", e);
             }
         }
         logger.info("File {} failed to send", connectorConfig.getResourcePath());
@@ -72,7 +88,7 @@ public class GCSOutgoingStreamingConnector implements OutgoingStreamingConnector
 
     @Override
     public OutputStream fetchOutputStream() throws Exception {
-        WriteChannel writer = storage.writer(blobInfo);
+        writer = storage.writer(blobInfo);
         return Channels.newOutputStream(writer);
     }
 }
