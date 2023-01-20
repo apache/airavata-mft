@@ -61,7 +61,13 @@ def handle_add_storage():
         region, index = pick(aws_regions, "Select the AWS Region", indicator="=>")
         endpoint = "https://s3." + region + ".amazonaws.com"
 
-    client = mft_client.MFTClient()
+    client = mft_client.MFTClient(transfer_api_port = 7003,
+                                  transfer_api_secured = False,
+                                  resource_service_host = "localhost",
+                                  resource_service_port = 7003,
+                                  resource_service_secured = False,
+                                  secret_service_host = "localhost",
+                                  secret_service_port = 7003)
 
     s3_secret = S3Credential_pb2.S3Secret(accessKey=client_id, secretKey=client_secret, sessionToken = session_token)
     secret_wrapper = MFTAgentStubs_pb2.SecretWrapper(s3=s3_secret)

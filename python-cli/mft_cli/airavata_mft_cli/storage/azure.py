@@ -16,7 +16,13 @@ def handle_add_storage():
     if index == 1: # Manual configuration
         connection_string = typer.prompt("Connection String")
 
-    client = mft_client.MFTClient()
+    client = mft_client.MFTClient(transfer_api_port = 7003,
+                                  transfer_api_secured = False,
+                                  resource_service_host = "localhost",
+                                  resource_service_port = 7003,
+                                  resource_service_secured = False,
+                                  secret_service_host = "localhost",
+                                  secret_service_port = 7003)
 
     azure_secret = AzureCredential_pb2.AzureSecret(connectionString = connection_string)
     secret_wrapper = MFTAgentStubs_pb2.SecretWrapper(azure=azure_secret)

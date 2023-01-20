@@ -114,7 +114,14 @@ def handle_add_storage():
             else:
                 print("No credential found in ~/" + gcs_key_path + " file")
                 exit()
-    client = mft_client.MFTClient()
+
+    client = mft_client.MFTClient(transfer_api_port = 7003,
+                                  transfer_api_secured = False,
+                                  resource_service_host = "localhost",
+                                  resource_service_port = 7003,
+                                  resource_service_secured = False,
+                                  secret_service_host = "localhost",
+                                  secret_service_port = 7003)
 
     gcs_secret = GCSCredential_pb2.GCSSecret(clientEmail=client_email, privateKey=client_secret, projectId=project_id)
     secret_wrapper = MFTAgentStubs_pb2.SecretWrapper(gcs=gcs_secret)

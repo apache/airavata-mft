@@ -1,8 +1,8 @@
 import typer
 from pick import pick
-import mft_cli.storage.s3 as s3
-import mft_cli.storage.azure as azure
-import mft_cli.storage.gcs as gcs
+import airavata_mft_cli.storage.s3 as s3
+import airavata_mft_cli.storage.azure as azure
+import airavata_mft_cli.storage.gcs as gcs
 from airavata_mft_sdk import mft_client
 from airavata_mft_sdk.common import StorageCommon_pb2
 from rich.console import Console
@@ -24,7 +24,13 @@ def add_storage():
 
 @app.command("list")
 def list_storage():
-    client = mft_client.MFTClient()
+    client = mft_client.MFTClient(transfer_api_port = 7003,
+                                  transfer_api_secured = False,
+                                  resource_service_host = "localhost",
+                                  resource_service_port = 7003,
+                                  resource_service_secured = False,
+                                  secret_service_host = "localhost",
+                                  secret_service_port = 7003)
     list_req = StorageCommon_pb2.StorageListRequest()
     list_response = client.common_api.listStorages(list_req)
 

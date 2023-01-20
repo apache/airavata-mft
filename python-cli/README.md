@@ -10,7 +10,7 @@ pip install pick
 
 Load Poetry shell
 ```
-cd mft_cli
+cd airavata_mft_cli
 poetry shell
 ```
 
@@ -24,5 +24,10 @@ pip install airavata_mft_sdk==0.0.1-alpha21
 Build the binary
 ```
 poetry install
-mft-cli
+mft --help
+```
+
+To publish the ditribution to pypi
+```
+ poetry publish --build
 ```
