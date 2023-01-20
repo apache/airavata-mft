@@ -18,14 +18,10 @@
 package org.apache.airavata.mft.standalone.server;
 
 import org.dozer.DozerBeanMapper;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration("SingleServiceAppConfig")
-@ComponentScan(basePackages = {"org.apache.airavata.mft.api.handler"})
-@EnableAutoConfiguration
 public class AppConfig {
 
 	@Bean(name = "org.dozer.Mapper")

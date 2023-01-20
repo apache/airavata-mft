@@ -56,7 +56,7 @@ public class SyncRPCClient {
     }
 
     public void init() {
-        syncResponseCache = KVCache.newCache(mftConsulClient.getKvClient(), baseResponsePath);
+        syncResponseCache = KVCache.newCache(mftConsulClient.getKvClient(), baseResponsePath, 9);
         listenToResponses();
     }
 
@@ -110,6 +110,6 @@ public class SyncRPCClient {
     }
 
     public SyncRPCResponse sendSyncRequest(SyncRPCRequest request) throws MFTConsulClientException, InterruptedException {
-        return sendSyncRequest(request, 100000);
+        return sendSyncRequest(request, 9000);
     }
 }

@@ -499,7 +499,7 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
                             .asException());
             }
         } catch (Exception e) {
-            logger.error("Error while fetching resource metadata for resource path " + directRequest.getResourcePath(), e);
+            logger.error("Error while fetching resource metadata" , e);
             responseObserver.onError(Status.INTERNAL
                     .withDescription("Failed to fetch file resource metadata. " + e.getMessage())
                     .asException());

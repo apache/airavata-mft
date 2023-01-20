@@ -34,6 +34,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java-util</artifactId>
+            <version>${protobuf.java}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.airavata</groupId>
             <artifactId>mft-resource-service-client</artifactId>
             <version>${project.version}</version>
@@ -92,7 +97,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk</artifactId>
-            <version>1.12.371</version>
+            <version>${aws.sdk.version}</version>
         </dependency>
         <dependency>
             <groupId>com.hierynomus</groupId>

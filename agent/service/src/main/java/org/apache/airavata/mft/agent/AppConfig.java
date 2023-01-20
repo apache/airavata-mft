@@ -24,7 +24,7 @@ import org.apache.airavata.mft.agent.rpc.RPCParser;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@Configuration("AgentAppConfig")
 public class AppConfig {
 
     @org.springframework.beans.factory.annotation.Value("${consul.host}")

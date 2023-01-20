@@ -44,10 +44,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import org.springframework.context.annotation.PropertySource;
 
 @SpringBootApplication()
 @ComponentScan(basePackages = {"org.apache.airavata.mft"})
 @EntityScan("org.apache.airavata.mft.api.db.entities")
+@PropertySource(value = "classpath:controller-application.properties")
 public class MFTController implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(MFTController.class);
@@ -71,9 +73,9 @@ public class MFTController implements CommandLineRunner {
 
     public void init() {
         logger.info("Initializing the Controller");
-        messageCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.CONTROLLER_TRANSFER_MESSAGE_PATH);
-        stateCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.CONTROLLER_STATE_MESSAGE_PATH);
-        liveAgentCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.LIVE_AGENTS_PATH);
+        messageCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.CONTROLLER_TRANSFER_MESSAGE_PATH, 9);
+        stateCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.CONTROLLER_STATE_MESSAGE_PATH, 9);
+        liveAgentCache = KVCache.newCache(mftConsulClient.getKvClient(), MFTConsulClient.LIVE_AGENTS_PATH, 9);
         pendingMonitor = Executors.newSingleThreadScheduledExecutor();
 
         pendingMonitor.scheduleWithFixedDelay(this::processPending, 2000, 4000, TimeUnit.MILLISECONDS);

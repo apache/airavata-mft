@@ -225,7 +225,10 @@ public class EC2AgentSpawner extends AgentSpawner {
                                 Path.of(mftKeyDir, keyName).toAbsolutePath().toString(), systemUser);
                         logger.info("Created SSH Connection. Installing dependencies...");
 
-                        int exeCode = sshProvider.runCommand("sudo apt install -y openjdk-11-jre-headless");
+                        int exeCode = sshProvider.runCommand("sudo apt update -y");
+                        if (exeCode != 0)
+                            throw new IOException("Failed to update apt for VM");
+                        exeCode = sshProvider.runCommand("sudo apt install -y openjdk-11-jre-headless");
                         if (exeCode != 0)
                             throw new IOException("Failed to install jdk on new VM");
                         exeCode = sshProvider.runCommand("sudo apt install -y unzip");

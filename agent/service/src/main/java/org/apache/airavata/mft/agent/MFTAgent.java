@@ -27,13 +27,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
 import javax.annotation.PreDestroy;
 import java.util.List;
 import java.util.concurrent.*;
+import org.springframework.context.annotation.PropertySource;
 
-@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
+@SpringBootApplication()
+@PropertySource(value = "classpath:agent-application.properties")
 public class MFTAgent implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(MFTAgent.class);

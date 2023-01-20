@@ -84,6 +84,16 @@
             <artifactId>dozer</artifactId>
             <version>${dozer}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
+            <artifactId>mft-agent-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
+            <artifactId>mft-controller</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

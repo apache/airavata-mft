@@ -21,7 +21,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HostAndPort;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.util.JsonFormat;
 import com.orbitz.consul.Consul;
 import com.orbitz.consul.ConsulException;
 import com.orbitz.consul.KeyValueClient;
@@ -101,7 +100,8 @@ public class MFTConsulClient {
         List<HostAndPort> hostAndPorts = consulHostPorts.entrySet().stream()
                 .map(entry -> fromParts(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
-        this.client = Consul.builder().withMultipleHostAndPort(hostAndPorts, 100000).build();
+        this.client = Consul.builder().withMultipleHostAndPort(hostAndPorts, 100000)
+            .withReadTimeoutMillis(11000).withWriteTimeoutMillis(1000).build();
         this.kvClient = client.keyValueClient();
         this.sessionClient = client.sessionClient();
     }

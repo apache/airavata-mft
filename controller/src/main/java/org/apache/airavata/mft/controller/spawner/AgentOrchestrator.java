@@ -146,6 +146,7 @@ public class AgentOrchestrator {
                                 transferDispatcher.getMftConsulClient().getKvClient().deleteKey(transferInfo.consulKey);
                                 logger.info("Terminating the spawner");
                                 metadata.spawner.terminate();
+                                launchedSpawnersMap.remove(key);
                             } finally {
                                 metadata.transferInfos.remove(agentTransferId);
                             }
@@ -161,9 +162,21 @@ public class AgentOrchestrator {
                         logger.info("No transfer infos for spawner {}. Checking for termination", key);
 
                         try {
-                            List<String> pendingAgentTransfers = transferDispatcher.getMftConsulClient().listPendingAgentTransfers(metadata.spawner.getLaunchState().get());
+                            String agentId = null;
+                            try {
+                                agentId = metadata.spawner.getLaunchState().get();
+
+                            } catch (Exception e) {
+                                logger.info("Killing spawner with key {} as the agent is not responding and inactive for {} seconds",
+                                    key, SPAWNER_MAX_IDLE_SECONDS);
+                                metadata.spawner.terminate();
+                                launchedSpawnersMap.remove(key);
+                                return;
+                            }
+
+                            List<String> pendingAgentTransfers = transferDispatcher.getMftConsulClient().listPendingAgentTransfers(agentId);
                             if (pendingAgentTransfers.isEmpty()) {
-                                int totalFilesInProgress = transferDispatcher.getMftConsulClient().getEndpointHookCountForAgent(metadata.spawner.getLaunchState().get());
+                                int totalFilesInProgress = transferDispatcher.getMftConsulClient().getEndpointHookCountForAgent(agentId);
                                 if (totalFilesInProgress == 0) {
                                     logger.info("Killing spawner with key {} as all files were transferred and the agent" +
                                                     " is inactive for {} seconds",

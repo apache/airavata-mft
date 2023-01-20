@@ -25,7 +25,7 @@ import org.apache.airavata.mft.secret.client.SecretServiceClientBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@Configuration("ControllerConfig")
 public class AppConfig {
 
     @org.springframework.beans.factory.annotation.Value("${consul.host}")
