@@ -101,11 +101,6 @@
                 <groupId>org.apache.rat</groupId>
                 <artifactId>apache-rat-plugin</artifactId>
                 <version>0.15</version>
-                <configuration>
-                            <excludes>
-                                <exclude>**/python-sdk/**/*</exclude>
-                            </excludes>
-                        </configuration>
             </plugin>
         </plugins>
     </build>
