@@ -20,91 +20,59 @@ under the License.
 [![Build Status](https://travis-ci.org/apache/airavata-mft.svg?branch=master)](https://travis-ci.org/apache/airavata-mft)
 
 
-Airavata Managed File Transfer Service and Clients
+# Airavata Managed File Transfers (MFT)
 
-## Running from IDE
+Airavata MFT is a high-performance, multi-protocol data transfer engine developed for orchestrating data movement and operations across most of the cloud and legacy storage endpoints. Through Airavata MFT, our vision is to provide simple but highly performing tools for users to access any cloud or on-premise storage endpoint just as they access local files in their workstations. 
 
-* Start consul server - ./consul agent -dev
-* Start ResourceServiceApplication
-* Start SecretServiceApplication
-* Start MftController
-* Start ApiServiceApplication
-* Start the agent
+Airavata MFT abstracts out the complexity of each storage type and provides a unified and simple interface for users to access and move data across any endpoint seamlessly. To gain the maximum throughput between storage endpoints, Airavata MFT utilizes Agents installed between the optimum network path with additional multi-channel, parallel data paths to further optimize the transfer performance. In addition to that, MFT can utilize parallel Agents to transfer data between endpoints to gain the advantage of multiple network links. 
 
-## Building from the script
+# Try Airavata MFT
+You need to have Java 11+ and python3.10+ installed to install Airavata MFT in your environment. We currently only support Linux and MacOS operating systems and plan to support Windows in future. 
 
-* Go to scripts directory
-* Run ```/bin/bash build.sh```
-* This will build the whole project and unzip distributions of each service to the build direcotry of the root of the project
-
-#### Defaults for Resource and Secret Service
-* The Backends for Secret and Resource services are by default set to File based backend so you can find sample config json 
-files in conf directory of each distribution
-* You can easily change the backend by updating the applicationContext.xml file in conf directory
-
-#### Starting the distribution
-* You should have consul running inorder to start MFT. You can start consul by running ```/bin/bash start-consul.sh <os distribution>```. 
-For example ```/bin/bash start-consul.sh mac```. You can see supported distributions by running ```/bin/bash start-consul.sh -h```
-* If your OS distribution is not provided in the script, you can manually install Consul using pre compiled binaries https://www.consul.io/docs/install/index.html#precompiled-binaries
-* To start MFT stack, run ```/bin/bash start-mft.sh```. This will start all the services and an Agent to transfer data
-* To stop MFT stack, run ```/bin/bash start-mft.sh```
-* If you want to see logs of any running service, run ```/bin/bash log.sh <service name>```. For example, ```/bin/bash log.sh secret```. 
-To view available services, run  ```/bin/bash log.sh -h```
-
-#### Sample API Call
-
-* This sample is for the Java gRPC client of MFT API. Request resource ids and secret ids are analogous to default values 
-in secret.json and resources.json files available for File based backends. 
-
-* You should have mft-api-client dependency in your project
-
+### Download and Install
 ```
-<dependency>
-    <groupId>org.apache.airavata</groupId>
-    <artifactId>mft-api-client</artifactId>
-    <version>0.01-SNAPSHOT</version>
-</dependency>
+pip3 install airavata-mft-cli
+mft init
 ```
 
+Above commands will download Airavata MFT into your machine and start the MFT service. To stop MFT after using
+
 ```
-import org.apache.airavata.mft.api.client.MFTApiClient;
-import org.apache.airavata.mft.api.service.*;
-
-public class SampleClient {
-    public static void main(String args[]) throws InterruptedException {
-
-        MFTApiServiceGrpc.MFTApiServiceBlockingStub client = MFTApiClient.buildClient("localhost", 7004);
-
-        String sourceId = "remote-ssh-resource2";
-        String sourceToken = "local-ssh-cred";
-        String destId = "remote-ssh-resource";
-        String destToken = "local-ssh-cred";
-
-        TransferApiRequest request = TransferApiRequest.newBuilder()
-                .setSourceId(sourceId)
-                .setSourceToken(sourceToken)
-                .setSourceType("SCP")
-                .setDestinationId(destId)
-                .setDestinationToken(destToken)
-                .setDestinationType("SCP")
-                .setAffinityTransfer(false).build();
-
-        // Submitting the transfer to MFT
-        TransferApiResponse transferApiResponse = client.submitTransfer(request);
-        while(true) {
-            // Monitoring transfer status
-            try {
-                TransferStateApiResponse transferState = client.getTransferState(TransferStateApiRequest.newBuilder().setTransferId(transferApiResponse.getTransferId()).build());
-                System.out.println("Latest Transfer State " + transferState.getState());
-                if ("COMPLETED".equals(transferState.getState()) || "FAILED".equals(transferState.getState()) {
-                    break;
-                }
-
-            } catch (Exception e) {
-                System.out.println("Errored " + e.getMessage());
-            }
-            Thread.sleep(1000);
-        }
-    }
-}
+mft stop
 ```
+
+
+### Registering Storages
+
+First you need to register your storage endpoints into MFT in order to access them. Registering storage is an interactive process and you can easily register those without prior knowledge 
+
+```
+mft storage add
+```
+
+This will ask the type of storage you need and credentials to access those storages. To list already added storages, you can run
+
+```
+mft storage list
+```
+### Accessing Data in Storages
+
+In Airavata MFT, we provide a unified interface to access the data in any storage. Users can access data in storages just as they access data in their computers. MFT converts user queries into storage specific data representations (POSIX, Block, Objects, ..) internally
+
+```
+mft ls <storage name>
+mft ls <storage name>/<resource path>
+```
+
+### Moving Data between Storages
+
+Copying data between storages are simple as copying data between directories of local machine for users. MFT takes care of network path optimizations, parallel data path selections and selections or creations of suitable transfer agents. 
+ 
+ ```
+ mft cp <source storage name>/<path> <destination storage name>/<path> 
+ ```
+MFT is capable of auto detecting directory copying and file copying based on the path given.
+
+### Troubleshooting and Issue Reporting
+
+This is our very first attempt release Airavata MFT for community usage and there might be lots of corner cases that we have not noticed. All the logs of MFT service are available in ```~/.mft/Standalone-Service-0.01/logs/airavata.log```. If you see any error while using MFT, please report that in our Github issue page and we will respond as soon as possible. We really appreciate your contribution as it will greatly help to improve the stability of the product.
