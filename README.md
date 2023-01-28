@@ -80,3 +80,18 @@ MFT is capable of auto detecting directory copying and file copying based on the
 ### Troubleshooting and Issue Reporting
 
 This is our very first attempt release Airavata MFT for community usage and there might be lots of corner cases that we have not noticed. All the logs of MFT service are available in ```~/.mft/Standalone-Service-0.01/logs/airavata.log```. If you see any error while using MFT, please report that in our Github issue page and we will respond as soon as possible. We really appreciate your contribution as it will greatly help to improve the stability of the product.
+
+#### Common issues
+
+- Following error can be noticed if you have a python version which is less than 3.10
+```
+  ERROR: Could not find a version that satisfies the requirement airavata-mft-cli (from versions: none)
+  ERROR: No matching distribution found for airavata-mft-cli
+```
+If the Error still occurs after installing the right python version, try creating a virtual environemnt
+```
+python3.10 -m venv venv
+source venv/bin/activate
+pip install airavata-mft-client
+```
+  
