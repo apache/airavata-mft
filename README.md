@@ -30,12 +30,16 @@ Airavata MFT abstracts out the complexity of each storage type and provides a un
 You need to have Java 11+ and python3.10+ installed to install Airavata MFT in your environment. We currently only support Linux and MacOS operating systems and plan to support Windows in future. 
 
 ### Download and Install
+
+Following commands will download Airavata MFT into your machine and start the MFT service. 
 ```
 pip3 install airavata-mft-cli
 mft init
 ```
 
-Above commands will download Airavata MFT into your machine and start the MFT service. To stop MFT after using
+> If the installer failed for M1 and M2 Macs complaining about grpcio installation. Follow the solution mentioned in [here](https://github.com/apache/airavata-mft/issues/71). You might have to uninstall already installed grpcio and gerpcio-tools distributions first.
+
+To stop MFT after using
 
 ```
 mft stop
