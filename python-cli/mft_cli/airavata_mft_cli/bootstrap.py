@@ -23,6 +23,7 @@ import zipfile
 from subprocess import call
 from subprocess import Popen
 from pathlib import Path
+from sys import platform
 
 def download_and_unarchive(url, download_path, extract_dir = os.path.join(os.path.expanduser('~'), ".mft/")):
 
@@ -62,13 +63,26 @@ def stop_service(bin_path, daemon_script_name):
 def start_mft():
   print("Setting up MFT Services")
 
+  if platform == "linux" or platform == "linux2":
+    consul_url = "https://releases.hashicorp.com/consul/1.7.1/consul_1.7.1_linux_amd64.zip"
+  elif platform == "darwin":
+    consul_url = "https://releases.hashicorp.com/consul/1.7.1/consul_1.7.1_darwin_amd64.zip"
+  elif platform == "win32":
+    print("Windows support is not avialable yet")
+    raise typer.Exit()
+  else:
+    print("Un supported platform: " + platform)
+    raise typer.Exit()
+
+  mft_dir = os.path.join(os.path.expanduser('~'), ".mft")
+  if not os.path.exists(mft_dir):
+    os.makedirs(mft_dir)
+
   path = os.path.join(os.path.expanduser('~'), ".mft/consul")
   if not os.path.exists(path):
-    consul_macos_url = "https://releases.hashicorp.com/consul/1.7.1/consul_1.7.1_darwin_amd64.zip"
-    consul_linux_url = "https://releases.hashicorp.com/consul/1.7.1/consul_1.7.1_linux_amd64.zip"
     print("Downloading Consul...")
     zip_path = os.path.join(os.path.expanduser('~'), ".mft/consul.zip")
-    download_and_unarchive(consul_macos_url, zip_path, os.path.join(os.path.expanduser('~'), ".mft/"))
+    download_and_unarchive(consul_url, zip_path, os.path.join(os.path.expanduser('~'), ".mft/"))
 
   current_dir =  os.getcwd()
   try:
