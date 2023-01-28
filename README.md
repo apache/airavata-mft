@@ -37,7 +37,8 @@ pip3 install airavata-mft-cli
 mft init
 ```
 
-> If the installer failed for M1 and M2 Macs complaining about grpcio installation. Follow the solution mentioned in [here](https://github.com/apache/airavata-mft/issues/71). You might have to uninstall already installed grpcio and gerpcio-tools distributions first.
+> If the installer failed for M1 and M2 Macs complaining about grpcio installation. Follow the solution mentioned in [here](https://github.com/apache/airavata-mft/issues/71). You might have to uninstall already installed grpcio and grpcio-tools distributions first.
+> For other common installation issues, please refer to the [troubleshooting section](https://github.com/apache/airavata-mft#common-issues).
 
 To stop MFT after using
 
