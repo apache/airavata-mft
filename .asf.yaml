@@ -31,7 +31,7 @@ github:
   labels:
     - airavata
     - apache
-    - file-ransfers
+    - file-transfers
     - mft
 
   features:
