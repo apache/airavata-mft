@@ -17,9 +17,6 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-[![Build Status](https://travis-ci.org/apache/airavata-mft.svg?branch=master)](https://travis-ci.org/apache/airavata-mft)
-
-
 # Airavata Managed File Transfers (MFT)
 
 Apache Airavata MFT is a high-performance, multi-protocol data transfer engine to orchestrate data movement and operations across most cloud and On-premises storages. MFT aims to abstract the complexity of heterogenous storages by providing a unified and simple interface for users to seamlessly access and move data across any storage endpoint. To accomplish this goal, MFT provides simple but highly-performing tools to access most cloud and on-premise storages as seamlessly as they access local files in their workstations. 
