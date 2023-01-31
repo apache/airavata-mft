@@ -22,9 +22,9 @@ under the License.
 
 # Airavata Managed File Transfers (MFT)
 
-Apache Airavata MFT is a high-performance, multi-protocol data transfer engine to orchestrate data movement and operations across most cloud and legacy storage endpoints. Airavata MFT provides simple but highly-performing tools to access most cloud and on-premise storages as seamlessly as they access local files in their workstations. 
+Apache Airavata MFT is a high-performance, multi-protocol data transfer engine to orchestrate data movement and operations across most cloud and On-premises storages. MFT aims to abstract the complexity of heterogenous storages by providing a unified and simple interface for users to seamlessly access and move data across any storage endpoint. To accomplish this goal, MFT provides simple but highly-performing tools to access most cloud and on-premise storages as seamlessly as they access local files in their workstations. 
 
-Airavata MFT abstracts out the complexity of each storage type and provides a unified and simple interface for users to access and move data across any endpoint seamlessly. Airavata MFT bundles easily deployable agents which auto determine optimum network path with additional multi-channel, parallel data paths to optimize the transfer performance to gain the maximum throughput between storage endpoints. MFT utilizes parallel Agents to transfer data between endpoints to gain the advantage of multiple network links. 
+Apache Airavata MFT bundles easily deployable agents that auto determine optimum network path with additional multi-channel, parallel data paths to optimize the transfer performance to gain the maximum throughput between storage endpoints. MFT utilizes parallel Agents to transfer data between endpoints to gain the advantage of multiple network links.
 
 # Try Airavata MFT
 MFT requires Java 11+ and python3.10+  to install Airavata MFT in your environment. MFT currently supports Linux and MacOS operating systems. Contributions to support Windows are welcome!!. 
