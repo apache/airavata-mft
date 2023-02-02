@@ -48,7 +48,6 @@
         <module>transport</module>
         <module>agent</module>
         <module>controller</module>
-        <module>command-line</module>
         <module>standalone-service</module>
     </modules>
 
@@ -101,6 +100,13 @@
                 <groupId>org.apache.rat</groupId>
                 <artifactId>apache-rat-plugin</artifactId>
                 <version>0.15</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/venv/**/*</exclude>
+                        <exclude>**/dist/**/*</exclude>
+                        <exclude>**/*.egg-info/**/*</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
