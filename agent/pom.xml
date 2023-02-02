@@ -43,6 +43,11 @@
             <artifactId>protobuf-java</artifactId>
             <version>${protobuf.java}</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java-util</artifactId>
+            <version>${protobuf.java}</version>
+        </dependency>
 
     </dependencies>
     <properties>
