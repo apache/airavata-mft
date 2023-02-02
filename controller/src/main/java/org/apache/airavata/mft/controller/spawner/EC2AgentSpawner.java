@@ -23,6 +23,7 @@ import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.*;
+import com.amazonaws.services.lightsail.model.CreateInstanceSnapshotRequest;
 import org.apache.airavata.mft.agent.stub.SecretWrapper;
 import org.apache.airavata.mft.agent.stub.StorageWrapper;
 import org.slf4j.Logger;
@@ -109,6 +110,20 @@ public class EC2AgentSpawner extends AgentSpawner {
                         .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
                         .build();
 
+                boolean preSavedImage = false;
+                DescribeImagesRequest describeImagesRequest = new DescribeImagesRequest().withFilters(
+                    new ArrayList<>());
+                describeImagesRequest.getFilters().add(new Filter().withName("name").withValues("mft-agent"));
+                DescribeImagesResult describeImagesResult = amazonEC2.describeImages(
+                    describeImagesRequest);
+                List<Image> images = describeImagesResult.getImages();
+                if (!images.isEmpty()) {
+                    Image image = images.get(0);
+                    imageId = image.getImageId();
+                    preSavedImage = true;
+                    logger.info("Using already created image {}", imageId);
+                }
+
                 DescribeSecurityGroupsRequest desSecGrp = new DescribeSecurityGroupsRequest();
                 DescribeSecurityGroupsResult describeSecurityGroupsResult = amazonEC2.describeSecurityGroups(desSecGrp);
                 List<SecurityGroup> securityGroups = describeSecurityGroupsResult.getSecurityGroups();
@@ -178,14 +193,15 @@ public class EC2AgentSpawner extends AgentSpawner {
                 RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
 
                 runInstancesRequest.withImageId(imageId)
-                        .withInstanceType(InstanceType.T1Micro)
+                        .withInstanceType(InstanceType.T1Micro) // TODO Externalize
                         .withMinCount(1)
                         .withMaxCount(1)
                         .withKeyName(keyName)
                         .withTagSpecifications(
                                 new TagSpecification().withResourceType(ResourceType.Instance)
                                         .withTags(new Tag().withKey("Type").withValue("MFT-Agent"),
-                                                new Tag().withKey("AgentId").withValue(agentId)))
+                                                new Tag().withKey("AgentId").withValue(agentId),
+                                                new Tag().withKey("Name").withValue("MFT-Agent")))
                         .withSecurityGroups(secGroupName);
 
 
@@ -225,23 +241,25 @@ public class EC2AgentSpawner extends AgentSpawner {
                                 Path.of(mftKeyDir, keyName).toAbsolutePath().toString(), systemUser);
                         logger.info("Created SSH Connection. Installing dependencies...");
 
-                        int exeCode = sshProvider.runCommand("sudo apt update -y");
-                        if (exeCode != 0)
-                            throw new IOException("Failed to update apt for VM");
-                        exeCode = sshProvider.runCommand("sudo apt install -y openjdk-11-jre-headless");
-                        if (exeCode != 0)
-                            throw new IOException("Failed to install jdk on new VM");
-                        exeCode = sshProvider.runCommand("sudo apt install -y unzip");
-                        if (exeCode != 0)
-                            throw new IOException("Failed to install unzip on new VM");
-                        exeCode = sshProvider.runCommand("wget https://github.com/apache/airavata-mft/releases/download/v0.0.1/MFT-Agent-0.01-bin.zip");
-                        if (exeCode != 0)
-                            throw new IOException("Failed to download mft distribution");
-                        exeCode = sshProvider.runCommand("unzip MFT-Agent-0.01-bin.zip");
-                        if (exeCode != 0)
-                            throw new IOException("Failed to unzip mft distribution");
+                        if (! preSavedImage) {
+                            int exeCode = sshProvider.runCommand("sudo apt update -y");
+                            if (exeCode != 0)
+                                throw new IOException("Failed to update apt for VM");
+                            exeCode = sshProvider.runCommand("sudo apt install -y openjdk-11-jre-headless");
+                            if (exeCode != 0)
+                                throw new IOException("Failed to install jdk on new VM");
+                            exeCode = sshProvider.runCommand("sudo apt install -y unzip");
+                            if (exeCode != 0)
+                                throw new IOException("Failed to install unzip on new VM");
+                            exeCode = sshProvider.runCommand("wget https://github.com/apache/airavata-mft/releases/download/v0.0.1/MFT-Agent-0.01-bin.zip");
+                            if (exeCode != 0)
+                                throw new IOException("Failed to download mft distribution");
+                            exeCode = sshProvider.runCommand("unzip MFT-Agent-0.01-bin.zip");
+                            if (exeCode != 0)
+                                throw new IOException("Failed to unzip mft distribution");
+                        }
 
-                        exeCode = sshProvider.runCommand("sed -ir \"s/^[#]*\\s*agent.id=.*/agent.id=" + agentId + "/\" /home/ubuntu/MFT-Agent-0.01/conf/application.properties");
+                        int exeCode = sshProvider.runCommand("sed -ir \"s/^[#]*\\s*agent.id=.*/agent.id=" + agentId + "/\" /home/ubuntu/MFT-Agent-0.01/conf/application.properties");
                         if (exeCode != 0)
                             throw new IOException("Failed to update agent id in config file");
 
@@ -279,7 +297,7 @@ public class EC2AgentSpawner extends AgentSpawner {
     }
 
     @Override
-    public void terminate() {
+    public void terminate(boolean failed) {
 
         terminateFuture =  executor.submit(() -> {
 
@@ -295,6 +313,13 @@ public class EC2AgentSpawner extends AgentSpawner {
                         .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
                         .build();
 
+                /*logger.info("Creating AMI for MFT Agent");
+                CreateImageRequest createImageRequest = new CreateImageRequest().withName("mft-agent")
+                    .withDescription("AMI For MFT Agent").withInstanceId(instanceId).withNoReboot(true)
+                    .withBlockDeviceMappings(new BlockDeviceMapping().withEbs(new EbsBlockDevice()));
+                CreateImageResult imageCreateResult = amazonEC2.createImage(createImageRequest);
+                logger.info("Created AMI {} for instance {}", imageCreateResult.getImageId(), instanceId);
+                */
                 if (portForwardLock != null) {
                     portForwardLock.countDown();
                 }

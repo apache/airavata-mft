@@ -32,7 +32,7 @@ public class AgentOrchestrator {
 
     private static final Logger logger = LoggerFactory.getLogger(AgentOrchestrator.class);
 
-    private final int SPAWNER_MAX_IDLE_SECONDS = 30;
+    private final int SPAWNER_MAX_IDLE_SECONDS = 30; // TODO Externalize this
 
     private class TransferInfo {
         private final String transferId;
@@ -145,7 +145,7 @@ public class AgentOrchestrator {
                                 logger.info("Removing consul key {}", transferInfo.consulKey);
                                 transferDispatcher.getMftConsulClient().getKvClient().deleteKey(transferInfo.consulKey);
                                 logger.info("Terminating the spawner");
-                                metadata.spawner.terminate();
+                                metadata.spawner.terminate(true);
                                 launchedSpawnersMap.remove(key);
                             } finally {
                                 metadata.transferInfos.remove(agentTransferId);
@@ -169,7 +169,7 @@ public class AgentOrchestrator {
                             } catch (Exception e) {
                                 logger.info("Killing spawner with key {} as the agent is not responding and inactive for {} seconds",
                                     key, SPAWNER_MAX_IDLE_SECONDS);
-                                metadata.spawner.terminate();
+                                metadata.spawner.terminate(false);
                                 launchedSpawnersMap.remove(key);
                                 return;
                             }
@@ -181,7 +181,7 @@ public class AgentOrchestrator {
                                     logger.info("Killing spawner with key {} as all files were transferred and the agent" +
                                                     " is inactive for {} seconds",
                                             key, SPAWNER_MAX_IDLE_SECONDS);
-                                    metadata.spawner.terminate();
+                                    metadata.spawner.terminate(false);
                                     launchedSpawnersMap.remove(key);
                                 }
                             }
