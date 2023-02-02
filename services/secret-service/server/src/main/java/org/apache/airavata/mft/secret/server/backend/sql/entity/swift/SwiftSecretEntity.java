@@ -28,7 +28,7 @@ import javax.persistence.Id;
 public class SwiftSecretEntity {
 
     public enum InternalSecretType {
-        PASSWORD, AUTH_CREDENTIAL;
+        V2, V3;
     }
 
     @Id
@@ -42,6 +42,9 @@ public class SwiftSecretEntity {
 
     @Column(name = "INTERNAL_SECRET_TYPE")
     private InternalSecretType internalSecretType;
+
+    @Column(name = "ENDPOINT")
+    private String endpoint;
 
     public String getSecretId() {
         return secretId;
@@ -65,5 +68,14 @@ public class SwiftSecretEntity {
 
     public void setInternalSecretType(InternalSecretType internalSecretType) {
         this.internalSecretType = internalSecretType;
+    }
+
+    public String getEndpoint() {
+        return endpoint;
+    }
+
+    public SwiftSecretEntity setEndpoint(String endpoint) {
+        this.endpoint = endpoint;
+        return this;
     }
 }

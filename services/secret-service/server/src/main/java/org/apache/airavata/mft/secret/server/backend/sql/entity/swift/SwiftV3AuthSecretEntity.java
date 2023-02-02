@@ -25,7 +25,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
-public class SwiftPasswordSecretEntity {
+public class SwiftV3AuthSecretEntity {
 
     @Id
     @Column(name = "SECRET_ID")
@@ -33,17 +33,18 @@ public class SwiftPasswordSecretEntity {
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String secretId;
 
+    @Column(name = "USER_DOMAIN_NAME")
+    private String userDomainName;
     @Column(name = "USER_NAME")
-    String userName;
-
+    private String userName;
     @Column(name = "PASSWORD")
-    String password;
+    private String password;
 
-    @Column(name = "PROJECT_ID")
-    String projectId;
+    @Column(name = "TENANT_NAME")
+    private String tenantName;
 
-    @Column(name = "DOMAIN_ID")
-    String domainId;
+    @Column(name = "PROJECT_DOMAIN_NAME")
+    private String projectDomainName;
 
     public String getSecretId() {
         return secretId;
@@ -69,19 +70,30 @@ public class SwiftPasswordSecretEntity {
         this.password = password;
     }
 
-    public String getProjectId() {
-        return projectId;
+    public String getUserDomainName() {
+        return userDomainName;
     }
 
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
+    public SwiftV3AuthSecretEntity setUserDomainName(String userDomainName) {
+        this.userDomainName = userDomainName;
+        return this;
     }
 
-    public String getDomainId() {
-        return domainId;
+    public String getTenantName() {
+        return tenantName;
     }
 
-    public void setDomainId(String domainId) {
-        this.domainId = domainId;
+    public SwiftV3AuthSecretEntity setTenantName(String tenantName) {
+        this.tenantName = tenantName;
+        return this;
+    }
+
+    public String getProjectDomainName() {
+        return projectDomainName;
+    }
+
+    public SwiftV3AuthSecretEntity setProjectDomainName(String projectDomainName) {
+        this.projectDomainName = projectDomainName;
+        return this;
     }
 }

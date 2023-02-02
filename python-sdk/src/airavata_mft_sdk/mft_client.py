@@ -7,6 +7,7 @@ from airavata_mft_sdk.ftp import FTPStorageService_pb2_grpc
 from airavata_mft_sdk.gcs import GCSStorageService_pb2_grpc
 from airavata_mft_sdk.local import LocalStorageService_pb2_grpc
 from airavata_mft_sdk.s3 import S3StorageService_pb2_grpc
+from airavata_mft_sdk.swift import SwiftStorageService_pb2_grpc
 from airavata_mft_sdk.scp import SCPStorageService_pb2_grpc
 from airavata_mft_sdk.common import StorageCommon_pb2_grpc
 
@@ -17,6 +18,7 @@ from airavata_mft_sdk.dropbox import DropboxSecretService_pb2_grpc
 from airavata_mft_sdk.ftp import FTPSecretService_pb2_grpc
 from airavata_mft_sdk.gcs import GCSSecretService_pb2_grpc
 from airavata_mft_sdk.s3 import S3SecretService_pb2_grpc
+from airavata_mft_sdk.swift import SwiftSecretService_pb2_grpc
 from airavata_mft_sdk.scp import SCPSecretService_pb2_grpc
 
 class MFTClient:
@@ -47,6 +49,7 @@ class MFTClient:
         self.local_storage_api = LocalStorageService_pb2_grpc.LocalStorageServiceStub(self.resource_channel)
         self.s3_storage_api = S3StorageService_pb2_grpc.S3StorageServiceStub(self.resource_channel)
         self.scp_storage_api = SCPStorageService_pb2_grpc.SCPStorageServiceStub(self.resource_channel)
+        self.swift_storage_api = SwiftStorageService_pb2_grpc.SwiftStorageServiceStub(self.resource_channel)
         self.common_api = StorageCommon_pb2_grpc.StorageCommonServiceStub(self.resource_channel)
 
         if (not secret_service_secured):
@@ -58,6 +61,7 @@ class MFTClient:
         self.ftp_secret_api = FTPSecretService_pb2_grpc.FTPSecretServiceStub(self.secret_channel)
         self.gcs_secret_api = GCSSecretService_pb2_grpc.GCSSecretServiceStub(self.secret_channel)
         self.s3_secret_api = S3SecretService_pb2_grpc.S3SecretServiceStub(self.secret_channel)
+        self.swift_secret_api = SwiftSecretService_pb2_grpc.SwiftSecretServiceStub(self.secret_channel)
         self.scp_secret_api = SCPSecretService_pb2_grpc.SCPSecretServiceStub(self.secret_channel)
 
 

@@ -24,9 +24,7 @@ message SwiftStorage {
     string storageId = 1;
     string container = 2;
     string name = 3;
-    string endpoint = 4;
     string region = 5;
-    int32 keystoneVersion = 6;
 }
 
 message SwiftStorageListRequest {
@@ -46,18 +44,14 @@ message SwiftStorageCreateRequest {
     string storageId = 1;
     string container = 2;
     string name = 3;
-    string endpoint = 4;
     string region = 5;
-    int32 keystoneVersion = 6;
 }
 
 message SwiftStorageUpdateRequest {
     string storageId = 1;
     string container = 2;
     string name = 3;
-    string endpoint = 4;
     string region = 5;
-    int32 keystoneVersion = 6;
 }
 
 message SwiftStorageUpdateResponse {

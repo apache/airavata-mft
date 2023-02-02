@@ -15,12 +15,12 @@ _sym_db = _symbol_database.Default()
 import airavata_mft_sdk.CredCommon_pb2 as CredCommon__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1bswift/SwiftCredential.proto\x12.org.apache.airavata.mft.credential.stubs.swift\x1a\x10\x43redCommon.proto\"^\n\x13SwiftPasswordSecret\x12\x10\n\x08userName\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\x11\n\tprojectId\x18\x03 \x01(\t\x12\x10\n\x08\x64omainId\x18\x04 \x01(\t\"K\n\x19SwiftAuthCredentialSecret\x12\x14\n\x0c\x63redentialId\x18\x01 \x01(\t\x12\x18\n\x10\x63redentialSecret\x18\x02 \x01(\t\"\xf3\x01\n\x0bSwiftSecret\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12]\n\x0epasswordSecret\x18\x02 \x01(\x0b\x32\x43.org.apache.airavata.mft.credential.stubs.swift.SwiftPasswordSecretH\x00\x12i\n\x14\x61uthCredentialSecret\x18\x03 \x01(\x0b\x32I.org.apache.airavata.mft.credential.stubs.swift.SwiftAuthCredentialSecretH\x00\x42\x08\n\x06secret\"h\n\x15SwiftSecretGetRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\xad\x02\n\x18SwiftSecretCreateRequest\x12]\n\x0epasswordSecret\x18\x01 \x01(\x0b\x32\x43.org.apache.airavata.mft.credential.stubs.swift.SwiftPasswordSecretH\x00\x12i\n\x14\x61uthCredentialSecret\x18\x02 \x01(\x0b\x32I.org.apache.airavata.mft.credential.stubs.swift.SwiftAuthCredentialSecretH\x00\x12=\n\nauthzToken\x18\x03 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthTokenB\x08\n\x06secret\"\xbf\x02\n\x18SwiftSecretUpdateRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12]\n\x0epasswordSecret\x18\x02 \x01(\x0b\x32\x43.org.apache.airavata.mft.credential.stubs.swift.SwiftPasswordSecretH\x00\x12i\n\x14\x61uthCredentialSecret\x18\x03 \x01(\x0b\x32I.org.apache.airavata.mft.credential.stubs.swift.SwiftAuthCredentialSecretH\x00\x12=\n\nauthzToken\x18\x04 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthTokenB\x08\n\x06secret\"-\n\x19SwiftSecretUpdateResponse\x12\x10\n\x08secretId\x18\x01 \x01(\t\"k\n\x18SwiftSecretDeleteRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"+\n\x19SwiftSecretDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x42\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1bswift/SwiftCredential.proto\x12.org.apache.airavata.mft.credential.stubs.swift\x1a\x10\x43redCommon.proto\"G\n\x11SwiftV2AuthSecret\x12\x0e\n\x06tenant\x18\x01 \x01(\t\x12\x10\n\x08userName\x18\x02 \x01(\t\x12\x10\n\x08password\x18\x03 \x01(\t\"~\n\x11SwiftV3AuthSecret\x12\x16\n\x0euserDomainName\x18\x01 \x01(\t\x12\x10\n\x08userName\x18\x02 \x01(\t\x12\x10\n\x08password\x18\x03 \x01(\t\x12\x12\n\ntenantName\x18\x04 \x01(\t\x12\x19\n\x11projectDomainName\x18\x05 \x01(\t\"\xf1\x01\n\x0bSwiftSecret\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12Y\n\x0cv2AuthSecret\x18\x02 \x01(\x0b\x32\x41.org.apache.airavata.mft.credential.stubs.swift.SwiftV2AuthSecretH\x00\x12Y\n\x0cv3AuthSecret\x18\x03 \x01(\x0b\x32\x41.org.apache.airavata.mft.credential.stubs.swift.SwiftV3AuthSecretH\x00\x12\x10\n\x08\x65ndpoint\x18\x04 \x01(\tB\x08\n\x06secret\"h\n\x15SwiftSecretGetRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"\xab\x02\n\x18SwiftSecretCreateRequest\x12Y\n\x0cv2AuthSecret\x18\x01 \x01(\x0b\x32\x41.org.apache.airavata.mft.credential.stubs.swift.SwiftV2AuthSecretH\x00\x12Y\n\x0cv3AuthSecret\x18\x02 \x01(\x0b\x32\x41.org.apache.airavata.mft.credential.stubs.swift.SwiftV3AuthSecretH\x00\x12\x10\n\x08\x65ndpoint\x18\x03 \x01(\t\x12=\n\nauthzToken\x18\x04 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthTokenB\x08\n\x06secret\"\xbd\x02\n\x18SwiftSecretUpdateRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12Y\n\x0cv2AuthSecret\x18\x02 \x01(\x0b\x32\x41.org.apache.airavata.mft.credential.stubs.swift.SwiftV2AuthSecretH\x00\x12Y\n\x0cv3AuthSecret\x18\x03 \x01(\x0b\x32\x41.org.apache.airavata.mft.credential.stubs.swift.SwiftV3AuthSecretH\x00\x12\x10\n\x08\x65ndpoint\x18\x04 \x01(\t\x12=\n\nauthzToken\x18\x05 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthTokenB\x08\n\x06secret\"-\n\x19SwiftSecretUpdateResponse\x12\x10\n\x08secretId\x18\x01 \x01(\t\"k\n\x18SwiftSecretDeleteRequest\x12\x10\n\x08secretId\x18\x01 \x01(\t\x12=\n\nauthzToken\x18\x02 \x01(\x0b\x32).org.apache.airavata.mft.common.AuthToken\"+\n\x19SwiftSecretDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x42\x02P\x01\x62\x06proto3')
 
 
 
-_SWIFTPASSWORDSECRET = DESCRIPTOR.message_types_by_name['SwiftPasswordSecret']
-_SWIFTAUTHCREDENTIALSECRET = DESCRIPTOR.message_types_by_name['SwiftAuthCredentialSecret']
+_SWIFTV2AUTHSECRET = DESCRIPTOR.message_types_by_name['SwiftV2AuthSecret']
+_SWIFTV3AUTHSECRET = DESCRIPTOR.message_types_by_name['SwiftV3AuthSecret']
 _SWIFTSECRET = DESCRIPTOR.message_types_by_name['SwiftSecret']
 _SWIFTSECRETGETREQUEST = DESCRIPTOR.message_types_by_name['SwiftSecretGetRequest']
 _SWIFTSECRETCREATEREQUEST = DESCRIPTOR.message_types_by_name['SwiftSecretCreateRequest']
@@ -28,19 +28,19 @@ _SWIFTSECRETUPDATEREQUEST = DESCRIPTOR.message_types_by_name['SwiftSecretUpdateR
 _SWIFTSECRETUPDATERESPONSE = DESCRIPTOR.message_types_by_name['SwiftSecretUpdateResponse']
 _SWIFTSECRETDELETEREQUEST = DESCRIPTOR.message_types_by_name['SwiftSecretDeleteRequest']
 _SWIFTSECRETDELETERESPONSE = DESCRIPTOR.message_types_by_name['SwiftSecretDeleteResponse']
-SwiftPasswordSecret = _reflection.GeneratedProtocolMessageType('SwiftPasswordSecret', (_message.Message,), {
-  'DESCRIPTOR' : _SWIFTPASSWORDSECRET,
+SwiftV2AuthSecret = _reflection.GeneratedProtocolMessageType('SwiftV2AuthSecret', (_message.Message,), {
+  'DESCRIPTOR' : _SWIFTV2AUTHSECRET,
   '__module__' : 'swift.SwiftCredential_pb2'
-  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.swift.SwiftPasswordSecret)
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.swift.SwiftV2AuthSecret)
   })
-_sym_db.RegisterMessage(SwiftPasswordSecret)
+_sym_db.RegisterMessage(SwiftV2AuthSecret)
 
-SwiftAuthCredentialSecret = _reflection.GeneratedProtocolMessageType('SwiftAuthCredentialSecret', (_message.Message,), {
-  'DESCRIPTOR' : _SWIFTAUTHCREDENTIALSECRET,
+SwiftV3AuthSecret = _reflection.GeneratedProtocolMessageType('SwiftV3AuthSecret', (_message.Message,), {
+  'DESCRIPTOR' : _SWIFTV3AUTHSECRET,
   '__module__' : 'swift.SwiftCredential_pb2'
-  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.swift.SwiftAuthCredentialSecret)
+  # @@protoc_insertion_point(class_scope:org.apache.airavata.mft.credential.stubs.swift.SwiftV3AuthSecret)
   })
-_sym_db.RegisterMessage(SwiftAuthCredentialSecret)
+_sym_db.RegisterMessage(SwiftV3AuthSecret)
 
 SwiftSecret = _reflection.GeneratedProtocolMessageType('SwiftSecret', (_message.Message,), {
   'DESCRIPTOR' : _SWIFTSECRET,
@@ -95,22 +95,22 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'P\001'
-  _SWIFTPASSWORDSECRET._serialized_start=97
-  _SWIFTPASSWORDSECRET._serialized_end=191
-  _SWIFTAUTHCREDENTIALSECRET._serialized_start=193
-  _SWIFTAUTHCREDENTIALSECRET._serialized_end=268
-  _SWIFTSECRET._serialized_start=271
-  _SWIFTSECRET._serialized_end=514
-  _SWIFTSECRETGETREQUEST._serialized_start=516
-  _SWIFTSECRETGETREQUEST._serialized_end=620
-  _SWIFTSECRETCREATEREQUEST._serialized_start=623
-  _SWIFTSECRETCREATEREQUEST._serialized_end=924
-  _SWIFTSECRETUPDATEREQUEST._serialized_start=927
-  _SWIFTSECRETUPDATEREQUEST._serialized_end=1246
-  _SWIFTSECRETUPDATERESPONSE._serialized_start=1248
-  _SWIFTSECRETUPDATERESPONSE._serialized_end=1293
-  _SWIFTSECRETDELETEREQUEST._serialized_start=1295
-  _SWIFTSECRETDELETEREQUEST._serialized_end=1402
-  _SWIFTSECRETDELETERESPONSE._serialized_start=1404
-  _SWIFTSECRETDELETERESPONSE._serialized_end=1447
+  _SWIFTV2AUTHSECRET._serialized_start=97
+  _SWIFTV2AUTHSECRET._serialized_end=168
+  _SWIFTV3AUTHSECRET._serialized_start=170
+  _SWIFTV3AUTHSECRET._serialized_end=296
+  _SWIFTSECRET._serialized_start=299
+  _SWIFTSECRET._serialized_end=540
+  _SWIFTSECRETGETREQUEST._serialized_start=542
+  _SWIFTSECRETGETREQUEST._serialized_end=646
+  _SWIFTSECRETCREATEREQUEST._serialized_start=649
+  _SWIFTSECRETCREATEREQUEST._serialized_end=948
+  _SWIFTSECRETUPDATEREQUEST._serialized_start=951
+  _SWIFTSECRETUPDATEREQUEST._serialized_end=1268
+  _SWIFTSECRETUPDATERESPONSE._serialized_start=1270
+  _SWIFTSECRETUPDATERESPONSE._serialized_end=1315
+  _SWIFTSECRETDELETEREQUEST._serialized_start=1317
+  _SWIFTSECRETDELETEREQUEST._serialized_end=1424
+  _SWIFTSECRETDELETERESPONSE._serialized_start=1426
+  _SWIFTSECRETDELETERESPONSE._serialized_end=1469
 # @@protoc_insertion_point(module_scope)

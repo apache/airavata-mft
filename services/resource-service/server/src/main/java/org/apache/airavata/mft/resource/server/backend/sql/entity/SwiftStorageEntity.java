@@ -38,14 +38,8 @@ public class SwiftStorageEntity {
     @Column(name = "CONTAINER")
     String container;
 
-    @Column(name = "ENDPOINT")
-    String endpoint;
-
     @Column(name = "REGION")
     String region;
-
-    @Column(name = "KEYSTONE_VERSION")
-    int keystoneVersion;
 
     public String getStorageId() {
         return storageId;
@@ -71,14 +65,6 @@ public class SwiftStorageEntity {
         this.container = container;
     }
 
-    public String getEndpoint() {
-        return endpoint;
-    }
-
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
-    }
-
     public String getRegion() {
         return region;
     }
@@ -87,11 +73,4 @@ public class SwiftStorageEntity {
         this.region = region;
     }
 
-    public int getKeystoneVersion() {
-        return keystoneVersion;
-    }
-
-    public void setKeystoneVersion(int keystoneVersion) {
-        this.keystoneVersion = keystoneVersion;
-    }
 }

@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18swift/SwiftStorage.proto\x12\x34org.apache.airavata.mft.resource.stubs.swift.storage\"}\n\x0cSwiftStorage\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x11\n\tcontainer\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x10\n\x08\x65ndpoint\x18\x04 \x01(\t\x12\x0e\n\x06region\x18\x05 \x01(\t\x12\x17\n\x0fkeystoneVersion\x18\x06 \x01(\x05\"8\n\x17SwiftStorageListRequest\x12\x0e\n\x06offset\x18\x01 \x01(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\"p\n\x18SwiftStorageListResponse\x12T\n\x08storages\x18\x01 \x03(\x0b\x32\x42.org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorage\"+\n\x16SwiftStorageGetRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"\x8a\x01\n\x19SwiftStorageCreateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x11\n\tcontainer\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x10\n\x08\x65ndpoint\x18\x04 \x01(\t\x12\x0e\n\x06region\x18\x05 \x01(\t\x12\x17\n\x0fkeystoneVersion\x18\x06 \x01(\x05\"\x8a\x01\n\x19SwiftStorageUpdateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x11\n\tcontainer\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x10\n\x08\x65ndpoint\x18\x04 \x01(\t\x12\x0e\n\x06region\x18\x05 \x01(\t\x12\x17\n\x0fkeystoneVersion\x18\x06 \x01(\x05\"/\n\x1aSwiftStorageUpdateResponse\x12\x11\n\tstorageId\x18\x01 \x01(\t\".\n\x19SwiftStorageDeleteRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\",\n\x1aSwiftStorageDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x42\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18swift/SwiftStorage.proto\x12\x34org.apache.airavata.mft.resource.stubs.swift.storage\"R\n\x0cSwiftStorage\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x11\n\tcontainer\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0e\n\x06region\x18\x05 \x01(\t\"8\n\x17SwiftStorageListRequest\x12\x0e\n\x06offset\x18\x01 \x01(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\"p\n\x18SwiftStorageListResponse\x12T\n\x08storages\x18\x01 \x03(\x0b\x32\x42.org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorage\"+\n\x16SwiftStorageGetRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"_\n\x19SwiftStorageCreateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x11\n\tcontainer\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0e\n\x06region\x18\x05 \x01(\t\"_\n\x19SwiftStorageUpdateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x11\n\tcontainer\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0e\n\x06region\x18\x05 \x01(\t\"/\n\x1aSwiftStorageUpdateResponse\x12\x11\n\tstorageId\x18\x01 \x01(\t\".\n\x19SwiftStorageDeleteRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\",\n\x1aSwiftStorageDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x42\x02P\x01\x62\x06proto3')
 
 
 
@@ -95,21 +95,21 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'P\001'
   _SWIFTSTORAGE._serialized_start=82
-  _SWIFTSTORAGE._serialized_end=207
-  _SWIFTSTORAGELISTREQUEST._serialized_start=209
-  _SWIFTSTORAGELISTREQUEST._serialized_end=265
-  _SWIFTSTORAGELISTRESPONSE._serialized_start=267
-  _SWIFTSTORAGELISTRESPONSE._serialized_end=379
-  _SWIFTSTORAGEGETREQUEST._serialized_start=381
-  _SWIFTSTORAGEGETREQUEST._serialized_end=424
-  _SWIFTSTORAGECREATEREQUEST._serialized_start=427
-  _SWIFTSTORAGECREATEREQUEST._serialized_end=565
-  _SWIFTSTORAGEUPDATEREQUEST._serialized_start=568
-  _SWIFTSTORAGEUPDATEREQUEST._serialized_end=706
-  _SWIFTSTORAGEUPDATERESPONSE._serialized_start=708
-  _SWIFTSTORAGEUPDATERESPONSE._serialized_end=755
-  _SWIFTSTORAGEDELETEREQUEST._serialized_start=757
-  _SWIFTSTORAGEDELETEREQUEST._serialized_end=803
-  _SWIFTSTORAGEDELETERESPONSE._serialized_start=805
-  _SWIFTSTORAGEDELETERESPONSE._serialized_end=849
+  _SWIFTSTORAGE._serialized_end=164
+  _SWIFTSTORAGELISTREQUEST._serialized_start=166
+  _SWIFTSTORAGELISTREQUEST._serialized_end=222
+  _SWIFTSTORAGELISTRESPONSE._serialized_start=224
+  _SWIFTSTORAGELISTRESPONSE._serialized_end=336
+  _SWIFTSTORAGEGETREQUEST._serialized_start=338
+  _SWIFTSTORAGEGETREQUEST._serialized_end=381
+  _SWIFTSTORAGECREATEREQUEST._serialized_start=383
+  _SWIFTSTORAGECREATEREQUEST._serialized_end=478
+  _SWIFTSTORAGEUPDATEREQUEST._serialized_start=480
+  _SWIFTSTORAGEUPDATEREQUEST._serialized_end=575
+  _SWIFTSTORAGEUPDATERESPONSE._serialized_start=577
+  _SWIFTSTORAGEUPDATERESPONSE._serialized_end=624
+  _SWIFTSTORAGEDELETEREQUEST._serialized_start=626
+  _SWIFTSTORAGEDELETEREQUEST._serialized_end=672
+  _SWIFTSTORAGEDELETERESPONSE._serialized_start=674
+  _SWIFTSTORAGEDELETERESPONSE._serialized_end=718
 # @@protoc_insertion_point(module_scope)

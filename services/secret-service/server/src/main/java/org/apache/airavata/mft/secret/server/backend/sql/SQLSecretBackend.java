@@ -28,12 +28,13 @@ import org.apache.airavata.mft.credential.stubs.scp.*;
 import org.apache.airavata.mft.credential.stubs.swift.*;
 import org.apache.airavata.mft.secret.server.backend.SecretBackend;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.*;
-import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftAuthCredentialSecretEntity;
-import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftPasswordSecretEntity;
+import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftSecretEntity.InternalSecretType;
+import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftV2AuthSecretEntity;
+import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftV3AuthSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.*;
-import org.apache.airavata.mft.secret.server.backend.sql.repository.swift.SwiftAuthCredentialSecretRepository;
-import org.apache.airavata.mft.secret.server.backend.sql.repository.swift.SwiftPasswordSecretRepository;
+import org.apache.airavata.mft.secret.server.backend.sql.repository.swift.SwiftV2AuthSecretRepository;
+import org.apache.airavata.mft.secret.server.backend.sql.repository.swift.SwiftV3AuthSecretRepository;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.swift.SwiftSecretRepository;
 import org.dozer.DozerBeanMapper;
 import org.slf4j.Logger;
@@ -64,10 +65,10 @@ public class SQLSecretBackend implements SecretBackend {
     private SwiftSecretRepository swiftSecretRepository;
 
     @Autowired
-    private SwiftPasswordSecretRepository swiftPasswordSecretRepository;
+    private SwiftV3AuthSecretRepository swiftV3AuthSecretRepository;
 
     @Autowired
-    private SwiftAuthCredentialSecretRepository swiftAuthCredentialSecretRepository;
+    private SwiftV2AuthSecretRepository swiftV2AuthSecretRepository;
 
     @Autowired
     private ODataSecretRepository odataSecretRepository;
@@ -229,26 +230,27 @@ public class SQLSecretBackend implements SecretBackend {
             SwiftSecret.Builder secBuilder = SwiftSecret.newBuilder();
             SwiftSecretEntity secEty = secEtyOp.get();
             secBuilder.setSecretId(secEty.getSecretId());
+            secBuilder.setEndpoint(secEty.getEndpoint());
 
             switch (secEty.getInternalSecretType()) {
-                case PASSWORD:
-                    Optional<SwiftPasswordSecretEntity> passSec = swiftPasswordSecretRepository
+                case V2:
+                    Optional<SwiftV2AuthSecretEntity> v2Sec = swiftV2AuthSecretRepository
                             .findBySecretId(secEty.getInternalSecretId());
-                    if (passSec.isPresent()) {
-                        SwiftPasswordSecret.Builder passBuilder = SwiftPasswordSecret.newBuilder();
-                        mapper.map(passSec.get(), passBuilder);
-                        secBuilder.setPasswordSecret(passBuilder.build());
+                    if (v2Sec.isPresent()) {
+                        SwiftV2AuthSecret.Builder v2Builder = SwiftV2AuthSecret.newBuilder();
+                        mapper.map(v2Sec.get(), v2Builder);
+                        secBuilder.setV2AuthSecret(v2Builder.build());
                     } else {
                         throw new Exception("Can not find a swift password secret with id " + secEty.getInternalSecretId());
                     }
                     break;
-                case AUTH_CREDENTIAL:
-                    Optional<SwiftAuthCredentialSecretEntity> authCredSec = swiftAuthCredentialSecretRepository
+                case V3:
+                    Optional<SwiftV3AuthSecretEntity> v3Sec = swiftV3AuthSecretRepository
                             .findBySecretId(secEty.getInternalSecretId());
-                    if (authCredSec.isPresent()) {
-                        SwiftAuthCredentialSecret.Builder authBuilder = SwiftAuthCredentialSecret.newBuilder();
-                        mapper.map(authCredSec.get(), authBuilder);
-                        secBuilder.setAuthCredentialSecret(authBuilder.build());
+                    if (v3Sec.isPresent()) {
+                        SwiftV3AuthSecret.Builder v3Builder = SwiftV3AuthSecret.newBuilder();
+                        mapper.map(v3Sec.get(), v3Builder);
+                        secBuilder.setV3AuthSecret(v3Builder.build());
                     } else {
                         throw new Exception("Can not find a swift auth cred secret with id " + secEty.getInternalSecretId());
                     }
@@ -266,21 +268,22 @@ public class SQLSecretBackend implements SecretBackend {
     public SwiftSecret createSwiftSecret(SwiftSecretCreateRequest request) throws Exception {
 
         SwiftSecretEntity secEty = new SwiftSecretEntity();
-        SwiftAuthCredentialSecretEntity authCredSaved = null;
-        SwiftPasswordSecretEntity passSecSaved = null;
+        secEty.setEndpoint(request.getEndpoint());
+        SwiftV2AuthSecretEntity v2SecSaved = null;
+        SwiftV3AuthSecretEntity v3SecSaved = null;
 
         switch (request.getSecretCase()) {
-            case PASSWORDSECRET:
-                passSecSaved = swiftPasswordSecretRepository
-                        .save(mapper.map(request.getPasswordSecret(), SwiftPasswordSecretEntity.class));
-                secEty.setInternalSecretId(passSecSaved.getSecretId());
-                secEty.setInternalSecretType(SwiftSecretEntity.InternalSecretType.PASSWORD);
+            case V2AUTHSECRET:
+                v2SecSaved = swiftV2AuthSecretRepository
+                        .save(mapper.map(request.getV2AuthSecret(), SwiftV2AuthSecretEntity.class));
+                secEty.setInternalSecretId(v2SecSaved.getSecretId());
+                secEty.setInternalSecretType(InternalSecretType.V2);
                 break;
-            case AUTHCREDENTIALSECRET:
-                authCredSaved = swiftAuthCredentialSecretRepository
-                        .save(mapper.map(request.getAuthCredentialSecret(), SwiftAuthCredentialSecretEntity.class));
-                secEty.setInternalSecretId(authCredSaved.getSecretId());
-                secEty.setInternalSecretType(SwiftSecretEntity.InternalSecretType.AUTH_CREDENTIAL);
+            case V3AUTHSECRET:
+                v3SecSaved = swiftV3AuthSecretRepository
+                        .save(mapper.map(request.getV3AuthSecret(), SwiftV3AuthSecretEntity.class));
+                secEty.setInternalSecretId(v3SecSaved.getSecretId());
+                secEty.setInternalSecretType(InternalSecretType.V3);
                 break;
             case SECRET_NOT_SET:
                 throw new Exception("No internal secret is set");
@@ -290,11 +293,11 @@ public class SQLSecretBackend implements SecretBackend {
         SwiftSecret.Builder secBuilder = SwiftSecret.newBuilder();
         secBuilder.setSecretId(savedEty.getSecretId());
         switch (savedEty.getInternalSecretType()) {
-            case PASSWORD:
-                secBuilder.setPasswordSecret(mapper.map(passSecSaved, SwiftPasswordSecret.newBuilder().getClass()));
+            case V2:
+                secBuilder.setV2AuthSecret(mapper.map(v2SecSaved, SwiftV2AuthSecret.newBuilder().getClass()));
                 break;
-            case AUTH_CREDENTIAL:
-                secBuilder.setAuthCredentialSecret(mapper.map(authCredSaved, SwiftAuthCredentialSecret.newBuilder().getClass()));
+            case V3:
+                secBuilder.setV3AuthSecret(mapper.map(v3SecSaved, SwiftV3AuthSecret.newBuilder().getClass()));
                 break;
         }
 
@@ -312,11 +315,11 @@ public class SQLSecretBackend implements SecretBackend {
         if (secOp.isPresent()) {
             swiftSecretRepository.deleteById(request.getSecretId());
             switch (secOp.get().getInternalSecretType()) {
-                case AUTH_CREDENTIAL:
-                    swiftAuthCredentialSecretRepository.deleteById(secOp.get().getInternalSecretId());
+                case V2:
+                    swiftV2AuthSecretRepository.deleteById(secOp.get().getInternalSecretId());
                     break;
-                case PASSWORD:
-                    swiftPasswordSecretRepository.deleteById(secOp.get().getInternalSecretId());
+                case V3:
+                    swiftV3AuthSecretRepository.deleteById(secOp.get().getInternalSecretId());
                     break;
             }
             return true;
