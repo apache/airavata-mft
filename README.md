@@ -90,6 +90,6 @@ If the Error still occurs after installing the right python version, try creatin
 ```
 python3.10 -m venv venv
 source venv/bin/activate
-pip install airavata-mft-client
+pip install airavata-mft-cli
 ```
   
