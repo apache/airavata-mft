@@ -222,7 +222,7 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
                     if (st.getState().equals("COMPLETED")) {
                         completedFiles.add(st.getChildId());
                     } else if (st.getState().equals("FAILED")) {
-                        failedFiles.add("FAILED");
+                        failedFiles.add(st.getChildId());
                     }
                 });
 
