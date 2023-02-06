@@ -257,7 +257,7 @@ public class MFTConsulClient {
      * @return
      * @throws MFTConsulClientException
      */
-    public List<String> getAgentActiveTransferIds(AgentInfo agentInfo) throws MFTConsulClientException {
+    public List<String> getAgentActiveTransfers(AgentInfo agentInfo) throws MFTConsulClientException {
         try {
             List<String> keys = kvClient.getKeys(MFTConsulClient.AGENTS_SCHEDULED_PATH + agentInfo.getId() + "/" + agentInfo.getSessionId());
             return keys.stream().map(key -> key.substring(key.lastIndexOf("/") + 1)).collect(Collectors.toList());
