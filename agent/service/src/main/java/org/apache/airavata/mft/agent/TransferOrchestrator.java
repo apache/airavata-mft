@@ -119,6 +119,27 @@ public class TransferOrchestrator {
                 throw new Exception("Expected a file as the source but received " + srcMetadata.getMetadataCase().name());
             }
 
+            Optional<MetadataCollector> dstMetadataCollectorOp = MetadataCollectorResolver
+                    .resolveMetadataCollector(destStorage.getStorageCase().name());
+
+            MetadataCollector dstMetadataCollector = dstMetadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for destination"));
+            dstMetadataCollector.init(destStorage, destSecret);
+
+            if (dstMetadataCollector.isAvailable(endpointPath.getDestinationPath())) {
+                ResourceMetadata destinationMetadata = dstMetadataCollector.getResourceMetadata(endpointPath.getDestinationPath(), false);
+                if (destinationMetadata.getMetadataCase() == ResourceMetadata.MetadataCase.FILE &&
+                        destinationMetadata.getFile().getResourceSize() == srcMetadata.getFile().getResourceSize()) {
+                    logger.info("Ignoring the transfer of file {} as it is available in the destination", endpointPath.getSourcePath());
+                    updateStatus.accept(endpointPath, new TransferState()
+                            .setPercentage(100)
+                            .setState("COMPLETED")
+                            .setUpdateTimeMils(System.currentTimeMillis())
+                            .setDescription("Ignoring transfer as the file is available in destination"));
+
+                    return;
+                }
+            }
+
             ConnectorConfig srcCC = ConnectorConfig.ConnectorConfigBuilder.newBuilder()
                     .withTransferId(transferId)
                     .withSecret(sourceSecret)
