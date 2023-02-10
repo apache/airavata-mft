@@ -100,21 +100,23 @@ public class TransferDispatcher {
         String selectedAgent = null;
         List<Optional<AgentInfo>> agentInfos = liveAgentIds.stream().map(
                 id -> mftConsulClient.getAgentInfo(id)).collect(Collectors.toList());
-        int transferCount = -1;
+        long transferCount = -1;
         List<String> candidates = new ArrayList<>();
 
         for (Optional<AgentInfo> agentInfo : agentInfos) {
             if (agentInfo.isPresent()) {
-                List<String> agentActiveTransfers = mftConsulClient.getAgentActiveTransfers(agentInfo.get());
-                logger.info("Agent {} has transfers assigned {}", agentInfo.get().getId(), agentActiveTransfers.size());
+                int agentActiveTransfers = mftConsulClient.getEndpointHookCountForAgent(agentInfo.get().getId());
+                long pendingTransferCount = mftConsulClient.getAgentPendingTransferCount(agentInfo.get().getId());
+                long totalTransferCount = agentActiveTransfers + pendingTransferCount;
+                logger.info("Agent {} has transfers assigned {}", agentInfo.get().getId(), totalTransferCount);
                 if (transferCount == -1) {
-                    transferCount = agentActiveTransfers.size();
+                    transferCount = totalTransferCount;
                     candidates.add(agentInfo.get().getId());
-                } else if (transferCount == agentActiveTransfers.size()) {
+                } else if (transferCount == totalTransferCount) {
                     candidates.add(agentInfo.get().getId());
-                } else if (transferCount > agentActiveTransfers.size()) {
+                } else if (transferCount > totalTransferCount) {
                     candidates = new ArrayList<>();
-                    transferCount = agentActiveTransfers.size();
+                    transferCount = totalTransferCount;
                     candidates.add(agentInfo.get().getId());
                 }
             }

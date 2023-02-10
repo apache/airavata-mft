@@ -71,6 +71,7 @@ public class MFTConsulClient {
     public static final String TRANSFER_PROCESSED_PATH = "mft/transfer/processed/";
     public static final String AGENTS_TRANSFER_REQUEST_MESSAGE_PATH = "mft/agents/transfermessages/";
     public static final String AGENTS_SCHEDULED_PATH = "mft/agents/scheduled/";
+    public static final String AGENTS_PENDING_TRANSFER_COUNT_PATH = "mft/agents/pendingtransfers/";
 
     public static final String CONTROLLER_STATE_MESSAGE_PATH = "mft/controller/messages/states/";
     public static final String CONTROLLER_TRANSFER_MESSAGE_PATH = "mft/controller/messages/transfers/";
@@ -113,6 +114,32 @@ public class MFTConsulClient {
     }
 
     public MFTConsulClient() {
+    }
+
+    public synchronized void updateAgentPendingTransferCount(String agentId, long transferCount) {
+        try {
+            kvClient.putValue(AGENTS_PENDING_TRANSFER_COUNT_PATH + agentId, transferCount + "");
+        } catch (Exception e) {
+            logger.error("Failed update pending transfer count {} in consul for agent {}. But Continuing the execution",
+                    transferCount, agentId);
+        }
+    }
+
+    public long getAgentPendingTransferCount(String agentId) {
+        try {
+            Optional<Value> valueOp = kvClient.getValue(AGENTS_PENDING_TRANSFER_COUNT_PATH + agentId);
+            if (valueOp.isEmpty()) {
+                return 0;
+            }
+            String countAsStr = valueOp.get().getValueAsString().get();
+            return Long.parseLong(countAsStr);
+        } catch (ConsulException e) {
+            if (e.getCode() == 404) {
+                return 0;
+            } else {
+                throw e;
+            }
+        }
     }
 
     public String submitTransfer(TransferApiRequest transferRequest) throws MFTConsulClientException {
@@ -271,6 +298,28 @@ public class MFTConsulClient {
         }
     }
 
+    public int getEndpointHookCountForAgent(String agentId) throws MFTConsulClientException {
+        Optional<String> sessionOp = getKvClient().getSession(LIVE_AGENTS_PATH + agentId);
+
+        try {
+            try {
+                if (sessionOp.isPresent()) {
+                    List<String> transfers = getKvClient().getKeys(MFTConsulClient.AGENTS_SCHEDULED_PATH + agentId + "/" + sessionOp.get());
+                    return transfers.size();
+                } else {
+                    return 0;
+                }
+            } catch (ConsulException e) {
+                if (e.getCode() == 404) {
+                    return 0;
+                } else {
+                    throw e;
+                }
+            }
+        } catch (Exception e) {
+            throw new MFTConsulClientException("Failed to fetch endpoint hook count for agent " + agentId, e);
+        }
+    }
     /**
      * Agents should call this method to submit {@link TransferState}. These status are received by the controller and reorder
      * status messages and put in the final status array.
@@ -416,25 +465,6 @@ public class MFTConsulClient {
         getKvClient().deleteKey(MFTConsulClient.AGENTS_SCHEDULED_PATH
                 + agentId + "/" + session + "/" + transferId + "/" + agentTransferRequestId
                 + "/" + getEndpointPathHash(endpointPaths));
-    }
-
-    public int getEndpointHookCountForAgent(String agentId) throws MFTConsulClientException {
-        Optional<String> session = getKvClient().getSession(LIVE_AGENTS_PATH + agentId);
-
-        try {
-            try {
-                return session.map(s -> getKvClient().getKeys(MFTConsulClient.AGENTS_SCHEDULED_PATH
-                        + agentId + "/" + s).size()).orElse(0);
-            } catch (ConsulException e) {
-                if (e.getCode() == 404) {
-                    return 0;
-                } else {
-                    throw e;
-                }
-            }
-        } catch (Exception e) {
-            throw new MFTConsulClientException("Failed to fetch endpoint hook count for agent " + agentId, e);
-        }
     }
 
     public KeyValueClient getKvClient() {
