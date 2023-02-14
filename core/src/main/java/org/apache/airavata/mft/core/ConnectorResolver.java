@@ -45,6 +45,9 @@ public final class ConnectorResolver {
             case "GCS":
                 className = "org.apache.airavata.mft.transport.gcp.GCSIncomingStreamingConnector";
                 break;
+//            case "LOCAL":
+//                className = "org.apache.airavata.mft.transport.local.LocalIncomingStreamingConnector";
+//                break;
         }
 
         if (className != null) {
@@ -94,6 +97,9 @@ public final class ConnectorResolver {
                 break;
             case "GCS":
                 className = "org.apache.airavata.mft.transport.gcp.GCSIncomingChunkedConnector";
+                break;
+            case "LOCAL":
+                className = "org.apache.airavata.mft.transport.local.LocalIncomingChunkedConnector";
                 break;
         }
 

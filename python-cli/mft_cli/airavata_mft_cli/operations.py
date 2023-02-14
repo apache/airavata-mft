@@ -48,6 +48,8 @@ def fetch_storage_and_secret_ids(storage_name):
     raise typer.Abort()
 
   storage = storages.storageList[0]
+  if storage.storageType == 3: #checking if storageID is Local
+      return storage.storageId, ''
   sec_req = StorageCommon_pb2.SecretForStorageGetRequest(storageId = storage.storageId)
   sec_resp = client.common_api.getSecretForStorage(sec_req)
   if sec_resp.error != 0:
