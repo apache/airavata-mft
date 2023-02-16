@@ -17,12 +17,12 @@
 
 package org.apache.airavata.mft.secret.server.backend.sql.repository.swift;
 
-import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftPasswordSecretEntity;
+import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftV3AuthSecretEntity;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.Optional;
 
-public interface SwiftPasswordSecretRepository extends CrudRepository<SwiftPasswordSecretEntity, String> {
-    Optional<SwiftPasswordSecretEntity> findBySecretId(String secretId);
+public interface SwiftV3AuthSecretRepository extends CrudRepository<SwiftV3AuthSecretEntity, String> {
+    Optional<SwiftV3AuthSecretEntity> findBySecretId(String secretId);
 
 }

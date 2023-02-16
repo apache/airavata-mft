@@ -222,7 +222,7 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
                     if (st.getState().equals("COMPLETED")) {
                         completedFiles.add(st.getChildId());
                     } else if (st.getState().equals("FAILED")) {
-                        failedFiles.add("FAILED");
+                        failedFiles.add(st.getChildId());
                     }
                 });
 
@@ -512,7 +512,11 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
             if (liveAgentIds.isEmpty()) {
                 throw new Exception("No agent is available to perform the operation");
             }
-            targetAgent = liveAgentIds.get(0);
+            if (liveAgentIds.stream().anyMatch(id -> id.equals("local-agent"))) {
+                targetAgent = "local-agent";
+            } else {
+                targetAgent = liveAgentIds.get(0);
+            }
             logger.info("Using agent {} for processing the operation", targetAgent);
         } else {
             Optional<AgentInfo> agentInfo = mftConsulClient.getAgentInfo(targetAgent);

@@ -33,7 +33,7 @@ public abstract class AgentSpawner {
 
     public abstract void launch();
     public abstract Future<String> getLaunchState();
-    public abstract void terminate();
+    public abstract void terminate(boolean failed);
 
     public abstract Future<Boolean> getTerminateState();
 }

@@ -48,7 +48,6 @@
         <module>transport</module>
         <module>agent</module>
         <module>controller</module>
-        <module>command-line</module>
         <module>standalone-service</module>
     </modules>
 
@@ -101,6 +100,13 @@
                 <groupId>org.apache.rat</groupId>
                 <artifactId>apache-rat-plugin</artifactId>
                 <version>0.15</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/venv/**/*</exclude>
+                        <exclude>**/dist/**/*</exclude>
+                        <exclude>**/*.egg-info/**/*</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -157,6 +163,7 @@
         <commons.io.version>2.6</commons.io.version>
         <apache.http.client.version>4.5.13</apache.http.client.version>
         <aws.sdk.version>1.12.372</aws.sdk.version>
+        <guava.version>31.1-jre</guava.version>
     </properties>
 
 </project>

@@ -17,14 +17,13 @@
 
 package org.apache.airavata.mft.transport.swift;
 
+import com.google.common.collect.FluentIterable;
 import org.apache.airavata.mft.agent.stub.*;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.airavata.mft.credential.stubs.swift.SwiftSecret;
 import org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorage;
-import org.jclouds.ContextBuilder;
-import org.jclouds.openstack.keystone.auth.config.CredentialTypes;
-import org.jclouds.openstack.keystone.config.KeystoneProperties;
 import org.jclouds.openstack.swift.v1.SwiftApi;
+import org.jclouds.openstack.swift.v1.domain.Container;
 import org.jclouds.openstack.swift.v1.domain.ObjectList;
 import org.jclouds.openstack.swift.v1.domain.SwiftObject;
 import org.jclouds.openstack.swift.v1.features.ObjectApi;
@@ -49,87 +48,81 @@ public class SwiftMetadataCollector implements MetadataCollector {
         }
     }
 
-    private SwiftApi getSwiftApi(SwiftStorage swiftStorage, SwiftSecret swiftSecret) {
-        String provider = "openstack-swift";
-
-        Properties overrides = new Properties();
-        overrides.put(KeystoneProperties.KEYSTONE_VERSION, swiftStorage.getKeystoneVersion() + "");
-
-        String identity = null;
-        String credential = null;
-        switch (swiftSecret.getSecretCase()) {
-            case PASSWORDSECRET:
-                identity = swiftSecret.getPasswordSecret().getDomainId() + ":" + swiftSecret.getPasswordSecret().getUserName();
-                credential = swiftSecret.getPasswordSecret().getPassword();
-                overrides.put(KeystoneProperties.SCOPE, "projectId:" + swiftSecret.getPasswordSecret().getProjectId());
-                overrides.put(KeystoneProperties.CREDENTIAL_TYPE, CredentialTypes.PASSWORD_CREDENTIALS);
-                break;
-            case AUTHCREDENTIALSECRET:
-                identity = swiftSecret.getAuthCredentialSecret().getCredentialId();
-                credential = swiftSecret.getAuthCredentialSecret().getCredentialSecret();
-                overrides.put(KeystoneProperties.CREDENTIAL_TYPE, CredentialTypes.API_ACCESS_KEY_CREDENTIALS);
-                break;
-        }
-
-        return ContextBuilder.newBuilder(provider)
-                .endpoint(swiftStorage.getEndpoint())
-                .credentials(identity, credential)
-                .overrides(overrides)
-                .buildApi(SwiftApi.class);
-    }
-
     @Override
     public ResourceMetadata getResourceMetadata(String resourcePath, boolean recursiveSearch) throws Exception {
         checkInitialized();
 
-        SwiftApi swiftApi = getSwiftApi(swiftStorage, swiftSecret);
+        SwiftApi swiftApi = SwiftUtil.createSwiftApi(swiftSecret, swiftStorage);
 
-        ObjectApi objectApi = swiftApi.getObjectApi(swiftStorage.getRegion(), swiftStorage.getContainer());
+        try {
+            ResourceMetadata.Builder resourceBuilder = ResourceMetadata.newBuilder();
+            if ("".equals(resourcePath) && "".equals(swiftStorage.getContainer())) {
+                FluentIterable<Container> containers = swiftApi.getContainerApi(swiftStorage.getRegion()).list();
+                DirectoryMetadata.Builder parentDir = DirectoryMetadata.newBuilder();
+                parentDir.setResourcePath("");
+                parentDir.setFriendlyName("");
+                containers.forEach(container -> {
+                    DirectoryMetadata.Builder bucketDir = DirectoryMetadata.newBuilder();
+                    bucketDir.setFriendlyName(container.getName());
+                    bucketDir.setResourcePath(container.getName());
+                    parentDir.addDirectories(bucketDir);
+                });
+                resourceBuilder.setDirectory(parentDir);
 
-        ResourceMetadata.Builder resourceBuilder = ResourceMetadata.newBuilder();
-        if ("".equals(resourcePath)) {
-            DirectoryMetadata.Builder rootDirBuilder = DirectoryMetadata.newBuilder();
+            } else {
+                ObjectApi objectApi = swiftApi.getObjectApi(swiftStorage.getRegion(), swiftStorage.getContainer());
+                if ("".equals(resourcePath)) {
 
-            ObjectList objectList = objectApi.list();
-            objectList.forEach(swiftObject -> {
-                FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
-                fileBuilder.setFriendlyName(swiftObject.getName());
-                fileBuilder.setResourcePath(swiftObject.getName());
-                fileBuilder.setCreatedTime(swiftObject.getLastModified().getTime());
-                fileBuilder.setUpdateTime(swiftObject.getLastModified().getTime());
-                fileBuilder.setResourceSize(swiftObject.getPayload().getContentMetadata().getContentLength());
-                rootDirBuilder.addFiles(fileBuilder);
-            });
-            resourceBuilder.setDirectory(rootDirBuilder);
-        } else {
-            SwiftObject swiftObject = objectApi.get(resourcePath);
+                    DirectoryMetadata.Builder rootDirBuilder = DirectoryMetadata.newBuilder();
 
-            if (swiftObject == null) {
-                resourceBuilder.setError(MetadataFetchError.NOT_FOUND);
-                return resourceBuilder.build();
+                    ObjectList objectList = objectApi.list();
+                    objectList.forEach(swiftObject -> {
+                        FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
+                        fileBuilder.setFriendlyName(swiftObject.getName());
+                        fileBuilder.setResourcePath(swiftObject.getName());
+                        fileBuilder.setCreatedTime(swiftObject.getLastModified().getTime());
+                        fileBuilder.setUpdateTime(swiftObject.getLastModified().getTime());
+                        fileBuilder.setResourceSize(swiftObject.getPayload().getContentMetadata().getContentLength());
+                        rootDirBuilder.addFiles(fileBuilder);
+                    });
+                    resourceBuilder.setDirectory(rootDirBuilder);
+                } else {
+                    SwiftObject swiftObject = objectApi.get(resourcePath);
+
+                    if (swiftObject == null) {
+                        resourceBuilder.setError(MetadataFetchError.NOT_FOUND);
+                        return resourceBuilder.build();
+                    }
+
+                    FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
+                    fileBuilder.setFriendlyName(swiftObject.getName());
+                    fileBuilder.setResourcePath(swiftObject.getName());
+                    fileBuilder.setCreatedTime(swiftObject.getLastModified().getTime());
+                    fileBuilder.setUpdateTime(swiftObject.getLastModified().getTime());
+                    fileBuilder.setResourceSize(swiftObject.getPayload().getContentMetadata().getContentLength());
+                    resourceBuilder.setFile(fileBuilder);
+                }
             }
-
-            FileMetadata.Builder fileBuilder = FileMetadata.newBuilder();
-            fileBuilder.setFriendlyName(swiftObject.getName());
-            fileBuilder.setResourcePath(swiftObject.getName());
-            fileBuilder.setCreatedTime(swiftObject.getLastModified().getTime());
-            fileBuilder.setUpdateTime(swiftObject.getLastModified().getTime());
-            fileBuilder.setResourceSize(swiftObject.getPayload().getContentMetadata().getContentLength());
-            resourceBuilder.setFile(fileBuilder);
+            return resourceBuilder.build();
+        } finally{
+            swiftApi.close();
         }
-        return resourceBuilder.build();
     }
 
     @Override
     public Boolean isAvailable(String resourcePath) throws Exception {
         checkInitialized();
 
-        SwiftApi swiftApi = getSwiftApi(swiftStorage, swiftSecret);
+        SwiftApi swiftApi = SwiftUtil.createSwiftApi(swiftSecret, swiftStorage);
 
-        ObjectApi objectApi = swiftApi.getObjectApi(swiftStorage.getRegion(), swiftStorage.getContainer());
+        try {
+            ObjectApi objectApi = swiftApi.getObjectApi(swiftStorage.getRegion(), swiftStorage.getContainer());
 
-        SwiftObject swiftObject = objectApi.get(resourcePath);
+            SwiftObject swiftObject = objectApi.get(resourcePath);
 
-        return swiftObject != null;
+            return swiftObject != null;
+        } finally {
+            swiftApi.close();
+        }
     }
 }

@@ -17,6 +17,7 @@
 
 package org.apache.airavata.mft.agent;
 
+import org.apache.airavata.mft.admin.MFTConsulClient;
 import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.agent.stub.*;
 import org.apache.airavata.mft.core.MetadataCollectorResolver;
@@ -25,6 +26,7 @@ import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -61,6 +63,12 @@ public class TransferOrchestrator {
     @org.springframework.beans.factory.annotation.Value("${agent.temp.data.dir}")
     private String tempDataDir = "/tmp";
 
+    @org.springframework.beans.factory.annotation.Value("${agent.id}")
+    private String agentId;
+
+    @Autowired
+    private MFTConsulClient mftConsulClient;
+
     @PostConstruct
     public void init() {
         transferRequestExecutor  = Executors.newFixedThreadPool(concurrentTransfers);
@@ -68,6 +76,7 @@ public class TransferOrchestrator {
                 concurrentTransfers,
                 concurrentChunkedThreads,
                 chunkedSize, doChunkStream);
+        mftConsulClient.updateAgentPendingTransferCount(agentId, 0);
         logger.info("Transfer orchestrator initialized");
     }
 
@@ -81,6 +90,8 @@ public class TransferOrchestrator {
                                         BiConsumer<EndpointPaths, TransferState> updateStatus,
                                         BiConsumer<EndpointPaths, Boolean> createTransferHook) {
         long totalPending = totalPendingTransfers.addAndGet(request.getEndpointPathsCount());
+        mftConsulClient.updateAgentPendingTransferCount(agentId, totalPending);
+
         logger.info("Total pending files to transfer {}", totalPending);
         for (EndpointPaths endpointPath : request.getEndpointPathsList()) {
 
@@ -100,6 +111,8 @@ public class TransferOrchestrator {
 
             long running = totalRunningTransfers.incrementAndGet();
             long pending = totalPendingTransfers.decrementAndGet();
+            mftConsulClient.updateAgentPendingTransferCount(agentId, pending);
+
             logger.info("Received request {}. Total Running {}. Total Pending {}", transferId, running, pending);
 
             updateStatus.accept(endpointPath, new TransferState()
@@ -117,6 +130,27 @@ public class TransferOrchestrator {
             ResourceMetadata srcMetadata = srcMetadataCollector.getResourceMetadata(endpointPath.getSourcePath(), false);
             if (srcMetadata.getMetadataCase() != ResourceMetadata.MetadataCase.FILE) {
                 throw new Exception("Expected a file as the source but received " + srcMetadata.getMetadataCase().name());
+            }
+
+            Optional<MetadataCollector> dstMetadataCollectorOp = MetadataCollectorResolver
+                    .resolveMetadataCollector(destStorage.getStorageCase().name());
+
+            MetadataCollector dstMetadataCollector = dstMetadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for destination"));
+            dstMetadataCollector.init(destStorage, destSecret);
+
+            if (dstMetadataCollector.isAvailable(endpointPath.getDestinationPath())) {
+                ResourceMetadata destinationMetadata = dstMetadataCollector.getResourceMetadata(endpointPath.getDestinationPath(), false);
+                if (destinationMetadata.getMetadataCase() == ResourceMetadata.MetadataCase.FILE &&
+                        destinationMetadata.getFile().getResourceSize() == srcMetadata.getFile().getResourceSize()) {
+                    logger.info("Ignoring the transfer of file {} as it is available in the destination", endpointPath.getSourcePath());
+                    updateStatus.accept(endpointPath, new TransferState()
+                            .setPercentage(100)
+                            .setState("COMPLETED")
+                            .setUpdateTimeMils(System.currentTimeMillis())
+                            .setDescription("Ignoring transfer as the file is available in destination"));
+
+                    return;
+                }
             }
 
             ConnectorConfig srcCC = ConnectorConfig.ConnectorConfigBuilder.newBuilder()

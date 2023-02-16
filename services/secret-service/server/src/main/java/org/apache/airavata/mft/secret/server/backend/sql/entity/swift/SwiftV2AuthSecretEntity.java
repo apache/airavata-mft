@@ -25,7 +25,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
-public class SwiftAuthCredentialSecretEntity {
+public class SwiftV2AuthSecretEntity {
 
     @Id
     @Column(name = "SECRET_ID")
@@ -33,11 +33,14 @@ public class SwiftAuthCredentialSecretEntity {
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String secretId;
 
-    @Column(name = "CREDENTIAL_ID")
-    private String credentialId;
+    @Column(name = "TENANT")
+    private String tenant;
 
-    @Column(name = "CREDENTIAL_SECRET")
-    private String credentialSecret;
+    @Column(name = "USER_NAME")
+    private String userName;
+
+    @Column(name = "PASSWORD")
+    private String password;
 
     public String getSecretId() {
         return secretId;
@@ -47,19 +50,30 @@ public class SwiftAuthCredentialSecretEntity {
         this.secretId = secretId;
     }
 
-    public String getCredentialId() {
-        return credentialId;
+    public String getTenant() {
+        return tenant;
     }
 
-    public void setCredentialId(String credentialId) {
-        this.credentialId = credentialId;
+    public SwiftV2AuthSecretEntity setTenant(String tenant) {
+        this.tenant = tenant;
+        return this;
     }
 
-    public String getCredentialSecret() {
-        return credentialSecret;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setCredentialSecret(String credentialSecret) {
-        this.credentialSecret = credentialSecret;
+    public SwiftV2AuthSecretEntity setUserName(String userName) {
+        this.userName = userName;
+        return this;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public SwiftV2AuthSecretEntity setPassword(String password) {
+        this.password = password;
+        return this;
     }
 }

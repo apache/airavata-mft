@@ -50,6 +50,11 @@
             <version>2.0.54.Final</version>
         </dependency>
         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.airavata</groupId>
             <artifactId>mft-scp-transport</artifactId>
             <version>${project.version}</version>
@@ -163,7 +168,7 @@
         </dependency>
     </dependencies>
 
-    <!--build>
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -188,7 +193,7 @@
                 </executions>
             </plugin>
         </plugins>
-    </build-->
+    </build>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>

@@ -60,34 +60,7 @@ public class SwiftOutgoingConnector implements OutgoingChunkedConnector {
         this.resourcePath = cc.getResourcePath();
 
         SwiftSecret swiftSecret = cc.getSecret().getSwift();
-
-        String provider = "openstack-swift";
-
-        Properties overrides = new Properties();
-        overrides.put(KeystoneProperties.KEYSTONE_VERSION, swiftStorage.getKeystoneVersion() + "");
-
-        String identity = null;
-        String credential = null;
-        switch (swiftSecret.getSecretCase()) {
-            case PASSWORDSECRET:
-                identity = swiftSecret.getPasswordSecret().getDomainId() + ":" + swiftSecret.getPasswordSecret().getUserName();
-                credential = swiftSecret.getPasswordSecret().getPassword();
-                overrides.put(KeystoneProperties.SCOPE, "projectId:" + swiftSecret.getPasswordSecret().getProjectId());
-                overrides.put(KeystoneProperties.CREDENTIAL_TYPE, CredentialTypes.PASSWORD_CREDENTIALS);
-                break;
-            case AUTHCREDENTIALSECRET:
-                identity = swiftSecret.getAuthCredentialSecret().getCredentialId();
-                credential = swiftSecret.getAuthCredentialSecret().getCredentialSecret();
-                overrides.put(KeystoneProperties.CREDENTIAL_TYPE, CredentialTypes.API_ACCESS_KEY_CREDENTIALS);
-                break;
-        }
-
-        swiftApi = ContextBuilder.newBuilder(provider)
-                .endpoint(swiftStorage.getEndpoint())
-                .credentials(identity, credential)
-                .overrides(overrides)
-                .buildApi(SwiftApi.class);
-
+        swiftApi = SwiftUtil.createSwiftApi(swiftSecret, swiftStorage);
         objectApi = swiftApi.getObjectApi(swiftStorage.getRegion(), swiftStorage.getContainer());
         staticLargeObjectApi = swiftApi.getStaticLargeObjectApi(swiftStorage.getRegion(), swiftStorage.getContainer());
     }

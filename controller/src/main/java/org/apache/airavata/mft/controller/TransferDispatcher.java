@@ -18,6 +18,8 @@
 package org.apache.airavata.mft.controller;
 
 import org.apache.airavata.mft.admin.MFTConsulClient;
+import org.apache.airavata.mft.admin.MFTConsulClientException;
+import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.agent.stub.AgentTransferRequest;
 import org.apache.airavata.mft.api.service.EndpointPaths;
@@ -70,7 +72,7 @@ public class TransferDispatcher {
                     .setDescription("Initializing the transfer"));
 
             // TODO use a better way to select the right agent
-            mftConsulClient.commandTransferToAgent(filteredAgents.get(0), transferId, agentTransferRequest);
+            mftConsulClient.commandTransferToAgent(selectTargetAgent(filteredAgents), transferId, agentTransferRequest);
             mftConsulClient.markTransferAsProcessed(transferId, transferRequest);
             logger.info("Marked transfer {} as processed", transferId);
 
@@ -91,6 +93,42 @@ public class TransferDispatcher {
         } finally {
             mftConsulClient.getKvClient().deleteKey(consulKey);
         }
+    }
+
+
+    private String selectTargetAgent(List<String> liveAgentIds) throws MFTConsulClientException {
+        String selectedAgent = null;
+        List<Optional<AgentInfo>> agentInfos = liveAgentIds.stream().map(
+                id -> mftConsulClient.getAgentInfo(id)).collect(Collectors.toList());
+        long transferCount = -1;
+        List<String> candidates = new ArrayList<>();
+
+        for (Optional<AgentInfo> agentInfo : agentInfos) {
+            if (agentInfo.isPresent()) {
+                int agentActiveTransfers = mftConsulClient.getEndpointHookCountForAgent(agentInfo.get().getId());
+                long pendingTransferCount = mftConsulClient.getAgentPendingTransferCount(agentInfo.get().getId());
+                long totalTransferCount = agentActiveTransfers + pendingTransferCount;
+                logger.info("Agent {} has transfers assigned {}", agentInfo.get().getId(), totalTransferCount);
+                if (transferCount == -1) {
+                    transferCount = totalTransferCount;
+                    candidates.add(agentInfo.get().getId());
+                } else if (transferCount == totalTransferCount) {
+                    candidates.add(agentInfo.get().getId());
+                } else if (transferCount > totalTransferCount) {
+                    candidates = new ArrayList<>();
+                    transferCount = totalTransferCount;
+                    candidates.add(agentInfo.get().getId());
+                }
+            }
+        }
+
+        if (candidates.size() > 0) {
+            Random rand = new Random();
+            selectedAgent = candidates.get(rand.nextInt(candidates.size()));
+            logger.info("Selecting agent {}", selectedAgent);
+        }
+
+        return selectedAgent;
     }
 
     public void handleTransferRequest(String transferId,

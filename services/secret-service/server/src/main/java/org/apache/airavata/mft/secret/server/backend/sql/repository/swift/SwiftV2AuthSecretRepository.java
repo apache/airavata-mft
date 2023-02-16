@@ -15,14 +15,13 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.command.line.sub.s3;
+package org.apache.airavata.mft.secret.server.backend.sql.repository.swift;
 
-import org.apache.airavata.mft.command.line.sub.s3.storage.S3StorageSubCommand;
-import picocli.CommandLine;
+import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftV2AuthSecretEntity;
+import org.springframework.data.repository.CrudRepository;
 
-@CommandLine.Command(name = "s3", description = "Manage S3 resources and credentials",
-        subcommands = {S3StorageSubCommand.class})
-public class S3SubCommand {
+import java.util.Optional;
 
-
+public interface SwiftV2AuthSecretRepository extends CrudRepository<SwiftV2AuthSecretEntity, String> {
+    Optional<SwiftV2AuthSecretEntity> findBySecretId(String secretId);
 }
