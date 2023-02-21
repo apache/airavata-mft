@@ -94,6 +94,14 @@ message FetchResourceMetadataRequest {
     org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 3;
 }
 
+message TransferRemoveRequest {
+    string transferId = 1;
+}
+
+message TransferRemoveResponse {
+    bool success = 1;
+}
+
 service  MFTTransferService {
 
     rpc submitTransfer(TransferApiRequest) returns (TransferApiResponse);
@@ -106,4 +114,5 @@ service  MFTTransferService {
 
     rpc resourceMetadata(FetchResourceMetadataRequest) returns (org.apache.airavata.mft.agent.stub.ResourceMetadata);
 
+    rpc removeTransfer(TransferRemoveRequest) returns (TransferRemoveResponse);
 }

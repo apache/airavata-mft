@@ -20,16 +20,6 @@ class MFTTransferServiceStub(object):
                 request_serializer=MFTTransferApi__pb2.TransferApiRequest.SerializeToString,
                 response_deserializer=MFTTransferApi__pb2.TransferApiResponse.FromString,
                 )
-        self.submitHttpUpload = channel.unary_unary(
-                '/org.apache.airavata.mft.api.service.MFTTransferService/submitHttpUpload',
-                request_serializer=MFTTransferApi__pb2.HttpUploadApiRequest.SerializeToString,
-                response_deserializer=MFTTransferApi__pb2.HttpUploadApiResponse.FromString,
-                )
-        self.submitHttpDownload = channel.unary_unary(
-                '/org.apache.airavata.mft.api.service.MFTTransferService/submitHttpDownload',
-                request_serializer=MFTTransferApi__pb2.HttpDownloadApiRequest.SerializeToString,
-                response_deserializer=MFTTransferApi__pb2.HttpDownloadApiResponse.FromString,
-                )
         self.getAllTransferStates = channel.unary_stream(
                 '/org.apache.airavata.mft.api.service.MFTTransferService/getAllTransferStates',
                 request_serializer=MFTTransferApi__pb2.TransferStateApiRequest.SerializeToString,
@@ -50,24 +40,17 @@ class MFTTransferServiceStub(object):
                 request_serializer=MFTTransferApi__pb2.FetchResourceMetadataRequest.SerializeToString,
                 response_deserializer=MFTAgentStubs__pb2.ResourceMetadata.FromString,
                 )
+        self.removeTransfer = channel.unary_unary(
+                '/org.apache.airavata.mft.api.service.MFTTransferService/removeTransfer',
+                request_serializer=MFTTransferApi__pb2.TransferRemoveRequest.SerializeToString,
+                response_deserializer=MFTTransferApi__pb2.TransferRemoveResponse.FromString,
+                )
 
 
 class MFTTransferServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def submitTransfer(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def submitHttpUpload(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def submitHttpDownload(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -97,6 +80,12 @@ class MFTTransferServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def removeTransfer(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_MFTTransferServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -104,16 +93,6 @@ def add_MFTTransferServiceServicer_to_server(servicer, server):
                     servicer.submitTransfer,
                     request_deserializer=MFTTransferApi__pb2.TransferApiRequest.FromString,
                     response_serializer=MFTTransferApi__pb2.TransferApiResponse.SerializeToString,
-            ),
-            'submitHttpUpload': grpc.unary_unary_rpc_method_handler(
-                    servicer.submitHttpUpload,
-                    request_deserializer=MFTTransferApi__pb2.HttpUploadApiRequest.FromString,
-                    response_serializer=MFTTransferApi__pb2.HttpUploadApiResponse.SerializeToString,
-            ),
-            'submitHttpDownload': grpc.unary_unary_rpc_method_handler(
-                    servicer.submitHttpDownload,
-                    request_deserializer=MFTTransferApi__pb2.HttpDownloadApiRequest.FromString,
-                    response_serializer=MFTTransferApi__pb2.HttpDownloadApiResponse.SerializeToString,
             ),
             'getAllTransferStates': grpc.unary_stream_rpc_method_handler(
                     servicer.getAllTransferStates,
@@ -134,6 +113,11 @@ def add_MFTTransferServiceServicer_to_server(servicer, server):
                     servicer.resourceMetadata,
                     request_deserializer=MFTTransferApi__pb2.FetchResourceMetadataRequest.FromString,
                     response_serializer=MFTAgentStubs__pb2.ResourceMetadata.SerializeToString,
+            ),
+            'removeTransfer': grpc.unary_unary_rpc_method_handler(
+                    servicer.removeTransfer,
+                    request_deserializer=MFTTransferApi__pb2.TransferRemoveRequest.FromString,
+                    response_serializer=MFTTransferApi__pb2.TransferRemoveResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -159,40 +143,6 @@ class MFTTransferService(object):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.api.service.MFTTransferService/submitTransfer',
             MFTTransferApi__pb2.TransferApiRequest.SerializeToString,
             MFTTransferApi__pb2.TransferApiResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def submitHttpUpload(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.api.service.MFTTransferService/submitHttpUpload',
-            MFTTransferApi__pb2.HttpUploadApiRequest.SerializeToString,
-            MFTTransferApi__pb2.HttpUploadApiResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def submitHttpDownload(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.api.service.MFTTransferService/submitHttpDownload',
-            MFTTransferApi__pb2.HttpDownloadApiRequest.SerializeToString,
-            MFTTransferApi__pb2.HttpDownloadApiResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -261,5 +211,22 @@ class MFTTransferService(object):
         return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.api.service.MFTTransferService/resourceMetadata',
             MFTTransferApi__pb2.FetchResourceMetadataRequest.SerializeToString,
             MFTAgentStubs__pb2.ResourceMetadata.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def removeTransfer(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/org.apache.airavata.mft.api.service.MFTTransferService/removeTransfer',
+            MFTTransferApi__pb2.TransferRemoveRequest.SerializeToString,
+            MFTTransferApi__pb2.TransferRemoveResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

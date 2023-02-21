@@ -26,6 +26,7 @@ import com.orbitz.consul.ConsulException;
 import com.orbitz.consul.KeyValueClient;
 import com.orbitz.consul.SessionClient;
 import com.orbitz.consul.model.kv.Value;
+import com.orbitz.consul.option.DeleteOptions;
 import com.orbitz.consul.option.PutOptions;
 import org.apache.airavata.mft.admin.models.AgentInfo;
 import org.apache.airavata.mft.admin.models.TransferState;
@@ -443,6 +444,11 @@ public class MFTConsulClient {
         } else {
             return Optional.empty();
         }
+    }
+
+    public void removeTransfer(String transferId) {
+        kvClient.deleteKey(TRANSFER_STATE_PATH + transferId, DeleteOptions.RECURSE);
+        kvClient.deleteKey(TRANSFER_PROCESSED_PATH + transferId, DeleteOptions.RECURSE);
     }
 
     public List<AgentInfo> getLiveAgentInfos() throws MFTConsulClientException {
