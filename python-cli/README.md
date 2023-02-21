@@ -37,7 +37,7 @@ Install dependencies
 ```
 pip install grpcio==1.46.3
 pip install grpcio-tools==1.46.3
-pip install airavata_mft_sdk==0.0.1-alpha24
+pip install airavata_mft_sdk==0.0.1-alpha26
 ```
 
 Build the binary
