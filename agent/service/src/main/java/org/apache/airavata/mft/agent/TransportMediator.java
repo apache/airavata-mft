@@ -140,6 +140,7 @@ public class TransportMediator {
 
                     for (int i = 0; i < chunkIdx; i++) {
                         Future<Integer> future = completionService.take();
+                        future.get();
                     }
 
                     inConnector.complete();
@@ -283,7 +284,7 @@ public class TransportMediator {
                 }
                 return chunkIdx;
             } catch (Exception e) {
-                logger.error("Failed to transfer ", e);
+                logger.error("Failed to transfer transfer id {}", transferId, e);
                 throw e;
             }
         }

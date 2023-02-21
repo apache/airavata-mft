@@ -200,7 +200,7 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
                                 (completedFiles.size() + failedFiles.size() + pendingFiles.size()));
                     } else if (!completedFiles.isEmpty()) {
                         stateBuilder.setState("COMPLETED");
-                        stateBuilder.setState("All file transfers completed");
+                        stateBuilder.setDescription("All file transfers completed");
                         stateBuilder.setPercentage((completedFiles.size() + failedFiles.size()) * 1.0 /
                                 (completedFiles.size() + failedFiles.size() + pendingFiles.size()));
                     }
@@ -450,6 +450,20 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
             logger.error("Error while fetching resource metadata" , e);
             responseObserver.onError(Status.INTERNAL
                     .withDescription("Failed to fetch file resource metadata. " + e.getMessage())
+                    .asException());
+        }
+    }
+
+    @Override
+    public void removeTransfer(TransferRemoveRequest request, StreamObserver<TransferRemoveResponse> responseObserver) {
+        try {
+            mftConsulClient.removeTransfer(request.getTransferId());
+            responseObserver.onNext(TransferRemoveResponse.newBuilder().setSuccess(true).build());
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            logger.error("Error while removing transfer {}", request.getTransferId() , e);
+            responseObserver.onError(Status.INTERNAL
+                    .withDescription("Failed to remove the transfer. " + e.getMessage())
                     .asException());
         }
     }
