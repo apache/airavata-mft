@@ -45,6 +45,9 @@ public final class ConnectorResolver {
             case "GCS":
                 className = "org.apache.airavata.mft.transport.gcp.GCSIncomingStreamingConnector";
                 break;
+//            case "LOCAL":
+//                className = "org.apache.airavata.mft.transport.local.LocalIncomingStreamingConnector";
+//                break;
         }
 
         if (className != null) {
@@ -95,6 +98,9 @@ public final class ConnectorResolver {
             case "GCS":
                 className = "org.apache.airavata.mft.transport.gcp.GCSIncomingChunkedConnector";
                 break;
+            case "LOCAL":
+                className = "org.apache.airavata.mft.transport.local.LocalIncomingChunkedConnector";
+                break;
         }
 
         if (className != null) {
@@ -115,6 +121,9 @@ public final class ConnectorResolver {
             case "SWIFT":
                 className = "org.apache.airavata.mft.transport.swift.SwiftOutgoingConnector";
                 break;
+            case "LOCAL":
+                className = "org.apache.airavata.mft.transport.local.LocalOutgoingChunkedConnector";
+                break;
         }
 
         if (className != null) {
@@ -124,5 +133,4 @@ public final class ConnectorResolver {
             return Optional.empty();
         }
     }
-
 }

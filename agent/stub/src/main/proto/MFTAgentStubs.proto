@@ -120,5 +120,6 @@ message GetResourceMetadataRequest {
     StorageWrapper storage = 2;
     SecretWrapper secret = 3;
     bool recursiveSearch = 4;
+    string targetAgent = 5;
 }
 

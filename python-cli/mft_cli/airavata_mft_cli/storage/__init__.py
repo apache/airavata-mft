@@ -21,6 +21,7 @@ from pick import pick
 import airavata_mft_cli.storage.s3 as s3
 import airavata_mft_cli.storage.azure as azure
 import airavata_mft_cli.storage.gcs as gcs
+import airavata_mft_cli.storage.local as local
 import airavata_mft_cli.storage.swift as swift
 from airavata_mft_sdk import mft_client
 from airavata_mft_sdk.common import StorageCommon_pb2
@@ -40,8 +41,11 @@ def add_storage():
         azure.handle_add_storage()
     elif option == "Google Cloud Storage (GCS)":
         gcs.handle_add_storage()
+    elif option == "Agent":
+        local.handle_add_storage()
     elif option == "Openstack SWIFT":
         swift.handle_add_storage()
+
 
 @app.command("list")
 def list_storage():

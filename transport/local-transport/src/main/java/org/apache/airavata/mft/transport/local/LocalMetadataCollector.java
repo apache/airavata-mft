@@ -85,13 +85,15 @@ public class LocalMetadataCollector implements MetadataCollector {
                     try {
                         if (p.toFile().isFile()) {
 
-                            FileMetadata.Builder fileBuilder = getFileBuilderFromPath(resourceFile);
+                            FileMetadata.Builder fileBuilder = getFileBuilderFromPath(p.toFile());
                             dirBuilder.addFiles(fileBuilder);
                         } else if (p.toFile().isDirectory()) {
                             DirectoryMetadata.Builder subDirBuilder = DirectoryMetadata.newBuilder();
                             BasicFileAttributes bfa = Files.readAttributes(p, BasicFileAttributes.class);
                             subDirBuilder.setCreatedTime(bfa.creationTime().toMillis());
                             subDirBuilder.setUpdateTime(bfa.lastModifiedTime().toMillis());
+                            subDirBuilder.setFriendlyName(p.toFile().getName());
+                            subDirBuilder.setResourcePath(p.toFile().toPath().toAbsolutePath().toString());
                             dirBuilder.addDirectories(subDirBuilder);
                         }
                     } catch (Exception e) {

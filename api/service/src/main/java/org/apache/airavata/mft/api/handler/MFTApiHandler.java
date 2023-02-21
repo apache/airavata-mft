@@ -327,6 +327,8 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
 
                 directReqBuilder
                         .setStorage(StorageWrapper.newBuilder().setLocal(localStorage).build());
+
+                directReqBuilder.setTargetAgent(localStorage.getAgentId());
                 break;
             case BOX:
                 BoxStorage boxStorage = storageClient.box()
@@ -428,7 +430,7 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
                 directRequest = deriveDirectRequest(request.getIdRequest());
             }
 
-            String targetAgent = derriveTargetAgent("");
+            String targetAgent = derriveTargetAgent(directRequest.getTargetAgent());
             SyncRPCRequest.SyncRPCRequestBuilder requestBuilder = SyncRPCRequest.SyncRPCRequestBuilder.builder()
                     .withAgentId(targetAgent)
                     .withMessageId(UUID.randomUUID().toString())
@@ -473,7 +475,7 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
                 directRequest = deriveDirectRequest(request.getIdRequest());
             }
 
-            String targetAgent = derriveTargetAgent("");
+            String targetAgent = derriveTargetAgent(directRequest.getTargetAgent());
             SyncRPCRequest.SyncRPCRequestBuilder requestBuilder = SyncRPCRequest.SyncRPCRequestBuilder.builder()
                     .withAgentId(targetAgent)
                     .withMessageId(UUID.randomUUID().toString())
