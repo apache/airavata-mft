@@ -132,59 +132,6 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
     }
 
     @Override
-    public void submitHttpUpload(HttpUploadApiRequest request, StreamObserver<HttpUploadApiResponse> responseObserver) {
-        super.submitHttpUpload(request, responseObserver);
-    }
-
-    @Override
-    public void submitHttpDownload(HttpDownloadApiRequest request, StreamObserver<HttpDownloadApiResponse> responseObserver) {
-        try {
-            // TODO : Automatically derive agent if the target agent is empty
-
-            logger.info("Processing submit http download for resource path {}", request.getResourcePath());
-
-            String targetAgent = derriveTargetAgent(request.getTargetAgent());
-
-            SyncRPCRequest.SyncRPCRequestBuilder requestBuilder = SyncRPCRequest.SyncRPCRequestBuilder.builder()
-                    .withAgentId(targetAgent)
-                    .withMessageId(UUID.randomUUID().toString())
-                    .withMethod("submitHttpDownload")
-                    .withParameter("resourcePath", request.getResourcePath())
-                    .withParameter("sourceStorageId", request.getSourceStorageId())
-                    .withParameter("sourceToken", request.getSourceSecretId())
-                    .withParameter("mftAuthorizationToken", JsonFormat.printer().print(request.getMftAuthorizationToken()));
-
-            SyncRPCResponse rpcResponse = agentRPCClient.sendSyncRequest(requestBuilder.build());
-
-            switch (rpcResponse.getResponseStatus()) {
-                case SUCCESS:
-                    String url = rpcResponse.getResponseAsStr();
-                    HttpDownloadApiResponse downloadResponse = HttpDownloadApiResponse.newBuilder()
-                            .setUrl(url)
-                            .setTargetAgent(request.getTargetAgent()).build();
-                    responseObserver.onNext(downloadResponse);
-                    responseObserver.onCompleted();
-                    return;
-                case FAIL:
-                    logger.error("Errored while processing the download request to resource path {}. Error msg : {}",
-                            request.getResourcePath(), rpcResponse.getErrorAsStr());
-
-                    responseObserver.onError(Status.INTERNAL
-                            .withDescription("Errored while processing the the fetch file metadata response. Error msg : " +
-                                    rpcResponse.getErrorAsStr())
-                            .asException());
-            }
-
-        } catch (Exception e) {
-            logger.error("Error while submitting http download request to resource path {}",
-                                                request.getResourcePath() , e);
-            responseObserver.onError(Status.INTERNAL
-                    .withDescription("Failed to submit http download request. " + e.getMessage())
-                    .asException());
-        }
-    }
-
-    @Override
     public void getAllTransferStates(TransferStateApiRequest request, StreamObserver<TransferStateResponse> responseObserver) {
         try {
             List<TransferState> states = mftConsulClient.getTransferStates(request.getTransferId());
@@ -328,7 +275,6 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
                 directReqBuilder
                         .setStorage(StorageWrapper.newBuilder().setLocal(localStorage).build());
 
-                directReqBuilder.setTargetAgent(localStorage.getAgentId());
                 break;
             case BOX:
                 BoxStorage boxStorage = storageClient.box()
@@ -430,7 +376,7 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
                 directRequest = deriveDirectRequest(request.getIdRequest());
             }
 
-            String targetAgent = derriveTargetAgent(directRequest.getTargetAgent());
+            String targetAgent = derriveTargetAgent(directRequest);
             SyncRPCRequest.SyncRPCRequestBuilder requestBuilder = SyncRPCRequest.SyncRPCRequestBuilder.builder()
                     .withAgentId(targetAgent)
                     .withMessageId(UUID.randomUUID().toString())
@@ -475,7 +421,7 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
                 directRequest = deriveDirectRequest(request.getIdRequest());
             }
 
-            String targetAgent = derriveTargetAgent(directRequest.getTargetAgent());
+            String targetAgent = derriveTargetAgent(directRequest);
             SyncRPCRequest.SyncRPCRequestBuilder requestBuilder = SyncRPCRequest.SyncRPCRequestBuilder.builder()
                     .withAgentId(targetAgent)
                     .withMessageId(UUID.randomUUID().toString())
@@ -508,7 +454,14 @@ public class MFTApiHandler extends MFTTransferServiceGrpc.MFTTransferServiceImpl
         }
     }
 
-    private String derriveTargetAgent(String targetAgent) throws Exception {
+    private String derriveTargetAgent(GetResourceMetadataRequest directRequest) throws Exception {
+
+        String targetAgent = "";
+
+        if (directRequest.getStorage().getStorageCase() == StorageWrapper.StorageCase.LOCAL) {
+            targetAgent = directRequest.getStorage().getLocal().getAgentId();
+        }
+
         if (targetAgent.isEmpty()) {
             List<String> liveAgentIds = mftConsulClient.getLiveAgentIds();
             if (liveAgentIds.isEmpty()) {

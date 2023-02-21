@@ -53,32 +53,6 @@ message TransferApiResponse {
     string transferId = 1;
 }
 
-message HttpUploadApiRequest {
-    string destinationStorageId = 1;
-    string resourcePath = 2;
-    string destinationSecretId = 3;
-    string targetAgent = 5;
-    org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 6;
-}
-
-message HttpUploadApiResponse {
-    string url = 1;
-    string targetAgent = 2;
-}
-
-message HttpDownloadApiRequest {
-    string resourcePath = 1;
-    string sourceStorageId = 2;
-    string sourceSecretId = 3;
-    string targetAgent = 5;
-    org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 6;
-}
-
-message HttpDownloadApiResponse {
-    string url = 1;
-    string targetAgent = 2;
-}
-
 message TransferStateApiRequest {
     string transferId = 1;
     org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 2;
@@ -123,10 +97,6 @@ message FetchResourceMetadataRequest {
 service  MFTTransferService {
 
     rpc submitTransfer(TransferApiRequest) returns (TransferApiResponse);
-
-    rpc submitHttpUpload(HttpUploadApiRequest) returns (HttpUploadApiResponse);
-
-    rpc submitHttpDownload(HttpDownloadApiRequest) returns (HttpDownloadApiResponse);
 
     rpc getAllTransferStates(TransferStateApiRequest) returns (stream TransferStateResponse);
 
