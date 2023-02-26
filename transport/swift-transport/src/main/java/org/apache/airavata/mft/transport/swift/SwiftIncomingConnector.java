@@ -20,13 +20,8 @@ package org.apache.airavata.mft.transport.swift;
 import org.apache.airavata.mft.core.api.ConnectorConfig;
 import org.apache.airavata.mft.core.api.IncomingChunkedConnector;
 import org.apache.airavata.mft.credential.stubs.swift.SwiftSecret;
-import org.apache.airavata.mft.credential.stubs.swift.SwiftSecretGetRequest;
 import org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorage;
-import org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorageGetRequest;
-import org.jclouds.ContextBuilder;
 import org.jclouds.http.options.GetOptions;
-import org.jclouds.openstack.keystone.auth.config.CredentialTypes;
-import org.jclouds.openstack.keystone.config.KeystoneProperties;
 import org.jclouds.openstack.swift.v1.SwiftApi;
 import org.jclouds.openstack.swift.v1.domain.SwiftObject;
 import org.jclouds.openstack.swift.v1.features.ObjectApi;
@@ -36,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.StandardCopyOption;
-import java.util.Properties;
 
 public class SwiftIncomingConnector implements IncomingChunkedConnector {
 
@@ -52,15 +46,15 @@ public class SwiftIncomingConnector implements IncomingChunkedConnector {
         SwiftStorage swiftStorage = cc.getStorage().getSwift();
         this.resourcePath = cc.getResourcePath();
         SwiftSecret swiftSecret = cc.getSecret().getSwift();
-        swiftApi = SwiftUtil.createSwiftApi(swiftSecret, swiftStorage);
+        swiftApi = SwiftUtil.getInstance().leaseSwiftApi(swiftSecret);
         objectApi = swiftApi.getObjectApi(swiftStorage.getRegion(), swiftStorage.getContainer());
     }
 
     @Override
     public void complete() throws Exception {
-        if (swiftApi != null) {
-            swiftApi.close();
-        }
+        //if (swiftApi != null) {
+        //    swiftApi.close();
+        //}
     }
 
     @Override

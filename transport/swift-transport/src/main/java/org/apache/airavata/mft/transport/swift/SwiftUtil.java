@@ -17,31 +17,77 @@
 
 package org.apache.airavata.mft.transport.swift;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import org.apache.airavata.mft.credential.stubs.swift.SwiftSecret;
 import org.apache.airavata.mft.credential.stubs.swift.SwiftV2AuthSecret;
 import org.apache.airavata.mft.credential.stubs.swift.SwiftV3AuthSecret;
-import org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorage;
 import org.jclouds.ContextBuilder;
 import org.jclouds.openstack.keystone.config.KeystoneProperties;
 import org.jclouds.openstack.swift.v1.SwiftApi;
 
 // https://jclouds.apache.org/guides/openstack/
 public class SwiftUtil {
-    public static SwiftApi createSwiftApi(SwiftSecret swiftSecret, SwiftStorage swiftStorage) throws Exception {
-      String provider = "openstack-swift";
-      Properties overrides = new Properties();
-      switch (swiftSecret.getSecretCase()) {
+    private ThreadLocal<Map<String, SwiftApi>> swiftApiCache = ThreadLocal.withInitial(() -> {
+        Map<String, SwiftApi> map = new HashMap<>();
+        return map;
+    });
+
+    private static SwiftUtil instance;
+
+    private SwiftUtil(){}
+
+    public static synchronized SwiftUtil getInstance() {
+        if (instance == null) {
+            synchronized (SwiftUtil.class) {
+                if (instance == null) {
+                    instance = new SwiftUtil();
+                }
+            }
+        }
+        return instance;
+    }
+
+    public void releaseSwiftApi(SwiftSecret swiftSecret) {
+
+    }
+
+    private String getSecretKey(SwiftSecret swiftSecret) {
+        switch (swiftSecret.getSecretCase()) {
+            case V2AUTHSECRET:
+                SwiftV2AuthSecret v2AuthSecret = swiftSecret.getV2AuthSecret();
+                return v2AuthSecret.getTenant() + v2AuthSecret.getUserName() + v2AuthSecret.getPassword();
+            case V3AUTHSECRET:
+                SwiftV3AuthSecret v3AuthSecret = swiftSecret.getV3AuthSecret();
+                return v3AuthSecret.getTenantName() + v3AuthSecret.getProjectDomainName()
+                        + v3AuthSecret.getUserDomainName() + v3AuthSecret.getUserName() + v3AuthSecret.getPassword();
+        }
+        return null;
+    }
+    public SwiftApi leaseSwiftApi(SwiftSecret swiftSecret) throws Exception {
+
+        String secretKey = getSecretKey(swiftSecret);
+
+        if (swiftApiCache.get().containsKey(secretKey)) {
+            return swiftApiCache.get().get(secretKey);
+        }
+
+        SwiftApi swiftApi;
+
+        String provider = "openstack-swift";
+        Properties overrides = new Properties();
+        switch (swiftSecret.getSecretCase()) {
           case V2AUTHSECRET:
               SwiftV2AuthSecret v2AuthSecret = swiftSecret.getV2AuthSecret();
               overrides.put(KeystoneProperties.KEYSTONE_VERSION, "2");
-              return ContextBuilder.newBuilder(provider)
+              swiftApi = ContextBuilder.newBuilder(provider)
                   .endpoint(swiftSecret.getEndpoint())
                   .credentials(v2AuthSecret.getTenant() + ":" + v2AuthSecret.getUserName(),
                       v2AuthSecret.getPassword())
                   .overrides(overrides)
                   .buildApi(SwiftApi.class);
-
+              break;
           case V3AUTHSECRET:
 
               SwiftV3AuthSecret v3AuthSecret = swiftSecret.getV3AuthSecret();
@@ -54,15 +100,18 @@ public class SwiftUtil {
                   overrides.put(KeystoneProperties.PROJECT_DOMAIN_NAME, v3AuthSecret.getProjectDomainName());
               }
 
-              return ContextBuilder.newBuilder(provider)
+              swiftApi =  ContextBuilder.newBuilder(provider)
                   .endpoint(swiftSecret.getEndpoint())
                   .credentials(v3AuthSecret.getUserDomainName() + ":" + v3AuthSecret.getUserName(),
                       v3AuthSecret.getPassword())
                   .overrides(overrides)
                   .buildApi(SwiftApi.class);
-
+              break;
           default:
             throw new Exception("No v2 or v3 auth secret set");
-      }
+        }
+
+        swiftApiCache.get().put(secretKey, swiftApi);
+        return swiftApi;
     }
 }

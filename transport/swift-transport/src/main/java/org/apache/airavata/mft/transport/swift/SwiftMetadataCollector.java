@@ -28,8 +28,6 @@ import org.jclouds.openstack.swift.v1.domain.ObjectList;
 import org.jclouds.openstack.swift.v1.domain.SwiftObject;
 import org.jclouds.openstack.swift.v1.features.ObjectApi;
 
-import java.util.Properties;
-
 public class SwiftMetadataCollector implements MetadataCollector {
     boolean initialized = false;
     private SwiftStorage swiftStorage;
@@ -52,7 +50,7 @@ public class SwiftMetadataCollector implements MetadataCollector {
     public ResourceMetadata getResourceMetadata(String resourcePath, boolean recursiveSearch) throws Exception {
         checkInitialized();
 
-        SwiftApi swiftApi = SwiftUtil.createSwiftApi(swiftSecret, swiftStorage);
+        SwiftApi swiftApi = SwiftUtil.getInstance().leaseSwiftApi(swiftSecret);
 
         try {
             ResourceMetadata.Builder resourceBuilder = ResourceMetadata.newBuilder();
@@ -105,7 +103,7 @@ public class SwiftMetadataCollector implements MetadataCollector {
             }
             return resourceBuilder.build();
         } finally{
-            swiftApi.close();
+            //swiftApi.close();
         }
     }
 
@@ -113,7 +111,7 @@ public class SwiftMetadataCollector implements MetadataCollector {
     public Boolean isAvailable(String resourcePath) throws Exception {
         checkInitialized();
 
-        SwiftApi swiftApi = SwiftUtil.createSwiftApi(swiftSecret, swiftStorage);
+        SwiftApi swiftApi = SwiftUtil.getInstance().leaseSwiftApi(swiftSecret);
 
         try {
             ObjectApi objectApi = swiftApi.getObjectApi(swiftStorage.getRegion(), swiftStorage.getContainer());
@@ -122,7 +120,7 @@ public class SwiftMetadataCollector implements MetadataCollector {
 
             return swiftObject != null;
         } finally {
-            swiftApi.close();
+            //swiftApi.close();
         }
     }
 }
