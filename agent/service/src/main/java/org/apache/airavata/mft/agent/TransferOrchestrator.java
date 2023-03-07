@@ -158,6 +158,7 @@ public class TransferOrchestrator {
                     .withSecret(sourceSecret)
                     .withStorage(sourceStorage)
                     .withResourcePath(endpointPath.getSourcePath())
+                    .withChunkSize(chunkedSize)
                     .withMetadata(srcMetadata).build();
 
             ConnectorConfig dstCC = ConnectorConfig.ConnectorConfigBuilder.newBuilder()
@@ -165,6 +166,7 @@ public class TransferOrchestrator {
                     .withStorage(destStorage)
                     .withSecret(destSecret)
                     .withResourcePath(endpointPath.getDestinationPath())
+                    .withChunkSize(chunkedSize)
                     .withMetadata(srcMetadata).build();
 
             updateStatus.accept(endpointPath, new TransferState()

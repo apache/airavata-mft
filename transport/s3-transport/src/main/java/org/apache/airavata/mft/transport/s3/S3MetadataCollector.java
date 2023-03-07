@@ -63,20 +63,7 @@ public class S3MetadataCollector implements MetadataCollector {
 
         checkInitialized();
 
-        AWSCredentials awsCreds;
-        if (s3Secret.getSessionToken() == null || s3Secret.getSessionToken().equals("")) {
-            awsCreds = new BasicAWSCredentials(s3Secret.getAccessKey(), s3Secret.getSecretKey());
-        } else {
-            awsCreds = new BasicSessionCredentials(s3Secret.getAccessKey(),
-                    s3Secret.getSecretKey(),
-                    s3Secret.getSessionToken());
-        }
-
-        AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
-                        s3Storage.getEndpoint(), s3Storage.getRegion()))
-                .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                .build();
+        AmazonS3 s3Client = S3Util.getInstance().leaseS3Client(s3Secret, s3Storage);
 
         ResourceMetadata.Builder resourceBuilder = ResourceMetadata.newBuilder();
 
@@ -189,21 +176,7 @@ public class S3MetadataCollector implements MetadataCollector {
 
         checkInitialized();
 
-        AWSCredentials awsCreds;
-        if (s3Secret.getSessionToken() == null || s3Secret.getSessionToken().equals("")) {
-            awsCreds = new BasicAWSCredentials(s3Secret.getAccessKey(), s3Secret.getSecretKey());
-        } else {
-            awsCreds = new BasicSessionCredentials(s3Secret.getAccessKey(),
-                    s3Secret.getSecretKey(),
-                    s3Secret.getSessionToken());
-        }
-
-        AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
-                        s3Storage.getEndpoint(), s3Storage.getRegion()))
-                .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                .build();
-
+        AmazonS3 s3Client = S3Util.getInstance().leaseS3Client(s3Secret, s3Storage);
         return s3Client.doesObjectExist(s3Storage.getBucketName(), resourcePath);
     }
 }

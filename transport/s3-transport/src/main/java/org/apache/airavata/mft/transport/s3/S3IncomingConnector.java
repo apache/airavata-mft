@@ -54,21 +54,8 @@ public class S3IncomingConnector implements IncomingChunkedConnector, IncomingSt
 
         S3Secret s3Secret = cc.getSecret().getS3();
 
-        AWSCredentials awsCreds;
+        s3Client = S3Util.getInstance().leaseS3Client(s3Secret, s3Storage);
 
-        if (s3Secret.getSessionToken() == null || s3Secret.getSessionToken().equals("")) {
-            awsCreds = new BasicAWSCredentials(s3Secret.getAccessKey(), s3Secret.getSecretKey());
-        } else {
-            awsCreds = new BasicSessionCredentials(s3Secret.getAccessKey(),
-                    s3Secret.getSecretKey(),
-                    s3Secret.getSessionToken());
-        }
-
-        s3Client = AmazonS3ClientBuilder.standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
-                        s3Storage.getEndpoint(), s3Storage.getRegion()))
-                .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                .build();
     }
 
 

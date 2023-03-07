@@ -17,6 +17,7 @@
 
 package org.apache.airavata.mft.transport.s3;
 
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -25,6 +26,7 @@ import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
+import com.amazonaws.util.Md5Utils;
 import org.apache.airavata.mft.core.api.ConnectorConfig;
 import org.apache.airavata.mft.core.api.OutgoingChunkedConnector;
 import org.apache.airavata.mft.credential.stubs.s3.S3Secret;
@@ -36,6 +38,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,6 +52,7 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
     private S3Storage s3Storage;
     private AmazonS3 s3Client;
     private String resourcePath;
+    private long resourceLength;
 
     InitiateMultipartUploadResult initResponse;
     List<PartETag> partETags = Collections.synchronizedList(new ArrayList<>());
@@ -55,65 +61,69 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
     public void init(ConnectorConfig cc) throws Exception {
 
         this.resourcePath = cc.getResourcePath();
+        this.resourceLength = cc.getMetadata().getFile().getResourceSize();
 
         s3Storage = cc.getStorage().getS3();
 
         S3Secret s3Secret = cc.getSecret().getS3();
 
-        AWSCredentials awsCreds;
-        if (s3Secret.getSessionToken() == null || s3Secret.getSessionToken().equals("")) {
-            awsCreds = new BasicAWSCredentials(s3Secret.getAccessKey(), s3Secret.getSecretKey());
+        s3Client = S3Util.getInstance().leaseS3Client(s3Secret, s3Storage);
+
+        if (cc.getChunkSize() < cc.getMetadata().getFile().getResourceSize()) {
+            InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(s3Storage.getBucketName(),
+                    resourcePath);
+            initResponse = s3Client.initiateMultipartUpload(initRequest);
+            logger.info("Initialized multipart upload for file {} in bucket {}",
+                    resourcePath, s3Storage.getBucketName());
         } else {
-            awsCreds = new BasicSessionCredentials(s3Secret.getAccessKey(),
-                    s3Secret.getSecretKey(),
-                    s3Secret.getSessionToken());
+            logger.info("Using non-multipart upload for file {} in bucket {}", resourcePath, s3Storage.getBucketName());
         }
-
-        s3Client = AmazonS3ClientBuilder.standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
-                        s3Storage.getEndpoint(), s3Storage.getRegion()))
-                .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                .build();
-
-        InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(s3Storage.getBucketName(),
-                resourcePath);
-        initResponse = s3Client.initiateMultipartUpload(initRequest);
-        logger.info("Initialized multipart upload for file {} in bucket {}",
-                resourcePath, s3Storage.getBucketName());
     }
 
     @Override
     public void uploadChunk(int chunkId, long startByte, long endByte, String uploadFile) throws Exception {
         File file = new File(uploadFile);
-        UploadPartRequest uploadRequest = new UploadPartRequest()
-                .withBucketName(s3Storage.getBucketName())
-                .withKey(resourcePath)
-                .withUploadId(initResponse.getUploadId())
-                .withPartNumber(chunkId + 1)
-                .withFileOffset(0)
-                .withFile(file)
-                .withPartSize(file.length());
+        if (initResponse != null) {
 
-        UploadPartResult uploadResult = s3Client.uploadPart(uploadRequest);
-        this.partETags.add(uploadResult.getPartETag());
-        logger.debug("Uploaded S3 chunk to path {} for resource path {}", uploadFile, resourcePath);
+            UploadPartRequest uploadRequest = new UploadPartRequest()
+                    .withBucketName(s3Storage.getBucketName())
+                    .withKey(resourcePath)
+                    .withUploadId(initResponse.getUploadId())
+                    .withPartNumber(chunkId + 1)
+                    .withFileOffset(0)
+                    //.withMD5Digest(Md5Utils.md5AsBase64(new File(uploadFile)))
+                    .withFile(file)
+                    .withPartSize(file.length());
+
+            UploadPartResult uploadResult = s3Client.uploadPart(uploadRequest);
+            this.partETags.add(uploadResult.getPartETag());
+            logger.debug("Uploaded S3 chunk to path {} for resource path {}", uploadFile, resourcePath);
+        } else {
+            s3Client.putObject(s3Storage.getBucketName(), resourcePath, uploadFile);
+        }
     }
 
     @Override
     public void uploadChunk(int chunkId, long startByte, long endByte, InputStream inputStream) throws Exception {
-        UploadPartRequest uploadRequest = new UploadPartRequest()
-                .withBucketName(s3Storage.getBucketName())
-                .withKey(resourcePath)
-                .withUploadId(initResponse.getUploadId())
-                .withPartNumber(chunkId + 1)
-                .withFileOffset(0)
-                .withInputStream(inputStream)
-                .withPartSize(endByte - startByte);
+        if (initResponse != null) {
+            UploadPartRequest uploadRequest = new UploadPartRequest()
+                    .withBucketName(s3Storage.getBucketName())
+                    .withKey(resourcePath)
+                    .withUploadId(initResponse.getUploadId())
+                    .withPartNumber(chunkId + 1)
+                    .withFileOffset(0)
+                    .withInputStream(inputStream)
+                    .withPartSize(endByte - startByte);
 
-        UploadPartResult uploadResult = s3Client.uploadPart(uploadRequest);
-        inputStream.close();
-        this.partETags.add(uploadResult.getPartETag());
-        logger.debug("Uploaded S3 chunk {} for resource path {} using stream", chunkId, resourcePath);
+            UploadPartResult uploadResult = s3Client.uploadPart(uploadRequest);
+            inputStream.close();
+            this.partETags.add(uploadResult.getPartETag());
+            logger.debug("Uploaded S3 chunk {} for resource path {} using stream", chunkId, resourcePath);
+        } else {
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(resourceLength);
+            s3Client.putObject(s3Storage.getBucketName(), resourcePath, inputStream, metadata);
+        }
     }
 
     @Override

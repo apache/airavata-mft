@@ -28,6 +28,8 @@ public class ConnectorConfig {
     private String resourcePath;
     private ResourceMetadata metadata;
 
+    private long chunkSize;
+
     public String getTransferId() {
         return transferId;
     }
@@ -68,6 +70,13 @@ public class ConnectorConfig {
         this.metadata = metadata;
     }
 
+    public long getChunkSize() {
+        return chunkSize;
+    }
+
+    public void setChunkSize(long chunkSize) {
+        this.chunkSize = chunkSize;
+    }
 
     public static final class ConnectorConfigBuilder {
         private String transferId;
@@ -75,6 +84,8 @@ public class ConnectorConfig {
         private SecretWrapper secret;
         private String resourcePath;
         private ResourceMetadata metadata;
+
+        private long chunkSize;
 
         private ConnectorConfigBuilder() {
         }
@@ -108,6 +119,11 @@ public class ConnectorConfig {
             return this;
         }
 
+        public ConnectorConfigBuilder withChunkSize(long chunkSize) {
+            this.chunkSize = chunkSize;
+            return this;
+        }
+
         public ConnectorConfig build() {
             ConnectorConfig connectorConfig = new ConnectorConfig();
             connectorConfig.setTransferId(transferId);
@@ -115,6 +131,7 @@ public class ConnectorConfig {
             connectorConfig.setSecret(secret);
             connectorConfig.setResourcePath(resourcePath);
             connectorConfig.setMetadata(metadata);
+            connectorConfig.setChunkSize(chunkSize);
             return connectorConfig;
         }
     }
