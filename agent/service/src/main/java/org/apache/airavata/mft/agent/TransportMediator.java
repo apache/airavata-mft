@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -277,7 +278,7 @@ public class TransportMediator {
                     InputStream inputStream = downloader.downloadChunk(chunkIdx, startPos, endPos);
                     uploader.uploadChunk(chunkIdx, startPos, endPos, inputStream);
                 } else {
-                    String tempFile = tempDataDir + File.separator + transferId + "-" + chunkIdx;
+                    String tempFile = tempDataDir + File.separator + UUID.randomUUID().toString() + "-" + chunkIdx;
                     downloader.downloadChunk(chunkIdx, startPos, endPos, tempFile);
                     uploader.uploadChunk(chunkIdx, startPos, endPos, tempFile);
                     new File(tempFile).delete();
