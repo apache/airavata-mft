@@ -17,6 +17,7 @@
 
 package org.apache.airavata.mft.transport.s3;
 
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -93,10 +94,14 @@ public class S3Util {
                     s3Secret.getSessionToken());
         }
 
+        ClientConfiguration clientConfiguration = new ClientConfiguration();
+        clientConfiguration.setUseTcpKeepAlive(true);
+
         AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
                 .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
                         s3Storage.getEndpoint(), s3Storage.getRegion()))
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
+                .withClientConfiguration(clientConfiguration)
                 .disableChunkedEncoding()
                 .build();
 
