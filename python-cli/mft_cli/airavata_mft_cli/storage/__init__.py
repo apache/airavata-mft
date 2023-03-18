@@ -27,6 +27,9 @@ from airavata_mft_sdk import mft_client
 from airavata_mft_sdk.common import StorageCommon_pb2
 from rich.console import Console
 from rich.table import Table
+import sys
+sys.path.append('../airavata_mft_cli')
+from airavata_mft_cli import config as configcli
 
 app = typer.Typer()
 
@@ -49,13 +52,13 @@ def add_storage():
 
 @app.command("list")
 def list_storage():
-    client = mft_client.MFTClient(transfer_api_port = 7003,
-                                  transfer_api_secured = False,
-                                  resource_service_host = "localhost",
-                                  resource_service_port = 7003,
-                                  resource_service_secured = False,
-                                  secret_service_host = "localhost",
-                                  secret_service_port = 7003)
+    client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
+                                  transfer_api_secured = configcli.transfer_api_secured,
+                                  resource_service_host = configcli.resource_service_host,
+                                  resource_service_port = configcli.resource_service_port,
+                                  resource_service_secured = configcli.resource_service_secured,
+                                  secret_service_host = configcli.secret_service_host,
+                                  secret_service_port = configcli.secret_service_port)
     list_req = StorageCommon_pb2.StorageListRequest()
     list_response = client.common_api.listStorages(list_req)
 
