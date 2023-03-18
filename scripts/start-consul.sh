@@ -27,7 +27,7 @@ case $1 in
             curl -O https://releases.hashicorp.com/consul/1.7.1/consul_1.7.1_darwin_amd64.zip
             unzip -o consul_1.7.1_darwin_amd64.zip -d ../airavata-mft/consul
             rm consul_1.7.1_darwin_amd64.zip
-            nohup ../airavata-mft/consul/consul agent -dev > $LOG_FILE 2>&1 &
+            nohup ../airavata-mft/consul/consul agent -dev -client 0.0.0.0 > $LOG_FILE 2>&1 &
             echo $! > $PID_PATH_NAME
             echo "Consul started"
         else
