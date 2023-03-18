@@ -25,6 +25,9 @@ from airavata_mft_sdk.azure import AzureStorage_pb2
 from airavata_mft_sdk import MFTTransferApi_pb2
 from airavata_mft_sdk import MFTAgentStubs_pb2
 from airavata_mft_sdk.common import StorageCommon_pb2
+import sys
+sys.path.append('../airavata_mft_cli')
+from airavata_mft_cli import config as configcli
 
 def handle_add_storage():
 
@@ -34,13 +37,13 @@ def handle_add_storage():
     if index == 1: # Manual configuration
         connection_string = typer.prompt("Connection String")
 
-    client = mft_client.MFTClient(transfer_api_port = 7003,
-                                  transfer_api_secured = False,
-                                  resource_service_host = "localhost",
-                                  resource_service_port = 7003,
-                                  resource_service_secured = False,
-                                  secret_service_host = "localhost",
-                                  secret_service_port = 7003)
+    client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
+                                  transfer_api_secured = configcli.transfer_api_secured,
+                                  resource_service_host = configcli.resource_service_host,
+                                  resource_service_port = configcli.resource_service_port,
+                                  resource_service_secured = configcli.resource_service_secured,
+                                  secret_service_host = configcli.secret_service_host,
+                                  secret_service_port = configcli.secret_service_port)
 
     azure_secret = AzureCredential_pb2.AzureSecret(connectionString = connection_string)
     secret_wrapper = MFTAgentStubs_pb2.SecretWrapper(azure=azure_secret)

@@ -23,15 +23,18 @@ from airavata_mft_sdk import MFTTransferApi_pb2
 from rich.console import Console
 from rich.table import Table
 import time
+import sys
+sys.path.append('.')
+from . import config as configcli
 
 def fetch_storage_and_secret_ids(storage_name):
-  client = mft_client.MFTClient(transfer_api_port = 7003,
-                                transfer_api_secured = False,
-                                resource_service_host = "localhost",
-                                resource_service_port = 7003,
-                                resource_service_secured = False,
-                                secret_service_host = "localhost",
-                                secret_service_port = 7003)
+  client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
+                                transfer_api_secured = configcli.transfer_api_secured,
+                                resource_service_host = configcli.resource_service_host,
+                                resource_service_port = configcli.resource_service_port,
+                                resource_service_secured = configcli.resource_service_secured,
+                                secret_service_host = configcli.secret_service_host,
+                                secret_service_port = configcli.secret_service_port)
   search_req = StorageCommon_pb2.StorageSearchRequest(storageName=storage_name)
   storages = client.common_api.searchStorages(search_req)
 
@@ -68,13 +71,13 @@ def get_resource_metadata(storage_path, recursive_search = False):
                                                                 resourcePath = resource_path)
   resource_medata_req = MFTTransferApi_pb2.FetchResourceMetadataRequest(idRequest = id_req)
 
-  client = mft_client.MFTClient(transfer_api_port = 7003,
-                                transfer_api_secured = False,
-                                resource_service_host = "localhost",
-                                resource_service_port = 7003,
-                                resource_service_secured = False,
-                                secret_service_host = "localhost",
-                                secret_service_port = 7003)
+  client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
+                                transfer_api_secured = configcli.transfer_api_secured,
+                                resource_service_host = configcli.resource_service_host,
+                                resource_service_port = configcli.resource_service_port,
+                                resource_service_secured = configcli.resource_service_secured,
+                                secret_service_host = configcli.secret_service_host,
+                                secret_service_port = configcli.secret_service_port)
 
   metadata_resp = client.transfer_api.resourceMetadata(resource_medata_req)
   return metadata_resp
@@ -167,18 +170,18 @@ def copy(source, destination):
                           " files to be transferred. Total volume is " + str(total_volume)
                           + " bytes. Do you want to start the transfer? ", True)
 
-  client = mft_client.MFTClient(transfer_api_port = 7003,
-                                transfer_api_secured = False,
-                                resource_service_host = "localhost",
-                                resource_service_port = 7003,
-                                resource_service_secured = False,
-                                secret_service_host = "localhost",
-                                secret_service_port = 7003)
+  if not confirm:
+      raise typer.Abort()
+
+  client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
+                                transfer_api_secured = configcli.transfer_api_secured,
+                                resource_service_host = configcli.resource_service_host,
+                                resource_service_port = configcli.resource_service_port,
+                                resource_service_secured = configcli.resource_service_secured,
+                                secret_service_host = configcli.secret_service_host,
+                                secret_service_port = configcli.secret_service_port)
 
   transfer_resp = client.transfer_api.submitTransfer(transfer_request)
-
-  if not confirm:
-    raise typer.Abort()
 
   transfer_id = transfer_resp.transferId
 
