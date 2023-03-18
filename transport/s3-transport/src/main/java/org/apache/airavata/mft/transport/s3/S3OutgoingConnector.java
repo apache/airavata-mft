@@ -36,7 +36,9 @@ import org.apache.airavata.mft.resource.stubs.s3.storage.S3StorageGetRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -61,7 +63,6 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
     public void init(ConnectorConfig cc) throws Exception {
 
         this.resourcePath = cc.getResourcePath();
-        this.resourceLength = cc.getMetadata().getFile().getResourceSize();
 
         s3Storage = cc.getStorage().getS3();
 
@@ -92,7 +93,8 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
                     .withPartNumber(chunkId + 1)
                     .withFileOffset(0)
                     //.withMD5Digest(Md5Utils.md5AsBase64(new File(uploadFile)))
-                    .withFile(file)
+//                    .withFile(file)
+                    .withInputStream(new BufferedInputStream(new FileInputStream(file), Math.min(16 * 1024 * 1024, (int) ( endByte - startByte))))
                     .withPartSize(file.length());
 
             UploadPartResult uploadResult = s3Client.uploadPart(uploadRequest);
@@ -137,6 +139,6 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
 
     @Override
     public void failed() throws Exception {
-
+        logger.error("S3 failed to upload chunk to bucket {} for resource path {}", s3Storage.getBucketName(), resourcePath);
     }
 }
