@@ -1213,3 +1213,4 @@ python-sdk/samples/env/*
 python-sdk/venv/*
 python-cli/venv/*
 python-cli/mft_cli/poetry.lock
+plugins/*

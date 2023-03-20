@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.core;
+package org.apache.airavata.mft.agent.transport;
 
 import org.apache.airavata.mft.core.api.IncomingChunkedConnector;
 import org.apache.airavata.mft.core.api.IncomingStreamingConnector;
@@ -26,7 +26,7 @@ import java.util.Optional;
 
 public final class ConnectorResolver {
 
-    public static Optional<IncomingStreamingConnector> resolveIncomingStreamingConnector(String type) throws Exception {
+    public static Optional<IncomingStreamingConnector> resolveIncomingStreamingConnector(String type, TransportClassLoaderCache transportCache) throws Exception {
 
         String className = null;
         switch (type) {
@@ -51,14 +51,15 @@ public final class ConnectorResolver {
         }
 
         if (className != null) {
-            Class<?> aClass = Class.forName(className);
+            TransportClassLoader transportClassLoader = transportCache.fetchClassLoader(type.toLowerCase());
+            Class<?> aClass = transportClassLoader.loadClass(className, true);
             return Optional.of((IncomingStreamingConnector) aClass.getDeclaredConstructor().newInstance());
         } else {
             return Optional.empty();
         }
     }
 
-    public static Optional<OutgoingStreamingConnector> resolveOutgoingStreamingConnector(String type) throws Exception {
+    public static Optional<OutgoingStreamingConnector> resolveOutgoingStreamingConnector(String type, TransportClassLoaderCache transportCache) throws Exception {
 
         String className = null;
         switch (type) {
@@ -78,14 +79,15 @@ public final class ConnectorResolver {
         }
 
         if (className != null) {
-            Class<?> aClass = Class.forName(className);
+            TransportClassLoader transportClassLoader = transportCache.fetchClassLoader(type.toLowerCase());
+            Class<?> aClass = transportClassLoader.loadClass(className, true);
             return Optional.of((OutgoingStreamingConnector) aClass.getDeclaredConstructor().newInstance());
         } else {
             return Optional.empty();
         }
     }
 
-    public static Optional<IncomingChunkedConnector> resolveIncomingChunkedConnector(String type) throws Exception {
+    public static Optional<IncomingChunkedConnector> resolveIncomingChunkedConnector(String type, TransportClassLoaderCache transportCache) throws Exception {
 
         String className = null;
         switch (type) {
@@ -104,14 +106,15 @@ public final class ConnectorResolver {
         }
 
         if (className != null) {
-            Class<?> aClass = Class.forName(className);
+            TransportClassLoader transportClassLoader = transportCache.fetchClassLoader(type.toLowerCase());
+            Class<?> aClass = transportClassLoader.loadClass(className, true);
             return Optional.of((IncomingChunkedConnector) aClass.getDeclaredConstructor().newInstance());
         } else {
             return Optional.empty();
         }
     }
 
-    public static Optional<OutgoingChunkedConnector> resolveOutgoingChunkedConnector(String type) throws Exception {
+    public static Optional<OutgoingChunkedConnector> resolveOutgoingChunkedConnector(String type, TransportClassLoaderCache transportCache) throws Exception {
 
         String className = null;
         switch (type) {
@@ -127,7 +130,8 @@ public final class ConnectorResolver {
         }
 
         if (className != null) {
-            Class<?> aClass = Class.forName(className);
+            TransportClassLoader transportClassLoader = transportCache.fetchClassLoader(type.toLowerCase());
+            Class<?> aClass = transportClassLoader.loadClass(className, true);
             return Optional.of((OutgoingChunkedConnector) aClass.getDeclaredConstructor().newInstance());
         } else {
             return Optional.empty();

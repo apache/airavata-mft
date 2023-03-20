@@ -144,7 +144,6 @@
 
     <properties>
         <standalone.service.dist.name>Standalone-Service-0.01</standalone.service.dist.name>
-        <maven.assembly.plugin>3.1.1</maven.assembly.plugin>
     </properties>
 
 </project>

@@ -35,6 +35,7 @@ import org.apache.airavata.mft.agent.AgentUtil;
 import org.apache.airavata.mft.agent.TransferOrchestrator;
 import org.apache.airavata.mft.agent.rpc.RPCParser;
 import org.apache.airavata.mft.agent.stub.AgentTransferRequest;
+import org.apache.airavata.mft.agent.transport.TransportClassLoaderCache;
 import org.apache.airavata.mft.api.service.TransferApiRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,6 +90,8 @@ public class ConsulIngressHandler {
     private String supportedProtocols;
 
     @Autowired
+    TransportClassLoaderCache transportCache;
+    @Autowired
     private TransferOrchestrator transferOrchestrator;
 
     private void acceptTransferRequests() {
@@ -112,7 +115,7 @@ public class ConsulIngressHandler {
                     }
 
                     AgentTransferRequest request = builder.build();
-                    transferOrchestrator.submitTransferToProcess(transferId, request,
+                    transferOrchestrator.submitTransferToProcess(transferId, request, transportCache,
                             AgentUtil.throwingBiConsumerWrapper((endPointPath, st) -> {
                                 mftConsulClient.submitFileTransferStateToProcess(transferId, request.getRequestId(), endPointPath,  agentId, st.setPublisher(agentId));
                             }),
@@ -137,7 +140,7 @@ public class ConsulIngressHandler {
                 decodedValue.ifPresent(v -> {
                     try {
                         SyncRPCRequest rpcRequest = mapper.readValue(v, SyncRPCRequest.class);
-                        SyncRPCResponse syncRPCResponse = rpcParser.processRPCRequest(rpcRequest);
+                        SyncRPCResponse syncRPCResponse = rpcParser.processRPCRequest(rpcRequest, transportCache);
                         mftConsulClient.sendSyncRPCResponseFromAgent(rpcRequest.getReturnAddress(), syncRPCResponse);
                     } catch (Throwable e) {
                         logger.error("Error processing the RPC request {}", value.getKey(), e);

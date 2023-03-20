@@ -15,16 +15,15 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.core;
+package org.apache.airavata.mft.agent.transport;
 
 import org.apache.airavata.mft.core.api.MetadataCollector;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
 public final class MetadataCollectorResolver {
 
-    public static Optional<MetadataCollector> resolveMetadataCollector(String type) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    public static Optional<MetadataCollector> resolveMetadataCollector(String type, TransportClassLoaderCache cache) throws Exception {
         String className = null;
         switch (type) {
             case "SCP":
@@ -60,7 +59,8 @@ public final class MetadataCollectorResolver {
         }
 
         if (className != null) {
-            Class<?> aClass = Class.forName(className);
+            TransportClassLoader transportClassLoader = cache.fetchClassLoader(type.toLowerCase());
+            Class<?> aClass = transportClassLoader.loadClass(className, true);
             return Optional.of((MetadataCollector) aClass.getDeclaredConstructor().newInstance());
         } else {
             return Optional.empty();

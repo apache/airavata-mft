@@ -22,7 +22,8 @@ import com.google.protobuf.util.JsonFormat;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCRequest;
 import org.apache.airavata.mft.admin.models.rpc.SyncRPCResponse;
 import org.apache.airavata.mft.agent.stub.*;
-import org.apache.airavata.mft.core.MetadataCollectorResolver;
+import org.apache.airavata.mft.agent.transport.MetadataCollectorResolver;
+import org.apache.airavata.mft.agent.transport.TransportClassLoaderCache;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ public class RPCParser {
 
     private static final Logger logger = LoggerFactory.getLogger(RPCParser.class);
 
-    public String resolveRPCRequest(SyncRPCRequest request) throws Exception {
+    public String resolveRPCRequest(SyncRPCRequest request, TransportClassLoaderCache transportCache) throws Exception {
         // TODO implement using the reflection
         ObjectMapper mapper = new ObjectMapper();
         logger.info("Accepting sync request {} for method {}", request.getRequestId(), request.getMethod());
@@ -46,11 +47,13 @@ public class RPCParser {
                 JsonFormat.parser().merge(requestStr, directResourceMetadataReq);
                 GetResourceMetadataRequest req = directResourceMetadataReq.build();
 
-                Optional<MetadataCollector> metadataCollectorOptional = MetadataCollectorResolver.resolveMetadataCollector(req.getStorage().getStorageCase().name());
+                Optional<MetadataCollector> metadataCollectorOptional = MetadataCollectorResolver
+                        .resolveMetadataCollector(req.getStorage().getStorageCase().name(), transportCache);
                 if (metadataCollectorOptional.isPresent()) {
                     MetadataCollector metadataCollector = metadataCollectorOptional.get();
                     metadataCollector.init(req.getStorage(), req.getSecret());
-                    ResourceMetadata resourceMetadata = metadataCollector.getResourceMetadata(req.getResourcePath(), directResourceMetadataReq.getRecursiveSearch());
+                    ResourceMetadata resourceMetadata = metadataCollector
+                            .getResourceMetadata(req.getResourcePath(), directResourceMetadataReq.getRecursiveSearch());
                     return JsonFormat.printer().print(resourceMetadata);
                 } else {
                     throw new Exception("No metadata collector for type " + req.getStorage().getStorageCase().name());
@@ -62,7 +65,8 @@ public class RPCParser {
                 req = directResourceMetadataReq.build();
                 JsonFormat.parser().merge(requestStr, directResourceMetadataReq);
 
-                metadataCollectorOptional = MetadataCollectorResolver.resolveMetadataCollector(req.getStorage().getStorageCase().name());
+                metadataCollectorOptional = MetadataCollectorResolver
+                        .resolveMetadataCollector(req.getStorage().getStorageCase().name(), transportCache);
                 if (metadataCollectorOptional.isPresent()) {
                     MetadataCollector metadataCollector = metadataCollectorOptional.get();
                     metadataCollector.init(req.getStorage(), req.getSecret());
@@ -77,11 +81,11 @@ public class RPCParser {
         throw new Exception("Unknown method " + request.getMethod());
     }
 
-    public SyncRPCResponse processRPCRequest(SyncRPCRequest request) {
+    public SyncRPCResponse processRPCRequest(SyncRPCRequest request, TransportClassLoaderCache transportCache) {
         SyncRPCResponse response = new SyncRPCResponse();
         response.setMessageId(request.getMessageId());
         try {
-            String respStr = resolveRPCRequest(request);
+            String respStr = resolveRPCRequest(request, transportCache);
             response.setResponseAsStr(respStr);
             response.setResponseStatus(SyncRPCResponse.ResponseStatus.SUCCESS);
         } catch (Exception e) {

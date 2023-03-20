@@ -153,6 +153,7 @@
         <protobuf.java>3.10.0</protobuf.java>
         <grpc.spring.boot>4.7.1</grpc.spring.boot>
         <spring.boot.data.jpa>2.2.1.RELEASE</spring.boot.data.jpa>
+        <spring.context>5.2.1.RELEASE</spring.context>
         <org.slf4j.version>1.7.25</org.slf4j.version>
         <log4j2.version>2.16.0</log4j2.version>
         <dozer>5.5.1</dozer>
@@ -164,6 +165,7 @@
         <apache.http.client.version>4.5.13</apache.http.client.version>
         <aws.sdk.version>1.12.372</aws.sdk.version>
         <guava.version>31.1-jre</guava.version>
+        <maven.assembly.plugin>3.1.1</maven.assembly.plugin>
     </properties>
 
 </project>

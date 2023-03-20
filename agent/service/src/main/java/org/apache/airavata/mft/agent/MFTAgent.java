@@ -18,12 +18,9 @@
 package org.apache.airavata.mft.agent;
 
 import org.apache.airavata.mft.admin.models.TransferState;
-import org.apache.airavata.mft.agent.http.HttpServer;
-import org.apache.airavata.mft.agent.http.HttpTransferRequestsStore;
 import org.apache.airavata.mft.api.service.CallbackEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -53,9 +50,6 @@ public class MFTAgent implements CommandLineRunner {
 
     private final Semaphore mainHold = new Semaphore(0);
 
-    @Autowired
-    private HttpTransferRequestsStore transferRequestsStore;
-
     public void init() {
 
     }
@@ -73,19 +67,6 @@ public class MFTAgent implements CommandLineRunner {
         }
     }
 
-    private void acceptHTTPRequests() {
-        logger.info("Starting the HTTP front end");
-
-        new Thread(() -> {
-            HttpServer httpServer = new HttpServer(agentHost, agentHttpPort, agentHttpsEnabled, transferRequestsStore);
-            try {
-                httpServer.run();
-            } catch (Exception e) {
-                logger.error("Http frontend server start failed", e);
-            }
-        }).start();
-    }
-
     @PreDestroy
     public void stop() {
         logger.info("Stopping Agent " + agentId);
@@ -94,7 +75,6 @@ public class MFTAgent implements CommandLineRunner {
 
     public void start() throws Exception {
         init();
-        acceptHTTPRequests();
     }
 
     @Override

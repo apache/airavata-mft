@@ -19,8 +19,8 @@ package org.apache.airavata.mft.agent;
 
 import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.agent.stub.EndpointPaths;
-import org.apache.airavata.mft.api.service.TransferApiRequest;
-import org.apache.airavata.mft.core.*;
+import org.apache.airavata.mft.agent.transport.ConnectorResolver;
+import org.apache.airavata.mft.agent.transport.TransportClassLoaderCache;
 import org.apache.airavata.mft.core.api.*;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -66,6 +66,7 @@ public class TransportMediator {
     public void transferSingleThread(String transferId,
                                      ConnectorConfig srcCC,
                                      ConnectorConfig dstCC,
+                                     TransportClassLoaderCache transportCache,
                                      BiConsumer<EndpointPaths, TransferState> onStatusCallback,
                                      BiConsumer<String, Boolean> exitingCallback) {
 
@@ -79,14 +80,14 @@ public class TransportMediator {
             logger.info("Stating transfer {}", transferId);
 
             Optional<IncomingStreamingConnector> inStreamingConnectorOp = ConnectorResolver
-                    .resolveIncomingStreamingConnector(srcCC.getStorage().getStorageCase().name());
+                    .resolveIncomingStreamingConnector(srcCC.getStorage().getStorageCase().name(), transportCache);
             Optional<OutgoingStreamingConnector> outStreamingConnectorOp = ConnectorResolver
-                    .resolveOutgoingStreamingConnector(dstCC.getStorage().getStorageCase().name());
+                    .resolveOutgoingStreamingConnector(dstCC.getStorage().getStorageCase().name(), transportCache);
 
             Optional<IncomingChunkedConnector> inChunkedConnectorOp = ConnectorResolver
-                    .resolveIncomingChunkedConnector(srcCC.getStorage().getStorageCase().name());
+                    .resolveIncomingChunkedConnector(srcCC.getStorage().getStorageCase().name(), transportCache);
             Optional<OutgoingChunkedConnector> outChunkedConnectorOp = ConnectorResolver
-                    .resolveOutgoingChunkedConnector(dstCC.getStorage().getStorageCase().name());
+                    .resolveOutgoingChunkedConnector(dstCC.getStorage().getStorageCase().name(), transportCache);
 
 
 

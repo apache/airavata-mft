@@ -20,7 +20,8 @@ package org.apache.airavata.mft.agent;
 import org.apache.airavata.mft.admin.MFTConsulClient;
 import org.apache.airavata.mft.admin.models.TransferState;
 import org.apache.airavata.mft.agent.stub.*;
-import org.apache.airavata.mft.core.MetadataCollectorResolver;
+import org.apache.airavata.mft.agent.transport.MetadataCollectorResolver;
+import org.apache.airavata.mft.agent.transport.TransportClassLoaderCache;
 import org.apache.airavata.mft.core.api.ConnectorConfig;
 import org.apache.airavata.mft.core.api.MetadataCollector;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -35,7 +36,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public class TransferOrchestrator {
 
@@ -86,7 +86,7 @@ public class TransferOrchestrator {
         logger.info("Transfer orchestrator turned off");
     }
 
-    public void submitTransferToProcess(String transferId, AgentTransferRequest request,
+    public void submitTransferToProcess(String transferId, AgentTransferRequest request, TransportClassLoaderCache cache,
                                         BiConsumer<EndpointPaths, TransferState> updateStatus,
                                         BiConsumer<EndpointPaths, Boolean> createTransferHook) {
         long totalPending = totalPendingTransfers.addAndGet(request.getEndpointPathsCount());
@@ -98,13 +98,14 @@ public class TransferOrchestrator {
             transferRequestExecutor.submit(() -> processTransfer(transferId, request.getRequestId(),
                     request.getSourceStorage(),
                     request.getDestinationStorage(), request.getSourceSecret(),
-                    request.getDestinationSecret(), endpointPath,
+                    request.getDestinationSecret(), endpointPath, cache,
                     updateStatus, createTransferHook));
         }
     }
 
     public void processTransfer(String transferId, String requestId, StorageWrapper sourceStorage, StorageWrapper destStorage,
                                 SecretWrapper sourceSecret,SecretWrapper destSecret, EndpointPaths endpointPath,
+                                TransportClassLoaderCache transportCache,
                                 BiConsumer<EndpointPaths, TransferState> updateStatus,
                                 BiConsumer<EndpointPaths, Boolean> createTransferHook) {
         try {
@@ -122,7 +123,7 @@ public class TransferOrchestrator {
                     .setDescription("Starting the transfer"));
 
             Optional<MetadataCollector> srcMetadataCollectorOp = MetadataCollectorResolver
-                    .resolveMetadataCollector(sourceStorage.getStorageCase().name());
+                    .resolveMetadataCollector(sourceStorage.getStorageCase().name(), transportCache);
 
             MetadataCollector srcMetadataCollector = srcMetadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for source"));
             srcMetadataCollector.init(sourceStorage, sourceSecret);
@@ -133,7 +134,7 @@ public class TransferOrchestrator {
             }
 
             Optional<MetadataCollector> dstMetadataCollectorOp = MetadataCollectorResolver
-                    .resolveMetadataCollector(destStorage.getStorageCase().name());
+                    .resolveMetadataCollector(destStorage.getStorageCase().name(), transportCache);
 
             MetadataCollector dstMetadataCollector = dstMetadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for destination"));
             dstMetadataCollector.init(destStorage, destSecret);
@@ -178,7 +179,7 @@ public class TransferOrchestrator {
             // Save transfer metadata in scheduled path to recover in case of an Agent failures. Recovery is done from controller
             createTransferHook.accept(endpointPath, true);
 
-            mediator.transferSingleThread(transferId, srcCC, dstCC, updateStatus,
+            mediator.transferSingleThread(transferId, srcCC, dstCC, transportCache, updateStatus,
                     (id, transferSuccess) -> {
                         try {
                             // Delete scheduled key as the transfer completed / failed if it was placed in current session

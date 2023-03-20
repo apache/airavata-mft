@@ -18,9 +18,9 @@
 package org.apache.airavata.mft.agent;
 
 import org.apache.airavata.mft.admin.MFTConsulClient;
-import org.apache.airavata.mft.agent.http.HttpTransferRequestsStore;
 import org.apache.airavata.mft.agent.ingress.ConsulIngressHandler;
 import org.apache.airavata.mft.agent.rpc.RPCParser;
+import org.apache.airavata.mft.agent.transport.TransportClassLoaderCache;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,6 +33,9 @@ public class AppConfig {
     @org.springframework.beans.factory.annotation.Value("${consul.port}")
     Integer consulPort;
 
+    @org.springframework.beans.factory.annotation.Value("${agent.transport.directory}")
+    String transportDirectory;
+
     @Bean
     public MFTConsulClient mftConsulClient() {
         return new MFTConsulClient(consulHost, consulPort);
@@ -44,11 +47,6 @@ public class AppConfig {
     }
 
     @Bean
-    public HttpTransferRequestsStore transferRequestStore() {
-        return new HttpTransferRequestsStore();
-    }
-
-    @Bean
     public ConsulIngressHandler consulIngressHandler() {
         return new ConsulIngressHandler();
 
@@ -57,5 +55,10 @@ public class AppConfig {
     @Bean
     public TransferOrchestrator transferOrchestrator() {
         return new TransferOrchestrator();
+    }
+
+    @Bean
+    public TransportClassLoaderCache transportClassLoaderCache() {
+        return new TransportClassLoaderCache(transportDirectory);
     }
 }
