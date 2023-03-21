@@ -53,6 +53,13 @@
             </includes>
         </fileSet>
         <fileSet>
+            <directory>../plugins</directory>
+            <outputDirectory>plugins</outputDirectory>
+            <includes>
+                <include>*.zip</include>
+            </includes>
+        </fileSet>
+        <fileSet>
             <directory>src/main/resources/distribution/conf</directory>
             <outputDirectory>conf</outputDirectory>
             <includes>

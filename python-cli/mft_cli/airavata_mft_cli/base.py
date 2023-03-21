@@ -37,3 +37,11 @@ def init_mft():
 @app.command("stop")
 def init_mft():
   bootstrap.stop_mft()
+
+@app.command("update")
+def init_mft():
+  bootstrap.update_mft()
+
+@app.command("log")
+def init_mft():
+  bootstrap.print_log()

@@ -18,7 +18,7 @@
 
 [tool.poetry]
 name = "airavata-mft-cli"
-version = "0.1.8"
+version = "0.1.9"
 description = "Command Line Client for Airavata MFT data transfer software"
 authors = ["Apache Airavata <dev@apache.airavata.org>"]
 readme = "README.md"

@@ -24,6 +24,8 @@ from subprocess import call
 from subprocess import Popen
 from pathlib import Path
 from sys import platform
+import shutil
+import time
 
 def download_and_unarchive(url, download_path, extract_dir = os.path.join(os.path.expanduser('~'), ".mft/")):
 
@@ -117,7 +119,7 @@ def start_mft():
 
 
 def stop_mft():
-  print("Stopping up MFT Services")
+  print("Stopping MFT Services")
 
   path = os.path.join(os.path.expanduser('~'), ".mft/consul")
   if os.path.exists(path):
@@ -138,6 +140,35 @@ def stop_mft():
 
   print("MFT Stopped....")
 
+def update_mft():
+  stop_mft()
 
+  mft_dir = os.path.join(os.path.expanduser('~'), ".mft")
+  if os.path.exists(mft_dir):
+    print("Removing .mft directory")
+    shutil.rmtree(mft_dir)
+
+  database = os.path.join(os.path.expanduser('~'), "mft_db.mv.db")
+  if os.path.exists(database):
+    os.remove(database)
+  start_mft()
+
+def print_log():
+  log_file_path = os.path.join(os.path.expanduser('~'), ".mft", "Standalone-Service-0.01", "logs", "airavata.log")
+  log_file = open(log_file_path,"r")
+  lines = follow_file(log_file)
+  for line in lines:
+    print(line)
+
+def follow_file(file):
+  #file.seek(0, os.SEEK_END)
+
+  while True:
+    line = file.readline()
+    if not line:
+      time.sleep(0.1)
+      continue
+
+    yield line
 
 
