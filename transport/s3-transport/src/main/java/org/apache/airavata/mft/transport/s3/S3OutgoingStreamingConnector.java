@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
+import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 
@@ -68,6 +69,7 @@ public class S3OutgoingStreamingConnector implements OutgoingStreamingConnector 
         }
 
         S3Client s3Client = S3Client.builder()
+                .httpClient(ApacheHttpClient.builder().build())
                 .region(Region.of(s3Storage.getRegion())).endpointOverride(new URI(s3Storage.getEndpoint()))
                 .credentialsProvider(() -> awsCreds)
                 .build();

@@ -157,8 +157,8 @@
         <org.slf4j.version>1.7.25</org.slf4j.version>
         <log4j2.version>2.16.0</log4j2.version>
         <dozer>5.5.1</dozer>
-        <jsch>0.1.55</jsch>
-        <sshj>0.27.0</sshj>
+        <jsch>0.1.54</jsch>
+        <sshj>0.32.0</sshj>
         <mariadb.jdbc>2.5.1</mariadb.jdbc>
         <jclouds.version>2.5.0</jclouds.version>
         <commons.io.version>2.6</commons.io.version>
