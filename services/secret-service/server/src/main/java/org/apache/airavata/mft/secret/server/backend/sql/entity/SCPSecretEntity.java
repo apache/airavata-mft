@@ -19,10 +19,7 @@ package org.apache.airavata.mft.secret.server.backend.sql.entity;
 
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 public class SCPSecretEntity {
@@ -33,10 +30,11 @@ public class SCPSecretEntity {
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String secretId;
 
-    @Column(name = "PRIVATE_KEY")
+    @Lob
+    @Column(name = "PRIVATE_KEY", length = 100000)
     private String privateKey;
-
-    @Column(name = "PUBLIC_KEY")
+    @Lob
+    @Column(name = "PUBLIC_KEY", length = 100000)
     private String publicKey;
 
     @Column(name = "PASSPHRASE")

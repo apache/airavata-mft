@@ -22,6 +22,7 @@ import net.schmizz.sshj.sftp.FileAttributes;
 import net.schmizz.sshj.sftp.FileMode;
 import net.schmizz.sshj.sftp.RemoteResourceInfo;
 import net.schmizz.sshj.sftp.SFTPClient;
+import net.schmizz.sshj.transport.verification.HostKeyVerifier;
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider;
 import net.schmizz.sshj.userauth.method.AuthKeyboardInteractive;
 import net.schmizz.sshj.userauth.method.AuthMethod;
@@ -37,7 +38,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -106,6 +109,7 @@ public class SCPMetadataCollector implements MetadataCollector {
                             dirBuilder.addFiles(fileBuilder);
                         }
                     }
+                    resourceBuilder.setDirectory(dirBuilder);
 
                 } else {
                     resourceBuilder.setError(MetadataFetchError.UNRECOGNIZED);
@@ -139,7 +143,19 @@ public class SCPMetadataCollector implements MetadataCollector {
 
         SSHClient sshClient = new SSHClient();
 
-        sshClient.addHostKeyVerifier((h, p, key) -> true);
+        HostKeyVerifier hkv = new HostKeyVerifier() {
+            @Override
+            public boolean verify(String s, int i, PublicKey publicKey) {
+                return true;
+            }
+
+            @Override
+            public List<String> findExistingAlgorithms(String hostname, int port) {
+                return Collections.emptyList();
+            }
+        };
+
+        sshClient.addHostKeyVerifier(hkv);
 
         File privateKeyFile = Files.createTempFile("id_rsa", "").toFile();
         BufferedWriter writer = new BufferedWriter(new FileWriter(privateKeyFile));

@@ -43,7 +43,6 @@ message SCPStorageGetRequest {
 message SCPStorageCreateRequest {
     string host = 1;
     int32 port = 2;
-    string user = 3;
     string storageId = 4;
     string name = 5;
 }

@@ -32,7 +32,7 @@ typer = {extras = ["all"], version = "^0.7.0"}
 pick = {version= "2.2.0"}
 grpcio= [{version="1.46.3", markers = "platform_machine != 'arm64'"},{version="1.47.0rc1", markers = "platform_machine == 'arm64'"}]
 grpcio-tools = [{version="1.46.3", markers = "platform_machine != 'arm64'"},{version="1.47.0rc1", markers = "platform_machine == 'arm64'"}]
-airavata_mft_sdk= {version="0.0.1-alpha26"}
+airavata_mft_sdk= {version="0.0.1-alpha27"}
 
 [build-system]
 requires = ["poetry-core"]

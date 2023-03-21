@@ -19,6 +19,7 @@
 import typer
 from pick import pick
 import airavata_mft_cli.storage.s3 as s3
+import airavata_mft_cli.storage.scp as scp
 import airavata_mft_cli.storage.azure as azure
 import airavata_mft_cli.storage.gcs as gcs
 import airavata_mft_cli.storage.local as local
@@ -48,6 +49,8 @@ def add_storage():
         local.handle_add_storage()
     elif option == "Openstack SWIFT":
         swift.handle_add_storage()
+    elif option == "SCP":
+        scp.handle_add_storage()
 
 
 @app.command("list")
