@@ -82,7 +82,11 @@ public class TransportClassLoader extends URLClassLoader {
     @Override
     public final Class<?> findClass(String name) throws ClassNotFoundException {
         final byte[] bytes = classes.get(name);
-        if(bytes != null) return defineClass(name, bytes, 0, bytes.length);
+        if(bytes != null) {
+            logger.debug("Found class {}", name);
+            return defineClass(name, bytes, 0, bytes.length);
+        }
+        logger.debug("Not found class {}", name);
         return super.findClass(name);
     }
 
