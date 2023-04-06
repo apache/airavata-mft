@@ -18,10 +18,18 @@
 
 [tool.poetry]
 name = "airavata-mft-cli"
-version = "0.1.9"
-description = "Command Line Client for Airavata MFT data transfer software"
-authors = ["Apache Airavata <dev@apache.airavata.org>"]
+version = "0.1.10"
+description = "Command Line Client for Apache Airavata MFT data transfer software"
+authors = [
+    "Dimuthu Wannipurage <dwannipu@iu.edu>",
+]
+maintainers = [
+    "Apache Airavata Developers <dev@apache.airavata.org>",
+]
 readme = "README.md"
+homepage = "https://github.com/apache/airavata-mft"
+license = "Apache-2.0"
+keywords = ["MFT", "Data", "High Thorught Data Transfer", "Multi Protocol", "S3", "GCS", "Azure", "SCP", "Google Drive", "Swift", "Box", "DropBox"]
 
 [tool.poetry.scripts]
 mft = "airavata_mft_cli.main:app"

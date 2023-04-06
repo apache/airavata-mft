@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-### MFT-Cli Build Instructions
+### MFT-Cli Local Build Instructions
 
 Install Poetry
 ```
@@ -29,15 +29,8 @@ pip install pick
 
 Load Poetry shell
 ```
-cd airavata_mft_cli
+cd mft_cli
 poetry shell
-```
-
-Install dependencies
-```
-pip install grpcio==1.46.3
-pip install grpcio-tools==1.46.3
-pip install airavata_mft_sdk==0.0.1-alpha26
 ```
 
 Build the binary
