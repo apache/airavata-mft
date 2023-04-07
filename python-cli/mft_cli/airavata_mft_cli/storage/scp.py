@@ -28,48 +28,52 @@ from airavata_mft_sdk.common import StorageCommon_pb2
 import configparser
 import os
 import sys
+import grpc
 sys.path.append('../airavata_mft_cli')
 from airavata_mft_cli import config as configcli
 
 def handle_add_storage():
+    try:
+        private_key_file = typer.prompt("Private Key File Location")
 
-    private_key_file = typer.prompt("Private Key File Location")
+        with open(private_key_file, 'r') as file:
+            private_key = file.read()
 
-    with open(private_key_file, 'r') as file:
-        private_key = file.read()
+        public_key_file = typer.prompt("Public Key File Location")
+        with open(public_key_file, 'r') as file:
+            public_key = file.read()
 
-    public_key_file = typer.prompt("Public Key File Location")
-    with open(public_key_file, 'r') as file:
-        public_key = file.read()
+        passphrase = ""
+        is_pass = typer.confirm("Is there a passphrase to Private Key?", False)
+        if is_pass:
+            passphrase = typer.prompt("Passphrase to Private Key")
+        host_name = typer.prompt("Hostname / IP")
+        user_name = typer.prompt("User Name:")
+        storage_name = typer.prompt("Storage Name", host_name)
 
-    passphrase = ""
-    is_pass = typer.confirm("Is there a passphrase to Private Key?", False)
-    if is_pass:
-        passphrase = typer.prompt("Passphrase to Private Key")
-    host_name = typer.prompt("Hostname / IP")
-    user_name = typer.prompt("User Name:")
-    storage_name = typer.prompt("Storage Name", host_name)
+        client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
+                                    transfer_api_secured = configcli.transfer_api_secured,
+                                    resource_service_host = configcli.resource_service_host,
+                                    resource_service_port = configcli.resource_service_port,
+                                    resource_service_secured = configcli.resource_service_secured,
+                                    secret_service_host = configcli.secret_service_host,
+                                    secret_service_port = configcli.secret_service_port)
 
-    client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
-                                  transfer_api_secured = configcli.transfer_api_secured,
-                                  resource_service_host = configcli.resource_service_host,
-                                  resource_service_port = configcli.resource_service_port,
-                                  resource_service_secured = configcli.resource_service_secured,
-                                  secret_service_host = configcli.secret_service_host,
-                                  secret_service_port = configcli.secret_service_port)
+        secret_create_req = SCPCredential_pb2.SCPSecretCreateRequest(privateKey=private_key, publicKey=public_key, passphrase = passphrase, user=user_name)
+        created_secret = client.scp_secret_api.createSCPSecret(secret_create_req)
 
-    secret_create_req = SCPCredential_pb2.SCPSecretCreateRequest(privateKey=private_key, publicKey=public_key, passphrase = passphrase, user=user_name)
-    created_secret = client.scp_secret_api.createSCPSecret(secret_create_req)
+        scp_storage_create_req = SCPStorage_pb2.SCPStorageCreateRequest(
+            host=host_name, port=22, name=storage_name)
 
-    scp_storage_create_req = SCPStorage_pb2.SCPStorageCreateRequest(
-        host=host_name, port=22, name=storage_name)
+        created_storage = client.scp_storage_api.createSCPStorage(scp_storage_create_req)
 
-    created_storage = client.scp_storage_api.createSCPStorage(scp_storage_create_req)
+        secret_for_storage_req = StorageCommon_pb2.SecretForStorage(storageId = created_storage.storageId,
+                                        secretId = created_secret.secretId,
+                                        storageType = StorageCommon_pb2.StorageType.SCP)
 
-    secret_for_storage_req = StorageCommon_pb2.SecretForStorage(storageId = created_storage.storageId,
-                                       secretId = created_secret.secretId,
-                                       storageType = StorageCommon_pb2.StorageType.SCP)
+        client.common_api.registerSecretForStorage(secret_for_storage_req)
 
-    client.common_api.registerSecretForStorage(secret_for_storage_req)
-
-    print("Successfully added the SCP endpoint...")
+        print("Successfully added the SCP endpoint...")
+    except grpc.RpcError as rpc_error:
+        if  rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
+            print('Could not add storage in SCP due to MFT server grpc unavailable error')

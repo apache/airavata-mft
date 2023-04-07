@@ -28,7 +28,9 @@ from airavata_mft_sdk import mft_client
 from airavata_mft_sdk.common import StorageCommon_pb2
 from rich.console import Console
 from rich.table import Table
+from rich import print
 import sys
+import grpc
 sys.path.append('../airavata_mft_cli')
 from airavata_mft_cli import config as configcli
 
@@ -55,27 +57,29 @@ def add_storage():
 
 @app.command("list")
 def list_storage():
-    client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
-                                  transfer_api_secured = configcli.transfer_api_secured,
-                                  resource_service_host = configcli.resource_service_host,
-                                  resource_service_port = configcli.resource_service_port,
-                                  resource_service_secured = configcli.resource_service_secured,
-                                  secret_service_host = configcli.secret_service_host,
-                                  secret_service_port = configcli.secret_service_port)
-    list_req = StorageCommon_pb2.StorageListRequest()
-    list_response = client.common_api.listStorages(list_req)
+    try: 
+        client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
+                                    transfer_api_secured = configcli.transfer_api_secured,
+                                    resource_service_host = configcli.resource_service_host,
+                                    resource_service_port = configcli.resource_service_port,
+                                    resource_service_secured = configcli.resource_service_secured,
+                                    secret_service_host = configcli.secret_service_host,
+                                    secret_service_port = configcli.secret_service_port)
+        list_req = StorageCommon_pb2.StorageListRequest()
+        list_response = client.common_api.listStorages(list_req)
+        console = Console()
+        table = Table(show_header=True, header_style='bold #2070b2')
 
-    console = Console()
-    table = Table(show_header=True, header_style='bold #2070b2')
+        table.add_column('Storage Name', justify='left')
+        table.add_column('Type', justify='center')
+        table.add_column('Storage ID', justify='center')
 
-    table.add_column('Storage Name', justify='left')
-    table.add_column('Type', justify='center')
-    table.add_column('Storage ID', justify='center')
+        for storage in list_response.storageList:
 
-    for storage in list_response.storageList:
-
-        table.add_row('[bold]' + storage.storageName + '[/bold]',
-                      StorageCommon_pb2.StorageType.Name(storage.storageType),
-                      storage.storageId)
-
-    console.print(table)
+            table.add_row('[bold]' + storage.storageName + '[/bold]',
+                        StorageCommon_pb2.StorageType.Name(storage.storageType),
+                        storage.storageId)
+        console.print(table)
+    except grpc.RpcError as rpc_error:
+        if  rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
+            print('Could not fetch storage list due to MFT server grpc unavailable error')
