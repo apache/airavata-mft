@@ -32,6 +32,7 @@ public class LocalIncomingChunkedConnector implements IncomingChunkedConnector {
 
     private String resourcePath;
     private long resourceSize;
+    private boolean dmaFlag;
 
     private static final Logger logger = LoggerFactory.getLogger(LocalIncomingChunkedConnector.class);
 
@@ -39,6 +40,7 @@ public class LocalIncomingChunkedConnector implements IncomingChunkedConnector {
     public void init(ConnectorConfig connectorConfig) throws Exception {
         this.resourcePath = connectorConfig.getResourcePath();
         this.resourceSize = connectorConfig.getMetadata().getFile().getResourceSize();
+        this.dmaFlag = connectorConfig.getTransportConfig().get("local.dma").toString().equals("true");
     }
 
     @Override
@@ -58,36 +60,37 @@ public class LocalIncomingChunkedConnector implements IncomingChunkedConnector {
         logger.info("Downloading chunk {} with start byte {} and end byte {} to file {} from resource path {}",
                 chunkId, startByte, endByte, downloadFile, this.resourcePath);
 
-//        #use this code on a DMA enabled device
-//        if (resourceSize <= endByte - startByte) {
-//            Files.copy(Path.of(this.resourcePath), Path.of(downloadFile));
-//        } else {
-//            try (FileInputStream from = new FileInputStream(this.resourcePath);
-//                 FileOutputStream to = new FileOutputStream(downloadFile)) {
-//                from.getChannel().transferTo(startByte, endByte - startByte, to.getChannel());
-//            } catch (Exception e) {
-//                logger.error("Unexpected error occurred while downloading chunk {} to file {} from resource path {}",
-//                        chunkId, downloadFile, this.resourcePath, e);
-//                throw e;
-//            }
-//        }
-
-        int buffLen = 1024 * 1024 * 16;
-        try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(this.resourcePath),buffLen);
-             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(downloadFile))) {
-            byte[] buffer = new byte[buffLen];
-            int read = 0;
-            long totalRead = bis.skip(startByte);
-            while ((read = bis.read(buffer,0,Math.min(buffLen, (int) (endByte - totalRead )))) > 0) {
-                bos.write(buffer, 0, read);
-                totalRead += read;
+        if (this.dmaFlag) {
+            if (resourceSize <= endByte - startByte) {
+                Files.copy(Path.of(this.resourcePath), Path.of(downloadFile));
+            } else {
+                try (FileInputStream from = new FileInputStream(this.resourcePath);
+                     FileOutputStream to = new FileOutputStream(downloadFile)) {
+                    from.getChannel().transferTo(startByte, endByte - startByte, to.getChannel());
+                } catch (Exception e) {
+                    logger.error("Unexpected error occurred while downloading chunk {} to file {} from resource path {}",
+                            chunkId, downloadFile, this.resourcePath, e);
+                    throw e;
+                }
             }
-            bis.close();
-            bos.close();
-        } catch (Exception e) {
-            logger.error("Unexpected error occurred while downloading chunk {} to file {} from resource path {}",
+        }   else {
+            int buffLen = 1024 * 1024 * 16;
+            try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(this.resourcePath), buffLen);
+                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(downloadFile))) {
+                byte[] buffer = new byte[buffLen];
+                int read = 0;
+                long totalRead = bis.skip(startByte);
+                while ((read = bis.read(buffer, 0, Math.min(buffLen, (int) (endByte - totalRead)))) > 0) {
+                    bos.write(buffer, 0, read);
+                    totalRead += read;
+                }
+                bis.close();
+                bos.close();
+            } catch (Exception e) {
+                logger.error("Unexpected error occurred while downloading chunk {} to file {} from resource path {}",
                         chunkId, downloadFile, this.resourcePath, e);
                 throw e;
+            }
         }
     }
 

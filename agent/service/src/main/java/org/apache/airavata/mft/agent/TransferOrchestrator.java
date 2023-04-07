@@ -69,6 +69,9 @@ public class TransferOrchestrator {
     @Autowired
     private MFTConsulClient mftConsulClient;
 
+    @Autowired
+    private TransportConfig transportConfig;
+
     @PostConstruct
     public void init() {
         transferRequestExecutor  = Executors.newFixedThreadPool(concurrentTransfers);
@@ -160,6 +163,7 @@ public class TransferOrchestrator {
                     .withStorage(sourceStorage)
                     .withResourcePath(endpointPath.getSourcePath())
                     .withChunkSize(chunkedSize)
+                    .withTransportConfig(transportConfig.getTransport())
                     .withMetadata(srcMetadata).build();
 
             ConnectorConfig dstCC = ConnectorConfig.ConnectorConfigBuilder.newBuilder()
@@ -168,6 +172,7 @@ public class TransferOrchestrator {
                     .withSecret(destSecret)
                     .withResourcePath(endpointPath.getDestinationPath())
                     .withChunkSize(chunkedSize)
+                    .withTransportConfig(transportConfig.getTransport())
                     .withMetadata(srcMetadata).build();
 
             updateStatus.accept(endpointPath, new TransferState()
