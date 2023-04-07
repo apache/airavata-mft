@@ -21,12 +21,16 @@ import org.apache.airavata.mft.agent.stub.ResourceMetadata;
 import org.apache.airavata.mft.agent.stub.SecretWrapper;
 import org.apache.airavata.mft.agent.stub.StorageWrapper;
 
+import java.util.Map;
+
 public class ConnectorConfig {
     private String transferId;
     private StorageWrapper storage;
     private SecretWrapper secret;
     private String resourcePath;
     private ResourceMetadata metadata;
+
+    private Map transportConfig;
 
     private long chunkSize;
 
@@ -78,12 +82,21 @@ public class ConnectorConfig {
         this.chunkSize = chunkSize;
     }
 
+    public Map getTransportConfig() {
+        return transportConfig;
+    }
+
+    public void setTransportConfig(Map transportConfig) {
+        this.transportConfig = transportConfig;
+    }
+
     public static final class ConnectorConfigBuilder {
         private String transferId;
         private StorageWrapper storage;
         private SecretWrapper secret;
         private String resourcePath;
         private ResourceMetadata metadata;
+        private Map transportConfig;
 
         private long chunkSize;
 
@@ -119,6 +132,11 @@ public class ConnectorConfig {
             return this;
         }
 
+        public ConnectorConfigBuilder withTransportConfig(Map appConfig) {
+            this.transportConfig = appConfig;
+            return this;
+        }
+
         public ConnectorConfigBuilder withChunkSize(long chunkSize) {
             this.chunkSize = chunkSize;
             return this;
@@ -132,6 +150,7 @@ public class ConnectorConfig {
             connectorConfig.setResourcePath(resourcePath);
             connectorConfig.setMetadata(metadata);
             connectorConfig.setChunkSize(chunkSize);
+            connectorConfig.setTransportConfig(transportConfig);
             return connectorConfig;
         }
     }
