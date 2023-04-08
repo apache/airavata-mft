@@ -38,22 +38,25 @@ app = typer.Typer()
 
 @app.command("add")
 def add_storage():
-    title = "Select storage type: "
-    options = ["S3", "Google Cloud Storage (GCS)", "Azure Storage", "Openstack SWIFT", "SCP", "FTP", "Box", "DropBox", "OData", "Agent" ]
-    option, index = pick(options, title, indicator="=>")
-    if option == "S3":
-        s3.handle_add_storage()
-    elif option == "Azure Storage":
-        azure.handle_add_storage()
-    elif option == "Google Cloud Storage (GCS)":
-        gcs.handle_add_storage()
-    elif option == "Agent":
-        local.handle_add_storage()
-    elif option == "Openstack SWIFT":
-        swift.handle_add_storage()
-    elif option == "SCP":
-        scp.handle_add_storage()
-
+    try:
+        title = "Select storage type: "
+        options = ["S3", "Google Cloud Storage (GCS)", "Azure Storage", "Openstack SWIFT", "SCP", "FTP", "Box", "DropBox", "OData", "Agent" ]
+        option, index = pick(options, title, indicator="=>")
+        if option == "S3":
+            s3.handle_add_storage()
+        elif option == "Azure Storage":
+            azure.handle_add_storage()
+        elif option == "Google Cloud Storage (GCS)":
+            gcs.handle_add_storage()
+        elif option == "Agent":
+            local.handle_add_storage()
+        elif option == "Openstack SWIFT":
+            swift.handle_add_storage()
+        elif option == "SCP":
+            scp.handle_add_storage()
+    except grpc.RpcError as rpc_error:
+        if  rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
+            print(f'Could not add storage in {option} due to MFT server grpc unavailable error') 
 
 @app.command("list")
 def list_storage():

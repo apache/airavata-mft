@@ -23,28 +23,23 @@ from airavata_mft_sdk.local import LocalStorage_pb2
 import sys
 sys.path.append('../airavata_mft_cli')
 from airavata_mft_cli import config as configcli
-import grpc
 
 
 def handle_add_storage():
-    try:
-        agent_id = typer.prompt("Agent identifier")
-        name = typer.prompt("Storage name",agent_id)
+    agent_id = typer.prompt("Agent identifier")
+    name = typer.prompt("Storage name",agent_id)
 
-        client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
-                                    transfer_api_secured = configcli.transfer_api_secured,
-                                    resource_service_host = configcli.resource_service_host,
-                                    resource_service_port = configcli.resource_service_port,
-                                    resource_service_secured = configcli.resource_service_secured,
-                                    secret_service_host = configcli.secret_service_host,
-                                    secret_service_port = configcli.secret_service_port)
+    client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
+                                transfer_api_secured = configcli.transfer_api_secured,
+                                resource_service_host = configcli.resource_service_host,
+                                resource_service_port = configcli.resource_service_port,
+                                resource_service_secured = configcli.resource_service_secured,
+                                secret_service_host = configcli.secret_service_host,
+                                secret_service_port = configcli.secret_service_port)
 
-        local_storage_create_req = LocalStorage_pb2.LocalStorageCreateRequest(
-            agentId = agent_id, name = name)
+    local_storage_create_req = LocalStorage_pb2.LocalStorageCreateRequest(
+        agentId = agent_id, name = name)
 
-        created_storage = client.local_storage_api.createLocalStorage(local_storage_create_req)
+    created_storage = client.local_storage_api.createLocalStorage(local_storage_create_req)
 
-        print("Successfully added the Local Bucket...")
-    except grpc.RpcError as rpc_error:
-        if  rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
-            print('Could not add storage in local due to MFT server grpc unavailable error')
+    print("Successfully added the Local Bucket...")

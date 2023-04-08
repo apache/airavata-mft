@@ -14,7 +14,6 @@
 #  limitations under the License.
 
 from rich import print as rprint
-import grpc
 from rich.panel import Panel
 from rich.text import Text
 from pick import pick
@@ -39,52 +38,74 @@ gcs_key_path = '.mft/keys/gcs/service_account_key.json'
 
 
 def handle_add_storage():
-    try:
+    options = ["Through Google Cloud SDK config file", "Enter manually"]
+    option, index = pick(options, "How do you want to load credentials", indicator="=>")
 
-        options = ["Through Google Cloud SDK config file", "Enter manually"]
-        option, index = pick(options, "How do you want to load credentials", indicator="=>")
+    if index == 1:  # Manual configuration
+        text_msg = ("MFT uses service accounts to gain access to Google Cloud. "
+                    "\n 1) You can create a service account by going to https://console.cloud.google.com/iam-admin/serviceaccounts."
+                    "\n 2) Download the JSON format of the service account key."
+                    "\n 3) Use that downloaded Service Account Credential JSON file to access Google storage."
+                    "\nMore information about service accounts can be found here https://cloud.google.com/iam/docs/service-accounts")
 
-        if index == 1:  # Manual configuration
-            text_msg = ("MFT uses service accounts to gain access to Google Cloud. "
-                        "\n 1) You can create a service account by going to https://console.cloud.google.com/iam-admin/serviceaccounts."
-                        "\n 2) Download the JSON format of the service account key."
-                        "\n 3) Use that downloaded Service Account Credential JSON file to access Google storage."
-                        "\nMore information about service accounts can be found here https://cloud.google.com/iam/docs/service-accounts")
-
-            panel = Panel.fit(Text(text_msg, justify="left"))
-            rprint(panel)
-            credential_json_path = typer.prompt("Service Account Credential JSON path")
-            with open(credential_json_path) as json_file:
-                sa_entries = json.load(json_file)
-                client_id = sa_entries['client_id']
-                client_email = sa_entries['client_email']
-                client_secret = sa_entries['private_key']
-                project_id = sa_entries['project_id']
+        panel = Panel.fit(Text(text_msg, justify="left"))
+        rprint(panel)
+        credential_json_path = typer.prompt("Service Account Credential JSON path")
+        with open(credential_json_path) as json_file:
+            sa_entries = json.load(json_file)
+            client_id = sa_entries['client_id']
+            client_email = sa_entries['client_email']
+            client_secret = sa_entries['private_key']
+            project_id = sa_entries['project_id']
 
 
-        else:  # Loading credentials from the gcloud cli config file
-            service_account = None
-            client_email = None
-            default_service_account_name = 'mft-gcs-serviceaccount'
+    else:  # Loading credentials from the gcloud cli config file
+        service_account = None
+        client_email = None
+        default_service_account_name = 'mft-gcs-serviceaccount'
 
-            # Find the active config for Google cloud ADC
-            active_config_path = os.path.join(os.path.expanduser('~'), '.config/gcloud/active_config')
-            with open(active_config_path) as f:
-                active_config = f.readline()
-            print('Active config : ' + active_config)
+        # Find the active config for Google cloud ADC
+        active_config_path = os.path.join(os.path.expanduser('~'), '.config/gcloud/active_config')
+        with open(active_config_path) as f:
+            active_config = f.readline()
+        print('Active config : ' + active_config)
 
-            # Load default project
-            config = configparser.RawConfigParser()
-            default_project_path = os.path.join(os.path.expanduser('~'), '.config/gcloud/configurations/config_' + active_config)
-            config.read(default_project_path)
-            project_id = config['core']['project']
-            account_email = config['core']['account']
-            print('Project ID : ' + project_id)
-            print(account_email)
+        # Load default project
+        config = configparser.RawConfigParser()
+        default_project_path = os.path.join(os.path.expanduser('~'), '.config/gcloud/configurations/config_' + active_config)
+        config.read(default_project_path)
+        project_id = config['core']['project']
+        account_email = config['core']['account']
+        print('Project ID : ' + project_id)
+        print(account_email)
 
-            default_service_account_email = (default_service_account_name + '@' + project_id + '.iam.gserviceaccount.com')
+        default_service_account_email = (default_service_account_name + '@' + project_id + '.iam.gserviceaccount.com')
 
-            path = os.path.join(os.path.expanduser('~'), gcs_key_path)
+        path = os.path.join(os.path.expanduser('~'), gcs_key_path)
+        if os.path.exists(path):
+            with open(path, 'r') as config_file:
+                config_data = json.load(config_file)
+            client_id = config_data['client_id']
+            client_email = config_data['client_email']
+            project_id = config_data['project_id']
+            client_secret = config_data['private_key']
+
+        print('Client email : ', client_email)
+        if client_email is None or client_email != default_service_account_email:
+            inferred_cred, inferred_project = google.auth.default(active_config)
+
+            service_acc_list = list_service_accounts(project_id=project_id, credentials=inferred_cred)
+            service_account_available = any(x['email'] == default_service_account_email for x in service_acc_list['accounts'])
+            print('Service account availability : ', service_account_available)
+            if service_account_available:  # Already have a service account for mft, But no key
+                get_service_account_key(credentials=inferred_cred, service_account_email=default_service_account_email)
+
+            else:  # No service account for mft
+
+                # Read OAuth credentials and create the service account
+                service_account = create_service_account(project_id, default_service_account_name, 'Airavata MFT Service Account', credentials=inferred_cred)
+
+            # Load service account details again
             if os.path.exists(path):
                 with open(path, 'r') as config_file:
                     config_data = json.load(config_file)
@@ -92,83 +113,56 @@ def handle_add_storage():
                 client_email = config_data['client_email']
                 project_id = config_data['project_id']
                 client_secret = config_data['private_key']
+            else:
+                print("No credential found in ~/" + gcs_key_path + " file")
+                exit()
 
-            print('Client email : ', client_email)
-            if client_email is None or client_email != default_service_account_email:
-                inferred_cred, inferred_project = google.auth.default(active_config)
+    client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
+                                transfer_api_secured = configcli.transfer_api_secured,
+                                resource_service_host = configcli.resource_service_host,
+                                resource_service_port = configcli.resource_service_port,
+                                resource_service_secured = configcli.resource_service_secured,
+                                secret_service_host = configcli.secret_service_host,
+                                secret_service_port = configcli.secret_service_port)
 
-                service_acc_list = list_service_accounts(project_id=project_id, credentials=inferred_cred)
-                service_account_available = any(x['email'] == default_service_account_email for x in service_acc_list['accounts'])
-                print('Service account availability : ', service_account_available)
-                if service_account_available:  # Already have a service account for mft, But no key
-                    get_service_account_key(credentials=inferred_cred, service_account_email=default_service_account_email)
+    gcs_secret = GCSCredential_pb2.GCSSecret(clientEmail=client_email, privateKey=client_secret, projectId=project_id)
+    secret_wrapper = MFTAgentStubs_pb2.SecretWrapper(gcs=gcs_secret)
 
-                else:  # No service account for mft
+    gcs_storage = GCSStorage_pb2.GCSStorage()
+    storage_wrapper = MFTAgentStubs_pb2.StorageWrapper(gcs=gcs_storage)
 
-                    # Read OAuth credentials and create the service account
-                    service_account = create_service_account(project_id, default_service_account_name, 'Airavata MFT Service Account', credentials=inferred_cred)
+    direct_req = MFTAgentStubs_pb2.GetResourceMetadataRequest(resourcePath="", secret=secret_wrapper,
+                                                            storage=storage_wrapper)
+    resource_medata_req = MFTTransferApi_pb2.FetchResourceMetadataRequest(directRequest=direct_req)
+    metadata_resp = client.transfer_api.resourceMetadata(resource_medata_req)
 
-                # Load service account details again
-                if os.path.exists(path):
-                    with open(path, 'r') as config_file:
-                        config_data = json.load(config_file)
-                    client_id = config_data['client_id']
-                    client_email = config_data['client_email']
-                    project_id = config_data['project_id']
-                    client_secret = config_data['private_key']
-                else:
-                    print("No credential found in ~/" + gcs_key_path + " file")
-                    exit()
+    bucket_options = ["Manually Enter"]
 
-        client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
-                                    transfer_api_secured = configcli.transfer_api_secured,
-                                    resource_service_host = configcli.resource_service_host,
-                                    resource_service_port = configcli.resource_service_port,
-                                    resource_service_secured = configcli.resource_service_secured,
-                                    secret_service_host = configcli.secret_service_host,
-                                    secret_service_port = configcli.secret_service_port)
+    bucket_list = metadata_resp.directory.directories
+    if len(bucket_list) > 0:
+        for b in bucket_list:
+            bucket_options.append(b.friendlyName)
 
-        gcs_secret = GCSCredential_pb2.GCSSecret(clientEmail=client_email, privateKey=client_secret, projectId=project_id)
-        secret_wrapper = MFTAgentStubs_pb2.SecretWrapper(gcs=gcs_secret)
+    title = "Select the Bucket: "
+    selected_bucket, index = pick(bucket_options, title, indicator="=>")
+    if index == 0:
+        selected_bucket = typer.prompt("Enter bucket name ")
+    storage_name = typer.prompt("Name of the storage ", selected_bucket)
 
-        gcs_storage = GCSStorage_pb2.GCSStorage()
-        storage_wrapper = MFTAgentStubs_pb2.StorageWrapper(gcs=gcs_storage)
+    gcs_storage_create_req = GCSStorage_pb2.GCSStorageCreateRequest(storageId=storage_name, bucketName=selected_bucket,
+                                                                    name=storage_name)
+    created_storage = client.gcs_storage_api.createGCSStorage(gcs_storage_create_req)
 
-        direct_req = MFTAgentStubs_pb2.GetResourceMetadataRequest(resourcePath="", secret=secret_wrapper,
-                                                                storage=storage_wrapper)
-        resource_medata_req = MFTTransferApi_pb2.FetchResourceMetadataRequest(directRequest=direct_req)
-        metadata_resp = client.transfer_api.resourceMetadata(resource_medata_req)
+    secret_create_req = GCSCredential_pb2.GCSSecretCreateRequest(clientEmail=client_id, privateKey=client_secret,
+                                                                projectId=project_id)
+    created_secret = client.gcs_secret_api.createGCSSecret(secret_create_req)
 
-        bucket_options = ["Manually Enter"]
+    secret_for_storage_req = StorageCommon_pb2.SecretForStorage(storageId=created_storage.storageId,
+                                                                secretId=created_secret.secretId,
+                                                                storageType=StorageCommon_pb2.StorageType.GCS)
+    client.common_api.registerSecretForStorage(secret_for_storage_req)
 
-        bucket_list = metadata_resp.directory.directories
-        if len(bucket_list) > 0:
-            for b in bucket_list:
-                bucket_options.append(b.friendlyName)
-
-        title = "Select the Bucket: "
-        selected_bucket, index = pick(bucket_options, title, indicator="=>")
-        if index == 0:
-            selected_bucket = typer.prompt("Enter bucket name ")
-        storage_name = typer.prompt("Name of the storage ", selected_bucket)
-
-        gcs_storage_create_req = GCSStorage_pb2.GCSStorageCreateRequest(storageId=storage_name, bucketName=selected_bucket,
-                                                                        name=storage_name)
-        created_storage = client.gcs_storage_api.createGCSStorage(gcs_storage_create_req)
-
-        secret_create_req = GCSCredential_pb2.GCSSecretCreateRequest(clientEmail=client_id, privateKey=client_secret,
-                                                                    projectId=project_id)
-        created_secret = client.gcs_secret_api.createGCSSecret(secret_create_req)
-
-        secret_for_storage_req = StorageCommon_pb2.SecretForStorage(storageId=created_storage.storageId,
-                                                                    secretId=created_secret.secretId,
-                                                                    storageType=StorageCommon_pb2.StorageType.GCS)
-        client.common_api.registerSecretForStorage(secret_for_storage_req)
-
-        print("Successfully added the GCS Bucket...")
-    except grpc.RpcError as rpc_error:
-        if  rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
-            rprint('Could not add storage in google cloud due to MFT server grpc unavailable error')
+    print("Successfully added the GCS Bucket...")
 
 def list_service_accounts(project_id, credentials):
     """Lists all service accounts for the current project."""
