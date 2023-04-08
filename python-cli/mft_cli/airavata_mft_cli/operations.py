@@ -30,70 +30,61 @@ sys.path.append('.')
 from . import config as configcli
 
 def fetch_storage_and_secret_ids(storage_name):
-  try:
-    client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
-                                  transfer_api_secured = configcli.transfer_api_secured,
-                                  resource_service_host = configcli.resource_service_host,
-                                  resource_service_port = configcli.resource_service_port,
-                                  resource_service_secured = configcli.resource_service_secured,
-                                  secret_service_host = configcli.secret_service_host,
-                                  secret_service_port = configcli.secret_service_port)
-    search_req = StorageCommon_pb2.StorageSearchRequest(storageName=storage_name)
+  client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
+                                transfer_api_secured = configcli.transfer_api_secured,
+                                resource_service_host = configcli.resource_service_host,
+                                resource_service_port = configcli.resource_service_port,
+                                resource_service_secured = configcli.resource_service_secured,
+                                secret_service_host = configcli.secret_service_host,
+                                secret_service_port = configcli.secret_service_port)
+  search_req = StorageCommon_pb2.StorageSearchRequest(storageName=storage_name)
+  storages = client.common_api.searchStorages(search_req)
+
+  if len(storages.storageList) == 0:
+    search_req = StorageCommon_pb2.StorageSearchRequest(storageId=storage_name)
     storages = client.common_api.searchStorages(search_req)
 
-    if len(storages.storageList) == 0:
-      search_req = StorageCommon_pb2.StorageSearchRequest(storageId=storage_name)
-      storages = client.common_api.searchStorages(search_req)
+  if len(storages.storageList) == 0:
+    print("No storage with name or id " + storage_name + " was found. Please register the storage with command mft-cli storage add")
+    raise typer.Abort()
 
-    if len(storages.storageList) == 0:
-      print("No storage with name or id " + storage_name + " was found. Please register the storage with command mft-cli storage add")
-      raise typer.Abort()
+  if len(storages.storageList) > 1:
+    print("More than one storage with nam " + storage_name + " was found. Please use the storage id. You can fetch it from mft-cli storage list")
+    raise typer.Abort()
 
-    if len(storages.storageList) > 1:
-      print("More than one storage with nam " + storage_name + " was found. Please use the storage id. You can fetch it from mft-cli storage list")
-      raise typer.Abort()
+  storage = storages.storageList[0]
+  if storage.storageType == StorageCommon_pb2.StorageType.LOCAL : #checking if storageID is Local
+      return storage.storageId, ''
+  sec_req = StorageCommon_pb2.SecretForStorageGetRequest(storageId = storage.storageId)
+  sec_resp = client.common_api.getSecretForStorage(sec_req)
+  if sec_resp.error != 0:
+    print("Could not fetch the secret for storage " + storage.storageId)
 
-    storage = storages.storageList[0]
-    if storage.storageType == StorageCommon_pb2.StorageType.LOCAL : #checking if storageID is Local
-        return storage.storageId, ''
-    sec_req = StorageCommon_pb2.SecretForStorageGetRequest(storageId = storage.storageId)
-    sec_resp = client.common_api.getSecretForStorage(sec_req)
-    if sec_resp.error != 0:
-      print("Could not fetch the secret for storage " + storage.storageId)
-
-    return sec_resp.storageId, sec_resp.secretId
-  except grpc.RpcError as rpc_error:
-          if  rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
-              print('Could not fetch storage and secret id due to MFT server grpc unavailable error')
+  return sec_resp.storageId, sec_resp.secretId
 
 def get_resource_metadata(storage_path, recursive_search = False):
-    try:
-      storage_name = storage_path.split("/")[0]
-      resource_path = storage_path[len(storage_name) +1 :]
+  storage_name = storage_path.split("/")[0]
+  resource_path = storage_path[len(storage_name) +1 :]
 
-      storage_id, secret_id = fetch_storage_and_secret_ids(storage_name)
+  storage_id, secret_id = fetch_storage_and_secret_ids(storage_name)
 
-      id_req = MFTTransferApi_pb2.GetResourceMetadataFromIDsRequest(storageId = storage_id,
-                                                                    secretId = secret_id,
-                                                                    resourcePath = resource_path)
-      resource_medata_req = MFTTransferApi_pb2.FetchResourceMetadataRequest(idRequest = id_req)
+  id_req = MFTTransferApi_pb2.GetResourceMetadataFromIDsRequest(storageId = storage_id,
+                                                                secretId = secret_id,
+                                                                resourcePath = resource_path)
+  resource_medata_req = MFTTransferApi_pb2.FetchResourceMetadataRequest(idRequest = id_req)
 
-      client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
-                                    transfer_api_secured = configcli.transfer_api_secured,
-                                    resource_service_host = configcli.resource_service_host,
-                                    resource_service_port = configcli.resource_service_port,
-                                    resource_service_secured = configcli.resource_service_secured,
-                                    secret_service_host = configcli.secret_service_host,
-                                    secret_service_port = configcli.secret_service_port)
+  client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
+                                transfer_api_secured = configcli.transfer_api_secured,
+                                resource_service_host = configcli.resource_service_host,
+                                resource_service_port = configcli.resource_service_port,
+                                resource_service_secured = configcli.resource_service_secured,
+                                secret_service_host = configcli.secret_service_host,
+                                secret_service_port = configcli.secret_service_port)
 
-      metadata_resp = client.transfer_api.resourceMetadata(resource_medata_req)
-      return metadata_resp
-    except grpc.RpcError as rpc_error:
-          if  rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
-              print('Could not fetch resource metadata due to MFT server grpc unavailable error')
+  metadata_resp = client.transfer_api.resourceMetadata(resource_medata_req)
+  return metadata_resp
 
 def list(storage_path):
-
   metadata_resp = get_resource_metadata(storage_path)
 
   console = Console()
@@ -126,101 +117,97 @@ def flatten_directories(directory, parent_path, file_list):
     file_list.append((file, parent_path + file.friendlyName))
 
 def copy(source, destination):
-  try:
-    source_storage_id, source_secret_id = fetch_storage_and_secret_ids(source.split("/")[0])
-    dest_storage_id, dest_secret_id = fetch_storage_and_secret_ids(destination.split("/")[0])
+  source_storage_id, source_secret_id = fetch_storage_and_secret_ids(source.split("/")[0])
+  dest_storage_id, dest_secret_id = fetch_storage_and_secret_ids(destination.split("/")[0])
 
-    ## TODO : Check agent availability and deploy cloud agents if required
+  ## TODO : Check agent availability and deploy cloud agents if required
 
-    file_list = []
-    source_metadata = get_resource_metadata(source)
-    endpoint_paths = []
-    total_volume = 0
+  file_list = []
+  source_metadata = get_resource_metadata(source)
+  endpoint_paths = []
+  total_volume = 0
 
-    transfer_request = MFTTransferApi_pb2.TransferApiRequest(sourceStorageId = source_storage_id,
-                                                            sourceSecretId = source_secret_id,
-                                                            destinationStorageId = dest_storage_id,
-                                                            destinationSecretId = dest_secret_id,
-                                                            optimizeTransferPath = False)
+  transfer_request = MFTTransferApi_pb2.TransferApiRequest(sourceStorageId = source_storage_id,
+                                                          sourceSecretId = source_secret_id,
+                                                          destinationStorageId = dest_storage_id,
+                                                          destinationSecretId = dest_secret_id,
+                                                          optimizeTransferPath = False)
 
-    if (source_metadata.WhichOneof('metadata') == 'directory') :
-      if (destination[-1] != "/"):
-        print("Source is a directory path so destination path should end with /")
-        raise typer.Abort()
-
-      flatten_directories(source_metadata.directory, "", file_list)
-      for file_entry in file_list:
-        file = file_entry[0]
-        relative_path = file_entry[1]
-        endpoint_paths.append(MFTTransferApi_pb2.EndpointPaths(
-            sourcePath = file.resourcePath,
-            destinationPath = destination[len(destination.split("/")[0]) +1 :] + relative_path))
-        total_volume += file.resourceSize
-
-    elif (source_metadata.WhichOneof('metadata') == 'file'):
-      file_list.append((source_metadata.file, source_metadata.file.friendlyName))
-
-      if destination[-1] == "/":
-        destination = destination + source_metadata.file.friendlyName
-
-      endpoint_paths.append(MFTTransferApi_pb2.EndpointPaths(
-          sourcePath = source_metadata.file.resourcePath,
-          destinationPath = destination[len(destination.split("/")[0]) +1 :]))
-
-      total_volume += source_metadata.file.resourceSize
-
-    elif (source_metadata.WhichOneof('metadata') == 'error'):
-      print("Failed while fetching source details")
-      print(metadata_resp.error)
+  if (source_metadata.WhichOneof('metadata') == 'directory') :
+    if (destination[-1] != "/"):
+      print("Source is a directory path so destination path should end with /")
       raise typer.Abort()
 
-    transfer_request.endpointPaths.extend(endpoint_paths)
+    flatten_directories(source_metadata.directory, "", file_list)
+    for file_entry in file_list:
+      file = file_entry[0]
+      relative_path = file_entry[1]
+      endpoint_paths.append(MFTTransferApi_pb2.EndpointPaths(
+          sourcePath = file.resourcePath,
+          destinationPath = destination[len(destination.split("/")[0]) +1 :] + relative_path))
+      total_volume += file.resourceSize
 
-    confirm = typer.confirm("Total number of " + str(len(endpoint_paths)) +
-                            " files to be transferred. Total volume is " + str(total_volume)
-                            + " bytes. Do you want to start the transfer? ", True)
+  elif (source_metadata.WhichOneof('metadata') == 'file'):
+    file_list.append((source_metadata.file, source_metadata.file.friendlyName))
 
-    if not confirm:
+    if destination[-1] == "/":
+      destination = destination + source_metadata.file.friendlyName
+
+    endpoint_paths.append(MFTTransferApi_pb2.EndpointPaths(
+        sourcePath = source_metadata.file.resourcePath,
+        destinationPath = destination[len(destination.split("/")[0]) +1 :]))
+
+    total_volume += source_metadata.file.resourceSize
+
+  elif (source_metadata.WhichOneof('metadata') == 'error'):
+    print("Failed while fetching source details")
+    print(metadata_resp.error)
+    raise typer.Abort()
+
+  transfer_request.endpointPaths.extend(endpoint_paths)
+
+  confirm = typer.confirm("Total number of " + str(len(endpoint_paths)) +
+                          " files to be transferred. Total volume is " + str(total_volume)
+                          + " bytes. Do you want to start the transfer? ", True)
+
+  if not confirm:
+      raise typer.Abort()
+
+  client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
+                                transfer_api_secured = configcli.transfer_api_secured,
+                                resource_service_host = configcli.resource_service_host,
+                                resource_service_port = configcli.resource_service_port,
+                                resource_service_secured = configcli.resource_service_secured,
+                                secret_service_host = configcli.secret_service_host,
+                                secret_service_port = configcli.secret_service_port)
+
+  transfer_resp = client.transfer_api.submitTransfer(transfer_request)
+
+  transfer_id = transfer_resp.transferId
+
+  state_request = MFTTransferApi_pb2.TransferStateApiRequest(transferId=transfer_id)
+
+  ## TODO: This has to be optimized and avoid frequent polling of all transfer ids in each iteration
+  ## Possible fix is to introduce a parent batch transfer id at the API level and fetch child trnasfer id
+  # summaries in a single API call
+
+  completed = 0
+  failed = 0
+
+  with typer.progressbar(length=100) as progress:
+
+    while 1:
+      state_resp = client.transfer_api.getTransferStateSummary(state_request)
+
+      progress.update(int(state_resp.percentage * 100))
+      if (state_resp.percentage == 1.0):
+        completed = len(state_resp.completed)
+        failed = len(state_resp.failed)
+        break
+
+      if (state_resp.state == "FAILED"):
+        print("Transfer failed. Reason: " + state_resp.description)
         raise typer.Abort()
+      time.sleep(1)
 
-    client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
-                                  transfer_api_secured = configcli.transfer_api_secured,
-                                  resource_service_host = configcli.resource_service_host,
-                                  resource_service_port = configcli.resource_service_port,
-                                  resource_service_secured = configcli.resource_service_secured,
-                                  secret_service_host = configcli.secret_service_host,
-                                  secret_service_port = configcli.secret_service_port)
-
-    transfer_resp = client.transfer_api.submitTransfer(transfer_request)
-
-    transfer_id = transfer_resp.transferId
-
-    state_request = MFTTransferApi_pb2.TransferStateApiRequest(transferId=transfer_id)
-
-    ## TODO: This has to be optimized and avoid frequent polling of all transfer ids in each iteration
-    ## Possible fix is to introduce a parent batch transfer id at the API level and fetch child trnasfer id
-    # summaries in a single API call
-
-    completed = 0
-    failed = 0
-
-    with typer.progressbar(length=100) as progress:
-
-      while 1:
-        state_resp = client.transfer_api.getTransferStateSummary(state_request)
-
-        progress.update(int(state_resp.percentage * 100))
-        if (state_resp.percentage == 1.0):
-          completed = len(state_resp.completed)
-          failed = len(state_resp.failed)
-          break
-
-        if (state_resp.state == "FAILED"):
-          print("Transfer failed. Reason: " + state_resp.description)
-          raise typer.Abort()
-        time.sleep(1)
-
-    print(f"Processed {completed + failed} files. Completed {completed}, Failed {failed}.")
-  except grpc.RpcError as rpc_error:
-      if  rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
-          print('Could not copy from source to destination due to MFT server grpc unavailable error')
+  print(f"Processed {completed + failed} files. Completed {completed}, Failed {failed}.")

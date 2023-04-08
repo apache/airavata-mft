@@ -19,16 +19,26 @@
 import typer
 import airavata_mft_cli.operations as operations
 import airavata_mft_cli.bootstrap as bootstrap
+import grpc
+from rich import print
 
 app = typer.Typer()
 
 @app.command("ls")
 def list(storage_path):
-  operations.list(storage_path)
+  try:
+    operations.list(storage_path)
+  except grpc.RpcError as rpc_error:
+    if rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
+      print(f'Could not list resources for your storage path {storage_path} due to MFT server unavailable')
 
 @app.command("cp")
 def copy(source, destination):
-  operations.copy(source, destination)
+  try:
+    operations.copy(source, destination)
+  except grpc.RpcError as rpc_error:
+    if rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
+      print('Could not copy resources from source to destination due to MFT server unavailable')
 
 @app.command("init")
 def init_mft():
