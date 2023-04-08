@@ -17,13 +17,11 @@
 # under the License.
 #
 import typer
-import grpc
 from airavata_mft_sdk import mft_client
 from airavata_mft_sdk.common import StorageCommon_pb2
 from airavata_mft_sdk import MFTTransferApi_pb2
 from rich.console import Console
 from rich.table import Table
-from rich import print
 import time
 import sys
 sys.path.append('.')
@@ -85,6 +83,7 @@ def get_resource_metadata(storage_path, recursive_search = False):
   return metadata_resp
 
 def list(storage_path):
+
   metadata_resp = get_resource_metadata(storage_path)
 
   console = Console()
@@ -117,6 +116,7 @@ def flatten_directories(directory, parent_path, file_list):
     file_list.append((file, parent_path + file.friendlyName))
 
 def copy(source, destination):
+
   source_storage_id, source_secret_id = fetch_storage_and_secret_ids(source.split("/")[0])
   dest_storage_id, dest_secret_id = fetch_storage_and_secret_ids(destination.split("/")[0])
 
@@ -127,13 +127,11 @@ def copy(source, destination):
   endpoint_paths = []
   total_volume = 0
 
-  transfer_request = MFTTransferApi_pb2.TransferApiRequest(
-    sourceStorageId = source_storage_id,
-    sourceSecretId = source_secret_id,
-    destinationStorageId = dest_storage_id,
-    destinationSecretId = dest_secret_id,
-    optimizeTransferPath = False
-  )
+  transfer_request = MFTTransferApi_pb2.TransferApiRequest(sourceStorageId = source_storage_id,
+                                                           sourceSecretId = source_secret_id,
+                                                           destinationStorageId = dest_storage_id,
+                                                           destinationSecretId = dest_secret_id,
+                                                           optimizeTransferPath = False)
 
   if (source_metadata.WhichOneof('metadata') == 'directory') :
     if (destination[-1] != "/"):

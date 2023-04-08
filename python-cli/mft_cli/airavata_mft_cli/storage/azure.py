@@ -30,6 +30,7 @@ sys.path.append('../airavata_mft_cli')
 from airavata_mft_cli import config as configcli
 
 def handle_add_storage():
+
     options = ["Through Azure Cli config file", "Enter manually" ]
     option, index = pick(options, "How do you want to load credentials", indicator="=>")
 
@@ -37,12 +38,12 @@ def handle_add_storage():
         connection_string = typer.prompt("Connection String")
 
     client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
-                                    transfer_api_secured = configcli.transfer_api_secured,
-                                    resource_service_host = configcli.resource_service_host,
-                                    resource_service_port = configcli.resource_service_port,
-                                    resource_service_secured = configcli.resource_service_secured,
-                                    secret_service_host = configcli.secret_service_host,
-                                    secret_service_port = configcli.secret_service_port)
+                                  transfer_api_secured = configcli.transfer_api_secured,
+                                  resource_service_host = configcli.resource_service_host,
+                                  resource_service_port = configcli.resource_service_port,
+                                  resource_service_secured = configcli.resource_service_secured,
+                                  secret_service_host = configcli.secret_service_host,
+                                  secret_service_port = configcli.secret_service_port)
 
     azure_secret = AzureCredential_pb2.AzureSecret(connectionString = connection_string)
     secret_wrapper = MFTAgentStubs_pb2.SecretWrapper(azure=azure_secret)

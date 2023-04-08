@@ -32,6 +32,7 @@ sys.path.append('../airavata_mft_cli')
 from airavata_mft_cli import config as configcli
 
 def handle_add_storage():
+
     private_key_file = typer.prompt("Private Key File Location")
 
     with open(private_key_file, 'r') as file:
@@ -50,12 +51,12 @@ def handle_add_storage():
     storage_name = typer.prompt("Storage Name", host_name)
 
     client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
-                                transfer_api_secured = configcli.transfer_api_secured,
-                                resource_service_host = configcli.resource_service_host,
-                                resource_service_port = configcli.resource_service_port,
-                                resource_service_secured = configcli.resource_service_secured,
-                                secret_service_host = configcli.secret_service_host,
-                                secret_service_port = configcli.secret_service_port)
+                                  transfer_api_secured = configcli.transfer_api_secured,
+                                  resource_service_host = configcli.resource_service_host,
+                                  resource_service_port = configcli.resource_service_port,
+                                  resource_service_secured = configcli.resource_service_secured,
+                                  secret_service_host = configcli.secret_service_host,
+                                  secret_service_port = configcli.secret_service_port)
 
     secret_create_req = SCPCredential_pb2.SCPSecretCreateRequest(privateKey=private_key, publicKey=public_key, passphrase = passphrase, user=user_name)
     created_secret = client.scp_secret_api.createSCPSecret(secret_create_req)
@@ -66,8 +67,8 @@ def handle_add_storage():
     created_storage = client.scp_storage_api.createSCPStorage(scp_storage_create_req)
 
     secret_for_storage_req = StorageCommon_pb2.SecretForStorage(storageId = created_storage.storageId,
-                                    secretId = created_secret.secretId,
-                                    storageType = StorageCommon_pb2.StorageType.SCP)
+                                       secretId = created_secret.secretId,
+                                       storageType = StorageCommon_pb2.StorageType.SCP)
 
     client.common_api.registerSecretForStorage(secret_for_storage_req)
 

@@ -38,6 +38,7 @@ gcs_key_path = '.mft/keys/gcs/service_account_key.json'
 
 
 def handle_add_storage():
+
     options = ["Through Google Cloud SDK config file", "Enter manually"]
     option, index = pick(options, "How do you want to load credentials", indicator="=>")
 
@@ -118,12 +119,12 @@ def handle_add_storage():
                 exit()
 
     client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
-                                transfer_api_secured = configcli.transfer_api_secured,
-                                resource_service_host = configcli.resource_service_host,
-                                resource_service_port = configcli.resource_service_port,
-                                resource_service_secured = configcli.resource_service_secured,
-                                secret_service_host = configcli.secret_service_host,
-                                secret_service_port = configcli.secret_service_port)
+                                  transfer_api_secured = configcli.transfer_api_secured,
+                                  resource_service_host = configcli.resource_service_host,
+                                  resource_service_port = configcli.resource_service_port,
+                                  resource_service_secured = configcli.resource_service_secured,
+                                  secret_service_host = configcli.secret_service_host,
+                                  secret_service_port = configcli.secret_service_port)
 
     gcs_secret = GCSCredential_pb2.GCSSecret(clientEmail=client_email, privateKey=client_secret, projectId=project_id)
     secret_wrapper = MFTAgentStubs_pb2.SecretWrapper(gcs=gcs_secret)
@@ -132,7 +133,7 @@ def handle_add_storage():
     storage_wrapper = MFTAgentStubs_pb2.StorageWrapper(gcs=gcs_storage)
 
     direct_req = MFTAgentStubs_pb2.GetResourceMetadataRequest(resourcePath="", secret=secret_wrapper,
-                                                            storage=storage_wrapper)
+                                                              storage=storage_wrapper)
     resource_medata_req = MFTTransferApi_pb2.FetchResourceMetadataRequest(directRequest=direct_req)
     metadata_resp = client.transfer_api.resourceMetadata(resource_medata_req)
 
@@ -154,7 +155,7 @@ def handle_add_storage():
     created_storage = client.gcs_storage_api.createGCSStorage(gcs_storage_create_req)
 
     secret_create_req = GCSCredential_pb2.GCSSecretCreateRequest(clientEmail=client_id, privateKey=client_secret,
-                                                                projectId=project_id)
+                                                                 projectId=project_id)
     created_secret = client.gcs_secret_api.createGCSSecret(secret_create_req)
 
     secret_for_storage_req = StorageCommon_pb2.SecretForStorage(storageId=created_storage.storageId,
@@ -163,6 +164,7 @@ def handle_add_storage():
     client.common_api.registerSecretForStorage(secret_for_storage_req)
 
     print("Successfully added the GCS Bucket...")
+
 
 def list_service_accounts(project_id, credentials):
     """Lists all service accounts for the current project."""

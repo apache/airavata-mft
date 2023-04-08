@@ -32,12 +32,13 @@ sys.path.append('../airavata_mft_cli')
 from airavata_mft_cli import config as configcli
 
 def handle_add_storage():
+
     session_token = ""
     aws_regions = ["us-east-2", "us-east-1", "us-west-1", "us-west-2", "af-south-1", "ap-east-1", "ap-east-1",
-                    "ap-southeast-3", "ap-south-1", "ap-northeast-3", "ap-northeast-2", "ap-southeast-1",
-                    "ap-southeast-2", "ap-northeast-1", "ca-central-1", "cn-north-1", "cn-northwest-1", "eu-central-1",
-                    "eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3", "eu-north-1", "eu-south-2", "eu-central-2",
-                    "sa-east-1", "me-south-1", "me-central-1", "us-gov-east-1", "us-gov-west-1"]
+                   "ap-southeast-3", "ap-south-1", "ap-northeast-3", "ap-northeast-2", "ap-southeast-1",
+                   "ap-southeast-2", "ap-northeast-1", "ca-central-1", "cn-north-1", "cn-northwest-1", "eu-central-1",
+                   "eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3", "eu-north-1", "eu-south-2", "eu-central-2",
+                   "sa-east-1", "me-south-1", "me-central-1", "us-gov-east-1", "us-gov-west-1"]
 
     options = ["Through AWS Cli config file", "Enter manually" ]
     option, index = pick(options, "How do you want to load credentials", indicator="=>")
@@ -82,12 +83,12 @@ def handle_add_storage():
         endpoint = "https://s3." + region + ".amazonaws.com"
 
     client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
-                                transfer_api_secured = configcli.transfer_api_secured,
-                                resource_service_host = configcli.resource_service_host,
-                                resource_service_port = configcli.resource_service_port,
-                                resource_service_secured = configcli.resource_service_secured,
-                                secret_service_host = configcli.secret_service_host,
-                                secret_service_port = configcli.secret_service_port)
+                                  transfer_api_secured = configcli.transfer_api_secured,
+                                  resource_service_host = configcli.resource_service_host,
+                                  resource_service_port = configcli.resource_service_port,
+                                  resource_service_secured = configcli.resource_service_secured,
+                                  secret_service_host = configcli.secret_service_host,
+                                  secret_service_port = configcli.secret_service_port)
 
     s3_secret = S3Credential_pb2.S3Secret(accessKey=client_id, secretKey=client_secret, sessionToken = session_token)
     secret_wrapper = MFTAgentStubs_pb2.SecretWrapper(s3=s3_secret)
@@ -121,8 +122,8 @@ def handle_add_storage():
     created_secret = client.s3_secret_api.createS3Secret(secret_create_req)
 
     secret_for_storage_req = StorageCommon_pb2.SecretForStorage(storageId = created_storage.storageId,
-                                    secretId = created_secret.secretId,
-                                    storageType = StorageCommon_pb2.StorageType.S3)
+                                       secretId = created_secret.secretId,
+                                       storageType = StorageCommon_pb2.StorageType.S3)
 
     client.common_api.registerSecretForStorage(secret_for_storage_req)
 
