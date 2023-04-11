@@ -18,6 +18,7 @@
 package org.apache.airavata.mft.transport.local;
 
 
+import org.apache.airavata.mft.admin.TransportProperties;
 import org.apache.airavata.mft.core.api.ConnectorConfig;
 import org.apache.airavata.mft.core.api.IncomingChunkedConnector;
 
@@ -34,13 +35,17 @@ public class LocalIncomingChunkedConnector implements IncomingChunkedConnector {
     private long resourceSize;
     private boolean dmaFlag;
 
+    private int buffLen;
+
     private static final Logger logger = LoggerFactory.getLogger(LocalIncomingChunkedConnector.class);
+    private static final TransportProperties transportProperties = new TransportProperties();
 
     @Override
     public void init(ConnectorConfig connectorConfig) throws Exception {
         this.resourcePath = connectorConfig.getResourcePath();
         this.resourceSize = connectorConfig.getMetadata().getFile().getResourceSize();
-        this.dmaFlag = connectorConfig.getTransportConfig().get("local.dma").toString().equals("true");
+        this.dmaFlag = connectorConfig.getTransportConfig().getOrDefault("local.dma", transportProperties.getDma()).toString().equals("true");
+        this.buffLen = Integer.valueOf(connectorConfig.getTransportConfig().getOrDefault("local.buffLen",transportProperties.getBuffLen()).toString());
     }
 
     @Override
@@ -60,7 +65,7 @@ public class LocalIncomingChunkedConnector implements IncomingChunkedConnector {
         logger.info("Downloading chunk {} with start byte {} and end byte {} to file {} from resource path {}",
                 chunkId, startByte, endByte, downloadFile, this.resourcePath);
 
-        if (this.dmaFlag) {
+        if (dmaFlag) {
             if (resourceSize <= endByte - startByte) {
                 Files.copy(Path.of(this.resourcePath), Path.of(downloadFile));
             } else {
@@ -74,7 +79,6 @@ public class LocalIncomingChunkedConnector implements IncomingChunkedConnector {
                 }
             }
         }   else {
-            int buffLen = 1024 * 1024 * 16;
             try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(this.resourcePath), buffLen);
                  BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(downloadFile))) {
                 byte[] buffer = new byte[buffLen];

@@ -15,28 +15,19 @@
  * limitations under the License.
  */
 
-package org.apache.airavata.mft.agent;
+package org.apache.airavata.mft.admin;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.stereotype.Component;
+public final class TransportProperties {
 
-import java.util.Map;
+    private final String dma = "false";
 
-@Component
-@EnableConfigurationProperties
-@ConfigurationProperties(prefix = "agent")
-public class TransportConfig {
-
-
-    private Map<String, String> transport;
-
-    public Map<String, String> getTransport() {
-        return transport;
+    public String getDma() {
+        return dma;
     }
 
-    public void setTransport(Map<String, String> transport) {
-        this.transport = transport;
-    }
+    private final int buffLen = 1024 * 1024 * 16;
 
+    public int getBuffLen() {
+        return buffLen;
+    }
 }
