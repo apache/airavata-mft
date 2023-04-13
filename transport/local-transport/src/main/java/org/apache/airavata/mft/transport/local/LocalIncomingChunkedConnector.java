@@ -18,7 +18,6 @@
 package org.apache.airavata.mft.transport.local;
 
 
-import org.apache.airavata.mft.admin.TransportProperties;
 import org.apache.airavata.mft.core.api.ConnectorConfig;
 import org.apache.airavata.mft.core.api.IncomingChunkedConnector;
 
@@ -38,14 +37,13 @@ public class LocalIncomingChunkedConnector implements IncomingChunkedConnector {
     private int buffLen;
 
     private static final Logger logger = LoggerFactory.getLogger(LocalIncomingChunkedConnector.class);
-    private static final TransportProperties transportProperties = new TransportProperties();
 
     @Override
     public void init(ConnectorConfig connectorConfig) throws Exception {
         this.resourcePath = connectorConfig.getResourcePath();
         this.resourceSize = connectorConfig.getMetadata().getFile().getResourceSize();
-        this.dmaFlag = connectorConfig.getTransportConfig().getOrDefault("local.dma", transportProperties.getDma()).toString().equals("true");
-        this.buffLen = Integer.valueOf(connectorConfig.getTransportConfig().getOrDefault("local.buffLen",transportProperties.getBuffLen()).toString());
+        this.dmaFlag = connectorConfig.getBooleanTransportProperty(ConnectorConfig.LocalConfigs.DMA_ENABLED, false);
+        this.buffLen = connectorConfig.getIntTransportProperty(ConnectorConfig.LocalConfigs.BUFF_LEN, 16 * 1024 * 1024);
     }
 
     @Override
