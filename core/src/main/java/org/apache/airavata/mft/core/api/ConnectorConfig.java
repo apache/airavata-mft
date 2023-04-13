@@ -90,6 +90,40 @@ public class ConnectorConfig {
         this.transportConfig = transportConfig;
     }
 
+    public static final class LocalConfigs {
+        public LocalConfigs() {
+        }
+
+        public final static String DMA_ENABLED = "local.dma";
+        public final static String BUFF_LEN = "local.buffLen";
+    }
+
+    public Boolean getBooleanTransportProperty(String key, Boolean defaultValue){
+        if(key == LocalConfigs.DMA_ENABLED){
+            if (!this.transportConfig.get(key).toString().isEmpty()) return Boolean.getBoolean(this.transportConfig.get(key).toString());
+        }
+        return defaultValue;
+    }
+
+    public int getIntTransportProperty(String key, int defaultValue){
+        if(key == LocalConfigs.BUFF_LEN){
+            if (!this.transportConfig.get(key).toString().isEmpty()) return Integer.valueOf(this.transportConfig.get(key).toString());
+        }
+        return defaultValue;
+    }
+
+    public Long getLongTransportProperty(String key, Long defaultValue){
+        return defaultValue;
+    }
+
+    public double getDoubleTransportProperty(String key, double defaultValue){
+        return defaultValue;
+    }
+
+    public String getStringTransportProperty(String key, String defaultValue){
+        return defaultValue;
+    }
+
     public static final class ConnectorConfigBuilder {
         private String transferId;
         private StorageWrapper storage;
@@ -132,8 +166,8 @@ public class ConnectorConfig {
             return this;
         }
 
-        public ConnectorConfigBuilder withTransportConfig(Map appConfig) {
-            this.transportConfig = appConfig;
+        public ConnectorConfigBuilder withTransportConfig(Map transportConfig) {
+            this.transportConfig = transportConfig;
             return this;
         }
 

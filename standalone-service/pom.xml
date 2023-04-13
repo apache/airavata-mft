@@ -80,11 +80,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.airavata</groupId>
-            <artifactId>mft-common-clients</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>net.sf.dozer</groupId>
             <artifactId>dozer</artifactId>
             <version>${dozer}</version>
