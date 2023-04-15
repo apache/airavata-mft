@@ -30,9 +30,9 @@ from rich.console import Console
 from rich.table import Table
 from rich import print
 import sys
-import grpc 
 sys.path.append('../airavata_mft_cli')
 from airavata_mft_cli import config as configcli
+from airavata_mft_cli.util import exception_handler
 
 app = typer.Typer()
 
@@ -54,9 +54,8 @@ def add_storage():
             swift.handle_add_storage()
         elif option == "SCP":
             scp.handle_add_storage()
-    except grpc.RpcError as rpc_error:
-        if  rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
-            print(f'Could not add storage in {option} due to MFT server grpc unavailable error') 
+    except Exception as e:
+        exception_handler(e)
 
 @app.command("list")
 def list_storage():
@@ -85,6 +84,5 @@ def list_storage():
                         storage.storageId)
 
         console.print(table)
-    except grpc.RpcError as rpc_error:
-        if  rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
-            print('Could not fetch storage list due to MFT server grpc unavailable error')
+    except Exception as e:
+        exception_handler(e)

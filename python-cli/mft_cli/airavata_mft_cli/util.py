@@ -16,39 +16,11 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import typer
-import airavata_mft_cli.operations as operations
-import airavata_mft_cli.bootstrap as bootstrap
-from airavata_mft_cli.util import exception_handler
 
-app = typer.Typer()
+from rich import print
+import grpc
 
-@app.command("ls")
-def list(storage_path):
-  try:
-    operations.list(storage_path)
-  except Exception as e:
-    exception_handler(e)
-
-@app.command("cp")
-def copy(source, destination):
-  try:
-    operations.copy(source, destination)
-  except Exception as e:
-    exception_handler(e)
-
-@app.command("init")
-def init_mft():
-  bootstrap.start_mft()
-
-@app.command("stop")
-def init_mft():
-  bootstrap.stop_mft()
-
-@app.command("update")
-def init_mft():
-  bootstrap.update_mft()
-
-@app.command("log")
-def init_mft():
-  bootstrap.print_log()
+def exception_handler(e):
+    if isinstance(e, grpc.RpcError):
+        if e.code() == grpc.StatusCode.UNAVAILABLE:
+            print(f"MFT server is unavailable")
