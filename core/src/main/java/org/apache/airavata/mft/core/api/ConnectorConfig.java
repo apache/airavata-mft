@@ -99,28 +99,37 @@ public class ConnectorConfig {
     }
 
     public Boolean getBooleanTransportProperty(String key, Boolean defaultValue){
-        if(key == LocalConfigs.DMA_ENABLED){
-            if (!this.transportConfig.get(key).toString().isEmpty()) return Boolean.getBoolean(this.transportConfig.get(key).toString());
-        }
+
+        if (this.transportConfig.containsKey(key)) return Boolean.getBoolean(this.transportConfig.get(key).toString());
+
         return defaultValue;
     }
 
     public int getIntTransportProperty(String key, int defaultValue){
-        if(key == LocalConfigs.BUFF_LEN){
-            if (!this.transportConfig.get(key).toString().isEmpty()) return Integer.valueOf(this.transportConfig.get(key).toString());
-        }
+
+        if (this.transportConfig.containsKey(key)) return Integer.valueOf(this.transportConfig.get(key).toString());
+
         return defaultValue;
     }
 
     public Long getLongTransportProperty(String key, Long defaultValue){
+
+        if (this.transportConfig.containsKey(key)) return Long.valueOf(this.transportConfig.get(key).toString());
+
         return defaultValue;
     }
 
     public double getDoubleTransportProperty(String key, double defaultValue){
+
+        if (this.transportConfig.containsKey(key)) return Double.valueOf(this.transportConfig.get(key).toString());
+
         return defaultValue;
     }
 
     public String getStringTransportProperty(String key, String defaultValue){
+
+        if (this.transportConfig.containsKey(key)) return this.transportConfig.get(key).toString();
+
         return defaultValue;
     }
 
