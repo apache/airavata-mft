@@ -28,7 +28,6 @@ public class LocalOutgoingChunkedConnector implements OutgoingChunkedConnector {
 
     private String resourcePath;
 
-    private long resourceSize;
     private boolean dmaFlag;
 
     private int buffLen;
@@ -39,7 +38,6 @@ public class LocalOutgoingChunkedConnector implements OutgoingChunkedConnector {
     @Override
     public void init(ConnectorConfig connectorConfig) throws Exception {
         this.resourcePath = connectorConfig.getResourcePath();
-        this.resourceSize = connectorConfig.getMetadata().getFile().getResourceSize();
         this.dmaFlag = connectorConfig.getBooleanTransportProperty(ConnectorConfig.LocalConfigs.DMA_ENABLED, false);
         this.buffLen = connectorConfig.getIntTransportProperty(ConnectorConfig.LocalConfigs.BUFF_LEN, 16 * 1024 * 1024);
     }
@@ -75,7 +73,6 @@ public class LocalOutgoingChunkedConnector implements OutgoingChunkedConnector {
                         chunkId, this.resourcePath, uploadFile, e);
                 throw e;
             }
-//            }
         }   else {
             try {
                 RandomAccessFile file = new RandomAccessFile(this.resourcePath, "rw");
