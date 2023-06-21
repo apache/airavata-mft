@@ -62,6 +62,10 @@ def stop_service(bin_path, daemon_script_name):
   finally:
     os.chdir(current_dir)
 
+
+"""
+  Issue 96: https://github.com/apache/airavata-mft/issues/96
+"""
 def start_mft():
   print("Setting up MFT Services")
 
