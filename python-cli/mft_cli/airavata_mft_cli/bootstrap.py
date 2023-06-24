@@ -30,7 +30,7 @@ import shutil
 import time
 
 
-def download_and_unarchive(url, download_path, extract_dir=os.path.join(os.path.expanduser('~'), ".mft/")):
+def download_and_unarchive(url, download_path, extract_dir = os.path.join(os.path.expanduser('~'), ".mft/")):
   response = requests.get(url, stream=True)
   file_size = int(response.headers['Content-Length'])
   with typer.progressbar(length=file_size) as progress:
@@ -40,14 +40,14 @@ def download_and_unarchive(url, download_path, extract_dir=os.path.join(os.path.
         handle.write(data)
 
   print("Un archiving ....")
-  with zipfile.ZipFile(download_path, "r") as zip_ref:
+  with zipfile.ZipFile(download_path,"r") as zip_ref:
     zip_ref.extractall(extract_dir)
 
   os.remove(download_path)
 
 
 def restart_service(bin_path, daemon_script_name):
-  current_dir = os.getcwd()
+  current_dir =  os.getcwd()
   try:
     os.chdir(bin_path)
     os.chmod(daemon_script_name, 0o744)
@@ -56,9 +56,8 @@ def restart_service(bin_path, daemon_script_name):
   finally:
     os.chdir(current_dir)
 
-
 def stop_service(bin_path, daemon_script_name):
-  current_dir = os.getcwd()
+  current_dir =  os.getcwd()
   try:
     os.chdir(bin_path)
     os.chmod(daemon_script_name, 0o744)
@@ -126,7 +125,7 @@ def start_mft():
     zip_path = os.path.join(os.path.expanduser('~'), ".mft/consul.zip")
     download_and_unarchive(consul_url, zip_path, os.path.join(os.path.expanduser('~'), ".mft/"))
 
-  current_dir = os.getcwd()
+  current_dir =  os.getcwd()
   try:
     os.chdir(os.path.join(os.path.expanduser('~'), ".mft"))
     os.chmod("consul", 0o744)
@@ -136,9 +135,9 @@ def start_mft():
       call(["kill", "-9", pid])
 
     consul_process = Popen(['nohup', './consul', "agent", "-dev"],
-                           stdout=open('consul.log', 'w'),
-                           stderr=open('consul.err.log', 'a'),
-                           preexec_fn=os.setpgrp)
+                     stdout=open('consul.log', 'w'),
+                     stderr=open('consul.err.log', 'a'),
+                     preexec_fn=os.setpgrp)
 
     print("Consul process id: " + str(consul_process.pid))
     with open("consul.pid", "w") as consul_pid:
@@ -163,7 +162,7 @@ def stop_mft():
 
   path = os.path.join(os.path.expanduser('~'), ".mft/consul")
   if os.path.exists(path):
-    current_dir = os.getcwd()
+    current_dir =  os.getcwd()
     try:
       os.chdir(os.path.join(os.path.expanduser('~'), ".mft"))
       os.chmod("consul", 0o744)
@@ -180,7 +179,6 @@ def stop_mft():
 
   print("MFT Stopped....")
 
-
 def update_mft():
   stop_mft()
 
@@ -194,17 +192,16 @@ def update_mft():
     os.remove(database)
   start_mft()
 
-
 def print_log():
   log_file_path = os.path.join(os.path.expanduser('~'), ".mft", "Standalone-Service-0.01", "logs", "airavata.log")
-  log_file = open(log_file_path, "r")
+  log_file = open(log_file_path,  "r")
   lines = follow_file(log_file)
   for line in lines:
     print(line)
 
 
 def follow_file(file):
-  # file.seek(0, os.SEEK_END)
+  #file.seek(0, os.SEEK_END)
 
   while True:
     line = file.readline()
@@ -213,3 +210,4 @@ def follow_file(file):
       continue
 
     yield line
+
