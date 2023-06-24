@@ -65,7 +65,7 @@ def stop_service(bin_path, daemon_script_name):
     os.chdir(current_dir)
 
 
-def check_java_version_method(required_version):
+def validate_java_availability(required_version):
   """
       Issue 96: https://github.com/apache/airavata-mft/issues/96
 
@@ -73,10 +73,19 @@ def check_java_version_method(required_version):
       ---------
       https://stackoverflow.com/questions/31807882/get-java-version-number-from-python
       https://stackoverflow.com/questions/1332598/how-to-determine-whether-java-is-installed-on-a-system-through-python
+      https://stackoverflow.com/questions/74206258/how-are-oracle-jdk-versions-numbered
+      https://docs.python.org/3.8/library/subprocess.html#subprocess.check_output
+      https://stackoverflow.com/questions/2411288/java-versioning-and-terminology-1-6-vs-6-0-openjdk-vs-sun
   """
   if shutil.which("java"):
     res = check_output(['java', '-version'], stderr=STDOUT).decode('utf-8')
-    system_version = ''
+    """
+      res will have the value similar to the following
+      openjdk version "17.0.5" 2022-10-18 LTS
+      OpenJDK Runtime Environment Corretto-17.0.5.8.1 (build 17.0.5+8-LTS)
+      OpenJDK 64-Bit Server VM Corretto-17.0.5.8.1 (build 17.0.5+8-LTS, mixed mode, sharing)
+    """
+    java_version = ''
     count = 0
     for c in res:
       if c == '"' or count == 1:
@@ -85,12 +94,12 @@ def check_java_version_method(required_version):
         if count == 0:
           count += 1
           continue
-        system_version += c
+        java_version += c
 
-    system_version = int(system_version)
-    if system_version < required_version:
-      print("Airavata MFT requires Java version 11 or higher")
-      print("If you have more than one version of java please set java version 11 or higher to the path")
+    java_version = int(java_version)
+    if java_version < required_version:
+      print("Airavata MFT requires Java version " + required_version + " or higher")
+      print("If you have more than one version of java please set java version "+ required_version +" or higher to the path")
       raise typer.Exit()
   else:
     print("Java is either not installed or path hasn't been set properly")
@@ -103,10 +112,10 @@ def start_mft():
   required_java_version = 11
   if platform == "linux" or platform == "linux2":
     consul_url = "https://releases.hashicorp.com/consul/1.7.1/consul_1.7.1_linux_amd64.zip"
-    check_java_version_method(required_java_version)
+    validate_java_availability(required_java_version)
   elif platform == "darwin":
     consul_url = "https://releases.hashicorp.com/consul/1.7.1/consul_1.7.1_darwin_amd64.zip"
-    check_java_version_method(required_java_version)
+    validate_java_availability(required_java_version)
   elif platform == "win32":
     print("Windows support is not available yet")
     raise typer.Exit()
