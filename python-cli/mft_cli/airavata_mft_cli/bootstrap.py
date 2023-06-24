@@ -30,6 +30,7 @@ import shutil
 import time
 
 def download_and_unarchive(url, download_path, extract_dir = os.path.join(os.path.expanduser('~'), ".mft/")):
+
   response = requests.get(url, stream=True)
   file_size = int(response.headers['Content-Length'])
   with typer.progressbar(length=file_size) as progress:
@@ -43,7 +44,6 @@ def download_and_unarchive(url, download_path, extract_dir = os.path.join(os.pat
     zip_ref.extractall(extract_dir)
 
   os.remove(download_path)
-
 
 def restart_service(bin_path, daemon_script_name):
   current_dir =  os.getcwd()
