@@ -29,7 +29,6 @@ from sys import platform
 import shutil
 import time
 
-
 def download_and_unarchive(url, download_path, extract_dir = os.path.join(os.path.expanduser('~'), ".mft/")):
   response = requests.get(url, stream=True)
   file_size = int(response.headers['Content-Length'])
@@ -194,11 +193,10 @@ def update_mft():
 
 def print_log():
   log_file_path = os.path.join(os.path.expanduser('~'), ".mft", "Standalone-Service-0.01", "logs", "airavata.log")
-  log_file = open(log_file_path,  "r")
+  log_file = open(log_file_path,"r")
   lines = follow_file(log_file)
   for line in lines:
     print(line)
-
 
 def follow_file(file):
   #file.seek(0, os.SEEK_END)
@@ -210,4 +208,5 @@ def follow_file(file):
       continue
 
     yield line
+
 
