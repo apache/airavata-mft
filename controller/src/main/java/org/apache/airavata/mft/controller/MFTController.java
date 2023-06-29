@@ -304,17 +304,27 @@ public class MFTController implements CommandLineRunner {
 
             if (value.getValueAsString().isPresent()) {
                 logger.debug("Pending " + value.getKey() + " : " + value.getValueAsString().get());
+                String transferId = value.getKey().substring(value.getKey().lastIndexOf("/") + 1);
                 try {
                     TransferApiRequest.Builder builder = TransferApiRequest.newBuilder();
                     JsonFormat.parser().merge(value.getValueAsString().get(), builder);
                     TransferApiRequest transferRequest = builder.build();
-
-                    String transferId = value.getKey().substring(value.getKey().lastIndexOf("/") + 1);
                     AgentTransferRequest.Builder agentTransferRequest = requestBuilder.prepareAgentTransferRequest(transferRequest);
                     pathOptimizer.handleTransferRequest(transferId, transferRequest, agentTransferRequest, value.getKey());
 
                 } catch (Exception e) {
-                    logger.error("Failed to process pending transfer in key {}", value.getKey(), e);
+                    logger.error("Failed to process pending transfer in key {}. Deleting from queue", value.getKey(), e);
+                    try {
+                        mftConsulClient.saveTransferState(transferId, null, new TransferState()
+                                .setUpdateTimeMils(System.currentTimeMillis())
+                                .setState("FAILED").setPercentage(0)
+                                .setPublisher("controller")
+                                .setDescription("Failed to process pending transfer "));
+                        mftConsulClient.getKvClient().deleteKey(value.getKey());
+                    } catch (Exception ex) {
+                        logger.warn("Failed to update state of transfer {} to FAILED", transferId);
+                        // Ignore
+                    }
                 }
             }
         });
