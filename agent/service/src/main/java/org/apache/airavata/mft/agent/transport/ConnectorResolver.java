@@ -75,6 +75,9 @@ public final class ConnectorResolver {
             case "GCS":
                 className = "org.apache.airavata.mft.transport.gcp.GCSOutgoingStreamingConnector";
                 break;
+            case "LOCAL":
+                className = "org.apache.airavata.mft.transport.local.LocalOutgoingStreamingConnector";
+                break;
 
         }
 
