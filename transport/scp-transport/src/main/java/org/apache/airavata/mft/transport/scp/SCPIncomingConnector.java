@@ -58,7 +58,7 @@ public final class SCPIncomingConnector implements IncomingStreamingConnector {
                 scpStorage.getHost(),
                 scpStorage.getPort(),
                 scpSecret.getPrivateKey().getBytes(),
-                scpSecret.getPublicKey().getBytes(),
+                scpSecret.getPublicKey().equals("")? null : scpSecret.getPublicKey().getBytes(),
                 scpSecret.getPassphrase().equals("")? null : scpSecret.getPassphrase().getBytes());
 
         if (session == null) {
@@ -94,7 +94,7 @@ public final class SCPIncomingConnector implements IncomingStreamingConnector {
 
         while (true) {
             int c = checkAck(in);
-            if (c != 'C') {
+            if (c != 'C' && c != 'c' ) {
                 break;
             }
 
