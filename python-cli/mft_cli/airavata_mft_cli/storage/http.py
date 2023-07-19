@@ -42,15 +42,15 @@ def handle_add_storage():
                                       secret_service_host = configcli.secret_service_host,
                                       secret_service_port = configcli.secret_service_port)
 
-    base_url = typer.prompt("Base URL", "sawad")
+    base_url = typer.prompt("Base URL")
     storage_name = typer.prompt("Storage Name", base_url)
 
     options = ["Basic Auth", "Token" ]
     option, index = pick(options, "What is the authentication method", indicator="=>")
 
     if index == 0:
-        user_name = typer.prompt("User Name", "dds")
-        password = typer.prompt("Password", "sasd")
+        user_name = typer.prompt("User Name")
+        password = typer.prompt("Password")
         basic_auth = HttpCredential_pb2.BasicAuth(userName=user_name, password=password)
         http_secret = HttpCredential_pb2.HTTPSecret(basic=basic_auth)
     elif index == 1:
@@ -64,8 +64,6 @@ def handle_add_storage():
     http_storage_create_req = HTTPStorage_pb2.HTTPStorageCreateRequest(
             baseUrl=base_url, name=storage_name)
 
-    print("CP1")
-    print(http_storage_create_req)
     created_storage = client.http_storage_api.createHTTPStorage(http_storage_create_req)
 
     secret_for_storage_req = StorageCommon_pb2.SecretForStorage(storageId = created_storage.storageId,

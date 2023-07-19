@@ -26,6 +26,7 @@ import time
 import sys
 sys.path.append('.')
 from . import config as configcli
+import pandas as pd
 
 def fetch_storage_and_secret_ids(storage_name):
   client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
@@ -193,13 +194,93 @@ def copy(source, destination):
 
   completed = 0
   failed = 0
+  progress_percentage = 0
 
   with typer.progressbar(length=100) as progress:
 
     while 1:
       state_resp = client.transfer_api.getTransferStateSummary(state_request)
 
-      progress.update(int(state_resp.percentage * 100))
+      progress_percentage = int(state_resp.percentage * 100)
+      progress.update(progress_percentage - prev_percentage)
+      prev_percentage = progress_percentage
+
+      if (state_resp.percentage == 1.0):
+        completed = len(state_resp.completed)
+        failed = len(state_resp.failed)
+        break
+
+      if (state_resp.state == "FAILED"):
+        print("Transfer failed. Reason: " + state_resp.description)
+        raise typer.Abort()
+      time.sleep(1)
+
+  print(f"Processed {completed + failed} files. Completed {completed}, Failed {failed}.")
+
+def copy_list(source_storage_id, dest_storage_id, list_file):
+
+  source_storage_id, source_secret_id = fetch_storage_and_secret_ids(source_storage_id)
+  dest_storage_id, dest_secret_id = fetch_storage_and_secret_ids(dest_storage_id)
+
+  ## TODO : Check agent availability and deploy cloud agents if required
+
+  file_list = []
+  endpoint_paths = []
+  total_volume = 0
+
+  transfer_request = MFTTransferApi_pb2.TransferApiRequest(sourceStorageId = source_storage_id,
+                                                           sourceSecretId = source_secret_id,
+                                                           destinationStorageId = dest_storage_id,
+                                                           destinationSecretId = dest_secret_id,
+                                                           optimizeTransferPath = False)
+  columns=['source', 'destination']
+  df = pd.read_csv(list_file, header=None, dtype=str, names=columns)
+  for i in range(len(df)):
+    source_path = df['source'][i]
+    destination_path = df['destination'][i]
+
+    endpoint_paths.append(MFTTransferApi_pb2.EndpointPaths(sourcePath = source_path,
+            destinationPath = destination_path))
+
+  transfer_request.endpointPaths.extend(endpoint_paths)
+
+  confirm = typer.confirm("Total number of " + str(len(endpoint_paths)) +
+                          " files to be transferred. Do you want to start the transfer? ", True)
+
+  if not confirm:
+      raise typer.Abort()
+
+  client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
+                                transfer_api_secured = configcli.transfer_api_secured,
+                                resource_service_host = configcli.resource_service_host,
+                                resource_service_port = configcli.resource_service_port,
+                                resource_service_secured = configcli.resource_service_secured,
+                                secret_service_host = configcli.secret_service_host,
+                                secret_service_port = configcli.secret_service_port)
+
+  transfer_resp = client.transfer_api.submitTransfer(transfer_request)
+
+  transfer_id = transfer_resp.transferId
+
+  state_request = MFTTransferApi_pb2.TransferStateApiRequest(transferId=transfer_id)
+
+  ## TODO: This has to be optimized and avoid frequent polling of all transfer ids in each iteration
+  ## Possible fix is to introduce a parent batch transfer id at the API level and fetch child trnasfer id
+  # summaries in a single API call
+
+  completed = 0
+  failed = 0
+
+  prev_percentage = 0
+  with typer.progressbar(length=100) as progress:
+
+    while 1:
+      state_resp = client.transfer_api.getTransferStateSummary(state_request)
+
+      progress_percentage = int(state_resp.percentage * 100)
+      progress.update(progress_percentage - prev_percentage)
+      prev_percentage = progress_percentage
+
       if (state_resp.percentage == 1.0):
         completed = len(state_resp.completed)
         failed = len(state_resp.failed)
