@@ -9,6 +9,7 @@ from airavata_mft_sdk.local import LocalStorageService_pb2_grpc
 from airavata_mft_sdk.s3 import S3StorageService_pb2_grpc
 from airavata_mft_sdk.swift import SwiftStorageService_pb2_grpc
 from airavata_mft_sdk.scp import SCPStorageService_pb2_grpc
+from airavata_mft_sdk.http import HTTPStorageService_pb2_grpc
 from airavata_mft_sdk.common import StorageCommon_pb2_grpc
 
 
@@ -20,6 +21,7 @@ from airavata_mft_sdk.gcs import GCSSecretService_pb2_grpc
 from airavata_mft_sdk.s3 import S3SecretService_pb2_grpc
 from airavata_mft_sdk.swift import SwiftSecretService_pb2_grpc
 from airavata_mft_sdk.scp import SCPSecretService_pb2_grpc
+from airavata_mft_sdk.http import HttpSecretService_pb2_grpc
 
 class MFTClient:
 
@@ -50,6 +52,7 @@ class MFTClient:
         self.s3_storage_api = S3StorageService_pb2_grpc.S3StorageServiceStub(self.resource_channel)
         self.scp_storage_api = SCPStorageService_pb2_grpc.SCPStorageServiceStub(self.resource_channel)
         self.swift_storage_api = SwiftStorageService_pb2_grpc.SwiftStorageServiceStub(self.resource_channel)
+        self.http_storage_api = HTTPStorageService_pb2_grpc.HTTPStorageServiceStub(self.resource_channel)
         self.common_api = StorageCommon_pb2_grpc.StorageCommonServiceStub(self.resource_channel)
 
         if (not secret_service_secured):
@@ -63,6 +66,7 @@ class MFTClient:
         self.s3_secret_api = S3SecretService_pb2_grpc.S3SecretServiceStub(self.secret_channel)
         self.swift_secret_api = SwiftSecretService_pb2_grpc.SwiftSecretServiceStub(self.secret_channel)
         self.scp_secret_api = SCPSecretService_pb2_grpc.SCPSecretServiceStub(self.secret_channel)
+        self.http_secret_api = HttpSecretService_pb2_grpc.HTTPSecretServiceStub(self.secret_channel)
 
 
 

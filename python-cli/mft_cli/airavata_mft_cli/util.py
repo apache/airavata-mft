@@ -23,4 +23,10 @@ import grpc
 def exception_handler(e):
     if isinstance(e, grpc.RpcError):
         if e.code() == grpc.StatusCode.UNAVAILABLE:
-            print(f"MFT server is unavailable")
+            print(f"[bold red]MFT server is unavailable")
+        elif e.code() == grpc.StatusCode.INTERNAL:
+            print("[bold red]" + e.details())
+        else:
+            print(e)
+    else:
+        print(e)

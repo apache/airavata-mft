@@ -24,6 +24,7 @@ import airavata_mft_cli.storage.azure as azure
 import airavata_mft_cli.storage.gcs as gcs
 import airavata_mft_cli.storage.local as local
 import airavata_mft_cli.storage.swift as swift
+import airavata_mft_cli.storage.http as http
 from airavata_mft_sdk import mft_client
 from airavata_mft_sdk.common import StorageCommon_pb2
 from rich.console import Console
@@ -34,13 +35,13 @@ sys.path.append('../airavata_mft_cli')
 from airavata_mft_cli import config as configcli
 from airavata_mft_cli.util import exception_handler
 
-app = typer.Typer()
+app = typer.Typer(pretty_exceptions_show_locals=True)
 
 @app.command("add")
 def add_storage():
     try:
         title = "Select storage type: "
-        options = ["S3", "Google Cloud Storage (GCS)", "Azure Storage", "Openstack SWIFT", "SCP", "FTP", "Box", "DropBox", "OData", "Agent" ]
+        options = ["S3", "Google Cloud Storage (GCS)", "Azure Storage", "Openstack SWIFT", "SCP", "FTP", "Box", "DropBox", "OData", "Agent", "HTTP" ]
         option, index = pick(options, title, indicator="=>")
         if option == "S3":
             s3.handle_add_storage()
@@ -54,6 +55,8 @@ def add_storage():
             swift.handle_add_storage()
         elif option == "SCP":
             scp.handle_add_storage()
+        elif option == "HTTP":
+            http.handle_add_storage()
     except Exception as e:
         exception_handler(e)
 

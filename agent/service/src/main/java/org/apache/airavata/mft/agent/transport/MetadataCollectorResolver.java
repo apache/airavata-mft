@@ -56,6 +56,9 @@ public final class MetadataCollectorResolver {
             case "ODATA":
                 className = "org.apache.airavata.mft.transport.odata.ODataMetadataCollector";
                 break;
+            case "HTTP":
+                className = "org.apache.airavata.mft.trnasport.http.HttpMetadataCollector";
+                break;
         }
 
         if (className != null) {

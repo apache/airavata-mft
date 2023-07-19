@@ -23,6 +23,7 @@ import org.apache.airavata.mft.credential.service.box.BoxSecretServiceGrpc;
 import org.apache.airavata.mft.credential.service.dropbox.DropboxSecretServiceGrpc;
 import org.apache.airavata.mft.credential.service.ftp.FTPSecretServiceGrpc;
 import org.apache.airavata.mft.credential.service.gcs.GCSSecretServiceGrpc;
+import org.apache.airavata.mft.credential.service.http.HTTPSecretServiceGrpc;
 import org.apache.airavata.mft.credential.service.odata.ODataSecretServiceGrpc;
 import org.apache.airavata.mft.credential.service.s3.S3SecretServiceGrpc;
 import org.apache.airavata.mft.credential.service.scp.SCPSecretServiceGrpc;
@@ -73,6 +74,10 @@ public class SecretServiceClient implements Closeable {
 
     public ODataSecretServiceGrpc.ODataSecretServiceBlockingStub odata() {
         return ODataSecretServiceGrpc.newBlockingStub(channel);
+    }
+
+    public HTTPSecretServiceGrpc.HTTPSecretServiceBlockingStub http() {
+        return HTTPSecretServiceGrpc.newBlockingStub(channel);
     }
 
     @Override

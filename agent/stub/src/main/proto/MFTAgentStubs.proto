@@ -30,6 +30,7 @@ import "odata/ODataStorage.proto";
 import "s3/S3Storage.proto";
 import "scp/SCPStorage.proto";
 import "swift/SwiftStorage.proto";
+import "http/HTTPStorage.proto";
 
 import "azure/AzureCredential.proto";
 import "box/BoxCredential.proto";
@@ -40,6 +41,7 @@ import "odata/ODataCredential.proto";
 import "s3/S3Credential.proto";
 import "scp/SCPCredential.proto";
 import "swift/SwiftCredential.proto";
+import "http/HttpCredential.proto";
 
 message StorageWrapper {
     oneof storage {
@@ -53,6 +55,7 @@ message StorageWrapper {
         org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage s3 = 8;
         org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorage scp = 9;
         org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorage swift = 10;
+        org.apache.airavata.mft.resource.stubs.http.storage.HTTPStorage http = 11;
     }
 }
 
@@ -67,6 +70,7 @@ message SecretWrapper {
         org.apache.airavata.mft.credential.stubs.s3.S3Secret s3 = 7;
         org.apache.airavata.mft.credential.stubs.scp.SCPSecret scp = 8;
         org.apache.airavata.mft.credential.stubs.swift.SwiftSecret swift = 9;
+        org.apache.airavata.mft.credential.stubs.http.HTTPSecret http = 10;
     }
 }
 

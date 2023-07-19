@@ -22,17 +22,24 @@ import org.apache.airavata.mft.credential.stubs.box.*;
 import org.apache.airavata.mft.credential.stubs.dropbox.*;
 import org.apache.airavata.mft.credential.stubs.ftp.*;
 import org.apache.airavata.mft.credential.stubs.gcs.*;
+import org.apache.airavata.mft.credential.stubs.http.*;
 import org.apache.airavata.mft.credential.stubs.odata.*;
 import org.apache.airavata.mft.credential.stubs.s3.*;
 import org.apache.airavata.mft.credential.stubs.scp.*;
 import org.apache.airavata.mft.credential.stubs.swift.*;
 import org.apache.airavata.mft.secret.server.backend.SecretBackend;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.*;
+import org.apache.airavata.mft.secret.server.backend.sql.entity.http.BasicAuthSecretEntity;
+import org.apache.airavata.mft.secret.server.backend.sql.entity.http.HttpSecretEntity;
+import org.apache.airavata.mft.secret.server.backend.sql.entity.http.TokenAuthSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftSecretEntity.InternalSecretType;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftV2AuthSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftV3AuthSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.entity.swift.SwiftSecretEntity;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.*;
+import org.apache.airavata.mft.secret.server.backend.sql.repository.http.BasicAuthSecretRepository;
+import org.apache.airavata.mft.secret.server.backend.sql.repository.http.HttpSecretRepository;
+import org.apache.airavata.mft.secret.server.backend.sql.repository.http.TokenAuthSecretRepository;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.swift.SwiftV2AuthSecretRepository;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.swift.SwiftV3AuthSecretRepository;
 import org.apache.airavata.mft.secret.server.backend.sql.repository.swift.SwiftSecretRepository;
@@ -75,6 +82,15 @@ public class SQLSecretBackend implements SecretBackend {
 
     @Autowired
     private GCSSecretRepository gcsSecretRepository;
+
+    @Autowired
+    private HttpSecretRepository httpSecretRepository;
+
+    @Autowired
+    private BasicAuthSecretRepository basicAuthSecretRepository;
+
+    @Autowired
+    private TokenAuthSecretRepository tokenAuthSecretRepository;
 
     private DozerBeanMapper mapper = new DozerBeanMapper();
 
@@ -374,5 +390,106 @@ public class SQLSecretBackend implements SecretBackend {
     public boolean deleteODataSecret(ODataSecretDeleteRequest request) throws Exception {
         odataSecretRepository.deleteById(request.getSecretId());
         return true;
+    }
+
+    @Override
+    public Optional<HTTPSecret> getHttpSecret(HTTPSecretGetRequest request) throws Exception {
+        Optional<HttpSecretEntity> secEtyOp = httpSecretRepository.findBySecretId(request.getSecretId());
+        if (secEtyOp.isPresent()) {
+            HTTPSecret.Builder secBuilder = HTTPSecret.newBuilder();
+            HttpSecretEntity secEty = secEtyOp.get();
+            secBuilder.setSecretId(secEty.getSecretId());
+
+            switch (secEty.getInternalSecretType()) {
+                case BASIC:
+                    Optional<BasicAuthSecretEntity> basicSec = basicAuthSecretRepository
+                            .findBySecretId(secEty.getInternalSecretId());
+                    if (basicSec.isPresent()) {
+                        BasicAuth.Builder baBuilder = BasicAuth.newBuilder();
+                        mapper.map(basicSec.get(), baBuilder);
+                        secBuilder.setBasic(baBuilder.build());
+                    } else {
+                        throw new Exception("Can not find a swift password secret with id " + secEty.getInternalSecretId());
+                    }
+                    break;
+                case TOKEN:
+                    Optional<TokenAuthSecretEntity> tokenSec = tokenAuthSecretRepository
+                            .findBySecretId(secEty.getInternalSecretId());
+                    if (tokenSec.isPresent()) {
+                        TokenAuth.Builder tBuilder = TokenAuth.newBuilder();
+                        mapper.map(tokenSec.get(), tBuilder);
+                        secBuilder.setToken(tBuilder.build());
+                    } else {
+                        throw new Exception("Can not find a swift auth cred secret with id " + secEty.getInternalSecretId());
+                    }
+                    break;
+                default:
+                    throw new Exception("Non compatible internal secret type : " + secEty.getInternalSecretType());
+            }
+            return Optional.of(secBuilder.build());
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public HTTPSecret createHttpSecret(HTTPSecretCreateRequest request) throws Exception {
+        HttpSecretEntity secEty = new HttpSecretEntity();
+        BasicAuthSecretEntity baSecSaved = null;
+        TokenAuthSecretEntity tSecSaved = null;
+
+        switch (request.getSecret().getAuthCase()) {
+            case BASIC:
+                baSecSaved = basicAuthSecretRepository
+                        .save(mapper.map(request.getSecret().getBasic(), BasicAuthSecretEntity.class));
+                secEty.setInternalSecretId(baSecSaved.getSecretId());
+                secEty.setInternalSecretType(HttpSecretEntity.InternalSecretType.BASIC);
+                break;
+            case TOKEN:
+                tSecSaved = tokenAuthSecretRepository
+                        .save(mapper.map(request.getSecret().getToken(), TokenAuthSecretEntity.class));
+                secEty.setInternalSecretId(tSecSaved.getSecretId());
+                secEty.setInternalSecretType(HttpSecretEntity.InternalSecretType.TOKEN);
+                break;
+            case AUTH_NOT_SET:
+                throw new Exception("No internal secret auth is set");
+        }
+
+        HttpSecretEntity savedEty = httpSecretRepository.save(secEty);
+        HTTPSecret.Builder secBuilder = HTTPSecret.newBuilder();
+        secBuilder.setSecretId(savedEty.getSecretId());
+        switch (savedEty.getInternalSecretType()) {
+            case BASIC:
+                secBuilder.setBasic(mapper.map(baSecSaved, BasicAuth.newBuilder().getClass()));
+                break;
+            case TOKEN:
+                secBuilder.setToken(mapper.map(tSecSaved, TokenAuth.newBuilder().getClass()));
+                break;
+        }
+        return secBuilder.build();
+    }
+
+    @Override
+    public boolean updateHttpSecret(HTTPSecretUpdateRequest request) throws Exception {
+        return false;
+    }
+
+    @Override
+    public boolean deleteHttpSecret(HTTPSecretDeleteRequest request) throws Exception {
+        Optional<HttpSecretEntity> secOp = httpSecretRepository.findBySecretId(request.getSecretId());
+        if (secOp.isPresent()) {
+            httpSecretRepository.deleteById(request.getSecretId());
+            switch (secOp.get().getInternalSecretType()) {
+                case BASIC:
+                    basicAuthSecretRepository.deleteById(secOp.get().getInternalSecretId());
+                    break;
+                case TOKEN:
+                    tokenAuthSecretRepository.deleteById(secOp.get().getInternalSecretId());
+                    break;
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 }

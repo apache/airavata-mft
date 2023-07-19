@@ -31,6 +31,7 @@ enum StorageType {
     AZURE = 7;
     SWIFT = 8;
     ODATA = 9;
+    HTTP = 10;
 }
 
 enum Error {

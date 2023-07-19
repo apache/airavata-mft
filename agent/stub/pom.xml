@@ -73,6 +73,7 @@
                         <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/s3</additionalProtoPathElement>
                         <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/scp</additionalProtoPathElement>
                         <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/swift</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/resource-service/stub/src/main/proto/http</additionalProtoPathElement>
                         <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/azure</additionalProtoPathElement>
                         <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/box</additionalProtoPathElement>
                         <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/dropbox</additionalProtoPathElement>
@@ -82,6 +83,7 @@
                         <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/s3</additionalProtoPathElement>
                         <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/scp</additionalProtoPathElement>
                         <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/swift</additionalProtoPathElement>
+                        <additionalProtoPathElement>../../services/secret-service/stub/src/main/proto/http</additionalProtoPathElement>
                     </additionalProtoPathElements>
                 </configuration>
                 <executions>

@@ -18,7 +18,7 @@
 
 [tool.poetry]
 name = "airavata-mft-cli"
-version = "0.1.10"
+version = "0.1.11"
 description = "Command Line Client for Apache Airavata MFT data transfer software"
 authors = [
     "Dimuthu Wannipurage <dwannipu@iu.edu>",
@@ -40,7 +40,7 @@ typer = {extras = ["all"], version = "^0.7.0"}
 pick = {version= "2.2.0"}
 grpcio= [{version="1.46.3", markers = "platform_machine != 'arm64'"},{version="1.47.0rc1", markers = "platform_machine == 'arm64'"}]
 grpcio-tools = [{version="1.46.3", markers = "platform_machine != 'arm64'"},{version="1.47.0rc1", markers = "platform_machine == 'arm64'"}]
-airavata_mft_sdk= {version="0.0.1-alpha27"}
+airavata-mft-sdk = "0.0.1a33"
 
 [build-system]
 requires = ["poetry-core"]

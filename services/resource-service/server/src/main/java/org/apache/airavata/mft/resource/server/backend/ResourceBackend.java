@@ -22,6 +22,7 @@ import org.apache.airavata.mft.resource.stubs.box.storage.*;
 import org.apache.airavata.mft.resource.stubs.dropbox.storage.*;
 import org.apache.airavata.mft.resource.stubs.ftp.storage.*;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.*;
+import org.apache.airavata.mft.resource.stubs.http.storage.*;
 import org.apache.airavata.mft.resource.stubs.local.storage.*;
 import org.apache.airavata.mft.resource.stubs.odata.storage.*;
 import org.apache.airavata.mft.resource.stubs.s3.storage.*;
@@ -100,5 +101,12 @@ public interface ResourceBackend {
     boolean updateODataStorage(ODataStorageUpdateRequest request) throws Exception;
     boolean deleteODataStorage(ODataStorageDeleteRequest request) throws Exception;
 
+    public HTTPStorageListResponse listHttpStorage(HTTPStorageListRequest request) throws Exception;
+    Optional<HTTPStorage> getHttpStorage(HTTPStorageGetRequest request) throws Exception;
+    HTTPStorage createHttpStorage(HTTPStorageCreateRequest request) throws Exception;
+    boolean updateHttpStorage(HTTPStorageUpdateRequest request) throws Exception;
+    boolean deleteHttpStorage(HTTPStorageDeleteRequest request) throws Exception;
+    
     StorageTypeResolveResponse resolveStorageType(StorageTypeResolveRequest request) throws Exception;
+    
 }

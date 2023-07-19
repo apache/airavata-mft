@@ -43,5 +43,6 @@
         <module>dropbox-transport</module>
         <module>swift-transport</module>
         <module>odata-transport</module>
+        <module>http-transport</module>
     </modules>
 </project>

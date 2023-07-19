@@ -31,6 +31,8 @@ import org.apache.airavata.mft.credential.stubs.ftp.FTPSecret;
 import org.apache.airavata.mft.credential.stubs.ftp.FTPSecretGetRequest;
 import org.apache.airavata.mft.credential.stubs.gcs.GCSSecret;
 import org.apache.airavata.mft.credential.stubs.gcs.GCSSecretGetRequest;
+import org.apache.airavata.mft.credential.stubs.http.HTTPSecret;
+import org.apache.airavata.mft.credential.stubs.http.HTTPSecretGetRequest;
 import org.apache.airavata.mft.credential.stubs.odata.ODataSecret;
 import org.apache.airavata.mft.credential.stubs.odata.ODataSecretGetRequest;
 import org.apache.airavata.mft.credential.stubs.s3.S3Secret;
@@ -50,6 +52,8 @@ import org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorage;
 import org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorageGetRequest;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorage;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageGetRequest;
+import org.apache.airavata.mft.resource.stubs.http.storage.HTTPStorage;
+import org.apache.airavata.mft.resource.stubs.http.storage.HTTPStorageGetRequest;
 import org.apache.airavata.mft.resource.stubs.local.storage.LocalStorage;
 import org.apache.airavata.mft.resource.stubs.local.storage.LocalStorageGetRequest;
 import org.apache.airavata.mft.resource.stubs.odata.storage.ODataStorage;
@@ -234,19 +238,33 @@ public class RequestBuilder {
                 break;
 
             case ODATA:
-                    ODataStorage odataStorage = storageCache.containsKey(storageId)? storageCache.get(storageId).getOdata():
-                            storageServiceClient
-                            .odata()
-                            .getODataStorage(ODataStorageGetRequest.newBuilder().setStorageId(storageId).build());
-                    storageBuilder.setOdata(odataStorage);
+                ODataStorage odataStorage = storageCache.containsKey(storageId)? storageCache.get(storageId).getOdata():
+                        storageServiceClient
+                        .odata()
+                        .getODataStorage(ODataStorageGetRequest.newBuilder().setStorageId(storageId).build());
+                storageBuilder.setOdata(odataStorage);
 
-                    ODataSecret odataSecret = storageCache.containsKey(secretId)? secretCache.get(secretId).getOdata():
-                            secretServiceClient
-                            .odata()
-                            .getODataSecret(ODataSecretGetRequest.newBuilder().setSecretId(secretId).build());
+                ODataSecret odataSecret = storageCache.containsKey(secretId)? secretCache.get(secretId).getOdata():
+                        secretServiceClient
+                        .odata()
+                        .getODataSecret(ODataSecretGetRequest.newBuilder().setSecretId(secretId).build());
 
-                    secretBuilder.setOdata(odataSecret);
-                    break;
+                secretBuilder.setOdata(odataSecret);
+                break;
+            case HTTP:
+                HTTPStorage httpStorage = storageCache.containsKey(storageId)? storageCache.get(storageId).getHttp():
+                        storageServiceClient
+                                .http()
+                                .getHTTPStorage(HTTPStorageGetRequest.newBuilder().setStorageId(storageId).build());
+                storageBuilder.setHttp(httpStorage);
+
+                HTTPSecret httpSecret = storageCache.containsKey(secretId)? secretCache.get(secretId).getHttp():
+                        secretServiceClient
+                                .http()
+                                .getHTTPSecret(HTTPSecretGetRequest.newBuilder().setSecretId(secretId).build());
+
+                secretBuilder.setHttp(httpSecret);
+                break;
                     
         }
 

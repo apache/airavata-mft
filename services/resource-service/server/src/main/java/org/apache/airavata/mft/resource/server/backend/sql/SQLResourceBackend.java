@@ -25,6 +25,7 @@ import org.apache.airavata.mft.resource.stubs.box.storage.*;
 import org.apache.airavata.mft.resource.stubs.dropbox.storage.*;
 import org.apache.airavata.mft.resource.stubs.ftp.storage.*;
 import org.apache.airavata.mft.resource.stubs.gcs.storage.*;
+import org.apache.airavata.mft.resource.stubs.http.storage.*;
 import org.apache.airavata.mft.resource.stubs.local.storage.*;
 import org.apache.airavata.mft.resource.stubs.odata.storage.*;
 import org.apache.airavata.mft.resource.stubs.s3.storage.*;
@@ -77,6 +78,9 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Autowired
     private ODataStorageRepository odataStorageRepository;
+
+    @Autowired
+    private HttpStorageRepository httpStorageRepository;
 
     @Autowired
     private ResolveStorageRepository resolveStorageRepository;
@@ -542,7 +546,47 @@ public class SQLResourceBackend implements ResourceBackend {
     @Override
     public boolean deleteODataStorage(ODataStorageDeleteRequest request) throws Exception {
         odataStorageRepository.deleteById(request.getStorageId());
-        resourceRepository.deleteByStorageIdAndStorageType(request.getStorageId(), GenericResourceEntity.StorageType.SWIFT);
+        resourceRepository.deleteByStorageIdAndStorageType(request.getStorageId(), GenericResourceEntity.StorageType.ODATA);
+        return true;
+    }
+
+    @Override
+    public HTTPStorageListResponse listHttpStorage(HTTPStorageListRequest request) throws Exception {
+        HTTPStorageListResponse.Builder respBuilder = HTTPStorageListResponse.newBuilder();
+        List<HttpStorageEntity> all = httpStorageRepository.findAll(PageRequest.of(request.getOffset(), request.getLimit()));
+        all.forEach(ety -> respBuilder.addStorages(mapper.map(ety, HTTPStorage.newBuilder().getClass())));
+        return respBuilder.build();
+    }
+
+    @Override
+    public Optional<HTTPStorage> getHttpStorage(HTTPStorageGetRequest request) throws Exception {
+        Optional<HttpStorageEntity> entity = httpStorageRepository.findById(request.getStorageId());
+        return entity.map(e -> mapper.map(e, HTTPStorage.newBuilder().getClass()).build());
+    }
+
+    @Override
+    public HTTPStorage createHttpStorage(HTTPStorageCreateRequest request) throws Exception {
+        HttpStorageEntity savedEntity = httpStorageRepository.save(mapper.map(request, HttpStorageEntity.class));
+
+        ResolveStorageEntity storageTypeEty = new ResolveStorageEntity();
+        storageTypeEty.setStorageId(savedEntity.getStorageId());
+        storageTypeEty.setStorageType(ResolveStorageEntity.StorageType.HTTP);
+        storageTypeEty.setStorageName(savedEntity.getName());
+        resolveStorageRepository.save(storageTypeEty);
+
+        return mapper.map(savedEntity, HTTPStorage.newBuilder().getClass()).build();
+    }
+
+    @Override
+    public boolean updateHttpStorage(HTTPStorageUpdateRequest request) throws Exception {
+        httpStorageRepository.save(mapper.map(request, HttpStorageEntity.class));
+        return true;
+    }
+
+    @Override
+    public boolean deleteHttpStorage(HTTPStorageDeleteRequest request) throws Exception {
+        httpStorageRepository.deleteById(request.getStorageId());
+        resourceRepository.deleteByStorageIdAndStorageType(request.getStorageId(), GenericResourceEntity.StorageType.HTTP);
         return true;
     }
 

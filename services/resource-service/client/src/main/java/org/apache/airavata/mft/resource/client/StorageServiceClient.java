@@ -23,6 +23,7 @@ import org.apache.airavata.mft.resource.service.box.BoxStorageServiceGrpc;
 import org.apache.airavata.mft.resource.service.dropbox.DropboxStorageServiceGrpc;
 import org.apache.airavata.mft.resource.service.ftp.FTPStorageServiceGrpc;
 import org.apache.airavata.mft.resource.service.gcs.GCSStorageServiceGrpc;
+import org.apache.airavata.mft.resource.service.http.HTTPStorageServiceGrpc;
 import org.apache.airavata.mft.resource.service.local.LocalStorageServiceGrpc;
 import org.apache.airavata.mft.resource.service.odata.ODataStorageServiceGrpc;
 import org.apache.airavata.mft.resource.service.s3.S3StorageServiceGrpc;
@@ -79,6 +80,10 @@ public class StorageServiceClient implements Closeable {
 
     public ODataStorageServiceGrpc.ODataStorageServiceBlockingStub odata() {
         return ODataStorageServiceGrpc.newBlockingStub(channel);
+    }
+
+    public HTTPStorageServiceGrpc.HTTPStorageServiceBlockingStub http() {
+        return HTTPStorageServiceGrpc.newBlockingStub(channel);
     }
 
     public StorageCommonServiceGrpc.StorageCommonServiceBlockingStub common() {

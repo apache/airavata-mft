@@ -22,6 +22,7 @@ import org.apache.airavata.mft.credential.stubs.box.*;
 import org.apache.airavata.mft.credential.stubs.dropbox.*;
 import org.apache.airavata.mft.credential.stubs.ftp.*;
 import org.apache.airavata.mft.credential.stubs.gcs.*;
+import org.apache.airavata.mft.credential.stubs.http.*;
 import org.apache.airavata.mft.credential.stubs.odata.*;
 import org.apache.airavata.mft.credential.stubs.s3.*;
 import org.apache.airavata.mft.credential.stubs.scp.*;
@@ -78,4 +79,9 @@ public interface SecretBackend {
     ODataSecret createODataSecret(ODataSecretCreateRequest request) throws Exception;
     boolean updateODataSecret(ODataSecretUpdateRequest request) throws Exception;
     boolean deleteODataSecret(ODataSecretDeleteRequest request) throws Exception;
+
+    Optional<HTTPSecret> getHttpSecret(HTTPSecretGetRequest request) throws Exception;
+    HTTPSecret createHttpSecret(HTTPSecretCreateRequest request) throws Exception;
+    boolean updateHttpSecret(HTTPSecretUpdateRequest request) throws Exception;
+    boolean deleteHttpSecret(HTTPSecretDeleteRequest request) throws Exception;
 }

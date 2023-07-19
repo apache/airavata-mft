@@ -48,6 +48,9 @@ public final class ConnectorResolver {
             case "LOCAL":
                 className = "org.apache.airavata.mft.transport.local.LocalIncomingStreamingConnector";
                 break;
+            case "HTTP":
+                className = "org.apache.airavata.mft.trnasport.http.HttpIncomingStreamingConnector";
+                break;
         }
 
         if (className != null) {

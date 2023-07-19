@@ -28,7 +28,7 @@ import javax.persistence.Id;
 public class ResolveStorageEntity {
 
     public enum StorageType {
-        S3, SCP, LOCAL, FTP, BOX, DROPBOX, GCS, AZURE, SWIFT, ODATA;
+        S3, SCP, LOCAL, FTP, BOX, DROPBOX, GCS, AZURE, SWIFT, ODATA,HTTP;
     }
 
     @Id
