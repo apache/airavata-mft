@@ -66,6 +66,9 @@ public class TransferOrchestrator {
     @org.springframework.beans.factory.annotation.Value("${agent.id}")
     private String agentId;
 
+    @org.springframework.beans.factory.annotation.Value("${overwrite.existing}")
+    private Boolean overwriteExisting;
+
     @Autowired
     private MFTConsulClient mftConsulClient;
 
@@ -142,7 +145,7 @@ public class TransferOrchestrator {
             MetadataCollector dstMetadataCollector = dstMetadataCollectorOp.orElseThrow(() -> new Exception("Could not find a metadata collector for destination"));
             dstMetadataCollector.init(destStorage, destSecret);
 
-            if (dstMetadataCollector.isAvailable(endpointPath.getDestinationPath())) {
+            if (!overwriteExisting && dstMetadataCollector.isAvailable(endpointPath.getDestinationPath())) {
                 ResourceMetadata destinationMetadata = dstMetadataCollector.getResourceMetadata(endpointPath.getDestinationPath(), false);
                 if (destinationMetadata.getMetadataCase() == ResourceMetadata.MetadataCase.FILE &&
                         destinationMetadata.getFile().getResourceSize() == srcMetadata.getFile().getResourceSize()) {
