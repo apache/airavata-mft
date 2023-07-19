@@ -48,6 +48,17 @@ case $1 in
             echo "$SERVICE_NAME is already running ..."
         fi
     ;;
+    start-agent)
+        echo "Starting MFT Agent ..."
+        if [ ! -f $PID_PATH_NAME ]; then
+            nohup java ${JAVA_OPTS} -classpath "${AIRAVATA_CLASSPATH}" \
+            org.apache.airavata.mft.standalone.server.AgentServiceApplication ${AIRAVATA_COMMAND} $* > $LOG_FILE 2>&1 &
+            echo $! > $PID_PATH_NAME
+            echo "MFT Agent started ..."
+        else
+            echo "MFT Agent is already running ..."
+        fi
+    ;;
     stop)
         if [ -f $PID_PATH_NAME ]; then
             PID=$(cat $PID_PATH_NAME);
@@ -102,6 +113,7 @@ case $1 in
 
         echo "command options:"
         echo "  start               Start server in daemon mode"
+        echo "  start-agent         Start MFT Agent in daemon mode"
         echo "  stop                Stop server running in daemon mode"
         echo "  restart             Restart server in daemon mode"
 	    echo "  -log <LOG_FILE>     Where to redirect stdout/stderr (defaults to $DEFAULT_LOG_FILE)"
