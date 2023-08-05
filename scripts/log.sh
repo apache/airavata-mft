@@ -18,20 +18,8 @@
 # under the License.
 
 case $1 in
-    agent)
-        tail -100f ../airavata-mft/MFT-Agent-0.01/logs/airavata.log
-    ;;
-    resource)
-        tail -100f ../airavata-mft/Resource-Service-0.01/logs/airavata.log
-    ;;
-    secret)
-        tail -100f ../airavata-mft/Secret-Service-0.01/logs/airavata.log
-    ;;
-    api)
-        tail -100f ../airavata-mft/API-Service-0.01/logs/airavata.log
-    ;;
-    controller)
-        tail -100f ../airavata-mft/MFT-Controller-0.01/logs/airavata.log
+    mft)
+        tail -100f ../airavata-mft/Standalone-Service-0.01/logs/airavata.log
     ;;
     consul)
         tail -100f ../airavata-mft/consul/consul.log
@@ -40,11 +28,8 @@ case $1 in
         echo "Usage: log.sh"
 
         echo "command options:"
-        echo "  agent                View logs of MFT Agent"
-        echo "  resource             View logs of MFT Resource Service"
-        echo "  secret               View logs of MFT Secret Service"
-        echo "  api                  View logs of MFT API Service"
-        echo "  controller           View logs of MFT Controller"
+        echo "  mft                  View logs of MFT"
+        echo "  consul               View logs of Consul"
         echo "  -h                   Display this help and exit"
         shift
         exit 0

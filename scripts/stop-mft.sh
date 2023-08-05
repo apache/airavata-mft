@@ -17,8 +17,4 @@
 # specific language governing permissions and limitations
 # under the License.
 
-./../airavata-mft/API-Service-0.01/bin/api-service-daemon.sh stop
-./../airavata-mft/MFT-Controller-0.01/bin/controller-daemon.sh stop
-./../airavata-mft/Resource-Service-0.01/bin/resource-service-daemon.sh stop
-./../airavata-mft/Secret-Service-0.01/bin/secret-service-daemon.sh stop
-./../airavata-mft/MFT-Agent-0.01/bin/agent-daemon.sh stop
+./../airavata-mft/Standalone-Service-0.01/bin/standalone-service-daemon.sh stop
