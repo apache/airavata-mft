@@ -65,6 +65,8 @@
             <includes>
                 <include>application.properties</include>
                 <include>log4j2.xml</include>
+                <include>resource-service-application.properties</include>
+                <include>secret-service-application.properties</include>
                 <include>applicationContext.xml</include>
                 <include>resources.json</include>
             </includes>
@@ -82,18 +84,6 @@
             <includes>
                 <include>*.jar</include>
             </includes>
-        </fileSet>
-        <fileSet>
-            <directory>../services/resource-service/server/src/main/resources/distribution/conf</directory>
-            <outputDirectory>conf</outputDirectory>
-            <includes>
-                <include>resource-service-application.properties</include></includes>
-        </fileSet>
-        <fileSet>
-            <directory>../services/secret-service/server/src/main/resources/distribution/conf</directory>
-            <outputDirectory>conf</outputDirectory>
-            <includes>
-                <include>secret-service-application.properties</include></includes>
         </fileSet>
     </fileSets>
 
