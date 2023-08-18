@@ -104,13 +104,13 @@ public class MFTController implements CommandLineRunner {
             String transferId = key.substring(key.lastIndexOf("/") + 1);
             Optional<byte[]> decodedValue = value.getValueAsBytes();
             decodedValue.ifPresent(v -> {
-                logger.info("Received transfer request : {} with id {}", v, transferId);
 
                 TransferApiRequest transferRequest;
                 try {
                     TransferApiRequest.Builder builder = TransferApiRequest.newBuilder();
                     builder.mergeFrom(v);
                     transferRequest = builder.build();
+                    logger.info("Received transfer request : {} with id {}", transferRequest, transferId);
                 } catch (IOException e) {
                     logger.error("Failed to parse the transfer request {}", v, e);
                     return;
