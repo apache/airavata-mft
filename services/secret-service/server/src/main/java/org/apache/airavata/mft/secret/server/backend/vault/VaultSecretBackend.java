@@ -54,7 +54,7 @@ public class VaultSecretBackend implements SecretBackend {
 
     // Reference: https://stackoverflow.com/questions/1053467/how-do-i-save-a-string-to-a-text-file-using-java
 
-    public VaultInitData setVaultInit(String body) {
+    private VaultInitData setVaultInit(String body) {
         VaultInitData vaultInitData = new VaultInitData();
         JSONObject field = new JSONObject(body);
         JSONArray keysArray = field.getJSONArray("keys");
