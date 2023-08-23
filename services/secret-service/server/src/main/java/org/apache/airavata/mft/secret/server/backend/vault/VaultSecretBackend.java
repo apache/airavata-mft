@@ -33,9 +33,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class VaultSecretBackend implements SecretBackend {
+    private static final Logger logger = LoggerFactory.getLogger(VaultSecretBackend.class);
     private  Vault vault;
 
     private VaultInitData vaultGlobalCreds = null;
@@ -48,9 +51,6 @@ public class VaultSecretBackend implements SecretBackend {
 
 
     private final DozerBeanMapper mapper = new DozerBeanMapper();
-
-    // How to start vault server and initialize the vault through API
-    // Implement
 
     // Reference: https://stackoverflow.com/questions/1053467/how-do-i-save-a-string-to-a-text-file-using-java
 
@@ -101,8 +101,7 @@ public class VaultSecretBackend implements SecretBackend {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(vaultCredsPath))) {
             writer.write(response.toString());
         } catch (IOException e) {
-            System.out.println("Error while writing the key file");
-            e.printStackTrace();
+            logger.error("Error while writing the key file", e);
             throw new RuntimeException(e);
         }
 
@@ -117,12 +116,10 @@ public class VaultSecretBackend implements SecretBackend {
                 output.append(line);
             }
         } catch (FileNotFoundException e) {
-            System.out.println("Error: FileNotFoundException in reading the vault creds file");
-            e.printStackTrace();
+            logger.error("Error: FileNotFoundException in reading the vault creds file", e);
             throw new RuntimeException(e);
         } catch (IOException e) {
-            System.out.println("Error: IOException in reading vault creds file");
-            e.printStackTrace();
+            logger.error("Error: IOException in reading vault creds file", e);
             throw new RuntimeException(e);
         }
         return setVaultInit(output.toString());
@@ -133,9 +130,8 @@ public class VaultSecretBackend implements SecretBackend {
         try {
             sealResponse = seal.unseal(vaultGlobalCreds.getKeys()[0]);
         } catch (VaultException ve) {
-            ve.printStackTrace();
-            System.out.println("Error: Unsealing with Key 1 failed");
-            throw new RuntimeException("Error: Unsealing with Key 1 failed");
+            logger.error("Error: Unsealing with Key failed", ve);
+            throw new RuntimeException(ve);
         }
         return sealResponse.getSealed();
     }
@@ -152,8 +148,7 @@ public class VaultSecretBackend implements SecretBackend {
         try {
             mounts.enable("secret", MountType.KEY_VALUE_V2, payloadLocal);
         } catch (VaultException e) {
-            e.printStackTrace();
-            System.out.println("Error: Unable to mount the path");
+            logger.error("Error: Unable to mount the path", e);
             throw new RuntimeException(e);
         }
 
@@ -175,6 +170,7 @@ public class VaultSecretBackend implements SecretBackend {
      */
     @Override
     public void init() {
+        logger.info("Intializing the vault");
         int VAULT_OPEN_TIMEOUT = 5;
         int VAULT_READ_TIMEOUT = 30;
         int VAULT_KV_VERSION = 2;
@@ -187,7 +183,7 @@ public class VaultSecretBackend implements SecretBackend {
             try {
                 vaultGlobalCreds = initializeVault();
             } catch (IOException e) {
-                System.out.println("Error in init function");
+                logger.error("Error initializing vault", e);
                 throw new RuntimeException(e);
             }
         } else {
@@ -203,8 +199,7 @@ public class VaultSecretBackend implements SecretBackend {
                     .engineVersion(VAULT_KV_VERSION)
                     .build();
         } catch (VaultException ve) {
-            System.out.println("Error: Vault Exception, unable to config and build");
-            ve.printStackTrace();
+            logger.error("Error: Vault Exception, unable to config and build", ve);
             throw new RuntimeException(ve);
         }
 
@@ -215,15 +210,14 @@ public class VaultSecretBackend implements SecretBackend {
         try {
             sealResponse = sealLocal.sealStatus();
         } catch (VaultException ve) {
-            System.out.println("Error: Cannot get seal response");
-            ve.printStackTrace();
+            logger.warn("Warning: Cannot get seal response", ve);
             throw new RuntimeException(ve);
         }
 
         if (sealResponse.getSealed()) {
             boolean sealStatus = unsealVault(sealLocal);
             if (sealStatus) {
-                System.out.println("Error: Unsealing vault failed");
+                logger.error("Error: Unsealing vault failed");
                 throw new RuntimeException("Error: Unsealing vault failed");
             }
         }
@@ -235,11 +229,11 @@ public class VaultSecretBackend implements SecretBackend {
                 mountPath();
             }
         } catch (VaultException e) {
-            System.out.println("Error; Checking mounts failed");
-            e.printStackTrace();
+            logger.error("Error while mounting the path", e);
             throw new RuntimeException(e);
         }
         populatePathsToMap();
+        logger.info("Initializing the Vault Completed");
     }
 
     /**
@@ -256,6 +250,7 @@ public class VaultSecretBackend implements SecretBackend {
      */
     @Override
     public SCPSecret createSCPSecret(SCPSecretCreateRequest request) {
+        logger.info("Creating SCP secret");
         SCPSecretEntity entity = new SCPSecretEntity();
         Gson gson = new Gson();
 
@@ -274,10 +269,11 @@ public class VaultSecretBackend implements SecretBackend {
         try {
             vault.logical().write(pathMap.get("scp"), secrets);
         } catch (VaultException e) {
-            e.printStackTrace();
-            System.out.println("Error while writing secrets to secret/scp ");
+            logger.error("Error while writing secrets to secret/scp", e);
             throw new RuntimeException(e);
         }
+
+        logger.info("Completed writing created SCP secret into the vault");
 
         return mapper.map(entity, SCPSecret.newBuilder().getClass()).build();
     }
@@ -289,6 +285,7 @@ public class VaultSecretBackend implements SecretBackend {
      */
     @Override
     public Optional<SCPSecret> getSCPSecret(SCPSecretGetRequest request) throws Exception {
+        logger.info("Fetching the required SCP secret from the vault");
         String secretId = request.getSecretId();
 
         String readString;
@@ -301,17 +298,19 @@ public class VaultSecretBackend implements SecretBackend {
                     .getData()
                     .get(secretId);
         } catch (VaultException e) {
-            e.printStackTrace();
-            System.out.println("Error in reading from vault in readWrite");
+            logger.error("Error in reading from vault in readWrite", e);
             throw new RuntimeException(e);
         }
 
         if (readString == null) {
+            logger.info("Unable to fetch the required SCP secret from the vault");
             return Optional.empty();
         }
 
         SCPSecretEntity entity = gson.fromJson(readString, SCPSecretEntity.class);
         SCPSecret scpSecret = mapper.map(entity, SCPSecret.newBuilder().getClass()).build();
+
+        logger.info("Returning the required SCP secret from the vault");
 
         return Optional.of(scpSecret);
     }
@@ -324,6 +323,7 @@ public class VaultSecretBackend implements SecretBackend {
      */
     @Override
     public boolean updateSCPSecret(SCPSecretUpdateRequest request) {
+        logger.info("Updating the required SCP secret from the vault");
         Gson gson = new Gson();
 
         Map<String, String> readMap;
@@ -331,12 +331,17 @@ public class VaultSecretBackend implements SecretBackend {
         try {
             readMap = vault.withRetries(5, 1000).logical().read(pathMap.get("scp")).getData();
         } catch (VaultException e) {
-            e.printStackTrace();
-            System.out.println("Error while reading the secrets in the deleteSecrets() method");
+            logger.error("Error while reading the secrets in the deleteSecrets() method", e);
             throw new RuntimeException(e);
         }
 
         String value = readMap.get(request.getSecretId());
+
+        if (value == null) {
+            logger.info("Secret ID does not exist in the vault");
+            return false;
+        }
+
         SCPSecretEntity entity = gson.fromJson(value, SCPSecretEntity.class);
 
         // update & populate entity
@@ -357,11 +362,11 @@ public class VaultSecretBackend implements SecretBackend {
         try {
             vault.logical().write(pathMap.get("scp"), secrets);
         } catch (VaultException e) {
-            e.printStackTrace();
-            System.out.println("Error while writing secrets to secret/scp ");
+            logger.error("Error while writing secrets to secret/scp", e);
             throw new RuntimeException(e);
         }
 
+        logger.info("Updated the required secret successfully");
         return true;
     }
 
@@ -371,23 +376,23 @@ public class VaultSecretBackend implements SecretBackend {
      */
     @Override
     public boolean deleteSCPSecret(SCPSecretDeleteRequest request) {
+        logger.info("Deleting the required SCP secret from the vault");
         Map<String, String> readMap;
 
         try {
             readMap = vault.withRetries(5, 1000).logical().read(pathMap.get("scp")).getData();
         } catch (VaultException e) {
-            e.printStackTrace();
-            System.out.println("Error while reading the secrets in the deleteSecrets() method");
+            logger.error("Error while reading the secrets in the deleteSecrets() method", e);
             throw new RuntimeException(e);
         }
 
-        if (readMap.keySet().size() <= 1) {
+        if (readMap == null || readMap.keySet().size() <= 1) {
             try {
                 vault.logical().delete(pathMap.get("scp"));
+                logger.info("Deleted the required SCP secret from the vault");
                 return true;
             } catch (VaultException e) {
-                e.printStackTrace();
-                System.out.println("Error while deleting the secrets in the deleteSecrets() method");
+                logger.error("Error while deleting the secrets in the deleteSecrets() method", e);
                 throw new RuntimeException(e);
             }
         }
@@ -399,11 +404,12 @@ public class VaultSecretBackend implements SecretBackend {
         try {
             vault.logical().write(pathMap.get("scp"), secrets);
         } catch (VaultException e) {
-            System.out.println("Error while writing secrets to secret/scp ");
+            logger.error("Error while writing secrets to secret/scp", e);
+            throw new RuntimeException(e);
         }
 
-
-        return false;
+        logger.info("Deleted the required SCP secret from the vault");
+        return true;
     }
 
     /**
