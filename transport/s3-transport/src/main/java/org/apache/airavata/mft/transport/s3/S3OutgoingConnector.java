@@ -70,15 +70,15 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
 
         s3Client = S3Util.getInstance().leaseS3Client(s3Secret, s3Storage);
 
-        if (cc.getChunkSize() < cc.getMetadata().getFile().getResourceSize()) {
+        //if (cc.getChunkSize() < cc.getMetadata().getFile().getResourceSize()) {
             InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(s3Storage.getBucketName(),
                     resourcePath);
             initResponse = s3Client.initiateMultipartUpload(initRequest);
             logger.info("Initialized multipart upload for file {} in bucket {}",
                     resourcePath, s3Storage.getBucketName());
-        } else {
-            logger.info("Using non-multipart upload for file {} in bucket {}", resourcePath, s3Storage.getBucketName());
-        }
+        //} else {
+        //    logger.info("Using non-multipart upload for file {} in bucket {}", resourcePath, s3Storage.getBucketName());
+        //}
     }
 
     @Override
