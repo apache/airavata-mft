@@ -130,11 +130,13 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
 
     @Override
     public void complete() throws Exception {
-        CompleteMultipartUploadRequest compRequest = new CompleteMultipartUploadRequest(s3Storage.getBucketName(),
-                resourcePath, initResponse.getUploadId(), partETags);
-        s3Client.completeMultipartUpload(compRequest);
-        logger.info("Completing the upload for file {} in bucket {}", resourcePath,
-                s3Storage.getBucketName());
+
+        if (initResponse != null) {
+            CompleteMultipartUploadRequest compRequest = new CompleteMultipartUploadRequest(s3Storage.getBucketName(),
+                    resourcePath, initResponse.getUploadId(), partETags);
+            s3Client.completeMultipartUpload(compRequest);
+        }
+        logger.info("Completed the upload for file {} in bucket {}", resourcePath, s3Storage.getBucketName());
     }
 
     @Override
