@@ -92,10 +92,10 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
                     .withUploadId(initResponse.getUploadId())
                     .withPartNumber(chunkId + 1)
                     .withFileOffset(0)
-                    //.withMD5Digest(Md5Utils.md5AsBase64(new File(uploadFile)))
-//                    .withFile(file)
-                    .withInputStream(new BufferedInputStream(new FileInputStream(file), Math.min(16 * 1024 * 1024, (int) ( endByte - startByte))))
-                    .withPartSize(file.length());
+                    .withFile(file)
+                    .withMD5Digest(Md5Utils.md5AsBase64(new File(uploadFile)))
+                    //.withInputStream(new BufferedInputStream(new FileInputStream(file), Math.min(16 * 1024 * 1024, (int) ( endByte - startByte))))
+                    .withPartSize(endByte - startByte);
 
             UploadPartResult uploadResult = s3Client.uploadPart(uploadRequest);
             this.partETags.add(uploadResult.getPartETag());
