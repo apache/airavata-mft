@@ -66,7 +66,7 @@ public class SwiftIncomingConnector implements IncomingChunkedConnector {
     public void downloadChunk(int chunkId, long startByte, long endByte, String downloadFile) throws Exception {
         SwiftObject swiftObject = objectApi.get(
                 resourcePath,
-                GetOptions.Builder.range(startByte, endByte));
+                GetOptions.Builder.range(startByte, endByte - 1));
 
         InputStream inputStream = swiftObject.getPayload().openStream();
 
@@ -85,7 +85,7 @@ public class SwiftIncomingConnector implements IncomingChunkedConnector {
 
         SwiftObject swiftObject = objectApi.get(
                 resourcePath,
-                GetOptions.Builder.range(startByte, endByte));
+                GetOptions.Builder.range(startByte, endByte - 1));
 
         return swiftObject.getPayload().openStream();
     }
