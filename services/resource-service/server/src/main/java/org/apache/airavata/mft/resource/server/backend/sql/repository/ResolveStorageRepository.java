@@ -30,4 +30,6 @@ public interface ResolveStorageRepository extends CrudRepository<ResolveStorageE
     Optional<ResolveStorageEntity> getByStorageId(String storageID);
     List<ResolveStorageEntity> getByStorageName(String storageName);
     List<ResolveStorageEntity> getByStorageType(ResolveStorageEntity.StorageType storageType);
+
+    int deleteByStorageId(String storageId);
 }

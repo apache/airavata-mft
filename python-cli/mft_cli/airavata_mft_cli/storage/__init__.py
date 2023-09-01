@@ -60,6 +60,20 @@ def add_storage():
     except Exception as e:
         exception_handler(e)
 
+@app.command("remove")
+def remove_storage(storage_id):
+    client = mft_client.MFTClient(transfer_api_port = configcli.transfer_api_port,
+                                        transfer_api_secured = configcli.transfer_api_secured,
+                                        resource_service_host = configcli.resource_service_host,
+                                        resource_service_port = configcli.resource_service_port,
+                                        resource_service_secured = configcli.resource_service_secured,
+                                        secret_service_host = configcli.secret_service_host,
+                                        secret_service_port = configcli.secret_service_port)
+    delete_request = StorageCommon_pb2.SecretForStorageDeleteRequest(storageId=storage_id)
+    delete_response = client.common_api.deleteSecretsForStorage(delete_request)
+    console = Console()
+    console.print("Storage removed: " + str(delete_response.status))
+
 @app.command("list")
 def list_storage():
     try:
