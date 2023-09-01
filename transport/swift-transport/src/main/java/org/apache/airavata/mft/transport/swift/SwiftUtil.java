@@ -26,6 +26,7 @@ import org.apache.airavata.mft.credential.stubs.swift.SwiftV3AuthSecret;
 import org.jclouds.ContextBuilder;
 import org.jclouds.openstack.keystone.config.KeystoneProperties;
 import org.jclouds.openstack.swift.v1.SwiftApi;
+import org.jclouds.openstack.swift.v1.SwiftApiMetadata;
 
 // https://jclouds.apache.org/guides/openstack/
 public class SwiftUtil {
@@ -75,13 +76,13 @@ public class SwiftUtil {
 
         SwiftApi swiftApi;
 
-        String provider = "openstack-swift";
+        //String provider = "openstack-swift";
         Properties overrides = new Properties();
         switch (swiftSecret.getSecretCase()) {
           case V2AUTHSECRET:
               SwiftV2AuthSecret v2AuthSecret = swiftSecret.getV2AuthSecret();
               overrides.put(KeystoneProperties.KEYSTONE_VERSION, "2");
-              swiftApi = ContextBuilder.newBuilder(provider)
+              swiftApi = ContextBuilder.newBuilder(new SwiftApiMetadata())
                   .endpoint(swiftSecret.getEndpoint())
                   .credentials(v2AuthSecret.getTenant() + ":" + v2AuthSecret.getUserName(),
                       v2AuthSecret.getPassword())
@@ -100,7 +101,7 @@ public class SwiftUtil {
                   overrides.put(KeystoneProperties.PROJECT_DOMAIN_NAME, v3AuthSecret.getProjectDomainName());
               }
 
-              swiftApi =  ContextBuilder.newBuilder(provider)
+              swiftApi =  ContextBuilder.newBuilder(new SwiftApiMetadata())
                   .endpoint(swiftSecret.getEndpoint())
                   .credentials(v3AuthSecret.getUserDomainName() + ":" + v3AuthSecret.getUserName(),
                       v3AuthSecret.getPassword())
