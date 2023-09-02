@@ -48,6 +48,9 @@ public class S3StorageEntity {
     @Column(name = "USE_TLS")
     private boolean useTLS;
 
+    @Column(name = "PATH_STYLE_ACCESS")
+    private boolean enablePathStyleAccess = false;
+
     public String getStorageId() {
         return storageId;
     }
@@ -94,5 +97,13 @@ public class S3StorageEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean isEnablePathStyleAccess() {
+        return enablePathStyleAccess;
+    }
+
+    public void setEnablePathStyleAccess(boolean enablePathStyleAccess) {
+        this.enablePathStyleAccess = enablePathStyleAccess;
     }
 }
