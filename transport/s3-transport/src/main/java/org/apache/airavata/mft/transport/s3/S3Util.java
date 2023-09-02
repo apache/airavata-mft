@@ -97,13 +97,19 @@ public class S3Util {
         ClientConfiguration clientConfiguration = new ClientConfiguration();
         clientConfiguration.setUseTcpKeepAlive(true);
 
-        AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
+        AmazonS3ClientBuilder amazonS3ClientBuilder = AmazonS3ClientBuilder.standard()
                 .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
                         s3Storage.getEndpoint(), s3Storage.getRegion()))
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
                 .withClientConfiguration(clientConfiguration)
-                .disableChunkedEncoding()
-                .build();
+                .enablePathStyleAccess()
+                .disableChunkedEncoding();
+
+        if (s3Storage.getEnablePathStyleAccess()) {
+            amazonS3ClientBuilder = amazonS3ClientBuilder.enablePathStyleAccess();
+        }
+
+        AmazonS3 s3Client = amazonS3ClientBuilder.build();
 
         s3ClientCache.get().put(secretKey, s3Client);
         return s3Client;

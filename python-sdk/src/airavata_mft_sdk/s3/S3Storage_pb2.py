@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12s3/S3Storage.proto\x12\x31org.apache.airavata.mft.resource.stubs.s3.storage\"r\n\tS3Storage\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x12\n\nbucketName\x18\x02 \x01(\t\x12\x0e\n\x06region\x18\x03 \x01(\t\x12\x10\n\x08\x65ndpoint\x18\x04 \x01(\t\x12\x0e\n\x06useTLS\x18\x05 \x01(\x08\x12\x0c\n\x04name\x18\x06 \x01(\t\"5\n\x14S3StorageListRequest\x12\x0e\n\x06offset\x18\x01 \x01(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\"g\n\x15S3StorageListResponse\x12N\n\x08storages\x18\x01 \x03(\x0b\x32<.org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage\"(\n\x13S3StorageGetRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"\x7f\n\x16S3StorageCreateRequest\x12\x12\n\nbucketName\x18\x01 \x01(\t\x12\x0e\n\x06region\x18\x02 \x01(\t\x12\x11\n\tstorageId\x18\x03 \x01(\t\x12\x10\n\x08\x65ndpoint\x18\x04 \x01(\t\x12\x0e\n\x06useTLS\x18\x05 \x01(\x08\x12\x0c\n\x04name\x18\x06 \x01(\t\"\x7f\n\x16S3StorageUpdateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x12\n\nbucketName\x18\x02 \x01(\t\x12\x0e\n\x06region\x18\x03 \x01(\t\x12\x10\n\x08\x65ndpoint\x18\x04 \x01(\t\x12\x0e\n\x06useTLS\x18\x05 \x01(\x08\x12\x0c\n\x04name\x18\x06 \x01(\t\",\n\x17S3StorageUpdateResponse\x12\x11\n\tstorageId\x18\x01 \x01(\t\"+\n\x16S3StorageDeleteRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\")\n\x17S3StorageDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x42\x02P\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12s3/S3Storage.proto\x12\x31org.apache.airavata.mft.resource.stubs.s3.storage\"\x91\x01\n\tS3Storage\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x12\n\nbucketName\x18\x02 \x01(\t\x12\x0e\n\x06region\x18\x03 \x01(\t\x12\x10\n\x08\x65ndpoint\x18\x04 \x01(\t\x12\x0e\n\x06useTLS\x18\x05 \x01(\x08\x12\x0c\n\x04name\x18\x06 \x01(\t\x12\x1d\n\x15\x65nablePathStyleAccess\x18\x07 \x01(\x08\"5\n\x14S3StorageListRequest\x12\x0e\n\x06offset\x18\x01 \x01(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\"g\n\x15S3StorageListResponse\x12N\n\x08storages\x18\x01 \x03(\x0b\x32<.org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage\"(\n\x13S3StorageGetRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\"\x9e\x01\n\x16S3StorageCreateRequest\x12\x12\n\nbucketName\x18\x01 \x01(\t\x12\x0e\n\x06region\x18\x02 \x01(\t\x12\x11\n\tstorageId\x18\x03 \x01(\t\x12\x10\n\x08\x65ndpoint\x18\x04 \x01(\t\x12\x0e\n\x06useTLS\x18\x05 \x01(\x08\x12\x0c\n\x04name\x18\x06 \x01(\t\x12\x1d\n\x15\x65nablePathStyleAccess\x18\x07 \x01(\x08\"\x9e\x01\n\x16S3StorageUpdateRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\x12\x12\n\nbucketName\x18\x02 \x01(\t\x12\x0e\n\x06region\x18\x03 \x01(\t\x12\x10\n\x08\x65ndpoint\x18\x04 \x01(\t\x12\x0e\n\x06useTLS\x18\x05 \x01(\x08\x12\x0c\n\x04name\x18\x06 \x01(\t\x12\x1d\n\x15\x65nablePathStyleAccess\x18\x07 \x01(\x08\",\n\x17S3StorageUpdateResponse\x12\x11\n\tstorageId\x18\x01 \x01(\t\"+\n\x16S3StorageDeleteRequest\x12\x11\n\tstorageId\x18\x01 \x01(\t\")\n\x17S3StorageDeleteResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x42\x02P\x01\x62\x06proto3')
 
 
 
@@ -94,22 +94,22 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'P\001'
-  _S3STORAGE._serialized_start=73
-  _S3STORAGE._serialized_end=187
-  _S3STORAGELISTREQUEST._serialized_start=189
-  _S3STORAGELISTREQUEST._serialized_end=242
-  _S3STORAGELISTRESPONSE._serialized_start=244
-  _S3STORAGELISTRESPONSE._serialized_end=347
-  _S3STORAGEGETREQUEST._serialized_start=349
-  _S3STORAGEGETREQUEST._serialized_end=389
-  _S3STORAGECREATEREQUEST._serialized_start=391
-  _S3STORAGECREATEREQUEST._serialized_end=518
-  _S3STORAGEUPDATEREQUEST._serialized_start=520
-  _S3STORAGEUPDATEREQUEST._serialized_end=647
-  _S3STORAGEUPDATERESPONSE._serialized_start=649
-  _S3STORAGEUPDATERESPONSE._serialized_end=693
-  _S3STORAGEDELETEREQUEST._serialized_start=695
-  _S3STORAGEDELETEREQUEST._serialized_end=738
-  _S3STORAGEDELETERESPONSE._serialized_start=740
-  _S3STORAGEDELETERESPONSE._serialized_end=781
+  _S3STORAGE._serialized_start=74
+  _S3STORAGE._serialized_end=219
+  _S3STORAGELISTREQUEST._serialized_start=221
+  _S3STORAGELISTREQUEST._serialized_end=274
+  _S3STORAGELISTRESPONSE._serialized_start=276
+  _S3STORAGELISTRESPONSE._serialized_end=379
+  _S3STORAGEGETREQUEST._serialized_start=381
+  _S3STORAGEGETREQUEST._serialized_end=421
+  _S3STORAGECREATEREQUEST._serialized_start=424
+  _S3STORAGECREATEREQUEST._serialized_end=582
+  _S3STORAGEUPDATEREQUEST._serialized_start=585
+  _S3STORAGEUPDATEREQUEST._serialized_end=743
+  _S3STORAGEUPDATERESPONSE._serialized_start=745
+  _S3STORAGEUPDATERESPONSE._serialized_end=789
+  _S3STORAGEDELETEREQUEST._serialized_start=791
+  _S3STORAGEDELETEREQUEST._serialized_end=834
+  _S3STORAGEDELETERESPONSE._serialized_start=836
+  _S3STORAGEDELETERESPONSE._serialized_end=877
 # @@protoc_insertion_point(module_scope)

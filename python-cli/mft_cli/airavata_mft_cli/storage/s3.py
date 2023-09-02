@@ -43,6 +43,8 @@ def handle_add_storage():
     options = ["Through AWS Cli config file", "Enter manually" ]
     option, index = pick(options, "How do you want to load credentials", indicator="=>")
 
+    enable_path_style_access = False
+
     if index == 1: # Manual configuration
         client_id = typer.prompt("Access Key ID")
         client_secret = typer.prompt("Secret Access Key")
@@ -59,6 +61,7 @@ def handle_add_storage():
         else: # If endpoint is a S3 compatible endpoint
             endpoint = typer.prompt("What is the S3 endpoint URL?")
             region = typer.prompt("What is the region of the bucket?")
+            enable_path_style_access = typer.confirm("Enable Path Style Access?", False)
 
     else: # Loading credentials from the aws cli config file
         config = configparser.RawConfigParser()
@@ -93,7 +96,7 @@ def handle_add_storage():
     s3_secret = S3Credential_pb2.S3Secret(accessKey=client_id, secretKey=client_secret, sessionToken = session_token)
     secret_wrapper = MFTAgentStubs_pb2.SecretWrapper(s3=s3_secret)
 
-    s3_storage = S3Storage_pb2.S3Storage(endpoint=endpoint, region=region)
+    s3_storage = S3Storage_pb2.S3Storage(endpoint=endpoint, region=region, enablePathStyleAccess=enable_path_style_access)
     storage_wrapper = MFTAgentStubs_pb2.StorageWrapper(s3=s3_storage)
 
     direct_req = MFTAgentStubs_pb2.GetResourceMetadataRequest(resourcePath="", secret=secret_wrapper, storage=storage_wrapper)

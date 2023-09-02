@@ -27,6 +27,7 @@ message S3Storage {
     string endpoint = 4;
     bool useTLS = 5;
     string name = 6;
+    bool enablePathStyleAccess = 7;
 }
 
 message S3StorageListRequest {
@@ -49,6 +50,7 @@ message S3StorageCreateRequest {
     string endpoint = 4;
     bool useTLS = 5;
     string name = 6;
+    bool enablePathStyleAccess = 7;
 }
 
 message S3StorageUpdateRequest {
@@ -58,6 +60,7 @@ message S3StorageUpdateRequest {
     string endpoint = 4;
     bool useTLS = 5;
     string name = 6;
+    bool enablePathStyleAccess = 7;
 }
 
 message S3StorageUpdateResponse {
