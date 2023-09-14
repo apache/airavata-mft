@@ -35,15 +35,16 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
-
+@Component("VaultSecretBackend")
 public class VaultSecretBackend implements SecretBackend {
     private static final Logger logger = LoggerFactory.getLogger(VaultSecretBackend.class);
-    private  Vault vault;
+    private static Vault vault;
 
     private VaultInitData vaultGlobalCreds = null;
 
-    private final Map<String, String> pathMap = new HashMap<>();
+    private static final Map<String, String> pathMap = new HashMap<>();
 
     private final String vaultCredsPath="./airavata-mft/vault/keys/unseal.keys";
 
@@ -80,12 +81,15 @@ public class VaultSecretBackend implements SecretBackend {
     private VaultInitData initializeVault() throws IOException {
         String body = "{\"secret_shares\": 1, \"secret_threshold\": 1}";
         URL url = new URL(VAULT_ADDR + "/v1/sys/init");
+
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
 
         try (DataOutputStream dos = new DataOutputStream(connection.getOutputStream())) {
             dos.writeBytes(body);
+        } catch (IOException e) {
+            logger.error("Error while writing data to the POST body");
         }
 
         StringBuilder response= new StringBuilder();
@@ -140,10 +144,9 @@ public class VaultSecretBackend implements SecretBackend {
         Mounts mounts = vault.mounts();
 
         final MountPayload payloadLocal = new MountPayload()
-                .defaultLeaseTtl(TimeToLive.of(100, TimeUnit.HOURS))
-                .maxLeaseTtl(TimeToLive.of(100, TimeUnit.HOURS))
-                .maxLeaseTtl(TimeToLive.of(100, TimeUnit.HOURS))
-                .description("Expiration time is set for 100 hours");
+                .defaultLeaseTtl(TimeToLive.of(365*24, TimeUnit.HOURS))
+                .maxLeaseTtl(TimeToLive.of(365*24, TimeUnit.HOURS))
+                .description("Expiration time is set for 1 year");
 
         try {
             mounts.enable("secret", MountType.KEY_VALUE_V2, payloadLocal);
@@ -179,7 +182,9 @@ public class VaultSecretBackend implements SecretBackend {
         String path="./airavata-mft/vault/vault-data";
         File f = new File(path);
 
+
         if (!f.isDirectory()) {
+
             try {
                 vaultGlobalCreds = initializeVault();
             } catch (IOException e) {
@@ -187,6 +192,7 @@ public class VaultSecretBackend implements SecretBackend {
                 throw new RuntimeException(e);
             }
         } else {
+
             vaultGlobalCreds = readVaultCreds();
         }
 
@@ -233,6 +239,9 @@ public class VaultSecretBackend implements SecretBackend {
             throw new RuntimeException(e);
         }
         populatePathsToMap();
+
+
+
         logger.info("Initializing the Vault Completed");
     }
 
@@ -254,6 +263,7 @@ public class VaultSecretBackend implements SecretBackend {
         SCPSecretEntity entity = new SCPSecretEntity();
         Gson gson = new Gson();
 
+
         // Generate UUID
         String uuid = UUID.randomUUID().toString();
         entity.setSecretId(uuid);
@@ -262,14 +272,30 @@ public class VaultSecretBackend implements SecretBackend {
         entity.setPassphrase(request.getPassphrase());
         entity.setUser(request.getUser());
 
-        Map<String, Object> secrets = new HashMap<>();
-        // SecretId is chosen as the key because SCPSecretGetRequest only has getters for SecretId
-        secrets.put(entity.getSecretId(), gson.toJson(entity));
+        Map<String, String> readMap;
 
         try {
-            vault.logical().write(pathMap.get("scp"), secrets);
+            readMap = vault.withRetries(5, 1000).logical().read(pathMap.get("scp")).getData();
+        } catch (VaultException e) {
+            logger.error("Error while reading the secrets in the deleteSecrets() method", e);
+            throw new RuntimeException(e);
+        }
+
+
+
+        // Map<String, Object> secrets = new HashMap<>();
+        // SecretId is chosen as the key because SCPSecretGetRequest only has getters for SecretId
+        readMap.put(entity.getSecretId(), gson.toJson(entity));
+
+        // Copy it to new map with <k, v> as <string, object>
+        Map<String, Object> secrets = new HashMap<>(readMap);
+
+        try {
+            vault.withRetries(5, 1000).logical().write(pathMap.get("scp"), secrets);
         } catch (VaultException e) {
             logger.error("Error while writing secrets to secret/scp", e);
+
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
 
@@ -291,16 +317,17 @@ public class VaultSecretBackend implements SecretBackend {
         String readString;
         Gson gson = new Gson();
 
+
+        Map<String, String> readMap;
+
         try {
-            readString = vault.withRetries(5, 1000)
-                    .logical()
-                    .read(pathMap.get("scp"))
-                    .getData()
-                    .get(secretId);
+            readMap = vault.withRetries(5, 1000).logical().read(pathMap.get("scp")).getData();
         } catch (VaultException e) {
-            logger.error("Error in reading from vault in readWrite", e);
+            logger.error("Error while reading the secrets in the deleteSecrets() method", e);
             throw new RuntimeException(e);
         }
+
+        readString = readMap.get(request.getSecretId());
 
         if (readString == null) {
             logger.info("Unable to fetch the required SCP secret from the vault");
@@ -324,6 +351,15 @@ public class VaultSecretBackend implements SecretBackend {
     @Override
     public boolean updateSCPSecret(SCPSecretUpdateRequest request) {
         logger.info("Updating the required SCP secret from the vault");
+        // https://protobuf.dev/reference/java/java-generated/
+        // Not checking for null for protocol getters based on the above reference
+
+        if (request.getSecretId().equals("")) {
+            // if secretId is null or empty
+            logger.warn("Secret ID cannot be null or empty");
+            return false;
+        }
+
         Gson gson = new Gson();
 
         Map<String, String> readMap;
@@ -332,7 +368,7 @@ public class VaultSecretBackend implements SecretBackend {
             readMap = vault.withRetries(5, 1000).logical().read(pathMap.get("scp")).getData();
         } catch (VaultException e) {
             logger.error("Error while reading the secrets in the deleteSecrets() method", e);
-            throw new RuntimeException(e);
+            return false;
         }
 
         String value = readMap.get(request.getSecretId());
@@ -342,17 +378,45 @@ public class VaultSecretBackend implements SecretBackend {
             return false;
         }
 
-        SCPSecretEntity entity = gson.fromJson(value, SCPSecretEntity.class);
+        SCPSecretEntity existingEntity = null;
 
-        // update & populate entity
-        entity.setSecretId(request.getSecretId());
-        entity.setUser(request.getUser());
-        entity.setPassphrase(request.getPassphrase());
-        entity.setPrivateKey(request.getPrivateKey());
-        entity.setPublicKey(request.getPublicKey());
+        // populate existing entity
+        int flag = 0;
+        for (String key: readMap.keySet()) {
+            if (key.equals(request.getSecretId())) {
+                flag = 1;
+                // Now populate the existing values to entity
+                existingEntity = gson.fromJson(readMap.get(key), SCPSecretEntity.class);
+                break;
+            }
+        }
+
+        if (flag == 0) {
+            // if the sent secret id did not match with existing secret ids
+            // return false
+            logger.warn("Sent Secret ID did not match with existing secret IDs");
+            return false;
+        }
+
+
+        if (!request.getUser().equals("")) {
+            existingEntity.setUser(request.getUser());
+        }
+
+        if (!request.getPassphrase().equals("")) {
+            existingEntity.setPassphrase(request.getPassphrase());
+        }
+
+        if (!request.getPrivateKey().equals("")) {
+            existingEntity.setPrivateKey(request.getPrivateKey());
+        }
+
+        if (!request.getPublicKey().equals("")) {
+            existingEntity.setPublicKey(request.getPublicKey());
+        }
 
         // Modify the required kv pair in the read map
-        readMap.put(request.getSecretId(), gson.toJson(entity));
+        readMap.put(request.getSecretId(), gson.toJson(existingEntity));
 
 
         // Copy it to new map with <k, v> as <string, object>
@@ -383,7 +447,7 @@ public class VaultSecretBackend implements SecretBackend {
             readMap = vault.withRetries(5, 1000).logical().read(pathMap.get("scp")).getData();
         } catch (VaultException e) {
             logger.error("Error while reading the secrets in the deleteSecrets() method", e);
-            throw new RuntimeException(e);
+            return false;
         }
 
         if (readMap == null || readMap.keySet().size() <= 1) {
@@ -393,7 +457,7 @@ public class VaultSecretBackend implements SecretBackend {
                 return true;
             } catch (VaultException e) {
                 logger.error("Error while deleting the secrets in the deleteSecrets() method", e);
-                throw new RuntimeException(e);
+                return false;
             }
         }
 
@@ -405,7 +469,7 @@ public class VaultSecretBackend implements SecretBackend {
             vault.logical().write(pathMap.get("scp"), secrets);
         } catch (VaultException e) {
             logger.error("Error while writing secrets to secret/scp", e);
-            throw new RuntimeException(e);
+            return false;
         }
 
         logger.info("Deleted the required SCP secret from the vault");
