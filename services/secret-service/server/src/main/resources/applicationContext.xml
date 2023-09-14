@@ -29,7 +29,7 @@
 
 <!--    <bean id="secretBackend" class="org.apache.airavata.mft.secret.server.backend.file.FileBasedSecretBackend"-->
 <!--          init-method="init" destroy-method="destroy"></bean>-->
-    <bean id="secretBackend" class="org.apache.airavata.mft.secret.server.backend.sql.SQLSecretBackend"
+    <bean id="secretBackend" class="org.apache.airavata.mft.secret.server.backend.vault.VaultSecretBackend"
           init-method="init" destroy-method="destroy"></bean>
 
 </beans>
