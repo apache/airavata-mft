@@ -64,7 +64,7 @@ then
 fi
 
 # if the control structure reaches here, we have the vault executable ready to run
-nohup ../airavata-mft/vault/vault server -config=../config.hcl > $LOG_FILE 2>&1 &
+nohup ../airavata-mft/vault/vault server -config=./vault-config.hcl > $LOG_FILE 2>&1 &
 echo $! > $PID_PATH_NAME   # $! contains the pid of the recently started background process
 echo "Vault started"
 
