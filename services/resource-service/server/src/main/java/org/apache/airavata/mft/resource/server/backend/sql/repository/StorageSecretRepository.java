@@ -27,5 +27,5 @@ import java.util.Optional;
 public interface StorageSecretRepository extends CrudRepository<StorageSecretEntity, String> {
 
     Optional<StorageSecretEntity> findByStorageId(String storageId);
-    void deleteByStorageId(String resourceId);
+    int deleteByStorageId(String resourceId);
 }

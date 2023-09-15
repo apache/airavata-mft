@@ -125,8 +125,8 @@ public class SQLResourceBackend implements ResourceBackend {
 
     @Override
     public boolean deleteSecretForStorage(SecretForStorageDeleteRequest request) throws Exception {
-        resourceSecretRepository.deleteByStorageId(request.getStorageId());
-        return true;
+        resolveStorageRepository.deleteByStorageId(request.getStorageId());
+        return resourceSecretRepository.deleteByStorageId(request.getStorageId()) > 0;
     }
 
     @Override

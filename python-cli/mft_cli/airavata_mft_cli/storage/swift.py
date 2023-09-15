@@ -37,7 +37,7 @@ def handle_add_storage():
 
         user_name = typer.prompt("User Name")
         password = typer.prompt("Password")
-        tenant_name = typer.prompt("Tenant Name")
+        tenant_name = typer.prompt("Project Name")
         project_domain = typer.prompt("Project Domain Name", "Default")
         user_domain = typer.prompt("User Domain Name", "Default")
         v3_sec = SwiftCredential_pb2.SwiftV3AuthSecret(userDomainName=user_domain, userName=user_name,

@@ -280,9 +280,12 @@ public class TransportMediator {
                     uploader.uploadChunk(chunkIdx, startPos, endPos, inputStream);
                 } else {
                     String tempFile = tempDataDir + File.separator + UUID.randomUUID().toString() + "-" + chunkIdx;
-                    downloader.downloadChunk(chunkIdx, startPos, endPos, tempFile);
-                    uploader.uploadChunk(chunkIdx, startPos, endPos, tempFile);
-                    new File(tempFile).delete();
+                    try {
+                        downloader.downloadChunk(chunkIdx, startPos, endPos, tempFile);
+                        uploader.uploadChunk(chunkIdx, startPos, endPos, tempFile);
+                    } finally {
+                        new File(tempFile).delete();
+                    }
                 }
                 return chunkIdx;
             } catch (Exception e) {

@@ -70,15 +70,15 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
 
         s3Client = S3Util.getInstance().leaseS3Client(s3Secret, s3Storage);
 
-        if (cc.getChunkSize() < cc.getMetadata().getFile().getResourceSize()) {
+        //if (cc.getChunkSize() < cc.getMetadata().getFile().getResourceSize()) {
             InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(s3Storage.getBucketName(),
                     resourcePath);
             initResponse = s3Client.initiateMultipartUpload(initRequest);
             logger.info("Initialized multipart upload for file {} in bucket {}",
                     resourcePath, s3Storage.getBucketName());
-        } else {
-            logger.info("Using non-multipart upload for file {} in bucket {}", resourcePath, s3Storage.getBucketName());
-        }
+        //} else {
+        //    logger.info("Using non-multipart upload for file {} in bucket {}", resourcePath, s3Storage.getBucketName());
+        //}
     }
 
     @Override
@@ -92,10 +92,10 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
                     .withUploadId(initResponse.getUploadId())
                     .withPartNumber(chunkId + 1)
                     .withFileOffset(0)
-                    //.withMD5Digest(Md5Utils.md5AsBase64(new File(uploadFile)))
-//                    .withFile(file)
-                    .withInputStream(new BufferedInputStream(new FileInputStream(file), Math.min(16 * 1024 * 1024, (int) ( endByte - startByte))))
-                    .withPartSize(file.length());
+                    .withFile(file)
+                    .withMD5Digest(Md5Utils.md5AsBase64(new File(uploadFile)))
+                    //.withInputStream(new BufferedInputStream(new FileInputStream(file), Math.min(16 * 1024 * 1024, (int) ( endByte - startByte))))
+                    .withPartSize(endByte - startByte);
 
             UploadPartResult uploadResult = s3Client.uploadPart(uploadRequest);
             this.partETags.add(uploadResult.getPartETag());
@@ -130,11 +130,13 @@ public class S3OutgoingConnector implements OutgoingChunkedConnector {
 
     @Override
     public void complete() throws Exception {
-        CompleteMultipartUploadRequest compRequest = new CompleteMultipartUploadRequest(s3Storage.getBucketName(),
-                resourcePath, initResponse.getUploadId(), partETags);
-        s3Client.completeMultipartUpload(compRequest);
-        logger.info("Completing the upload for file {} in bucket {}", resourcePath,
-                s3Storage.getBucketName());
+
+        if (initResponse != null) {
+            CompleteMultipartUploadRequest compRequest = new CompleteMultipartUploadRequest(s3Storage.getBucketName(),
+                    resourcePath, initResponse.getUploadId(), partETags);
+            s3Client.completeMultipartUpload(compRequest);
+        }
+        logger.info("Completed the upload for file {} in bucket {}", resourcePath, s3Storage.getBucketName());
     }
 
     @Override

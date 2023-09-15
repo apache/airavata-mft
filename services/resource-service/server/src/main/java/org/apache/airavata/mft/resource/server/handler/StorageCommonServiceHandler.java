@@ -28,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+
 @Service("RSStorageCommonServiceHandler")
 @GRpcService
 public class StorageCommonServiceHandler extends StorageCommonServiceGrpc.StorageCommonServiceImplBase {
@@ -85,11 +87,12 @@ public class StorageCommonServiceHandler extends StorageCommonServiceGrpc.Storag
     }
 
     @Override
+    @Transactional
     public void deleteSecretsForStorage(SecretForStorageDeleteRequest request, StreamObserver<SecretForStorageDeleteResponse> responseObserver) {
         try {
-            this.backend.deleteSecretForStorage(request);
+            boolean status = this.backend.deleteSecretForStorage(request);
             SecretForStorageDeleteResponse.Builder builder = SecretForStorageDeleteResponse.newBuilder();
-            builder.setStatus(true);
+            builder.setStatus(status);
             responseObserver.onNext(builder.build());
             responseObserver.onCompleted();
         } catch (Exception e) {

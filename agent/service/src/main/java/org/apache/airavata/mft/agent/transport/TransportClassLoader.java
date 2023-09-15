@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -38,7 +39,7 @@ public class TransportClassLoader extends URLClassLoader {
 
     private final ClassLoader systemClassLoader;
 
-    private final Map<String, byte[]> classes;
+    private final Map<String, byte[]> content;
 
     public Map<String, byte[]> loadClassesFromFile(final Path path) throws IOException {
         try {
@@ -65,6 +66,8 @@ public class TransportClassLoader extends URLClassLoader {
                         result.putAll(unzipRecursively(os));
                     } else if (entry.getName().toLowerCase().endsWith(".class")) {
                         result.put(entry.getName().replaceAll("/", ".").substring(0, entry.getName().length() - 6), os.toByteArray());
+                    } else {
+                        result.put(entry.getName(), os.toByteArray());
                     }
                 }
             }
@@ -76,12 +79,12 @@ public class TransportClassLoader extends URLClassLoader {
     public TransportClassLoader(URL[] urls, ClassLoader parent, Path connectorPath) throws IOException {
         super(urls, parent);
         systemClassLoader = getSystemClassLoader();
-        classes = loadClassesFromFile(connectorPath);
+        content = loadClassesFromFile(connectorPath);
     }
 
     @Override
     public final Class<?> findClass(String name) throws ClassNotFoundException {
-        final byte[] bytes = classes.get(name);
+        final byte[] bytes = content.get(name);
         if(bytes != null) {
             logger.debug("Found class {}", name);
             return defineClass(name, bytes, 0, bytes.length);
@@ -119,5 +122,14 @@ public class TransportClassLoader extends URLClassLoader {
             resolveClass(loadedClass);
         }
         return loadedClass;
+    }
+
+    @Override
+    public InputStream getResourceAsStream(String name) {
+        if (content.containsKey(name)) {
+            return new ByteArrayInputStream(content.get(name));
+        } else {
+            return super.getResourceAsStream(name);
+        }
     }
 }
