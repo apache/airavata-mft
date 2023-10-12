@@ -44,6 +44,12 @@ def copy_list(source_storage_id, dest_storage_id, list_file):
   except Exception as e:
     exception_handler(e)
 
+@app.command("describe")
+def describe(storage_name):
+  try:
+    operations.describe_storage(storage_name)
+  except Exception as e:
+    exception_handler(e)
 @app.command("init")
 def init_mft():
   bootstrap.start_mft()
