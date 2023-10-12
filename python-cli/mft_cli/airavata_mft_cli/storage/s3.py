@@ -101,14 +101,16 @@ def handle_add_storage():
 
     direct_req = MFTAgentStubs_pb2.GetResourceMetadataRequest(resourcePath="", secret=secret_wrapper, storage=storage_wrapper)
     resource_medata_req = MFTTransferApi_pb2.FetchResourceMetadataRequest(directRequest = direct_req)
-    metadata_resp = client.transfer_api.resourceMetadata(resource_medata_req)
-
     bucket_options = ["Manually Enter"]
 
-    bucket_list = metadata_resp.directory.directories
-    if len(bucket_list) > 0:
-        for b in bucket_list:
-            bucket_options.append(b.friendlyName)
+    try:
+        metadata_resp = client.transfer_api.resourceMetadata(resource_medata_req)
+        bucket_list = metadata_resp.directory.directories
+        if len(bucket_list) > 0:
+            for b in bucket_list:
+                bucket_options.append(b.friendlyName)
+    except:
+        print("Failed to fetch bucket list. Add the bucket name manually")
 
     title = "Select the Bucket: "
     selected_bucket, index = pick(bucket_options, title, indicator="=>")
