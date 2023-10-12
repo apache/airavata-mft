@@ -61,6 +61,11 @@ def fetch_storage_and_secret_ids(storage_name):
 
   return sec_resp.storageId, sec_resp.secretId
 
+def describe_storage(storage_name):
+    storage_id, secret_id = fetch_storage_and_secret_ids(storage_name)
+    print("Storage id: " + storage_id)
+    print("Secret id: " + secret_id)
+
 def get_resource_metadata(storage_path, recursive_search = False):
   storage_name = storage_path.split("/")[0]
   resource_path = storage_path[len(storage_name) +1 :]
