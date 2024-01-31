@@ -1,0 +1,47 @@
+name: GitHub Actions Demo
+run-name: ${{ github.actor }} is testing out GitHub Actions
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: echo "The ${{ github.repository }} repository has been cloned to the runner."
+
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+
+      - run: echo "This job's status is ${{ job.status }}."
+      - run: mvn clean install
+
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+
+      - name: Upload more zips
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: agent/service/target/MFT-Agent-0.01-bin.zip
+          asset-name: MFT-Agent-0.01-bin.zip
+          tag: ${{ github.ref }}
+          overwrite: true
+          body: "Uploading more zips"
+
+      - name: Upload more zips
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: standalone-service/target/Standalone-Service-0.01-bin.zip
+          asset-name: Standalone-Service-0.01-bin.zip
+          tag: ${{ github.ref }}
+          overwrite: true
+          body: "Uploading more zips"
+
+
