@@ -24,24 +24,32 @@ jobs:
         run: |
           ls ${{ github.workspace }}
 
-      - name: Upload more zips
-        uses: svenstaro/upload-release-action@v2
+      - name: Create Release to get an id
+        id: create_release_id
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: agent/service/target/MFT-Agent-0.01-bin.zip
-          asset-name: MFT-Agent-0.01-bin.zip
-          tag: ${{ github.ref }}
-          overwrite: true
-          body: "Uploading more zips"
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
 
-      - name: Upload more zips
-        uses: svenstaro/upload-release-action@v2
+      - name: Upload Zip File 1
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: standalone-service/target/Standalone-Service-0.01-bin.zip
-          asset-name: Standalone-Service-0.01-bin.zip
-          tag: ${{ github.ref }}
-          overwrite: true
-          body: "Uploading more zips"
+          upload_url: ${{ steps.create_release_id.outputs.upload_url }}
+          asset_path: agent/service/target/MFT-Agent-0.01-bin.zip
+          asset_name: MFT-Agent-0.01-bin.zip
+          asset_content_type: application/zip
 
+      - name: Upload Zip File 2
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release_id.outputs.upload_url }}
+          asset_path: standalone-service/target/Standalone-Service-0.01-bin.zip
+          asset_name: Standalone-Service-0.01-bin.zip
+          asset_content_type: application/zip
 
