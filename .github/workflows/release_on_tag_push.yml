@@ -52,4 +52,3 @@ jobs:
           asset_path: standalone-service/target/Standalone-Service-0.01-bin.zip
           asset_name: Standalone-Service-0.01-bin.zip
           asset_content_type: application/zip
-
