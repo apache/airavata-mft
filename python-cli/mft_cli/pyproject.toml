@@ -38,8 +38,6 @@ mft = "airavata_mft_cli.main:app"
 python = "^3.10"
 typer = {extras = ["all"], version = "^0.7.0"}
 pick = {version= "2.2.0"}
-grpcio= [{version="1.46.3", markers = "platform_machine != 'arm64'"},{version="1.47.0rc1", markers = "platform_machine == 'arm64'"}]
-grpcio-tools = [{version="1.46.3", markers = "platform_machine != 'arm64'"},{version="1.47.0rc1", markers = "platform_machine == 'arm64'"}]
 airavata-mft-sdk = "0.0.1a34"
 pandas = "^2.0.3"
 
