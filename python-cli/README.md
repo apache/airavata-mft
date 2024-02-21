@@ -39,7 +39,7 @@ poetry install
 mft --help
 ```
 
-To publish the ditribution to pypi
+To publish the distribution to pypi
 ```
  poetry publish --build
 ```
