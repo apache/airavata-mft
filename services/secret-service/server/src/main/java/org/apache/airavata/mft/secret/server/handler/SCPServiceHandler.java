@@ -36,7 +36,7 @@ public class SCPServiceHandler extends SCPSecretServiceGrpc.SCPSecretServiceImpl
     private static final Logger logger = LoggerFactory.getLogger(SCPServiceHandler.class);
 
     @Autowired
-    @Qualifier("SQLSecretBackend")
+    @Qualifier("VaultSecretBackend")
     private SecretBackend backend;
 
     @Override
