@@ -27,6 +27,7 @@ from subprocess import Popen
 from pathlib import Path
 from sys import platform
 import shutil
+import socket
 import time
 
 def download_and_unarchive(url, download_path, extract_dir = os.path.join(os.path.expanduser('~'), ".mft/")):
@@ -105,6 +106,9 @@ def validate_java_availability(required_version):
     print("Java is either not installed or path hasn't been set properly")
     raise typer.Exit()
 
+def is_port_open(port):
+  with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    return s.connect_ex(('localhost', port)) == 0
 
 def start_mft():
   print("Setting up MFT Services")
@@ -159,6 +163,10 @@ def start_mft():
     print("Downloading MFT Server...")
     zip_path = os.path.join(os.path.expanduser('~'), ".mft/Standalone-Service-0.01-bin.zip")
     download_and_unarchive(url, zip_path)
+
+  while not is_port_open(8500):
+    print("Waiting for Consul to start...")
+    time.sleep(1)
 
   restart_service(path + "/bin", "standalone-service-daemon.sh")
 
