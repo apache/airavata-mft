@@ -1,0 +1,67 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+package org.apache.airavata.mft.resource.stubs.ftp.storage;
+
+message FTPStorage {
+    string storageId = 1;
+    string host = 2;
+    int32 port = 3;
+    string name = 4;
+}
+
+message FTPStorageListRequest {
+    int32 offset = 1;
+    int32 limit = 2;
+}
+
+message FTPStorageListResponse {
+    repeated FTPStorage storages = 1;
+}
+
+message FTPStorageGetRequest {
+    string storageId = 1;
+}
+
+message FTPStorageCreateRequest {
+    string host = 1;
+    int32 port = 2;
+    string storageId = 3;
+    string name = 4;
+}
+
+message FTPStorageUpdateRequest {
+    string storageId = 1;
+    string host = 2;
+    int32 port = 3;
+    string name = 4;
+}
+
+message FTPStorageUpdateResponse {
+    string storageId = 1;
+}
+
+message FTPStorageDeleteRequest {
+    string storageId = 1;
+}
+
+message FTPStorageDeleteResponse {
+    bool status = 1;
+}

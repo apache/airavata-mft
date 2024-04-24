@@ -1,0 +1,103 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+package org.apache.airavata.mft.resource.stubs.storage.common;
+
+enum StorageType {
+    S3 = 0;
+    SCP = 1;
+    FTP = 2;
+    LOCAL = 3;
+    BOX = 4;
+    DROPBOX = 5;
+    GCS = 6;
+    AZURE = 7;
+    SWIFT = 8;
+    ODATA = 9;
+    HTTP = 10;
+}
+
+enum Error {
+    NOT_FOUND = 0;
+    NO_PERMISSION = 1;
+    LIMIT_OVERFLOWED = 2;
+}
+
+message StorageTypeResolveRequest {
+    string storageId = 1;
+}
+
+message StorageTypeResolveResponse {
+    string storageId = 1;
+    string storageName = 2;
+    StorageType storageType = 3;
+    Error error = 4;
+}
+
+message SecretForStorage {
+    string storageId = 1;
+    string secretId = 2;
+    StorageType storageType = 3;
+    Error error = 4;
+}
+
+message SecretForStorageGetRequest {
+    string storageId = 1;
+}
+
+message SecretForStorageDeleteRequest {
+    string storageId = 1;
+}
+
+message SecretForStorageDeleteResponse {
+    bool status = 1;
+}
+
+message StorageListEntry {
+    string storageId = 1;
+    string storageName = 2;
+    StorageType storageType = 3;
+}
+
+message StorageListResponse {
+    repeated StorageListEntry storageList = 1;
+}
+
+message StorageListRequest {
+    int32 pageNumber = 1;
+    int32 pageSize = 2;
+}
+
+message StorageSearchRequest {
+    oneof searchQuery {
+        string storageId = 1;
+        string storageName = 2;
+        StorageType storageType = 3;
+    }
+}
+
+service StorageCommonService {
+    rpc resolveStorageType (StorageTypeResolveRequest) returns (StorageTypeResolveResponse);
+    rpc registerSecretForStorage(SecretForStorage) returns (SecretForStorage);
+    rpc getSecretForStorage(SecretForStorageGetRequest) returns (SecretForStorage);
+    rpc deleteSecretsForStorage(SecretForStorageDeleteRequest) returns (SecretForStorageDeleteResponse);
+    rpc searchStorages(StorageSearchRequest) returns (StorageListResponse);
+    rpc listStorages(StorageListRequest) returns (StorageListResponse);
+}

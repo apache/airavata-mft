@@ -1,0 +1,41 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+package org.apache.airavata.mft.resource.service.gcs;
+
+import "gcs/GCSStorage.proto";
+
+service GCSStorageService {
+
+    rpc listGCSStorage (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageListRequest) returns
+    (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageListResponse);
+    
+    rpc getGCSStorage (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageGetRequest) returns
+                                                    (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorage);
+
+    rpc createGCSStorage (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageCreateRequest) returns
+                                                    (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorage);
+
+    rpc updateGCSStorage (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageUpdateRequest) returns
+    (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageUpdateResponse);
+
+    rpc deleteGCSStorage (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageDeleteRequest) returns
+    (org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorageDeleteResponse);
+}
