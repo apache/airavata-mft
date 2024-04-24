@@ -1,0 +1,118 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+package org.apache.airavata.mft.api.service;
+
+import "CredCommon.proto";
+import "MFTAgentStubs.proto";
+
+message CallbackEndpoint {
+    enum CallbackType {
+        HTTP = 0;
+        KAFKA = 1;
+    }
+    CallbackType type = 1;
+    string endpoint = 2;
+}
+
+message EndpointPaths {
+    string sourcePath = 1;
+    string destinationPath = 2;
+}
+
+message TransferApiRequest {
+    repeated EndpointPaths endpointPaths = 1;
+    string sourceStorageId = 2;
+    string sourceSecretId = 3;
+    string destinationStorageId = 5;
+    string destinationSecretId = 6;
+    bool optimizeTransferPath = 7;
+    map<string, int32> targetAgents = 8;
+    org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 9;
+    repeated CallbackEndpoint callbackEndpoints = 10;
+}
+
+message TransferApiResponse {
+    string transferId = 1;
+}
+
+message TransferStateApiRequest {
+    string transferId = 1;
+    org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 2;
+}
+
+message TransferStateResponse {
+    string state = 1;
+    int64 updateTimeMils = 2;
+    double percentage = 3;
+    string description = 4;
+}
+
+message TransferStateSummaryResponse {
+    string state = 1;
+    int64 updateTimeMils = 2;
+    double percentage = 3;
+    repeated string completed = 4;
+    repeated string failed = 5;
+    repeated string processing = 6;
+    string description = 7;
+}
+
+message ResourceAvailabilityResponse {
+    bool available = 1;
+}
+
+message GetResourceMetadataFromIDsRequest {
+    string resourcePath = 1;
+    string storageId = 2;
+    string secretId = 3;
+    bool recursiveSearch = 4;
+}
+
+message FetchResourceMetadataRequest {
+    oneof request {
+        org.apache.airavata.mft.agent.stub.GetResourceMetadataRequest directRequest = 1;
+        GetResourceMetadataFromIDsRequest idRequest = 2;
+    }
+    org.apache.airavata.mft.common.AuthToken mftAuthorizationToken = 3;
+}
+
+message TransferRemoveRequest {
+    string transferId = 1;
+}
+
+message TransferRemoveResponse {
+    bool success = 1;
+}
+
+service  MFTTransferService {
+
+    rpc submitTransfer(TransferApiRequest) returns (TransferApiResponse);
+
+    rpc getAllTransferStates(TransferStateApiRequest) returns (stream TransferStateResponse);
+
+    rpc getTransferStateSummary(TransferStateApiRequest) returns (TransferStateSummaryResponse);
+
+    rpc getResourceAvailability(FetchResourceMetadataRequest) returns (ResourceAvailabilityResponse);
+
+    rpc resourceMetadata(FetchResourceMetadataRequest) returns (org.apache.airavata.mft.agent.stub.ResourceMetadata);
+
+    rpc removeTransfer(TransferRemoveRequest) returns (TransferRemoveResponse);
+}

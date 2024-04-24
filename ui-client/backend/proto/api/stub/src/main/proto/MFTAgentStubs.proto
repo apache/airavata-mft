@@ -1,0 +1,128 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+package org.apache.airavata.mft.agent.stub;
+
+// import "azure/AzureStorage.proto";
+// import "box/BoxStorage.proto";
+// import "dropbox/DropboxStorage.proto";
+// import "ftp/FTPStorage.proto";
+// import "gcs/GCSStorage.proto";
+// import "local/LocalStorage.proto";
+// import "odata/ODataStorage.proto";
+// import "s3/S3Storage.proto";
+// import "scp/SCPStorage.proto";
+// import "swift/SwiftStorage.proto";
+// import "http/HTTPStorage.proto";
+
+// import "azure/AzureCredential.proto";
+// import "box/BoxCredential.proto";
+// import "dropbox/DropboxCredential.proto";
+// import "ftp/FTPCredential.proto";
+// import "gcs/GCSCredential.proto";
+// import "odata/ODataCredential.proto";
+// import "s3/S3Credential.proto";
+// import "scp/SCPCredential.proto";
+// import "swift/SwiftCredential.proto";
+// import "http/HttpCredential.proto";
+
+message StorageWrapper {
+    // oneof storage {
+    //     org.apache.airavata.mft.resource.stubs.azure.storage.AzureStorage azure = 1;
+    //     org.apache.airavata.mft.resource.stubs.box.storage.BoxStorage box = 2;
+    //     org.apache.airavata.mft.resource.stubs.dropbox.storage.DropboxStorage dropbox = 3;
+    //     org.apache.airavata.mft.resource.stubs.ftp.storage.FTPStorage ftp = 4;
+    //     org.apache.airavata.mft.resource.stubs.gcs.storage.GCSStorage gcs = 5;
+    //     org.apache.airavata.mft.resource.stubs.local.storage.LocalStorage local = 6;
+    //     org.apache.airavata.mft.resource.stubs.odata.storage.ODataStorage odata = 7;
+    //     org.apache.airavata.mft.resource.stubs.s3.storage.S3Storage s3 = 8;
+    //     org.apache.airavata.mft.resource.stubs.scp.storage.SCPStorage scp = 9;
+    //     org.apache.airavata.mft.resource.stubs.swift.storage.SwiftStorage swift = 10;
+    //     org.apache.airavata.mft.resource.stubs.http.storage.HTTPStorage http = 11;
+    // }
+}
+
+message SecretWrapper {
+    // oneof secret {
+    //     org.apache.airavata.mft.credential.stubs.azure.AzureSecret azure = 1;
+    //     org.apache.airavata.mft.credential.stubs.box.BoxSecret box = 2;
+    //     org.apache.airavata.mft.credential.stubs.dropbox.DropboxSecret dropbox = 3;
+    //     org.apache.airavata.mft.credential.stubs.ftp.FTPSecret ftp = 4;
+    //     org.apache.airavata.mft.credential.stubs.gcs.GCSSecret gcs = 5;
+    //     org.apache.airavata.mft.credential.stubs.odata.ODataSecret odata = 6;
+    //     org.apache.airavata.mft.credential.stubs.s3.S3Secret s3 = 7;
+    //     org.apache.airavata.mft.credential.stubs.scp.SCPSecret scp = 8;
+    //     org.apache.airavata.mft.credential.stubs.swift.SwiftSecret swift = 9;
+    //     org.apache.airavata.mft.credential.stubs.http.HTTPSecret http = 10;
+    // }
+}
+
+message EndpointPaths {
+    string sourcePath = 1;
+    string destinationPath = 2;
+}
+
+message AgentTransferRequest {
+    string requestId = 1;
+    StorageWrapper sourceStorage = 2;
+    SecretWrapper sourceSecret = 3;
+    StorageWrapper destinationStorage = 4;
+    SecretWrapper destinationSecret = 5;
+    repeated EndpointPaths endpointPaths = 6;
+}
+
+message FileMetadata {
+    string friendlyName = 1;
+    int64 resourceSize = 2;
+    int64 createdTime = 3;
+    int64 updateTime = 4;
+    string md5sum = 5;
+    string resourcePath = 6;
+}
+
+message DirectoryMetadata {
+    string friendlyName = 1;
+    int64 createdTime = 2;
+    int64 updateTime = 3;
+    string resourcePath = 4;
+    repeated DirectoryMetadata directories = 5;
+    repeated FileMetadata files = 6;
+}
+
+enum MetadataFetchError {
+    NOT_FOUND = 0;
+    NO_PERMISSION = 1;
+}
+
+message ResourceMetadata {
+    oneof metadata {
+        FileMetadata file = 1;
+        DirectoryMetadata directory = 2;
+        MetadataFetchError error = 3;
+    }
+}
+
+message GetResourceMetadataRequest {
+    string resourcePath = 1;
+    StorageWrapper storage = 2;
+    SecretWrapper secret = 3;
+    bool recursiveSearch = 4;
+}
+

@@ -1,0 +1,52 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+package org.apache.airavata.mft.common;
+
+message UserTokenAuth {
+    string token = 1;
+}
+
+message PasswordAuth {
+    string userName = 1;
+    string password = 2;
+}
+
+message AgentAuth {
+    string token = 1;
+    string agentId = 2;
+    string agentSecret = 3;
+}
+
+message DelegateAuth {
+    string userId = 1;
+    string clientId = 2;
+    string clientSecret = 3;
+    map<string, string> properties = 4;
+}
+
+message AuthToken {
+    oneof authMechanism {
+        UserTokenAuth userTokenAuth = 1;
+        AgentAuth agentAuth = 2;
+        DelegateAuth delegateAuth = 3;
+        PasswordAuth passwordAuth = 4;
+    }
+}
