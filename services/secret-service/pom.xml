@@ -35,6 +35,13 @@
         <module>client</module>
         <module>server</module>
     </modules>
+    <dependencies>
+        <dependency>
+            <groupId>com.bettercloud</groupId>
+            <artifactId>vault-java-driver</artifactId>
+            <version>5.1.0</version>
+        </dependency>
+    </dependencies>
     <artifactId>mft-secret-service</artifactId>
 
 
