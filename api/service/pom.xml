@@ -88,6 +88,12 @@
             <artifactId>mft-secret-service-client</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.airavata</groupId>
+            <artifactId>mft-api-client</artifactId>
+            <version>0.01-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
