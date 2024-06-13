@@ -4,13 +4,15 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
-	"github.com/jacobsa/fuse"
-	"github.com/jacobsa/fuse/fuseops"
-	"github.com/jacobsa/fuse/fuseutil"
-	"mft-fs/datastructures"
 	"os"
 	"syscall"
 	"time"
+
+	"mft-fs/datastructures"
+
+	"github.com/jacobsa/fuse"
+	"github.com/jacobsa/fuse/fuseops"
+	"github.com/jacobsa/fuse/fuseutil"
 )
 
 type NoImplementationError struct{}

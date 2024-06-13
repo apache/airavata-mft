@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"log"
+	"os"
+
+	"mft-fs/basicfs"
+
 	"github.com/jacobsa/fuse"
 	"github.com/jacobsa/fuse/fuseutil"
-	"log"
-	"mft-fs/basicfs"
-	"os"
 )
 
 func main() {
