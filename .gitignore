@@ -1214,3 +1214,9 @@ python-sdk/venv/*
 python-cli/venv/*
 python-cli/mft_cli/poetry.lock
 plugins/*
+
+
+# mft-fs gitignores
+mft-fs/mftfs_data/
+mft-fs/mount
+mft-fs/root

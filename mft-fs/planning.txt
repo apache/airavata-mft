@@ -1,0 +1,111 @@
+AbstractFS attributes:
+    - file metadata - a safe, tree-based structure representing metadata of all files in the FS
+    - generic mount metadata
+        - cache - boolean value representing if file information should be cached (disable for osfs, s3fs if relying on external mount)
+        - readonly - boolean value representing if the FS can be written into
+    - specific mount metadata - mount-dependent metadata
+        - region, passwords for s3fs
+        - username, password, key for sftp-fs
+
+
+
+.mftfs
+    cache/
+        fs0/
+            file_<inode_number>.data
+        fs1/
+        ...
+        fsn/
+    info.json
+        path to id mapping
+        id to data
+            id
+            path
+            type (s3fs, osfs, sftpfs, etc)
+            config (type dependent)
+
+
+
+func (fs AbstractFS) StatFS(ctx context.Context, op *fuseops.StatFSOp) error
+     - returns general information about the FS like remaining space, inode capacity, etc
+     - implement GetSize(), GetLength() for each FS
+
+func (fs AbstractFS) LookUpInode(ctx context.Context, op *fuseops.LookUpInodeOp) error
+    - returns information about a certain inode
+    - implement as much in abstract as possible
+
+func (fs AbstractFS) GetInodeAttributes(ctx context.Context, op *fuseops.GetInodeAttributesOp) error
+    - simple metadata; fill it up in abstract
+
+func (fs AbstractFS) SetInodeAttributes(ctx context.Context, op *fuseops.SetInodeAttributesOp) error
+    - sets inode's attributes
+
+func (fs AbstractFS) ForgetInode(ctx context.Context, op *fuseops.ForgetInodeOp) error
+    - delete abstract inode metadata
+
+func (fs AbstractFS) BatchForget(ctx context.Context, op *fuseops.BatchForgetOp) error
+    - delete all abstract inodes
+
+func (fs AbstractFS) MkDir(ctx context.Context, op *fuseops.MkDirOp) error
+    - make a directory; fs specific, need to implement
+
+func (fs AbstractFS) CreateFile(ctx context.Context, op *fuseops.CreateFileOp) error
+    - creates a file; fs specific, need to implement
+
+func (fs AbstractFS) RmDir(ctx context.Context, op *fuseops.RmDirOp) error
+    - removes a directory
+    - fs specific, need to implement
+
+func (fs AbstractFS) OpenDir(ctx context.Context, op *fuseops.OpenDirOp) error
+    - returns a file handle
+
+func (fs AbstractFS) ReadDir(ctx context.Context, op *fuseops.ReadDirOp) error
+    - lists all items in a directory
+    - abstract implementation
+
+func (fs AbstractFS) ReleaseDirHandle(ctx context.Context, op *fuseops.ReleaseDirHandleOp) error
+    - delete handle
+    - abstract implementation
+
+func (fs AbstractFS) OpenFile(ctx context.Context, op *fuseops.OpenFileOp) error
+    - returns file handle
+    - abstract implementation
+
+func (fs AbstractFS) ReadFile(ctx context.Context, op *fuseops.ReadFileOp) error
+    - reads a file
+    - if cachable FS, checks if cache is up to date; if so, pulls from cache;
+    - else, pulls from remote; stores in cache if needed
+    - fs specific method needed
+
+func (fs AbstractFS) WriteFile(ctx context.Context, op *fuseops.WriteFileOp) error
+    - writes into a file. same behavior as readfile
+    - fs specific method needed
+
+func (fs AbstractFS) SyncFile(ctx context.Context, op *fuseops.SyncFileOp) error
+    - fs specific method needed
+
+func (fs AbstractFS) FlushFile(ctx context.Context, op *fuseops.FlushFileOp) error
+    - fs specific method needed
+
+func (fs AbstractFS) ReleaseFileHandle(ctx context.Context, op *fuseops.ReleaseFileHandleOp) error
+    - abstract implementation for deleting file handle
+
+func (fs AbstractFS) Destroy()
+    - abstract implementation for deleting mount
+
+mount generic methods:
+    - future: queue read/write
+
+mount-dependent methods:
+    - Load()
+    - Save()
+    - GetSize()
+    - GetLength()
+    - GetMetadata() -> blocking operations which pulls the lastest file metadata from remote to ensure consistency
+    - SetMetadata() -> blocking operation to update remote metadata
+    - MkDir()
+    - CreateFile()
+    - ReatAt()
+    - WriteAt()
+    - SyncFile()
+    - FlushFile()

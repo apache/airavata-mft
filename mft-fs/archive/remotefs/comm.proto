@@ -1,0 +1,102 @@
+syntax = "proto3";
+package remotefscomms;
+
+option go_package="./safe-remotefscomms";
+
+import "google/protobuf/timestamp.proto";
+
+/*
+Complete FileInfo struct
+  - GetInfo (response)
+*/
+message FileInfoMsg {
+  string name = 1;
+  string path = 2;
+  uint64 inode = 3;
+  repeated uint64 children = 4;
+  map<string, uint32> childrenIndexMap = 5;
+  uint64 parent = 6;
+  uint32 nlink = 7;
+  uint64 size = 8;
+  uint32 mode = 9;
+  google.protobuf.Timestamp atime = 10;
+  google.protobuf.Timestamp mtime = 11;
+  google.protobuf.Timestamp ctime = 12;
+  google.protobuf.Timestamp crtime = 13;
+  uint32 uid = 14;
+  uint32 gid = 15;
+  uint32 direntType = 16;
+  uint64 handle = 17;
+}
+
+/*
+Sending a single uint64
+  - GetSize (response)
+  - GetLength (response)
+  - GetInfo (request)
+  - Delete (request)
+  - MkDir (response)
+  - GenerateHandle (request, response)
+  - CreateFile (response)
+  - RmDir (request)
+  - DeleteHandle (request)
+  - SyncFile (request)
+*/
+message UintMsg {
+  uint64 data = 1;
+}
+
+/*
+Sending file contents
+  - ReadAt
+  - WriteAt
+*/
+message ContentMsg {
+  uint64 inode = 1;
+  bytes data = 2;
+  int64 off = 3;
+}
+
+/*
+SetInfoParamsMsg
+  - SetInfo (request)
+*/
+message SetInfoParamsMsg {
+  uint64 inode = 1;
+  int32 uid = 2;
+  int32 gid = 3;
+  int64 size = 4;
+  int32 mode = 5;
+  google.protobuf.Timestamp atime = 6;
+  google.protobuf.Timestamp mtime = 7;
+}
+
+/*
+MkInodeMsg
+  - MkDir (request)
+  - CreateFile (request)
+*/
+message MkInodeMsg {
+  uint64 parent = 1;
+  string name = 2;
+  uint32 mode = 3;
+}
+
+/*Empty Message*/
+message Empty {}
+
+service RemoteFSComms {
+  rpc GetSizeComm(Empty) returns (UintMsg) {}
+  rpc GetLengthComm(Empty) returns (UintMsg) {}
+  rpc GetInfoComm(UintMsg) returns (FileInfoMsg) {}
+  rpc SetInfoComm(SetInfoParamsMsg) returns (Empty) {}
+  rpc DeleteComm(UintMsg) returns (Empty) {}
+  rpc MkDirComm(MkInodeMsg) returns (UintMsg) {}
+  rpc GenerateHandleComm(UintMsg) returns (UintMsg) {}
+  rpc CreateFileComm(MkInodeMsg) returns (UintMsg) {}
+  rpc RmDirComm(UintMsg) returns (Empty) {}
+  rpc DeleteHandleComm(UintMsg) returns (Empty) {}
+  rpc SyncFileComm(UintMsg) returns (Empty) {}
+  rpc WriteAtComm(ContentMsg) returns (UintMsg) {}
+  rpc ReadAtComm(ContentMsg) returns (UintMsg) {}
+}
