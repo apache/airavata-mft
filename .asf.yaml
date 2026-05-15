@@ -17,11 +17,11 @@
 # under the License.
 #
 notifications:
-  commits:              commits@airavata.apache.org
+  commits: commits@airavata.apache.org
   # Send all issue emails (new, closed, comments) to issues@
-  issues:               issues@airavata.apache.org
+  issues: issues@airavata.apache.org
   # Send new/closed PR notifications to dev@
-  pullrequests_status:  issues@airavata.apache.org
+  pullrequests_status: issues@airavata.apache.org
   # Send individual PR comments/reviews to issues@
   pullrequests_comment: issues@airavata.apache.org
 
@@ -38,3 +38,16 @@ github:
     wiki: false
     issues: true
     projects: true
+  rulesets:
+    - name: "Default Branch Protection"
+      type: branch
+      branches:
+        includes:
+          - "~DEFAULT_BRANCH"
+          - "release/*"
+          - "rel/*"
+        excludes: []
+      bypass_teams:
+        - root
+      restrict_deletion: true
+      restrict_force_push: true
